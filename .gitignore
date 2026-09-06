@@ -1,0 +1,41 @@
+# --- Data: never commit ------------------------------------------------------
+data/raw/**
+data/interim/**
+data/processed/**
+data/restricted/**
+# keep the folders and the manifest
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+!data/restricted/.gitkeep
+!data/data_manifest.csv
+!data/README.md
+
+# --- Large outputs: keep figures/tables, ignore heavy rasters/models ---------
+outputs/rasters/**
+outputs/models/**
+!outputs/rasters/.gitkeep
+!outputs/models/.gitkeep
+
+# --- R / RStudio -------------------------------------------------------------
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj.user
+
+# --- renv (commit renv.lock, ignore the library) -----------------------------
+renv/library/
+renv/local/
+renv/cellar/
+renv/staging/
+renv/python/
+
+# --- Quarto ------------------------------------------------------------------
+site/.quarto/
+/.quarto/
+site/_site/
+
+# --- OS ----------------------------------------------------------------------
+.DS_Store
+Thumbs.db

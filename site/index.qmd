@@ -1,0 +1,9 @@
+---
+title: "India's Tiger Network"
+subtitle: "Growth, connectivity and habitat suitability across India's tiger reserves"
+---
+
+*Story framing goes here — author-written. Placeholder page for scaffolding.*
+
+This project joins two earlier efforts: the growth analysis of seven reserves
+(ArcGIS) and the planned connectivity study, now run in R for all reserves.

@@ -1,0 +1,14 @@
+dataset_id,dataset_name,category,expected_subpath,glob,required_for,source_url,license,notes
+ntca_census,NTCA All India Tiger Estimation (5 rounds),population,ntca,*.xlsx;*.pdf,growth,https://ntca.gov.in,Govt of India,Reserve-level figures for all reserves must be extracted from these PDFs/Excel
+research_karnataka,Singh & Sen 2015 (Karnataka 2006-2010 gap-fill),population,ntca,*singh*sen*.pdf,growth,https://www.researchgate.net,Research paper,Fills Bandipur/Nagarahole 2006-2010 gap
+reserve_boundaries,Tiger reserve boundaries (authoritative TR extents),boundaries,boundaries,*.gpkg;*.shp,growth;connectivity;sdm,https://wii.gov.in,TBD,AUTHORITATIVE all-reserve TR layer — availability is the key Week-1 unknown
+kba_boundaries,KBA Global protected areas (fallback boundaries),boundaries,wdpa,*.shp,growth;connectivity;sdm,https://www.keybiodiversityareas.org,Non-commercial attribution,Phase 1 boundary source; fallback if WII TR layer unavailable
+gbif_occ,GBIF Panthera tigris occurrence records,occurrences,gbif,*.csv,sdm;effort,https://www.gbif.org,CC BY / CC0,Phase 1 pulled ~4500 records; re-pull recommended for national extent
+gbif_effort,GBIF target-group background (all vertebrates),occurrences,gbif,*background*.csv,sdm;effort,https://www.gbif.org,CC BY / CC0,NEW — sampling-bias background for SDM; async download; not in prior projects
+worldcover,ESA WorldCover 2021 v200 land cover,covariates,worldcover,*.tif,connectivity;sdm,https://esa-worldcover.org,CC BY 4.0,10 m; national coverage is many tiles; needed for resistance + SDM
+srtm,SRTM 30 m elevation tiles,covariates,elevation,*.tif,sdm,https://earthexplorer.usgs.gov,Public domain,Phase 1 had 19 tiles covering 11-31N 73-94E; national extent may need more
+ghm,Global Human Modification index,covariates,ghm,*.tif,connectivity;sdm,https://doi.org/10.5281/zenodo.7473994,CC BY 4.0,Theobald 2024 v3 preferred over Kennedy 2019 (per Bay Area Decision 15)
+osm_roads,OpenStreetMap roads (India),infrastructure,osm,*roads*.shp;*.gpkg,connectivity,https://download.geofabrik.de/asia/india.html,ODbL,Geofabrik India extract; barrier layer for connectivity
+osm_settlements,OpenStreetMap settlements (India),infrastructure,osm,*settlement*.shp;*place*.shp,connectivity,https://download.geofabrik.de/asia/india.html,ODbL,Human-footprint context
+isfr_forest,ISFR 2021 Chapter 4 forest + corridors,forest,forest,*.xlsx;*.pdf,connectivity,https://fsi.nic.in,Govt of India,13 documented corridors + per-reserve VDF/MDF/OF; already tabular from Phase 1
+admin_boundaries,India admin boundaries (states/districts),administrative,administrative,*.shp,growth;connectivity,https://www.naturalearthdata.com,Public domain / CC BY,Natural Earth states + DataMeet districts for roll-up and context
