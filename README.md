@@ -12,7 +12,7 @@ Sibling in method to
 | | |
 |---|---|
 | **Author** | Kiran Balasubramanian |
-| **Status** | **Week 1 complete — environment verified and locked; data audit run.** `00a` toolchain check passes (GDAL 3.12.1 / GEOS 3.14.1 / PROJ 9.7.1; EPSG:7755 resolves). `renv` initialised and snapshotted (124 packages, R 4.5.2 pinned). `00b` audit run: all 13 expected datasets report MISSING — `data/raw/` is deliberately empty (surviving Phase 1 files cover 7 reserves only, so they are not used). Next step is Week 2: acquire the missing open data and make the boundary-source Decision (WII TR vs KBA fallback). |
+| **Status** | **Week 1 complete — environment verified and locked; data audit run.** `00a` toolchain check passes (GDAL 3.12.1 / GEOS 3.14.1 / PROJ 9.7.1; EPSG:7755 resolves). `renv` initialised and snapshotted (124 packages, R 4.5.2 pinned). `00b` audit run: all 13 expected datasets report MISSING — `data/raw/` is deliberately empty (surviving Phase 1 files cover 7 reserves only, so they are not used). Week 2 boundary-source Decision made (Decision 4): NTCA DSS PA/TR/corridor KML is the geometry source; reserve area/density come from the NTCA census, not the polygon. WDPA rejected (India shares no national PAs); KBA assessed but not selected. Remaining Week-2 work: the scripted/manual data downloads. |
 | **Focal species** | *Panthera tigris* (Bengal tiger) |
 | **Study area** | India — all tiger reserves with reserve-level census data |
 | **Primary unit** | Reserve, rolled up to landscape complex and state |

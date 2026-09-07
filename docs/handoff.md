@@ -56,14 +56,30 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
   **7 reserves only** / wrong edition (ISFR 2017, not 2021), so they are not
   usable for an all-reserve analysis and were not staged. `data/raw/` empty is
   the correct state — the audit therefore reports the true gap.
-- **Active week:** **Week 2** — acquire the missing open data (scripted + manual)
-  and make the **boundary-source Decision** (WII TR vs KBA fallback). Full task
-  list in `project-plan.md` → "Week 2 — task breakdown".
+- **Active week:** **Week 2** — boundary-source Decision **made** (Decision 4,
+  below); remaining Week-2 work is the scripted/manual data downloads
+  (tasks 2.4–2.9). Full task list in `project-plan.md` → "Week 2 — task
+  breakdown".
+
+### Boundary Decision (made Week 2 — Decision 4)
+
+- **Chosen:** NTCA DSS `PA_TR_Corridor_Final` KML as the single geometry source
+  for reserves + corridors. Reserve **area/density come from the NTCA census
+  total, not the KML polygon** (the polygon is the core PA, ~55% below legal
+  total).
+- **Why the alternatives lost:** WII authoritative layer not publicly
+  downloadable; **WDPA holds zero Indian national PAs** (Ramsar/WHS only —
+  verified from the country profile); KBA covers fewer reserves (51 vs 55), has
+  the same core-PA area limit, and no corridors.
+- **Provenance:** already documented in the Phase-2 project's `data-sources.md`
+  (NTCA DSS, July 2022, GoI licence). Raw at
+  `data/raw/ntca/PA_TR_Corridor_Final/`.
+- **Carried gaps (fix in Week 3):** 3 reserves not name-matched (Amrabad,
+  Pilibhit, Dholpur-Karauli); 2 false matches (Bor→Great Himalayan NP,
+  Kamlang→Namdapha-Kamlang).
 
 ### Open pending Decisions (decide in the week noted)
 
-- **[Week 2] Boundary source** — authoritative WII/NTCA all-reserve TR
-  boundaries vs KBA fallback (KBA mismatched legal TR area in Phase 1).
 - **[Week 4] Missing-year census handling** — reserves lacking a figure in some
   rounds (the Kaziranga-2006 problem, at scale).
 - **[Week 9] Land-cover resistance values** — final set for the resistance
@@ -95,6 +111,29 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
 ---
 
 ## Weekly log (newest first)
+
+### Week 2 (part) — Boundary-source Decision · 2026-09-07
+- Entry state: `00a` clean; `renv` locked; `data/raw/` empty; `00b` all 13
+  MISSING; boundary source not chosen.
+- Did: ran task 2.1 (boundary feasibility). Verified three candidate sources
+  against the 58 official reserves. **WII** authoritative layer not publicly
+  downloadable. **WDPA** holds zero Indian national PAs (India country profile:
+  "national designations only = 0"; the extract is Ramsar/WHS only, 63 polygons)
+  — rejected. **KBA** 51/58, core-PA area only, no corridors. **NTCA DSS KML**
+  55/58 + corridors, core-PA area only. Chose the KML (Option C): geometry from
+  KML, area/density from the NTCA census. Recovered KML provenance from the
+  Phase-2 project docs (no re-download needed).
+- Decisions made: **Decision 4 — Reserve boundary source and area basis**
+  (methodology.md).
+- Outputs: `scripts/00c_verify_wdpa_boundaries.R`,
+  `outputs/tables/tbl_00_kba_tr_match.csv`. Updated `methodology.md`,
+  `data-sources.md`, `data/data_manifest.csv`, `README.md`, this handoff.
+- Gotchas found: WDPA India national layer does not exist publicly — do not
+  re-attempt. KBA and the NTCA KML both store the **core PA polygon, not the
+  legal TR extent** — never derive reserve area from either geometry.
+- Carried forward / next week: finish Week-2 downloads (tasks 2.4–2.9); in
+  Week 3 fix the 3 unmatched + 2 false-matched reserves when building the
+  boundary layer.
 
 ### Week 1 — Setup + data audit · 2026-09-06
 - Entry state: scaffold on `main`; `gh-pages` live (placeholder site); no data
