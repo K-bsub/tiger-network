@@ -61,6 +61,90 @@ of "all reserves" is already on disk and how much must be rebuilt.
 authoritative WII/NTCA all-reserve boundary layer is not publicly downloadable,
 we fall back to KBA (with the Corbett-style area caveat) and record why.
 
+### Week 1 — task breakdown *(complete)*
+
+Entry state: scaffold on `main`, `gh-pages` live (placeholder site). No data
+re-acquired, no analysis run, `renv` not yet initialised.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 1.1 | Run `scripts/00a_setup_environment.R` | Packages install; GDAL/GEOS/PROJ versions print; CRS 7755 resolves; no error | 20–30 min |
+| 1.2 | Fix any toolchain problem `00a` surfaces before going further | `00a` runs clean end to end | 0–60 min (varies) |
+| 1.3 | Point `data/raw/` subfolders at whatever prior-project data still exists (copy or move it in, matching the layout in `data/README.md`) | Any surviving downloads sit under the right `data/raw/<subfolder>` | 15–30 min |
+| 1.4 | Run `scripts/00b_audit_data.R` | `outputs/tables/tbl_00_data_audit.csv` written; console shows PRESENT / MISSING per dataset | 5 min |
+| 1.5 | Read the audit output; note which growth-track datasets are MISSING | You know exactly what must be re-downloaded in Week 2 | 10 min |
+| 1.6 | `install.packages("renv")`; `renv::init()`; `renv::snapshot()` | `renv.lock` created | 20–30 min |
+| 1.7 | Commit `renv.lock` and the audit table (`analysis: add renv lockfile and data audit`) | Committed and pushed to `main` | 5 min |
+
+**Week 1 outcome (as run):** `00a` clean (GDAL 3.12.1 / GEOS 3.14.1 / PROJ
+9.7.1; EPSG:7755 resolves). `data/raw/` left **empty** on purpose — the
+surviving Phase 1 files are 7-reserve / wrong-edition, so they are not staged.
+`00b` therefore reports **all 13 datasets MISSING** (the true baseline).
+`renv` initialised and snapshotted (124 packages; R 4.5.2 pinned).
+
+**Note — site already published:** the `gh-pages` bootstrap and first site
+publish were completed during Week 0 (ahead of the Stage 4 schedule). The
+Quarto CLI method is recorded in `docs/handoff.md`. This does not change the
+Stage 4 plan — the site is republished with real content later; only the
+plumbing is done early.
+
+**Week 1 pitfalls:**
+- Do **not** run `renv::init()` before `00a` passes — the toolchain must be
+  verified first, or `renv` pins a broken environment.
+- The audit only finds data that is in the right `data/raw/<subfolder>`. If a
+  dataset reports MISSING but you think you have it, check placement before
+  re-downloading (task 1.3 exists to prevent false MISSING results).
+
+**Exit state:** `00a` clean, audit table written and read, `renv` initialised
+and locked. You know the exact data gap to close in Week 2.
+
+### Week 2 — task breakdown
+
+Entry state: `00a` clean; `renv` locked; `data/raw/` empty; `00b` reports all 13
+datasets MISSING. Boundary source not yet chosen.
+
+Week 2 has two jobs: **(A)** make the boundary-source Decision, and **(B)** close
+the acquirable part of the data gap. The all-reserve NTCA census is **not** a
+Week-2 download — it is manual extraction scheduled for Weeks 4–5. Week 2
+acquires everything that can be scripted or downloaded now.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 2.1 | Check whether the authoritative WII/NTCA all-reserve TR boundary layer is publicly downloadable (WII site, NTCA, any open portal) | You know: available (and how) or not available | 20–40 min |
+| 2.2 | **Make the boundary-source Decision** (WII TR vs KBA fallback). Record it as a numbered Decision in `docs/methodology.md` with the reason and the Phase-1 KBA area caveat | Numbered Decision written; source chosen | 15–30 min |
+| 2.3 | Acquire the chosen boundary source into `data/raw/boundaries/` (WII) or `data/raw/wdpa/` (KBA) | Boundary file on disk in the right subfolder | 20–40 min |
+| 2.4 | Run scripted open-data downloads via `scripts/01_download_open_data.R`: GBIF tiger occ, GBIF target-group background, ESA WorldCover, gHM (Theobald 2024 v3), OSM roads + settlements (Geofabrik India) | Script completes; files land in `gbif/`, `worldcover/`, `ghm/`, `osm/` | 60–90 min (download-bound) |
+| 2.5 | Acquire SRTM / terrain — `elevatr` AWS Terrain Tiles for the national extent, or SRTM tiles if preferred | Elevation data in `data/raw/elevation/` | 20–40 min |
+| 2.6 | Manual downloads: admin boundaries (Natural Earth states + DataMeet districts) → `administrative/`; ISFR 2021 Chapter 4 → `forest/`; Singh & Sen 2015 PDF → `ntca/` | Each manual file in its subfolder | 30–45 min |
+| 2.7 | Re-run `scripts/00b_audit_data.R` | Audit re-run; formerly-MISSING acquired datasets now report PRESENT | 5 min |
+| 2.8 | Confirm no `data/restricted/` or raw data is staged for commit (`git status --short`) | Nothing under `data/` staged | 5 min |
+| 2.9 | Commit the methodology Decision + updated docs (`docs:` scope, separate from any code commit) | Committed and pushed to `main` | 10 min |
+
+**Not in Week 2:** the all-reserve NTCA census (manual PDF/Excel extraction —
+Weeks 4–5), building the boundary layer itself (`scripts/02` — Week 3), and any
+covariate processing (Stage 2). Week 2 stops at *raw data on disk* plus the
+boundary Decision.
+
+**Week 2 pitfalls:**
+- **Licences.** KBA (non-commercial, attribution), WorldCover (CC BY 4.0), gHM
+  (CC BY 4.0), OSM (ODbL), DataMeet (CC BY 4.0) all require attribution. Keep
+  `docs/data-sources.md` and `data/data_manifest.csv` in sync with anything you
+  add.
+- **KBA area caveat.** If the Decision picks KBA, carry the Phase-1 note that KBA
+  polygon area mismatched legal TR area and inflated Corbett's density. It must
+  be documented, not silently used.
+- **`00b` re-run reads presence only.** A PRESENT after acquisition confirms a
+  file exists, not that it covers all reserves or the national extent. Judge
+  coverage yourself.
+- **Async GBIF background download.** The target-group background is a queued
+  GBIF download, not instant — it may need a wait-and-fetch step. Do not treat a
+  pending download as MISSING.
+
+**Exit state:** boundary source chosen and recorded as a numbered Decision; all
+scriptable and manually-downloadable datasets on disk; `00b` re-run shows the
+reduced gap; the only remaining growth-track gap is the manual NTCA census
+(Weeks 4–5).
+
 ---
 
 ## Stage 1 — Growth (Weeks 3–7) · priority 1
@@ -148,8 +232,8 @@ deliverable exists.
 
 | Week | Deliverable | Status |
 |---|---|---|
-| 0 | Scaffold committed + pushed to GitHub (data-free) | ⚪ Not started |
-| 1 | Data audit table | ⚪ Not started |
+| 0 | Scaffold committed + pushed to GitHub (data-free) | ✅ Complete |
+| 1 | Data audit table | ✅ Complete |
 | 2 | Boundary decision + gap downloads | ⚪ Not started |
 | 3 | Reserve boundary layer | ⚪ Not started |
 | 4–5 | Census time series (all reserves) | ⚪ Not started |

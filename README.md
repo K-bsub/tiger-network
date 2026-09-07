@@ -12,7 +12,7 @@ Sibling in method to
 | | |
 |---|---|
 | **Author** | Kiran Balasubramanian |
-| **Status** | **Scaffolding — Week 0.** Repository, R environment, and documentation set are in place. No analysis has run. First working step is the data audit (`scripts/00b_audit_data.R`), which checks which prior-project datasets are still on disk. |
+| **Status** | **Week 1 complete — environment verified and locked; data audit run.** `00a` toolchain check passes (GDAL 3.12.1 / GEOS 3.14.1 / PROJ 9.7.1; EPSG:7755 resolves). `renv` initialised and snapshotted (124 packages, R 4.5.2 pinned). `00b` audit run: all 13 expected datasets report MISSING — `data/raw/` is deliberately empty (surviving Phase 1 files cover 7 reserves only, so they are not used). Next step is Week 2: acquire the missing open data and make the boundary-source Decision (WII TR vs KBA fallback). |
 | **Focal species** | *Panthera tigris* (Bengal tiger) |
 | **Study area** | India — all tiger reserves with reserve-level census data |
 | **Primary unit** | Reserve, rolled up to landscape complex and state |
@@ -88,8 +88,8 @@ downloadable — see `data/README.md` for acquisition steps and
 source("scripts/00a_setup_environment.R")
 
 # 3. AUDIT what is still on disk from prior projects (space was reclaimed;
-#    some downloads may be gone). This reads docs/data-sources.md as the
-#    expected inventory and reports present / missing / moved.
+#    some downloads may be gone). This reads data/data_manifest.csv as the
+#    expected inventory and reports present / missing.
 source("scripts/00b_audit_data.R")     # writes outputs/tables/tbl_00_data_audit.csv
 
 # 4. First time only — initialise the reproducible environment
