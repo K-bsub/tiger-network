@@ -2,7 +2,8 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** Scaffolding. No analysis has run.
+**Status:** Week 2 — data acquisition underway (GBIF pulls complete). No
+analysis has run.
 
 This document is the processing log and the decision record. Every significant
 choice becomes a **numbered Decision** with a date and a justification, recorded
@@ -43,9 +44,9 @@ validated against reserve locations. **This is suitability, not occupancy**
 
 ### 5.5 Effort thread (cross-cutting)
 
-Target-group background (all georeferenced vertebrate occurrences) as the effort
-proxy. KDE and Getis-Ord Gi* reproduce and generalise the Phase 1 observer-bias
-finding (the Ranthambore cold spot) at national scale.
+Target-group background (all Mammalia occurrences, tiger excluded — Decision 5)
+as the effort proxy. KDE and Getis-Ord Gi* reproduce and generalise the Phase 1
+observer-bias finding (the Ranthambore cold spot) at national scale.
 
 ---
 
@@ -138,6 +139,29 @@ rest.
 **Verification artefacts:** `scripts/00c_verify_wdpa_boundaries.R` (WDPA check),
 `outputs/tables/tbl_00_kba_tr_match.csv` (KBA match), and the NTCA-KML match run.
 
+### Decision 5 — Target-group background is Mammalia only, not all vertebrates
+**Date:** 2026-09-07
+**Choice:** Build the SDM target-group background from all Mammalia occurrences
+(tiger excluded), 2006–2022, national extent. Do not use the all-vertebrate
+background that the sibling Bay Area project used.
+**Reason:** The target-group method assumes the background taxa share the focal
+species' sampling bias (Phillips et al. 2009; Barber et al. 2022). In India that
+holds for mammals but not for all vertebrates:
+- Birds (Aves) are recorded by a very large, separate birdwatcher/eBird
+  community whose spatial bias (wetlands, coasts, IBAs) differs from the
+  mammal-observer bias that shapes tiger records. Including birds would model
+  birder effort, not tiger-relevant effort, and would swamp the mammal signal.
+- Fish and amphibians are recorded by aquatic surveys — a different footprint
+  again.
+Mammalia is the widely used target group for mammal/carnivore SDMs and matches
+how tigers are recorded (sightings, camera traps, sign). The Bay Area project
+used all vertebrates because it built an *occupancy* non-detection history (any
+vertebrate record = "someone surveyed here"); this project uses a target-group
+*SDM*, where the shared-bias criterion governs and mammals are correct.
+**Open sub-choice (Week 13/14):** all Mammalia vs a narrower large-bodied guild
+(carnivores + ungulates, the camera-trap/sighting group). Pulled all Mammalia
+now; the narrowing is decided from observed volumes at model fit, not here.
+
 ---
 
 ### Decisions pending (raised, not yet made)
@@ -150,6 +174,22 @@ before the relevant code is written.
 - **[Week 9] Land-cover resistance values.** The `WORLDCOVER_RESISTANCE` lookup
   in `R/00_config.R` holds literature-informed starting values; the final set is
   a numbered Decision before the resistance surface is built.
+- **[Week 8–9] Settlement layer for the KDE.** The OSM settlement pull is
+  village-dominated (~195k of 199,800 points: city 495, town 4,102, village
+  195,203). A 15 km KDE over all points will near-saturate nationally. Decide
+  whether to use all city/town/village, trim to city/town (4,597), or change the
+  KDE radius, when the density surface is built.
+- **[Week 9] Road classes for the barrier surface.** The OSM road pull keeps
+  motorway–tertiary (885,669 features, tertiary-dominated: 432,689). Decide
+  whether tertiary stays in the barrier/resistance surface or the layer is
+  restricted to motorway–secondary, when the resistance surface is built.
+- **[Week 13–14] Target-group scope.** Decision 5 pulled all Mammalia. Decide at
+  model fit whether to narrow to a large-bodied guild (carnivores + ungulates,
+  the camera-trap/sighting group that shares the tiger's detection method),
+  based on observed record volumes.
+- **[Week 14] Terrain variables in the SDM.** Elevation, slope, and TRI are all
+  acquired. Decide which enter the model after a collinearity check (slope and
+  TRI are correlated; both may not be needed).
 
 ---
 

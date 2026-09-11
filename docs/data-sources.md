@@ -84,8 +84,16 @@ rejections are not re-litigated.
   re-checked.
 
 ### India administrative boundaries
-- **Role:** State/district context and roll-up.
-- **Source:** Natural Earth (public domain); DataMeet India districts (CC BY 4.0).
+- **Role:** State/district context and roll-up (Decision 2 units).
+- **States:** Natural Earth admin-1 via `rnaturalearth::ne_states` (public
+  domain). 36 states/UTs. Output `boundary_states_ne_7755.gpkg`.
+- **Districts:** DataMeet Census-2011 shapefile
+  (`datameet/maps` → `Districts/Census_2011/2011_Dist`), pulled file-by-file from
+  raw.githubusercontent.com, CC BY 4.0. 641 districts. Output
+  `boundary_districts_datameet2011_7755.gpkg`.
+- **Vintage caveat:** DataMeet districts are **Census 2011** — India has split
+  many districts since, so newer districts are absent. Fine for context /
+  roll-up; note before any district-level attribute join.
 
 ---
 
@@ -93,15 +101,31 @@ rejections are not re-litigated.
 
 ### GBIF — Panthera tigris in India
 - **Role:** Occurrence data for SDM and the effort thread.
-- **Source:** https://www.gbif.org (`rgbif`). Phase 1 pulled ~4,500 records.
+- **Source:** https://www.gbif.org (`rgbif` `occ_download`).
+- **DOI:** https://doi.org/10.15468/dl.npxmxx (accessed 2026-09-07).
+- **Citation:** GBIF.org (2026-09-07) GBIF Occurrence Download
+  https://doi.org/10.15468/dl.npxmxx
 - **Licence:** CC BY / CC0 per record.
-- **Note:** Re-pull recommended for the national extent.
+- **Method:** national bbox predicate, then clipped to the India boundary on
+  import (see `scripts/01`). 4,606 records inside India (93% of the bbox pull).
+- **Note (quality, for Week 13):** median coordinate uncertainty ~30 km; a large
+  fraction will be dropped at the 1 km grid. Year span 1840–2026 (windowed at
+  cleaning). Raw clipped points in
+  `data/interim/occ_tiger_gbif_raw_7755.gpkg`.
 
-### GBIF — target-group background (all vertebrates)
-- **Role:** Sampling-effort layer; bias correction for the SDM. **New to this
-  project.**
-- **Source:** https://www.gbif.org async download (no 10k cap).
+### GBIF — target-group background (Mammalia only)
+- **Role:** Sampling-effort layer; target-group bias correction for the SDM.
+  **New to this project.**
+- **Source:** https://www.gbif.org async `occ_download` (no 10k cap).
+- **DOI:** https://doi.org/10.15468/dl.2d523e (accessed 2026-09-07).
+- **Citation:** GBIF.org (2026-09-07) GBIF Occurrence Download
+  https://doi.org/10.15468/dl.2d523e
 - **Licence:** CC BY / CC0 per record.
+- **Scope:** all Mammalia (class), tiger excluded, 2006–2022, national bbox →
+  clipped to India. 39,057 points inside India (75% of pull). **Mammalia only,
+  not all vertebrates** — see Decision 5 (birds/fish do not share the tiger's
+  sampling bias). Raw clipped points in
+  `data/interim/effort_background_tgs_7755.gpkg`.
 
 ---
 
@@ -109,31 +133,82 @@ rejections are not re-litigated.
 
 ### ESA WorldCover 2021 v200
 - **Role:** Land cover for resistance surface and SDM.
-- **Source:** https://esa-worldcover.org (public AWS COGs).
-- **Resolution:** 10 m. **Licence:** CC BY 4.0.
+- **Source:** https://esa-worldcover.org (public AWS COGs, EPSG:4326).
+- **DOI:** https://doi.org/10.5281/zenodo.7254221. **Resolution:** 10 m.
+  **Licence:** CC BY 4.0.
+- **Acquisition (as built, `scripts/01`):** 3°×3° tiles windowed-read via
+  `/vsicurl` (lower-left-corner naming, e.g. N21E078), each reprojected to 1 km
+  EPSG:7755 by **modal (majority) class** (categorical layer), then merged and
+  clipped to India. 88 tiles overlap the AOI. Output:
+  `data/interim/cov_landcover_worldcover2021_1km_7755.tif`; per-tile 1 km cache
+  in `data/raw/worldcover/tiles_1km/` (resumable).
+- **Class codes present:** 10,20,30,40,50,60,70,80,90,95,100 (all 11 expected).
 - **Known issue (from Bay Area):** under-maps chaparral/shrub; check relevance
-  for Indian dry-forest classes at model fit.
+  for Indian dry-forest classes at model fit. Per-class fractional cover, if
+  needed, is a Week-8 zonal step over reserves/corridors (as in Phase 2), not a
+  re-pull.
 
-### SRTM / terrain
-- **Role:** Elevation, slope, TRI for SDM.
-- **Source:** USGS Earth Explorer / NASA (30 m); or `elevatr` AWS Terrain Tiles.
-- **Licence:** Public domain.
-- **Note:** Phase 1 had 19 tiles for 11–31°N, 73–94°E. National extent may need
-  more.
+### Terrain — elevation, slope, TRI (AWS Terrain Tiles)
+- **Role:** Elevation, slope, and TRI covariates for the SDM (and connectivity).
+- **Source:** AWS Open Data Terrain Tiles via `elevatr::get_elev_raster`
+  (Mapzen/Tilezen synthesis DEM). https://registry.opendata.aws/terrain-tiles/
+- **Licence:** Public domain / open (see AWS Terrain Tiles attribution).
+- **Acquisition (as built, `scripts/01`):** DEM pulled at **zoom 7** (~1 km at
+  India latitudes — matched to the covariate grid, no 30 m national over-pull),
+  clipped to India. **Slope (degrees) and TRI derived on the native DEM** with
+  `terra::terrain()` before resampling (deriving after coarsening would
+  understate ruggedness), then all three reprojected to the 1 km EPSG:7755
+  template (bilinear). Raw DEM cached as
+  `data/raw/terrain/dem_india_aws_z7_4326.tif`; 3-band output
+  `data/interim/cov_terrain_1km_7755.tif`.
+- **Coverage check:** DEM covers the full India bbox; interior fully filled
+  (3,067,585 cells inside India). Ranges: elevation −413 to 7,914 m (Himalaya to
+  coastal/salt-flat lows), slope 0–45° (1 km-aggregated), TRI 0–635.
+- **Superseded plan:** Phase 1 used SRTM 30 m tiles (EarthExplorer). Replaced
+  here by elevatr AWS tiles at 1 km — no national 30 m pull needed for a 1 km
+  covariate.
 
 ### Global Human Modification (gHM)
 - **Role:** Human-pressure covariate for connectivity and SDM.
-- **Source:** Theobald et al. 2024 v3, Zenodo (`/vsicurl`), preferred over
-  Kennedy 2019 (per Bay Area Decision 15).
-- **Licence:** CC BY 4.0.
+- **Source:** Theobald et al. 2024/2025 v3, Zenodo record 14502573, 2022 static
+  snapshot, all-threats-combined (AA), 300 m COG, EPSG:4326.
+- **DOI:** https://doi.org/10.5281/zenodo.14502573 (data);
+  https://doi.org/10.1038/s41597-025-04892-2 (paper). **Licence:** CC BY 4.0.
+- **File:** `HMv20240801_2022s_AA_300.tif` (AA = all threats; other codes on the
+  record: BU/HI/FR/TI/AG/EX/NS/PO).
+- **Acquisition (as built, `scripts/01`):** windowed `/vsicurl` read → clip →
+  reproject to 1 km EPSG:7755 (bilinear, continuous 0–1). Output:
+  `data/interim/cov_ghm2022_1km_7755.tif`; source stamp in
+  `data/raw/ghm/ghm_source_stamp.txt`.
+- **Check:** India min/max 0 / 0.993, mean 0.377 (values correctly within 0–1).
+- **Chosen over** Kennedy 2019 (per Bay Area Decision 15).
 
 ### OpenStreetMap — roads and settlements (India)
-- **Role:** Road barriers for connectivity; human-footprint context.
-- **Source:** Geofabrik India extract (https://download.geofabrik.de/asia/india.html).
-- **Licence:** ODbL — attribution required.
+- **Role:** Road barriers for connectivity; settlement/human-footprint context.
+- **Source:** Geofabrik India `.osm.pbf` via `osmextract::oe_get`
+  (https://download.geofabrik.de/asia/india.html). **Licence:** ODbL —
+  attribution required (© OpenStreetMap contributors).
+- **Acquisition (as built, `scripts/01`):** Geofabrik India extract (~1.5 GB
+  pbf, cached in `data/raw/osm/geofabrik_cache/`), filtered server-side via GDAL
+  SQL, clipped to India, reprojected to EPSG:7755.
+  - **Roads** (`highway`): motorway, trunk, primary, secondary, tertiary (+
+    `_link` ramps). **885,669 features** — tertiary-dominated (432,689).
+    Residential/track excluded. Output `osm_roads_major_7755.gpkg`.
+  - **Settlements** (`place`): city (495), town (4,102), village (195,203) —
+    **199,800 points total**. Output `osm_settlements_7755.gpkg`.
+- **Flag for Week 8–9 (KDE / resistance build):** the settlement layer is
+  **village-dominated** (~195k of 199,800). A 15 km KDE over that many points
+  will near-saturate across India and may not discriminate. Consider trimming to
+  city/town (4,597 points) or a smaller radius when the density surface is built.
+  Similarly, tertiary roads dominate the road layer; dropping tertiary is a
+  one-line filter if the barrier surface is too dense. Both are pending Decisions
+  (see `docs/methodology.md`).
 
 ### ISFR 2021 Chapter 4 — forest and corridors
-- **Role:** Per-reserve forest cover (VDF/MDF/OF) and 13 documented corridors.
+- **Role:** Per-reserve forest cover (VDF/MDF/OF) and documented corridors.
 - **Source:** Forest Survey of India (https://fsi.nic.in). **Manual.**
 - **Licence:** Government of India.
-- **Note:** Already extracted to Excel in Phase 1 — check the audit first.
+- **Acquired:** ISFR 2021 report fetched to `data/raw/forest/` (manual). This is
+  the 2021 edition — the Phase-1 survivor was ISFR 2017 (wrong edition), so a
+  fresh 2021 pull was needed. Per-reserve forest tables are extracted from the
+  PDF in a later step (Stage 1/2), not at download.

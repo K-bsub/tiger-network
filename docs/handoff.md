@@ -43,7 +43,7 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
 
 ---
 
-## Current state  ·  updated after **Week 1** (environment verified + data audit)
+## Current state  ·  updated after **Week 2** (boundary Decision + all data acquired)
 
 - **Done:** Toolchain verified — `00a` runs clean (GDAL 3.12.1 / GEOS 3.14.1 /
   PROJ 9.7.1; EPSG:7755 resolves to "WGS 84 / India NSF LCC"). `renv`
@@ -56,10 +56,40 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
   **7 reserves only** / wrong edition (ISFR 2017, not 2021), so they are not
   usable for an all-reserve analysis and were not staged. `data/raw/` empty is
   the correct state — the audit therefore reports the true gap.
-- **Active week:** **Week 2** — boundary-source Decision **made** (Decision 4,
-  below); remaining Week-2 work is the scripted/manual data downloads
-  (tasks 2.4–2.9). Full task list in `project-plan.md` → "Week 2 — task
-  breakdown".
+- **Active week:** **Week 2 complete.** Boundary Decision made (Decision 4);
+  Decision 5 (Mammalia target group) recorded; **all data acquired** (12/14
+  manifest PRESENT — the 2 MISSING are the rejected KBA/WDPA sources). `00b`
+  re-run confirms. **Next: Week 3** — (a) download the five NTCA census reports
+  (task 3.1 — not done in Week 2); (b) build the reserve boundary layer
+  (`scripts/02`): parse the NTCA DSS KML to reserve polygons, resolve the 3
+  unmatched + 2 false-matched reserves by hand, attach unit_id / state /
+  landscape_complex, and set area from the NTCA census (not the polygon, per
+  Decision 4).
+
+### Data acquired so far (tasks 2.4 + 2.5, via `scripts/01`)
+
+All on the 1 km EPSG:7755 grid where raster; `00b` shows PRESENT for each.
+- **GBIF tiger occ** — 4,606 pts in India (DOI 10.15468/dl.npxmxx). Median coord
+  uncertainty ~30 km — heavy cleaning drop expected in Week 13.
+- **GBIF Mammalia background** — 39,057 pts, 2006–2022 (DOI 10.15468/dl.2d523e).
+- **WorldCover 2021** — 1 km modal class (all 11 classes present).
+- **gHM 2022** — 1 km, mean 0.377 (windowed read; leaves only a source stamp in
+  raw, so its manifest glob points at `*stamp*.txt`).
+- **OSM** — roads 885,669 (major, tertiary-dominated); settlements 199,800
+  (**village-dominated ~195k** — likely needs trimming for the KDE, see pending
+  Decisions).
+- **Terrain** — elevation/slope/TRI, 1 km (elevatr AWS z7; slope/TRI derived on
+  native DEM). Coverage verified full-India.
+- **Admin boundaries** — Natural Earth states (36) + DataMeet Census-2011
+  districts (641), scripted (Block 8). Districts are pre-redistricting vintage.
+- **Manual (fetched by hand):** ISFR 2021 Ch.4, Singh & Sen 2015. **NOT
+  fetched:** the five NTCA census reports (2006–2022) — moved to Week 3 (task
+  3.1). The `ntca_census` PRESENT in `00b` is a stray/7-reserve file, not the
+  All-India Tiger Estimation rounds.
+
+**Manifest note:** windowed/streamed pulls (GBIF zips, gHM stamp) and the
+osmextract/elevatr outputs needed manifest glob/subpath fixes to audit PRESENT —
+the default globs assumed conventional download-to-disk files. All reconciled.
 
 ### Boundary Decision (made Week 2 — Decision 4)
 
@@ -80,10 +110,15 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
 
 ### Open pending Decisions (decide in the week noted)
 
-- **[Week 4] Missing-year census handling** — reserves lacking a figure in some
-  rounds (the Kaziranga-2006 problem, at scale).
-- **[Week 9] Land-cover resistance values** — final set for the resistance
-  surface; starting values are in `R/00_config.R`.
+Full text in `methodology.md` → "Decisions pending".
+- **[Week 4]** Missing-year census handling (the Kaziranga-2006 problem, at scale).
+- **[Week 8–9]** Settlement layer for the KDE — village-dominated (~195k);
+  trim to city/town (4,597) or change radius?
+- **[Week 9]** Land-cover resistance values (starting set in `R/00_config.R`).
+- **[Week 9]** Road classes for the barrier surface — keep tertiary or restrict
+  to motorway–secondary?
+- **[Week 13–14]** Target-group scope — all Mammalia vs large-bodied guild.
+- **[Week 14]** Terrain variables in the SDM — collinearity check (slope vs TRI).
 
 ### Known gotchas (do not relearn)
 
@@ -107,10 +142,68 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
 - **`00b` glob is recursive and case-insensitive.** A stray matching file in a
   nested subfolder still counts as `PRESENT`. Keep `data/raw/<subfolder>/` clean
   so a leftover file does not create a false `PRESENT`.
+- **PROJ / PostGIS `proj.db` clash (this machine).** PostgreSQL 16 / PostGIS 3.6
+  puts an old `proj.db` on PATH
+  (`C:\Program Files\PostgreSQL\16\share\contrib\postgis-3.6\proj\proj.db`,
+  LAYOUT.VERSION.MINOR = 2 — an ancient PROJ). GDAL/terra load that instead of
+  their own, so **every reprojection to EPSG:7755 fails** with `empty srs` /
+  `[project] cannot get output boundaries for the target crs`. This is NOT a code
+  bug — the CRS engine is reading a corrupt database. Fix: pin `PROJ_LIB` to
+  terra's bundled `proj.db` in the project `.Rprofile`, set **before** terra
+  loads (after `renv/activate.R`). Verify in a fresh session with
+  `crs(rast(crs="EPSG:7755"))` — it must print the "India NSF LCC" WKT. The env
+  var must be set in a clean session; setting it after terra is already loaded
+  does not take (PROJ caches the path at first use).
 
 ---
 
 ## Weekly log (newest first)
+
+### Week 2 (part) — Admin boundaries + Week-2 close · 2026-09-07
+- Entry state: covariates + boundary KML acquired; admin + manual downloads
+  pending.
+- Did: added `scripts/01` Block 8 — Natural Earth states (36) + DataMeet
+  Census-2011 districts (641), scripted, reprojected to 7755. Fetched the manual
+  PDFs by hand (ISFR 2021 Ch.4, Singh & Sen 2015). **Did NOT download the NTCA
+  census reports** — deferred to Week 3 (task 3.1). Re-ran `00b`: **12/14
+  PRESENT** (the 2 MISSING are the rejected KBA/WDPA sources — by design). Fixed
+  admin/terrain/settlement manifest globs. `renv::snapshot()` (adds osmextract,
+  elevatr, rnaturalearthhires). Confirmed no data staged for commit.
+- Decisions made: none new (Decisions 4 + 5 already logged; 4 new pending
+  Decisions added to methodology this week).
+- Outputs: admin boundary layers; updated `data-sources.md`, `references.md`,
+  `methodology.md`, `data_manifest.csv`, `project-plan.md` (Week 2 ✅), this
+  handoff.
+- Gotchas found: `ne_states()` needs `rnaturalearthhires` (not on CRAN — install
+  from `https://ropensci.r-universe.dev`). Streamed/windowed pulls and
+  osmextract/elevatr outputs needed manifest glob fixes to audit PRESENT (the
+  default globs assume download-to-disk files).
+- Carried forward / next week: **Week 3** — download the five NTCA census
+  reports (task 3.1); build the reserve boundary layer from the KML
+  (`scripts/02`); resolve the 3 unmatched + 2 false-matched reserves.
+
+### Week 2 (part) — Scripted data downloads · 2026-09-07
+- Entry state: boundary Decision made; `data/raw/` otherwise empty.
+- Did: wrote and ran `scripts/01` blocks 1–7 — India boundary (Natural Earth),
+  GBIF tiger occ + Mammalia background, WorldCover (1 km modal), gHM 2022 (1 km),
+  OSM roads + settlements (Geofabrik via osmextract), terrain (elevatr AWS z7,
+  elevation/slope/TRI). All covariates on the 1 km EPSG:7755 grid. Verified
+  terrain covers full India. Fixed several manifest glob/subpath mismatches so
+  `00b` audits the streamed/windowed pulls correctly (6 PRESENT).
+- Decisions made: none numbered this entry (Decision 5 — Mammalia target group —
+  was logged with the GBIF work). Several forks surfaced for end-of-week
+  pending Decisions: road classes, settlement filtering, terrain variable
+  selection.
+- Outputs: interim covariate layers (`cov_landcover_..._1km_7755.tif`,
+  `cov_ghm2022_1km_7755.tif`, `cov_terrain_1km_7755.tif`), raw GBIF/OSM/terrain,
+  updated docs + manifest.
+- Gotchas found: **PROJ/PostGIS `proj.db` clash** (see Known gotchas — cost most
+  of this session; fixed via `.Rprofile` PROJ_LIB pin). WorldCover 10 m national
+  reproject fails / is far too slow — reproject each tile to a 1 km template
+  instead. osmextract needs `max_file_size` raised for the 1.5 GB India pbf, and
+  an interrupted convert leaves a locked `.gpkg` (delete it + restart R).
+- Carried forward / next week: manual downloads (2.6); then re-audit, commit,
+  and write the end-of-week pending Decisions.
 
 ### Week 2 (part) — Boundary-source Decision · 2026-09-07
 - Entry state: `00a` clean; `renv` locked; `data/raw/` empty; `00b` all 13

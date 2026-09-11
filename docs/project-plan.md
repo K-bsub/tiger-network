@@ -145,6 +145,26 @@ scriptable and manually-downloadable datasets on disk; `00b` re-run shows the
 reduced gap; the only remaining growth-track gap is the manual NTCA census
 (Weeks 4–5).
 
+**Week 2 outcome (as run):** Decision 4 (boundary) + Decision 5 (Mammalia
+target group) recorded. `scripts/01` extended from stubs to 8 blocks and run.
+**Acquired (12 of 14 manifest rows PRESENT):**
+- GBIF tiger occ — 4,606 pts (DOI 10.15468/dl.npxmxx)
+- GBIF Mammalia background — 39,057 pts, 2006–2022 (DOI 10.15468/dl.2d523e)
+- ESA WorldCover 2021 — 1 km modal class
+- gHM 2022 — 1 km (DOI 10.5281/zenodo.14502573)
+- OSM roads 885,669 + settlements 199,800 (Geofabrik)
+- Terrain elevation/slope/TRI — 1 km (elevatr AWS z7)
+- NTCA DSS boundary KML, admin boundaries (36 states + 641 districts),
+  ISFR 2021, Singh & Sen 2015 (manual)
+
+The 2 MISSING rows (KBA, WDPA) are the **assessed-and-rejected** boundary
+sources from Decision 4 (`required_for=none`) — they stay MISSING by design, not
+a gap. **The NTCA census reports were NOT downloaded** — that moves to Week 3
+(task 3.1); the `ntca_census` PRESENT in the audit is a stray/7-reserve file,
+not the five All-India Tiger Estimation rounds. Task 2.3 wording (WII/KBA
+subpaths) left as-is; the actual boundary source is the NTCA DSS KML per
+Decision 4. `renv` snapshotted (adds osmextract, elevatr, rnaturalearthhires).
+
 ---
 
 ## Stage 1 — Growth (Weeks 3–7) · priority 1
@@ -163,6 +183,42 @@ the main new work, and it is manual PDF/Excel extraction.
 
 **At the end of Stage 1 the priority-1 track is complete and publishable on its
 own.** If the project stops here, it is still a finished, worthwhile piece.
+
+### Week 3 — task breakdown
+
+Entry state (from Week 2): all covariates + admin boundaries on disk; NTCA DSS
+boundary KML in `data/raw/ntca/`; ISFR 2021 + Singh & Sen fetched. **The NTCA
+census reports themselves were NOT downloaded in Week 2** — that is a Week-3 job
+here (the audit's `ntca_census` PRESENT is a stray/7-reserve file, not the
+all-round reports). Boundary layer not yet built.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 3.1 | Download the five NTCA All India Tiger Estimation reports (2006, 2010, 2014, 2018, 2022) — PDF + any Excel — into `data/raw/ntca/` | All five rounds on disk; `00b` `ntca_census` PRESENT reflects the real reports | 20–40 min |
+| 3.2 | Write `scripts/02_prepare_boundaries.R`: read the NTCA DSS KML, extract the PA/TR polygons (drop corridors to a separate layer for Stage 2) | KML parsed; reserve polygons and corridor lines separated | 45–60 min |
+| 3.3 | Match KML polygons to the 58-reserve reference list by name; **resolve the 3 unmatched (Amrabad, Pilibhit, Dholpur-Karauli) and 2 false matches (Bor→Great Himalayan, Kamlang→Namdapha-Kamlang) by hand** | All resolvable reserves matched; unmatched ones logged with reason | 45–60 min |
+| 3.4 | Attach `unit_id`, `unit_name`, `unit_name_std`, `state`, `landscape_complex` (from `LANDSCAPE_COMPLEXES` in `R/00_config.R`) | Every reserve polygon carries the standard identifiers | 30–45 min |
+| 3.5 | Set `area_km2` from the **NTCA census total (core+buffer), not the polygon** (Decision 4); add `source = "ntca"` | Area column populated from census figures; dissolve/validate geometry | 20–30 min |
+| 3.6 | Write `boundary_reserves_all_7755.gpkg`; update `data-dictionary.md` if fields differ from the recorded schema | Layer written; `02` output matches the data dictionary | 15–20 min |
+| 3.7 | Commit (`analysis:` for `scripts/02` + layer note; `docs:` separate for any dictionary change) | Committed and pushed to `main` | 10 min |
+
+**Week 3 pitfalls:**
+- The KML geometry is core-PA extent, not legal TR extent (Decision 4) — never
+  derive `area_km2` from it. Area is census-sourced.
+- The KML corridor centrelines are largely unnamed — do not try to name them in
+  Week 3; that is a Stage 2 (connectivity) task. Just separate them out.
+- Some reserves span multiple KML polygons (a TR made of several NP/sanctuary
+  parcels). Decide whether to dissolve to one polygon per `unit_id` — likely
+  yes, so census area joins one-to-one.
+
+**Decision that may surface (log if made):** how to represent a reserve that has
+no clean KML polygon (the 3 unmatched). Options: hand-digitise from the census
+map, use the constituent NP/sanctuary from admin data, or mark geometry-absent
+but keep the census row. Record as a numbered Decision if chosen.
+
+**Exit state:** `boundary_reserves_all_7755.gpkg` written with all standard
+identifiers and census-sourced area; corridors separated for Stage 2; the five
+NTCA census reports on disk ready for Week 4–5 extraction.
 
 ---
 
@@ -234,7 +290,7 @@ deliverable exists.
 |---|---|---|
 | 0 | Scaffold committed + pushed to GitHub (data-free) | ✅ Complete |
 | 1 | Data audit table | ✅ Complete |
-| 2 | Boundary decision + gap downloads | ⚪ Not started |
+| 2 | Boundary decision + gap downloads | ✅ Complete |
 | 3 | Reserve boundary layer | ⚪ Not started |
 | 4–5 | Census time series (all reserves) | ⚪ Not started |
 | 6 | Growth metrics table | ⚪ Not started |

@@ -12,7 +12,7 @@ Sibling in method to
 | | |
 |---|---|
 | **Author** | Kiran Balasubramanian |
-| **Status** | **Week 1 complete — environment verified and locked; data audit run.** `00a` toolchain check passes (GDAL 3.12.1 / GEOS 3.14.1 / PROJ 9.7.1; EPSG:7755 resolves). `renv` initialised and snapshotted (124 packages, R 4.5.2 pinned). `00b` audit run: all 13 expected datasets report MISSING — `data/raw/` is deliberately empty (surviving Phase 1 files cover 7 reserves only, so they are not used). Week 2 boundary-source Decision made (Decision 4): NTCA DSS PA/TR/corridor KML is the geometry source; reserve area/density come from the NTCA census, not the polygon. WDPA rejected (India shares no national PAs); KBA assessed but not selected. Remaining Week-2 work: the scripted/manual data downloads. |
+| **Status** | **Week 2 complete — boundary Decision made and all data acquired.** Decision 4: NTCA DSS PA/TR/corridor KML is the geometry source; reserve area/density come from the NTCA census, not the polygon (WDPA rejected — India shares no national PAs; KBA assessed but not selected). Decision 5: SDM target-group background is Mammalia-only. `scripts/01` (8 blocks) acquired all covariates on a 1 km EPSG:7755 grid — GBIF tiger occ (4,606) + Mammalia background (39,057), WorldCover, gHM 2022, OSM roads/settlements, terrain (elevatr), admin boundaries; plus manual NTCA census, ISFR 2021, Singh & Sen. `00b`: 12/14 PRESENT (KBA/WDPA MISSING by design). Next: Week 3 — build the reserve boundary layer. |
 | **Focal species** | *Panthera tigris* (Bengal tiger) |
 | **Study area** | India — all tiger reserves with reserve-level census data |
 | **Primary unit** | Reserve, rolled up to landscape complex and state |
