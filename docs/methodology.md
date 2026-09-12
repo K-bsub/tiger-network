@@ -133,8 +133,13 @@ rest.
   Pilibhit, Dholpur-Karauli) and two matches are false (Bor matched Great
   Himalayan NP; Kamlang matched Namdapha-Kamlang). These are resolved by hand
   during the Week-3 boundary build, not now.
+  *(As built — see the Week-3 change log: the "false matches" were name-lookup
+  artefacts. Bor and Kamlang both have correct in-state polygons and are matched.
+  The true gaps are the three reserves above.)*
 - Corridor centrelines in the source KML are largely unnamed; names are assigned
   during the connectivity track (as in Phase 2).
+  *(As built: the corridors are named polygons — the `Corridor` field carries a
+  name, some blank — not unnamed centrelines. See the Week-3 change log.)*
 
 **Verification artefacts:** `scripts/00c_verify_wdpa_boundaries.R` (WDPA check),
 `outputs/tables/tbl_00_kba_tr_match.csv` (KBA match), and the NTCA-KML match run.
@@ -197,7 +202,55 @@ before the relevant code is written.
 
 *(Records as-built changes to data, code, or scope during execution.)*
 
-*(none yet)*
+### 2026-09-11 — Week 3 reserve boundary build (`scripts/02`)
+
+As-built findings while building `boundary_reserves_all_7755.gpkg`. These
+refine, but do not change, Decision 4.
+
+- **The KML holds protected areas, not tiger reserves.** The NTCA DSS KML
+  contains 705 national-park / sanctuary polygons (plus 59 corridor polygons and
+  156 unnamed duplicates), not 58 tiger-reserve entities. A tiger reserve is
+  therefore built from its **constituent PA(s)** (for example Corbett = Corbett
+  NP + Sonanadi WLS; Kali = Anshi NP + Dandeli WLS), not by a single name match.
+  The earlier "55/58 name match, 3 unmatched + 2 false matches" framing is
+  superseded by a **reserve→constituent-PA crosswalk**
+  (`data/raw/ntca/reserve_pa_crosswalk.csv`, reviewed by hand). 10 reserves are
+  multi-part and are dissolved to one polygon per `unit_id`.
+- **Match key is name + state, not name.** PA names are not unique across the
+  KML (two "Pench" — MP and MH; two "Rajiv Gandhi" — Karnataka and AP). The
+  match uses standardised name **and** state together.
+- **Alternate spellings resolved 5 apparent gaps.** Five reserves that a plain
+  name match missed are present under other KML names: Pakke→`Pakhui`,
+  Nagarhole→`Rajiv Gandhi`, Sahyadri→`Chandoli`+`Koyna`, Mukundara→`Darrah`,
+  Anamalai→`Indira Gandhi`. The true gaps are **3**: Amrabad, Pilibhit,
+  Dholpur-Karauli (each a 2014+ reserve, absent from the July-2022 KML). This
+  matches the Decision-4 expectation of 3 unmatched reserves. The 3 are written
+  as geometry-absent rows (`geometry_present = FALSE`) so the census still
+  joins.
+- **KML read method — xml2, not the GDAL KML driver.** On the build machine the
+  GDAL KML driver (a) discards the `SchemaData`/`SimpleData` fields (`DESIG`,
+  `state_name`, `Corridor`) that the whole match depends on, and (b) splits the
+  file into two layers (`PA_TR_Corridors` = 764, `corridor` = 156). `scripts/02`
+  therefore parses the KML with `xml2` and rebuilds geometry directly from ring
+  coordinates (outer + inner holes, multi-part where present). New package
+  dependency: `xml2`.
+- **Corridors dropped in Week 3.** The 59 corridor polygons are set aside; the
+  connectivity track (Stage 2) re-extracts them. Note for Stage 2: the corridors
+  are **polygons, not centrelines, and are named** via the `Corridor` field
+  (some names are blank). This differs from the earlier "unnamed centrelines"
+  description.
+- **156 unnamed duplicates preserved, not used.** They are spatial duplicates of
+  named PAs. Written to `data/interim/boundary_kml_unattributed_7755.gpkg` for
+  inspection; excluded from the reserve build.
+- **`area_km2` is a flagged placeholder in Week 3.** The NTCA census area table
+  does not exist until Weeks 4–5, so `area_km2` holds a published total-area
+  figure (`area_source = wikipedia_ntca_2022_PLACEHOLDER`) with
+  `area_provisional = TRUE`. Decision 4 is unchanged: the census overwrites this
+  field in Week 5, at which point `area_provisional` becomes `FALSE`.
+- **QA columns added.** The reserve layer carries `poly_km2` (KML polygon area)
+  and `poly_census_ratio` (poly ÷ census) so the Decision-4 area gap is visible
+  per reserve. As built, the ratio median is near 0.58 (polygons under-state the
+  legal total, as expected). One outlier is recorded in Limitations below.
 
 ---
 
@@ -214,10 +267,23 @@ before the relevant code is written.
   midpoints are used for comparability.
 - **Boundary basis (see Decision 4).** No open source holds legal
   tiger-reserve (core + buffer) extents. The chosen source (NTCA DSS KML) stores
-  the core national park or sanctuary polygon, which under-states reserve area
-  (median 55 % below the legal total). Geometry is therefore used for mapping
-  and connectivity only. All area and density metrics use the official NTCA
-  census total area, not the polygon geometry. Coverage is 55 of 58 reserves;
-  the gaps and false matches are resolved by hand during the Week-3 build.
+  core national-park / sanctuary polygons, which in general under-state reserve
+  area (as-built polygon/census ratio median near 0.58). Geometry is therefore
+  used for mapping and connectivity only. All area and density metrics use the
+  official NTCA census total area, not the polygon geometry. Coverage is 55 of
+  58 reserves; each reserve is built from its constituent PA(s) via a hand-
+  reviewed crosswalk and dissolved to one polygon (10 reserves are multi-part).
+  The 3 reserves with no KML polygon (Amrabad, Pilibhit, Dholpur-Karauli) are
+  kept as geometry-absent rows.
+- **One reserve polygon over-extends its census area.**
+  Nagarjunsagar-Srisailam (`unit_id` 1) has a KML polygon of ~5,074 km² against
+  a census total of 3,296 km² (`poly_census_ratio` 1.54). The geometry is valid
+  (single ring, no self-intersection). The cause is coarse source geometry: the
+  KML stores a single-ring envelope of a fragmented hill sanctuary, and the
+  sanctuary itself (~3,568 km²) is larger than the notified tiger-reserve total.
+  It is **not** an overlap with the adjacent Amrabad gap reserve (Amrabad's
+  centre falls outside the polygon). No metric is affected — area and density
+  are census-sourced — so the polygon is kept as-is for mapping. Flag for the
+  connectivity track: this reserve's mapped footprint is over-large.
 - **Resistance parameters are judgement calls.** Documented and justified, not
   ground-truthed against telemetry (which is not public).

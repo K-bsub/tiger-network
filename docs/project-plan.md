@@ -184,41 +184,88 @@ the main new work, and it is manual PDF/Excel extraction.
 **At the end of Stage 1 the priority-1 track is complete and publishable on its
 own.** If the project stops here, it is still a finished, worthwhile piece.
 
-### Week 3 — task breakdown
+### Week 3 — task breakdown *(complete)*
 
 Entry state (from Week 2): all covariates + admin boundaries on disk; NTCA DSS
-boundary KML in `data/raw/ntca/`; ISFR 2021 + Singh & Sen fetched. **The NTCA
-census reports themselves were NOT downloaded in Week 2** — that is a Week-3 job
-here (the audit's `ntca_census` PRESENT is a stray/7-reserve file, not the
-all-round reports). Boundary layer not yet built.
+boundary KML in `data/raw/ntca/`; ISFR 2021 + Singh & Sen fetched. Boundary
+layer not yet built.
 
 | # | Task | Done when | Est. |
 |---|---|---|---|
 | 3.1 | Download the five NTCA All India Tiger Estimation reports (2006, 2010, 2014, 2018, 2022) — PDF + any Excel — into `data/raw/ntca/` | All five rounds on disk; `00b` `ntca_census` PRESENT reflects the real reports | 20–40 min |
-| 3.2 | Write `scripts/02_prepare_boundaries.R`: read the NTCA DSS KML, extract the PA/TR polygons (drop corridors to a separate layer for Stage 2) | KML parsed; reserve polygons and corridor lines separated | 45–60 min |
-| 3.3 | Match KML polygons to the 58-reserve reference list by name; **resolve the 3 unmatched (Amrabad, Pilibhit, Dholpur-Karauli) and 2 false matches (Bor→Great Himalayan, Kamlang→Namdapha-Kamlang) by hand** | All resolvable reserves matched; unmatched ones logged with reason | 45–60 min |
-| 3.4 | Attach `unit_id`, `unit_name`, `unit_name_std`, `state`, `landscape_complex` (from `LANDSCAPE_COMPLEXES` in `R/00_config.R`) | Every reserve polygon carries the standard identifiers | 30–45 min |
-| 3.5 | Set `area_km2` from the **NTCA census total (core+buffer), not the polygon** (Decision 4); add `source = "ntca"` | Area column populated from census figures; dissolve/validate geometry | 20–30 min |
-| 3.6 | Write `boundary_reserves_all_7755.gpkg`; update `data-dictionary.md` if fields differ from the recorded schema | Layer written; `02` output matches the data dictionary | 15–20 min |
-| 3.7 | Commit (`analysis:` for `scripts/02` + layer note; `docs:` separate for any dictionary change) | Committed and pushed to `main` | 10 min |
+| 3.2 | Write `scripts/02_prepare_boundaries.R`: parse the NTCA DSS KML, separate PA polygons / corridors / unattributed | KML parsed; groups separated | 45–60 min |
+| 3.3 | Match KML PA polygons to the 58 reserves via a reserve→constituent-PA crosswalk; resolve gaps and multi-part reserves by hand | All resolvable reserves matched; gaps logged | 45–60 min |
+| 3.4 | Attach `unit_id`, `unit_name`, `unit_name_std`, `state`, `landscape_complex` | Every reserve polygon carries the standard identifiers | 30–45 min |
+| 3.5 | Set `area_km2` (Decision 4 basis); dissolve multi-part reserves; add `source = "ntca"` | Area populated; geometry dissolved/validated | 20–30 min |
+| 3.6 | Write `boundary_reserves_all_7755.gpkg`; update `data-dictionary.md` to match | Layer written; dictionary updated | 15–20 min |
+| 3.7 | Commit (`analysis:` for `scripts/02`; `docs:` separate for dictionary/methodology) | Committed and pushed to `main` | 10 min |
 
-**Week 3 pitfalls:**
-- The KML geometry is core-PA extent, not legal TR extent (Decision 4) — never
-  derive `area_km2` from it. Area is census-sourced.
-- The KML corridor centrelines are largely unnamed — do not try to name them in
-  Week 3; that is a Stage 2 (connectivity) task. Just separate them out.
-- Some reserves span multiple KML polygons (a TR made of several NP/sanctuary
-  parcels). Decide whether to dissolve to one polygon per `unit_id` — likely
-  yes, so census area joins one-to-one.
+**Week 3 outcome (as run):** all tasks done. Key deviations from the plan above,
+all recorded in `docs/methodology.md` (Week-3 change log):
+- The KML holds **PA polygons, not reserve entities**, so 3.3 became a
+  hand-reviewed reserve→constituent-PA **crosswalk**
+  (`data/raw/ntca/reserve_pa_crosswalk.csv`), not a direct name match. Match key
+  is **name + state** (PA names are not unique). 10 reserves are multi-part and
+  are dissolved.
+- The GDAL KML driver dropped the attribute fields and split the file into two
+  layers, so `scripts/02` parses the KML with **`xml2`** and rebuilds geometry
+  from ring coordinates. New dependency: `xml2`.
+- **3 gaps** (Amrabad, Pilibhit, Dholpur-Karauli) written as geometry-absent
+  rows — the "2 false matches" (Bor, Kamlang) were name-lookup artefacts and are
+  correctly matched.
+- **`area_km2` is a flagged placeholder** (`area_provisional = TRUE`,
+  `area_source = wikipedia_ntca_2022_PLACEHOLDER`) — the census overwrite is a
+  Week-4/5 task, since the census table did not exist at build time.
+- QA columns `poly_km2` / `poly_census_ratio` added; one outlier
+  (Nagarjunsagar-Srisailam, ratio 1.54) documented in Limitations.
 
-**Decision that may surface (log if made):** how to represent a reserve that has
-no clean KML polygon (the 3 unmatched). Options: hand-digitise from the census
-map, use the constituent NP/sanctuary from admin data, or mark geometry-absent
-but keep the census row. Record as a numbered Decision if chosen.
+**Exit state:** `boundary_reserves_all_7755.gpkg` written (58 reserves: 55
+geometry + 3 absent); `boundary_states_7755.gpkg` written; corridors and 156
+duplicates set aside for later; the five NTCA census reports on disk ready for
+Week 4–5 extraction.
 
-**Exit state:** `boundary_reserves_all_7755.gpkg` written with all standard
-identifiers and census-sourced area; corridors separated for Stage 2; the five
-NTCA census reports on disk ready for Week 4–5 extraction.
+### Week 4 — task breakdown
+
+Entry state (from Week 3): `boundary_reserves_all_7755.gpkg` built, with
+`area_km2` holding a **provisional placeholder** (`area_provisional = TRUE`).
+The five NTCA All India Tiger Estimation reports (2006, 2010, 2014, 2018, 2022)
+are on disk in `data/raw/ntca/`. No census figures extracted yet.
+
+Week 4 starts the all-reserve census time series — the main new data effort of
+the project. It is manual PDF/table extraction and is the natural
+stop-and-resume task, split across Weeks 4–5.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 4.1 | Locate the reserve-level population tables in each of the five NTCA reports; note the page/table and the exact figure type (SECR estimate midpoint per Decision-4 limitations) | You know where each round's per-reserve figures live | 30–45 min |
+| 4.2 | **Make the missing-year Decision** (pending, [Week 4] in methodology): how to treat reserves absent from a round (the Kaziranga-2006 problem, at scale — carry-forward, interpolate, leave `NA`, or use the Singh & Sen gap-fill). Record as a numbered Decision **before** entering data | Numbered Decision written in `docs/methodology.md` | 20–30 min |
+| 4.3 | Decide the census table shape: long (`unit_id`, `year`, `pop`, `source`) vs wide (`pop_2006`…`pop_2022`). Naming-conventions §5 uses `pop_<year>`; the stats layer schema (`stats_reserve_census_7755.gpkg`) is wide — enter as long, pivot to wide on join | Table shape fixed; entry template created | 15–20 min |
+| 4.4 | Extract ~half of the reserves into the census time series (start with the well-documented core reserves) | ~29 reserves entered across the five rounds | 90–120 min |
+| 4.5 | Spot-check entered figures against a second source (Wikipedia 2022 column, ISFR, or the report's own summary) for the rows entered | Entered rows cross-checked; discrepancies logged | 20–30 min |
+| 4.6 | Save the partial census table to `data/raw/ntca/` (or `data/interim/`); do **not** join to boundaries yet (that is Week 5) | Partial census table on disk, versioned | 10 min |
+| 4.7 | Commit (`data:`/`analysis:` for the extraction; `docs:` for the missing-year Decision) | Committed and pushed to `main` | 10 min |
+
+**Week 4 pitfalls:**
+- **NTCA figures are estimates, not counts** (SECR; use the midpoint for
+  comparability — a known limitation). Do not mix a count and an estimate for
+  the same reserve-year.
+- **Reserve names differ between the census reports and the boundary layer.**
+  Join on `unit_id` via `unit_name_std`, not on raw `unit_name`. The 3
+  geometry-absent reserves (Amrabad, Pilibhit, Dholpur-Karauli) still get census
+  rows — they have a `unit_id`, just no polygon.
+- **New reserves have short histories.** A 2014+ reserve has no 2006/2010
+  figure; that is expected, not missing data to fill. The missing-year Decision
+  (4.2) must distinguish "not yet a reserve" from "surveyed but not reported".
+- **Do not overwrite `area_km2` yet unless the report gives core+buffer totals**
+  you trust. If it does, overwriting the placeholder (and setting
+  `area_provisional = FALSE`) can start here; otherwise it is a Week-5 join step.
+
+**Decision due this week:** missing-year census handling (numbered Decision).
+
+**Exit state:** ~half the reserves entered into the census time series; the
+missing-year Decision recorded; table shape fixed. Week 5 finishes the extraction
+and joins the census to the boundary layer (overwriting the placeholder
+`area_km2`).
 
 ---
 
@@ -291,7 +338,7 @@ deliverable exists.
 | 0 | Scaffold committed + pushed to GitHub (data-free) | ✅ Complete |
 | 1 | Data audit table | ✅ Complete |
 | 2 | Boundary decision + gap downloads | ✅ Complete |
-| 3 | Reserve boundary layer | ⚪ Not started |
+| 3 | Reserve boundary layer | ✅ Complete |
 | 4–5 | Census time series (all reserves) | ⚪ Not started |
 | 6 | Growth metrics table | ⚪ Not started |
 | 7 | Growth visuals + roll-up | ⚪ Not started |

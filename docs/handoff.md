@@ -43,75 +43,72 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
 
 ---
 
-## Current state  ·  updated after **Week 2** (boundary Decision + all data acquired)
+## Current state  ·  updated after **Week 3** (reserve boundary layer built)
 
-- **Done:** Toolchain verified — `00a` runs clean (GDAL 3.12.1 / GEOS 3.14.1 /
-  PROJ 9.7.1; EPSG:7755 resolves to "WGS 84 / India NSF LCC"). `renv`
-  initialised and snapshotted (124 packages linked; R 4.5.2 pinned in
-  `renv.lock`). Data audit run — `00b` reports **all 13 datasets MISSING**;
-  `outputs/tables/tbl_00_data_audit.csv` written. Week 1 marked complete in
-  `project-plan.md`; Week 2 task breakdown (2.1–2.9) added.
-- **On disk:** scaffold + `renv` library. **`data/raw/` deliberately left
-  empty.** Surviving Phase 1 files (NTCA census, ISFR forest, corridors) cover
-  **7 reserves only** / wrong edition (ISFR 2017, not 2021), so they are not
-  usable for an all-reserve analysis and were not staged. `data/raw/` empty is
-  the correct state — the audit therefore reports the true gap.
-- **Active week:** **Week 2 complete.** Boundary Decision made (Decision 4);
-  Decision 5 (Mammalia target group) recorded; **all data acquired** (12/14
-  manifest PRESENT — the 2 MISSING are the rejected KBA/WDPA sources). `00b`
-  re-run confirms. **Next: Week 3** — (a) download the five NTCA census reports
-  (task 3.1 — not done in Week 2); (b) build the reserve boundary layer
-  (`scripts/02`): parse the NTCA DSS KML to reserve polygons, resolve the 3
-  unmatched + 2 false-matched reserves by hand, attach unit_id / state /
-  landscape_complex, and set area from the NTCA census (not the polygon, per
-  Decision 4).
+- **Done this week:** `scripts/02_prepare_boundaries.R` written and run. It builds
+  `boundary_reserves_all_7755.gpkg` — **58 reserves, 55 with KML geometry, 3
+  geometry-absent** (Amrabad, Pilibhit, Dholpur-Karauli). Also writes
+  `boundary_states_7755.gpkg` (36) and a QA report
+  (`tbl_02_reserve_build_report.csv`). The five NTCA census reports (2006–2022)
+  are on disk (task 3.1). Docs updated: `data-dictionary.md` (new reserve
+  schema), `methodology.md` (Week-3 change log + Nagarjunsagar limitation),
+  `data-sources.md`, `proposal.md` (§8 deviation), `README.md`, `project-plan.md`
+  (Week 3 ✅, Week 4 breakdown added).
+- **How reserves are built (important — the KML is not what the plan assumed):**
+  the NTCA KML holds **705 protected-area polygons, not reserve entities**. Each
+  reserve is built from its constituent PA(s) named in
+  `data/raw/ntca/reserve_pa_crosswalk.csv` (hand-reviewed), matched on **name +
+  state**, and dissolved to one polygon per `unit_id`. 10 reserves are
+  multi-part (e.g. Corbett = Corbett NP + Sonanadi WLS).
+- **`area_km2` is a flagged placeholder.** `area_provisional = TRUE`,
+  `area_source = wikipedia_ntca_2022_PLACEHOLDER`. **Week 5 overwrites it from
+  the NTCA census** (Decision 4) and sets `area_provisional = FALSE`. The
+  `area_provisional` column is how to find every row to replace.
+- **Next: Week 4** — start the all-reserve census time-series extraction (manual,
+  from the five NTCA reports). Make the **missing-year Decision** first
+  (numbered). See `project-plan.md` → Week 4 breakdown.
 
-### Data acquired so far (tasks 2.4 + 2.5, via `scripts/01`)
+### Crosswalk review rows (carry into Week 5 census join)
 
-All on the 1 km EPSG:7755 grid where raster; `00b` shows PRESENT for each.
-- **GBIF tiger occ** — 4,606 pts in India (DOI 10.15468/dl.npxmxx). Median coord
+6 crosswalk rows are `match_status = review` — accepted and matched, but worth a
+glance when the census is joined (they are the name-collision / false-match
+cases): **Kamlang, Pench (MP), Pench (MH), Bor, Similipal, Nagarhole**
+(KML `Rajiv Gandhi` — the Karnataka one, not the AP duplicate). All resolved in
+the build; the flag just marks them for a second look.
+
+### Data on disk (from Week 2, via `scripts/01` — unchanged)
+
+All on the 1 km EPSG:7755 grid where raster.
+- **GBIF tiger occ** — 4,606 pts (DOI 10.15468/dl.npxmxx). Median coord
   uncertainty ~30 km — heavy cleaning drop expected in Week 13.
 - **GBIF Mammalia background** — 39,057 pts, 2006–2022 (DOI 10.15468/dl.2d523e).
 - **WorldCover 2021** — 1 km modal class (all 11 classes present).
-- **gHM 2022** — 1 km, mean 0.377 (windowed read; leaves only a source stamp in
-  raw, so its manifest glob points at `*stamp*.txt`).
+- **gHM 2022** — 1 km, mean 0.377.
 - **OSM** — roads 885,669 (major, tertiary-dominated); settlements 199,800
-  (**village-dominated ~195k** — likely needs trimming for the KDE, see pending
-  Decisions).
-- **Terrain** — elevation/slope/TRI, 1 km (elevatr AWS z7; slope/TRI derived on
-  native DEM). Coverage verified full-India.
+  (**village-dominated ~195k** — likely needs trimming for the KDE).
+- **Terrain** — elevation/slope/TRI, 1 km (elevatr AWS z7). Full-India coverage.
 - **Admin boundaries** — Natural Earth states (36) + DataMeet Census-2011
-  districts (641), scripted (Block 8). Districts are pre-redistricting vintage.
-- **Manual (fetched by hand):** ISFR 2021 Ch.4, Singh & Sen 2015. **NOT
-  fetched:** the five NTCA census reports (2006–2022) — moved to Week 3 (task
-  3.1). The `ntca_census` PRESENT in `00b` is a stray/7-reserve file, not the
-  All-India Tiger Estimation rounds.
+  districts (641). Districts are pre-redistricting vintage.
+- **Manual PDFs:** ISFR 2021 Ch.4, Singh & Sen 2015, **and the five NTCA census
+  reports (2006–2022)** — the census figures still need manual extraction
+  (Weeks 4–5); the reports are only on disk, not yet parsed.
 
-**Manifest note:** windowed/streamed pulls (GBIF zips, gHM stamp) and the
-osmextract/elevatr outputs needed manifest glob/subpath fixes to audit PRESENT —
-the default globs assumed conventional download-to-disk files. All reconciled.
+### Boundary Decision (Decision 4 — settled Week 2, as-built Week 3)
 
-### Boundary Decision (made Week 2 — Decision 4)
-
-- **Chosen:** NTCA DSS `PA_TR_Corridor_Final` KML as the single geometry source
-  for reserves + corridors. Reserve **area/density come from the NTCA census
-  total, not the KML polygon** (the polygon is the core PA, ~55% below legal
-  total).
-- **Why the alternatives lost:** WII authoritative layer not publicly
-  downloadable; **WDPA holds zero Indian national PAs** (Ramsar/WHS only —
-  verified from the country profile); KBA covers fewer reserves (51 vs 55), has
-  the same core-PA area limit, and no corridors.
-- **Provenance:** already documented in the Phase-2 project's `data-sources.md`
-  (NTCA DSS, July 2022, GoI licence). Raw at
-  `data/raw/ntca/PA_TR_Corridor_Final/`.
-- **Carried gaps (fix in Week 3):** 3 reserves not name-matched (Amrabad,
-  Pilibhit, Dholpur-Karauli); 2 false matches (Bor→Great Himalayan NP,
-  Kamlang→Namdapha-Kamlang).
+- **Chosen:** NTCA DSS `PA_TR_Corridor_Final` KML as the single geometry source.
+  Reserve **area/density come from the NTCA census, not the KML polygon** (the
+  polygon under-states the legal total; as-built poly/census ratio median ~0.58).
+- **As-built refinements (Week 3):** the "2 false matches" (Bor, Kamlang) were
+  name-lookup artefacts — both have correct in-state polygons and are matched.
+  Real gaps are the 3 above. Corridors are **named polygons**, not unnamed
+  centrelines. Full detail in `methodology.md` (Week-3 change log).
+- **Raw:** `data/raw/ntca/PA_TR_Corridor_Final/`.
 
 ### Open pending Decisions (decide in the week noted)
 
 Full text in `methodology.md` → "Decisions pending".
-- **[Week 4]** Missing-year census handling (the Kaziranga-2006 problem, at scale).
+- **[Week 4]** Missing-year census handling (the Kaziranga-2006 problem, at
+  scale) — **due next week, before entering census data.**
 - **[Week 8–9]** Settlement layer for the KDE — village-dominated (~195k);
   trim to city/town (4,597) or change radius?
 - **[Week 9]** Land-cover resistance values (starting set in `R/00_config.R`).
@@ -122,6 +119,26 @@ Full text in `methodology.md` → "Decisions pending".
 
 ### Known gotchas (do not relearn)
 
+- **NTCA KML — the GDAL driver mangles it; parse with `xml2`.** The KML
+  `PA_TR_Corridor_Final.kml` (a) has its attribute fields (`DESIG`, `state_name`,
+  `Corridor`) inside `SchemaData/SimpleData`, which the GDAL/LIBKML driver
+  **drops** (an `st_read` shows only `Name`/`Description`/`geometry`), and (b) is
+  split by the driver into **two layers** (`PA_TR_Corridors` = 764, `corridor` =
+  156), so a plain `st_read` sees 764 features and no fields. `scripts/02`
+  therefore parses the KML with **`xml2`** and rebuilds geometry from ring
+  coordinates. Do not switch it back to `st_read`. Also: `st_as_sfc()` on a KML
+  geometry snippet **returns empty geometries** for this file's
+  MultiGeometry/altitudeMode structure — that path was tried and abandoned. New
+  dependency: `xml2` (run `renv::snapshot()` if not already locked).
+- **KML layer named `corridor` is NOT the corridors.** The GDAL `corridor` layer
+  (156 features) holds the **unnamed duplicate** placemarks. The real corridors
+  (59) sit inside the `PA_TR_Corridors` layer, tagged by the `Corridor` field.
+- **`unit_name` is not a unique key.** Two `Pench` (MP + MH) and two
+  `Rajiv Gandhi` (Karnataka + AP) exist in the KML. Any KML→reserve match must
+  use **name + state**, never name alone. `scripts/02` does; keep it that way.
+- **`area_km2` is provisional until Week 5.** The reserve layer's `area_km2` is a
+  placeholder (`area_provisional = TRUE`). Do not treat it as census area until
+  Week 5 overwrites it and flips the flag to `FALSE`.
 - **First GitHub Pages publish:** the Action deploys to `gh-pages` but cannot
   create it. Bootstrap the branch once from the **Terminal tab** (not R
   console): `quarto publish gh-pages site`. Do **not** use
@@ -158,6 +175,42 @@ Full text in `methodology.md` → "Decisions pending".
 ---
 
 ## Weekly log (newest first)
+
+### Week 3 — Reserve boundary layer built · 2026-09-11
+- Entry state: all covariates + admin boundaries + NTCA DSS KML on disk; boundary
+  layer not built; the five NTCA census reports not yet downloaded.
+- Did:
+  - **Task 3.1** — downloaded the five NTCA All India Tiger Estimation reports
+    (2006, 2010, 2014, 2018, 2022) into `data/raw/ntca/` (PDF; no Excel).
+  - **Tasks 3.2–3.6** — wrote and ran `scripts/02_prepare_boundaries.R`. Built
+    `boundary_reserves_all_7755.gpkg` (58 reserves: 55 geometry + 3 absent) and
+    `boundary_states_7755.gpkg` (36). Built the hand-reviewed
+    `reserve_pa_crosswalk.csv` (58 reserves → constituent KML PA names + a
+    provisional area placeholder). Added QA columns (`poly_km2`,
+    `poly_census_ratio`) and a build report (`tbl_02_reserve_build_report.csv`).
+    Preserved the 156 unnamed KML duplicates to
+    `data/interim/boundary_kml_unattributed_7755.gpkg`.
+  - Updated docs: `data-dictionary.md` (new reserve schema), `methodology.md`
+    (Week-3 change log + Nagarjunsagar limitation), `data-sources.md`,
+    `proposal.md` (§8), `README.md`, `project-plan.md` (Week 3 ✅ + Week 4 tasks).
+- Decisions made: none numbered (Decision 4 unchanged; the Week-3 change log
+  records the as-built refinements to it).
+- Outputs: `scripts/02`, `boundary_reserves_all_7755.gpkg`,
+  `boundary_states_7755.gpkg`, `boundary_kml_unattributed_7755.gpkg`,
+  `reserve_pa_crosswalk.csv`, `tbl_02_reserve_build_report.csv`, updated docs.
+- Gotchas found (all now in "Known gotchas"): GDAL KML driver drops the
+  SchemaData fields and splits the file into two layers → parse with `xml2`;
+  `st_as_sfc()` on KML snippets returns empty geometry; the KML `corridor` layer
+  is actually the 156 duplicates; `unit_name` is not unique (two Pench, two Rajiv
+  Gandhi) → match on name + state. New dependency: `xml2`.
+- Data QA: polygon/census ratio median ~0.58 (expected — polygons under-state the
+  legal total). One outlier — Nagarjunsagar-Srisailam ratio 1.54 (coarse source
+  geometry; not an Amrabad overlap; area is census-sourced so no metric affected)
+  — documented in `methodology.md` Limitations.
+- Carried forward / next week: **Week 4** — extract the all-reserve census time
+  series from the five NTCA reports (manual). Make the **missing-year Decision**
+  first (numbered). 6 crosswalk `review` rows to glance at when joining the
+  census. `area_km2` overwrite from census happens in Week 5.
 
 ### Week 2 (part) — Admin boundaries + Week-2 close · 2026-09-07
 - Entry state: covariates + boundary KML acquired; admin + manual downloads

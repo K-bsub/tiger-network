@@ -98,4 +98,11 @@ Summarised in `docs/methodology.md` §5.
 where the as-built work diverged from a stated choice here. Elaborations left
 open are documented as numbered Decisions in `docs/methodology.md`, not here.*
 
-*(none yet — project is at scaffolding stage)*
+- **Boundary source (§3 fork resolved).** §3 posed the boundary source as a
+  Week-2 fork: authoritative WII/NTCA layer if available, KBA fallback if not.
+  Neither was chosen. The WII all-reserve layer is not publicly downloadable and
+  WDPA holds no Indian national PAs, so **Decision 4** selected the NTCA DSS
+  KML — used for geometry only, with area and density from the NTCA census. The
+  KML holds protected-area polygons, not reserve entities, so the reserve layer
+  is built from a hand-reviewed reserve→constituent-PA crosswalk rather than a
+  direct name match. See `docs/methodology.md` (Decision 4 + Week-3 change log).

@@ -52,11 +52,15 @@ rejections are not re-litigated.
   required; research/education use.
 - **Currency:** July 2022.
 - **Basis and limits:** geometry is the **core protected-area polygon, not the
-  legal core-plus-buffer tiger-reserve extent** (median area ~55% below the
-  legal total). Covers 55 of 58 reserves by name; 3 not found (Amrabad,
-  Pilibhit, Dholpur-Karauli) and 2 false matches (Bor, Kamlang) are fixed by
-  hand in Week 3. Corridor centrelines are largely unnamed in the source; names
-  assigned in the connectivity track. Infrastructure-clearance dataset, not
+  legal core-plus-buffer tiger-reserve extent** (as-built polygon/census ratio
+  median near 0.58; most polygons under-state the legal area). The KML holds
+  national-park / sanctuary polygons, so each reserve is built from its
+  constituent PA(s) via `data/raw/ntca/reserve_pa_crosswalk.csv` and dissolved
+  (see the Week-3 change log in `docs/methodology.md`). Covers 55 of 58 reserves;
+  3 have no KML polygon (Amrabad, Pilibhit, Dholpur-Karauli — each a 2014+
+  reserve, absent from the July-2022 KML) and are kept as geometry-absent rows.
+  Corridors are separate named polygons (`Corridor` field, some blank); the
+  connectivity track re-extracts them. Infrastructure-clearance dataset, not
   peer-reviewed spatial data — authoritative for approximate extents only.
 
 ### KBA Global — Key Biodiversity Areas (assessed, NOT selected)
@@ -83,7 +87,15 @@ rejections are not re-litigated.
   WDPA cannot supply reserve boundaries for India. Recorded so this is not
   re-checked.
 
-### India administrative boundaries
+### Reserve→PA crosswalk (project-built reference)
+- **Role:** Maps each of the 58 tiger reserves to its constituent KML PA
+  polygon name(s) (exact KML spelling, `;`-separated for multi-part reserves).
+  Drives the reserve build in `scripts/02`. Also carries a **provisional**
+  `area_km2_placeholder` (source: published NTCA/Wikipedia core+buffer totals),
+  overwritten from the NTCA census in Week 5.
+- **File:** `data/raw/ntca/reserve_pa_crosswalk.csv` (hand-reviewed;
+  gitignored with the rest of `data/raw`).
+- **Built:** Week 3, from the KML PA names + the NTCA 58-reserve reference list.
 - **Role:** State/district context and roll-up (Decision 2 units).
 - **States:** Natural Earth admin-1 via `rnaturalearth::ne_states` (public
   domain). 36 states/UTs. Output `boundary_states_ne_7755.gpkg`.

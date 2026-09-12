@@ -12,12 +12,12 @@ Sibling in method to
 | | |
 |---|---|
 | **Author** | Kiran Balasubramanian |
-| **Status** | **Week 2 complete — boundary Decision made and all data acquired.** Decision 4: NTCA DSS PA/TR/corridor KML is the geometry source; reserve area/density come from the NTCA census, not the polygon (WDPA rejected — India shares no national PAs; KBA assessed but not selected). Decision 5: SDM target-group background is Mammalia-only. `scripts/01` (8 blocks) acquired all covariates on a 1 km EPSG:7755 grid — GBIF tiger occ (4,606) + Mammalia background (39,057), WorldCover, gHM 2022, OSM roads/settlements, terrain (elevatr), admin boundaries; plus manual NTCA census, ISFR 2021, Singh & Sen. `00b`: 12/14 PRESENT (KBA/WDPA MISSING by design). Next: Week 3 — build the reserve boundary layer. |
+| **Status** | **Week 3 complete — reserve boundary layer built.** `scripts/02` builds `boundary_reserves_all_7755.gpkg` (58 reserves: 55 with KML geometry, 3 geometry-absent — Amrabad, Pilibhit, Dholpur-Karauli) from the NTCA DSS KML via a hand-reviewed reserve→constituent-PA crosswalk, dissolved per reserve; area is a flagged placeholder (`area_provisional = TRUE`), overwritten from the NTCA census in Weeks 4–5. The five NTCA census reports (2006–2022) are on disk (task 3.1). Prior: Week 2 — Decision 4 (NTCA KML geometry; census area/density) + Decision 5 (Mammalia target group); `scripts/01` acquired all covariates on a 1 km EPSG:7755 grid. Next: Weeks 4–5 — extract the all-reserve census time series and overwrite `area_km2`. |
 | **Focal species** | *Panthera tigris* (Bengal tiger) |
 | **Study area** | India — all tiger reserves with reserve-level census data |
 | **Primary unit** | Reserve, rolled up to landscape complex and state |
 | **Analysis CRS** | EPSG:7755 — WGS 84 / India NSF LCC (national equal-area/conformal frame) |
-| **Stack** | R (sf, terra, spatstat, sfdep, leastcostpath, igraph, maxnet), Quarto, Leaflet |
+| **Stack** | R (sf, terra, xml2, spatstat, sfdep, leastcostpath, igraph, maxnet), Quarto, Leaflet |
 | **Story site** | Planned — Quarto site on GitHub Pages, one page per analysis track |
 
 ---
