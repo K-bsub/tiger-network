@@ -17,13 +17,34 @@ Most datasets come from the two earlier tiger projects. **Run the audit
 - **Source:** National Tiger Conservation Authority & Wildlife Institute of India.
 - **Access:** https://ntca.gov.in — PDF reports + Excel. **Manual.**
 - **Licence:** Government of India.
-- **Note:** Phase 1 extracted reserve-level figures for 7 reserves only.
-  Extending to all reserves is the main new data effort.
+- **Extracted (Week 4):** the per-reserve within-reserve SECR series lives in a
+  **table only for 2014 (Table 2.2, pp.22-23), 2018 (Table 3.4, pp.22-43), and
+  2022 (Table I.3.3, pp.28-29)**. **2006 and 2010 carry no per-reserve table** —
+  their finest tabulated unit is state × landscape complex (Table ES.1), and
+  reserve-anchored figures appear only in landscape-chapter prose. So the growth
+  series is 2014/2018/2022 (Decision 6). Output: `census_reserve_long.csv` (148
+  within-reserve rows, 53 reserves) + 5 never-estimated flags. Per-round
+  locators: `outputs/tables/tbl_04_census_source_map.csv`. **Note:** the 2022
+  Table I.3.3 PDF text layer is corrupt — values were transcribed from a page
+  raster. Take the **within**-reserve column, never "utilising".
 
-### Singh & Sen (2015) — Karnataka 2006–2010 gap-fill
-- **Role:** Fills the Bandipur/Nagarahole 2006–2010 gap.
+### Singh & Sen (2015) — assessed, NOT usable as a numeric source
+- **Role (revised, Week 4):** originally logged as a Bandipur/Nagarahole
+  2006–2010 gap-fill. On inspection it **supplies no reserve-level values**: its
+  per-reserve figures are **normalised bar charts** (0–120 index, captioned
+  "Source: NTCA"), not counts, and its only hard numbers are landscape/national
+  totals already in the NTCA reports. Useful for **trend direction only**, not
+  for values. See `docs/tbl_04_secondary_sources_2006_2010.md`.
 - **Source:** *Am Research Thoughts*, Vol. 1, pp. 1796–1812.
-- **Licence:** Research paper. Supplementary, not primary.
+- **Licence:** Research paper. Context only, not a data source.
+
+### Reserve-specific 2006 papers (assessed, secondary context only)
+- **Role:** Checked in Week 4 for reserve-level 2006/2010 counts to supplement
+  the prose. None yields a comparable count: Gopal et al. (2010, *Oryx*) gives
+  Panna 2006 **occupancy** (not a count); Jhala et al. (2011, *J. Appl. Ecol.*)
+  is source-population scale; Harihar et al. (2017) documents 2006/2010 vs 2014+
+  **non-comparability**. Full write-up in
+  `docs/tbl_04_secondary_sources_2006_2010.md`; citations in `references.md`.
 
 ---
 

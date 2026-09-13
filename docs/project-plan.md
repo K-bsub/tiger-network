@@ -176,10 +176,10 @@ the main new work, and it is manual PDF/Excel extraction.
 | Week | Focus | Exit state (deliverable) | Est. |
 |---|---|---|---|
 | **3** | Boundary layer built | `02` output: reserves layer with unit_id, state, landscape_complex, area_km2 | 3–4 h |
-| **4** | Census extraction — part 1 | ~half of reserves entered into the census time series; **Decision:** missing-year handling | 3–4 h |
-| **5** | Census extraction — part 2 | All available reserves entered; census joined to boundaries | 3–4 h |
+| **4** | Census extraction *(done — full series, not half)* | Full within-reserve census entered (`census_reserve_long.csv`); **Decisions 6 + 7** made | 3–4 h |
+| **5** | Census join + area overwrite | `03` output: `stats_reserve_census_7755.gpkg` (wide census joined to boundaries; `area_km2` overwritten; density) | 3–4 h |
 | **6** | Growth metrics | `03` output: `tbl_01_reserve_growth.csv` (change, %, AAGR, density) | 2–3 h |
-| **7** | Growth visuals + roll-up | `04` outputs: ranking figure, regional roll-up table, animated choropleth | 3–4 h |
+| **7** | Growth visuals + roll-up | `04` outputs: ranking figure, regional roll-up table, animated choropleth (**3 frames — 2014/2018/2022 — per Decision 6, not 5**) | 3–4 h |
 
 **At the end of Stage 1 the priority-1 track is complete and publishable on its
 own.** If the project stops here, it is still a finished, worthwhile piece.
@@ -224,7 +224,7 @@ geometry + 3 absent); `boundary_states_7755.gpkg` written; corridors and 156
 duplicates set aside for later; the five NTCA census reports on disk ready for
 Week 4–5 extraction.
 
-### Week 4 — task breakdown
+### Week 4 — task breakdown *(complete)*
 
 Entry state (from Week 3): `boundary_reserves_all_7755.gpkg` built, with
 `area_km2` holding a **provisional placeholder** (`area_provisional = TRUE`).
@@ -266,6 +266,110 @@ stop-and-resume task, split across Weeks 4–5.
 missing-year Decision recorded; table shape fixed. Week 5 finishes the extraction
 and joins the census to the boundary layer (overwriting the placeholder
 `area_km2`).
+
+**Week 4 outcome (as run):** all 4.1–4.6 tasks done, and the extraction ran
+**ahead of plan — the full series, not half**, because the data was already
+located. Recorded in `docs/methodology.md` (Decisions 6 + 7; four Week-4 change
+log entries).
+
+- **4.1 — source map.** The per-reserve figures live in a **table only for
+  2014/2018/2022** (2014 Table 2.2 pp.22-23; 2018 Table 3.4 pp.42-43; 2022 Table
+  I.3.3 pp.28-29). **2006 and 2010 have no per-reserve table** — reserve-anchored
+  figures sit in landscape-chapter prose, are partial, and are a different
+  spatial unit (reserve + surrounds) and method (double sampling). Map:
+  `outputs/tables/tbl_04_census_source_map.csv`.
+- **Decision 6 (new)** — census figure type + baseline. The series is
+  within-reserve SECR, **2014/2018/2022 only**; 2006/2010 are context, not a
+  baseline. This drops the planned five-frame animation to **three frames** (a
+  proposal deviation, logged).
+- **4.2 → Decision 7 (new)** — missing (reserve, round) cells are `NA`; no
+  carry-forward, interpolation, or gap-fill. The gap structure is
+  left-censoring (reserves enter when first estimated), **no true internal gaps**.
+- **4.3 — table shape.** Long (`census_reserve_long.csv`), pivots to wide on the
+  Week-5 join. Documented in `data-dictionary.md`.
+- **4.4 — extraction (full).** `census_reserve_long.csv` — **148 within-reserve
+  rows across 53 reserves** + 5 never-estimated flag rows. 2022 transcribed from
+  a page raster (its PDF text layer is corrupt).
+- **4.5 — spot-check passed.** 2022 within-values match the PIB government
+  release **17/17**; the 2014 column sums to the report's own total (1586)
+  exactly. 2018 sum is +35 vs the report's de-double-counted 1923 — expected, not
+  an error. Log: `outputs/tables/tbl_04_spotcheck_log.md`.
+- **Prose sweep** (extra pass) — table-missing reserves checked in prose: found
+  Orang 2014 (NP survey) and Ratapani 2022 (WLS complex) as **supplementary**
+  rows (segregated, excluded from the series), and Mukundara 2014 = a real
+  within-reserve **0** (+1 series row). No 2018 additions.
+- **2006/2010 secondary table** (user request) —
+  `census_reserve_long_2006_2010.csv`: 24 prose-derived figures, confidence-
+  graded, context only. **Singh & Sen (2015) supplies no values** (its reserve
+  bars are normalised indices sourced from NTCA); no other reference gives a
+  comparable reserve-level count set (write-up:
+  `docs/tbl_04_secondary_sources_2006_2010.md`).
+- **Not done in Week 4 (moves to Week 5, as planned):** the census is **not
+  joined to boundaries**, and `area_km2` is **still the provisional
+  placeholder**.
+
+### Week 5 — task breakdown
+
+Entry state (from Week 4): `census_reserve_long.csv` holds the full within-reserve
+SECR series (148 rows, 53 reserves, 2014/2018/2022) + 5 never-estimated flags,
+spot-checked and on disk. `boundary_reserves_all_7755.gpkg` still has
+**provisional** `area_km2` (`area_provisional = TRUE`). Decisions 6 + 7 fix the
+series and the missing-year rule. The census is **not yet joined** to the
+boundary layer.
+
+Week 4 already finished the extraction, so Week 5 is the **join + area
+overwrite** week: pivot the census to wide, attach it to the reserves, replace
+the placeholder area with the census total area, and compute density. This writes
+`stats_reserve_census_7755.gpkg` — the analysis-ready growth input for Week 6.
+
+First check: the census reports give **population**, but Decision 4 wants
+**official census total area** (core+buffer) to overwrite the placeholder
+`area_km2` and to compute density. Task 5.1 confirms where that area table lives
+(NTCA report annex vs. the crosswalk placeholder). If no trustworthy census area
+table exists, the placeholder stays and `area_provisional` stays `TRUE` — density
+is then deferred, not faked.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 5.1 | Locate the **official reserve area** (core+buffer) table in the NTCA reports (or confirm none is usable). Note page/table, as in the 4.1 map | You know the area source per reserve, or have confirmed there is none | 30–45 min |
+| 5.2 | Write `scripts/03_prepare_census.R`: read `census_reserve_long.csv`, validate against `CENSUS_YEARS`/`unit_id`, pivot long → wide (`pop_2014`, `pop_2018`, `pop_2022`) per Decision 6 | Script reads long, pivots wide; row count and `unit_id` set verified | 45–60 min |
+| 5.3 | Join the wide census to `boundary_reserves_all_7755.gpkg` on `unit_id`; carry `census_status`; confirm all 58 reserves present (53 measured + 5 flagged) | Join clean; no unmatched `unit_id`; the 3 geometry-absent reserves still carry census rows | 20–30 min |
+| 5.4 | **Overwrite `area_km2`** from the census area table (5.1); set `area_provisional = FALSE` and `area_source` to the census; leave placeholder + `TRUE` for any reserve with no census area | Every row with a census area updated; `area_provisional` flag correct per row | 20–30 min |
+| 5.5 | Compute `density_2022` = `pop_2022` ÷ census `area_km2` × 100 (per 100 km²); `NA` where either input is `NA` | Density populated where inputs exist; `NA` elsewhere, not 0 | 15–20 min |
+| 5.6 | Set `baseline_year` per reserve (earliest non-`NA` round) — do **not** compute change/AAGR yet (that is Week 6) | `baseline_year` correct (2014 core; 2018/2022 late entries) | 10–15 min |
+| 5.7 | Write `stats_reserve_census_7755.gpkg`; update `data-dictionary.md` to match the as-built fields | Layer written; dictionary matches | 15–20 min |
+| 5.8 | Glance at the 6 crosswalk `review` rows (Kamlang, Pench-MP, Pench-MH, Bor, Similipal, Nagarhole) — confirm each census row landed on the right `unit_id` | The name-collision reserves are joined correctly | 15 min |
+| 5.9 | Reconcile config drift: `R/00_config.R` still has `BASELINE_YEAR <- 2006L` and `BASELINE_WINDOW <- c(2006,2010)`, which pre-date Decision 6. Update to the 2014 baseline (or add a comment pointing to Decision 6) | Config no longer contradicts Decision 6 | 10–15 min |
+| 5.10 | Commit (`analysis:` for `scripts/03` + the stats layer; `docs:` for dictionary/config notes) | Committed and pushed to `main` | 10 min |
+
+**Week 5 pitfalls:**
+- **Population area ≠ polygon area.** Decision 4 is strict: `area_km2` and
+  `density_2022` use the **official census total area**, never the KML
+  `poly_km2`. If 5.1 finds no usable census area, do not silently fall back to the
+  polygon — leave the placeholder and defer density.
+- **Two Pench, two `unit_id`.** The pivot and join key on `unit_id`, never
+  `unit_name`. The 4.4 extraction already split Pench-MP (23) and Pench-MH (33);
+  the join must preserve that. Check row 5.8.
+- **Never-estimated reserves must survive the join.** The 5 flag rows
+  (`census_status = not_estimated_post2022_notification`) have `pop = NA` and no
+  year — they should map with `NA` population, not be dropped by an inner join.
+  Use a left join from the 58-reserve boundary layer.
+- **Supplementary rows stay out.** `census_reserve_long_2006_2010.csv` and the
+  Orang/Ratapani supplementary rows are **not** inputs to the wide pivot. Filter
+  to `census_status = measured` AND `spatial_unit = within_reserve` before
+  pivoting.
+- **`area_provisional` is the audit column.** After 5.4, any row still `TRUE`
+  is a reserve with no census area — that is a real gap to note, not a bug.
+
+**Decision due this week:** none required. (If 5.1 finds the census area is
+unusable and a fallback is needed, that becomes a numbered Decision — but the
+default is to defer density, not to decide.)
+
+**Exit state:** `stats_reserve_census_7755.gpkg` written — all 58 reserves,
+wide census (`pop_2014/2018/2022`), census-sourced `area_km2` (placeholder
+overwritten where a census area exists), `density_2022`, `baseline_year`,
+`census_status`. Growth metrics (change/%/AAGR) are **not** computed yet — that is
+Week 6. Config drift reconciled.
 
 ---
 
@@ -320,7 +424,7 @@ and joins the census to the boundary layer (overwriting the placeholder
 
 | Risk | Likelihood | Effect | Response |
 |---|---|---|---|
-| All-reserve census extraction is slower than 2 weeks | High | Stage 1 slips | Extraction is the natural stop-and-resume task; split across more weeks freely |
+| All-reserve census extraction is slower than 2 weeks | ~~High~~ **Retired** | Stage 1 slips | Did not materialise — the full within-reserve series was extracted in Week 4 (2014/2018/2022 is only 3 tabular rounds, not 5). Week 5 is now the join, not more extraction |
 | WII TR boundaries not public | Medium | Weaker boundary layer | KBA fallback, documented (Decision) |
 | Weeks slip due to job load | High | Calendar stretches | Expected. Each week is self-contained; no penalty for a gap |
 | SDM adds little beyond growth + connectivity | Medium | Wasted effort | Priority 3 by design — drop it if Stage 1–2 already tell the story |
@@ -339,7 +443,8 @@ deliverable exists.
 | 1 | Data audit table | ✅ Complete |
 | 2 | Boundary decision + gap downloads | ✅ Complete |
 | 3 | Reserve boundary layer | ✅ Complete |
-| 4–5 | Census time series (all reserves) | ⚪ Not started |
+| 4 | Census time series extracted (all reserves) | ✅ Complete |
+| 5 | Census joined to boundaries + area overwrite | ⚪ Not started |
 | 6 | Growth metrics table | ⚪ Not started |
 | 7 | Growth visuals + roll-up | ⚪ Not started |
 | 8–12 | Connectivity track | ⚪ Not started |

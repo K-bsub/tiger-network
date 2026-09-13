@@ -97,7 +97,8 @@ Examples: `reserves_sf`, `landcover_r`, `occ_tiger_ppp`, `tiger_sdm_fit`
 
 - **snake_case**, lowercase.
 - Units embedded in the name: `area_km2`, `dist_road_m`, `elev_mean_m`.
-- Year suffix for temporal fields: `pop_2006`, `pop_2022`.
+- Year suffix for temporal fields: `pop_2014`, `pop_2022` (census columns exist
+  for 2014/2018/2022 only — Decision 6).
 
 Standard identifiers used across layers:
 

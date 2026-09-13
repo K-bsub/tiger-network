@@ -167,15 +167,134 @@ vertebrate record = "someone surveyed here"); this project uses a target-group
 (carnivores + ungulates, the camera-trap/sighting group). Pulled all Mammalia
 now; the narrowing is decided from observed volumes at model fit, not here.
 
----
+### Decision 6 — Census figure type and growth-series baseline
+**Date:** 2026-09-12
+**Choice:** For the growth track, use the **within-reserve SECR** per-reserve
+estimate from each round that publishes one — **2014, 2018, 2022**. Baseline the
+all-reserve growth series at **2014**. Do **not** build an all-reserve
+2006→2022 series from the census reports. Treat **2006 and 2010** as
+**7-reserve Phase-1 context only**, extracted from landscape-chapter prose and
+labelled as a different spatial unit, never mixed into the all-reserve series.
+
+**Reason (what task 4.1 found when locating the per-reserve tables):**
+The five rounds do not report reserve-level population the same way.
+
+1. **2014 / 2018 / 2022 — per-reserve SECR tables.** Each has a single table of
+   within-reserve estimates:
+   - 2014 — Table 2.2 (pp. 22–23), 44 reserves, `Tiger Population` midpoint with
+     `Lower SE Limit` / `Upper SE Limit`.
+   - 2018 — Table 3.4 (pp. 42–43), 50 reserves, `Number` + `SE`, split into
+     "tigers **within** the reserve" and "tigers **utilising** the reserve".
+   - 2022 — Table I.3.3 (pp. 28–29), ~56 reserves, `value ± SE`, same
+     within/utilising split. (Its PDF text layer is corrupt; values must be
+     transcribed from a page raster.)
+   The comparable figure is the **within-reserve** column (2014 has only the one
+   column; 2018 and 2022 split, and the "utilising" column double-counts tigers
+   shared between abutting reserves — the 2018 report states the within figure is
+   the one to use).
+2. **2006 / 2010 — no per-reserve table.** The finest tabulated unit is
+   **state × landscape complex** (Table ES.1 in each). Reserve-anchored numbers
+   exist only in **landscape-chapter prose** (e.g. 2006: Panna "89 (± 1 se range
+   73–105)", Pench "33 (27–39)"; 2010: Kanha "60 (45–75)", Ranthambhore "30–32").
+   These are: **partial** (~18 reserves in 2006, ~26 in 2010, not all 58);
+   **double-sampling**, not SECR; and estimated over the **reserve + surrounding
+   occupied forest** (the "source population"; occupancy area typically exceeds
+   the reserve), not the within-reserve boundary. Naming blends reserve and
+   landscape ("Panna landscape", "Kanha-Pench"), so mapping to `unit_id` is a
+   hand judgement, not a string join.
+
+**Why baseline at 2014, not 2006:**
+- Splicing a 2006/2010 reserve-and-surrounds prose figure to a 2014+
+  within-reserve SECR figure mixes two spatial units and two methods in one
+  series. It would **understate** early density (larger denominator area) and
+  **understate** growth, an artefact that looks like a real trend.
+- Coverage is incomplete before 2014, so an all-reserve 2006/2010 column would be
+  mostly missing anyway and would force imputation on the least comparable rounds.
+- The country-level 2006→2022 trajectory (1,411 → 3,682) is already the framing
+  number (Decision 2); the all-reserve *reserve-level* series is what 2014 onward
+  supports cleanly.
+- Phase 1 already reconstructed 2006/2010 for its **7 featured reserves** from
+  exactly these chapters. Those stay available for the 7-reserve narrative, with
+  an explicit note that they are reserve-and-surrounds, double-sampling figures.
+
+**Consequences for the pipeline:**
+- The growth metrics (absolute change, % growth, AAGR) are computed on the
+  2014/2018/2022 series. `baseline_year` in `stats_reserve_census_7755.gpkg` is
+  2014 for reserves present in the 2014 table, later where a reserve first
+  appears (e.g. Amrabad, Mukundara, Rajaji-2018; several reserves 2022-only).
+- Reserves notified after 2022 (Guru Ghasidas-Tamor Pingla, Veerangana
+  Durgavati, Ratapani, Madhav, Dholpur-Karauli) have **no census figure in any
+  round** and carry `NA` population with a flag; they map but do not enter growth
+  stats.
+- This resolves the **baseline** part of the [Week 4] missing-year question
+  (series starts 2014; 2006/2010 are not an all-reserve baseline). The remaining
+  part — reserves absent from a round within the series — is fixed in Decision 7.
+- Locators for every round are recorded in
+  `outputs/tables/tbl_04_census_source_map.csv` (task 4.1).
+
+### Decision 7 — Missing-year census handling (leave `NA`, no imputation)
+**Date:** 2026-09-12
+**Choice:** Where a reserve has no census figure in a round, **store `NA`**. Do
+**not** carry forward, interpolate, or gap-fill population values. Growth metrics
+are computed only over the rounds a reserve actually has, and each reserve's
+`baseline_year` is its **first round with a figure**. The Singh & Sen (2015)
+gap-fill is **not** used in the all-reserve series.
+
+**Reason (what the gap structure actually is):**
+Across the three SECR rounds that form the series (Decision 6), the per-reserve
+availability is not a scatter of random holes — it is almost entirely
+**left-censoring** (a reserve enters the series when it is first notified /
+first estimated) with **no true internal gaps**:
+
+- **42 reserves** are present in all three rounds (2014, 2018, 2022).
+- **~5 reserves** first appear in **2018** (Kamlang, Orang, Mukundara, Amrabad,
+  Rajaji) — no 2014 figure because they were not yet estimated as reserves.
+- **~5 reserves** first appear in **2022** (Navegaon-Nagzira, Ramgarh Vishdhari,
+  Srivilliputhur-Meghamalai, Ranipur, Sundarban within-figure) — 2022 baseline.
+- **5 reserves** (Guru Ghasidas-Tamor Pingla, Veerangana Durgavati, Ratapani,
+  Madhav, Dholpur-Karauli) have **no figure in any round** (post-2022
+  notifications) — they map but carry `NA` population and are excluded from
+  growth stats.
+- **No reserve** is present-then-absent-then-present within 2014–2022. The one
+  apparent "2014+2018 but not 2022" case (Satpura) is a name-match artefact; its
+  2022 figure exists. So there is no genuine interior hole to interpolate across.
+
+**Why `NA`, not the alternatives — evaluated:**
+- **Carry-forward** (repeat the previous round's value): fabricates stability.
+  For a late-entry reserve there is no previous value to carry; for a real reserve
+  it would invent an unchanged population and bias AAGR toward zero. Rejected.
+- **Interpolate** (linear between bracketing rounds): needs an interior gap to
+  interpolate across, and the data has none. It would only ever apply to
+  left-censored reserves, where there is nothing on the left to interpolate from.
+  Inapplicable by construction. Rejected.
+- **Singh & Sen (2015) gap-fill:** it fills the **2006–2010** Bandipur/Nagarahole
+  gap. Decision 6 already excludes 2006/2010 from the all-reserve series, so this
+  fill has no target in the series. Kept only as optional context for the
+  7-reserve Phase-1 panel, clearly labelled as a secondary source. Not entered as
+  primary census data.
+- **Leave `NA` (chosen):** honest about coverage, keeps every stored value a real
+  published SECR figure, and matches the pre-registration discipline (no invented
+  data before results are seen). Growth over a shorter observed span is still
+  valid; a reserve with only a 2022 figure simply has no growth metric yet.
+
+**Implementation consequences:**
+- `pop_<year>` is `NA` for any (reserve, round) with no published figure.
+- `baseline_year` = earliest round with a non-`NA` figure (2014 for the 42-reserve
+  core; 2018 or 2022 for late entries).
+- `change_abs`, `change_pct`, `aagr` use each reserve's own baseline→2022 span;
+  reserves with a single round get `NA` growth metrics, not a fabricated 0.
+- `density_2022` needs only the 2022 figure and the census area, so it is
+  available for every reserve with a 2022 row regardless of history.
+- The five never-estimated reserves are flagged (a `census_status` note) so they
+  are visibly "mapped, not measured" rather than silently missing.
+
+This closes the **[Week 4] Missing-year census handling** pending item.
 
 ### Decisions pending (raised, not yet made)
 
 These forks are open. Each is decided in the week noted in the project plan,
 before the relevant code is written.
 
-- **[Week 4] Missing-year census handling.** How to treat reserves that lack a
-  figure in one or more rounds (the Kaziranga-2006 problem, at scale).
 - **[Week 9] Land-cover resistance values.** The `WORLDCOVER_RESISTANCE` lookup
   in `R/00_config.R` holds literature-informed starting values; the final set is
   a numbered Decision before the resistance surface is built.
@@ -201,6 +320,104 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-09-12 — 2006/2010 secondary table + reference sweep
+
+Built a **secondary** 2006/2010 reserve table and checked whether any reference
+can supply comparable reserve-level counts (per user request; usable if needed).
+
+- **`data/raw/ntca/census_reserve_long_2006_2010.csv`** — 24 reserve-anchored
+  figures (11 for 2006, 13 for 2010) from the NTCA reports' prose, each tagged
+  `spatial_unit` (reserve_and_surrounds / block_or_complex / landscape /
+  reserve_prose) and `attribution_confidence` (5 high, 11 medium, 8 low). Kept
+  as **context only** — NOT spliced into the within-reserve SECR series
+  (Decision 6). The 5 high-confidence rows are 2010 Kanha 60, Bandhavgarh 59,
+  Satpura 43, Pench-MP 54, Ranthambhore 31.
+- **Singh & Sen (2015) supplies no values.** Its reserve bars (Figs 9–16) are
+  normalised indices captioned "Source: NTCA"; only its landscape/national
+  totals are numeric, and those are already in the reports. Confirms Decision 7.
+- **No other reference gives a comparable reserve-level count set.** The 2011
+  Jhala method paper is source-population scale; Gopal et al. (2010, Oryx) gives
+  Panna 2006 *occupancy* (not a count); Harihar et al. (2017) documents that
+  2006/2010 are methodologically non-comparable to 2014+ — reinforcing
+  Decision 6. Full write-up:
+  `docs/tbl_04_secondary_sources_2006_2010.md`. Three references added to
+  `docs/references.md`.
+
+### 2026-09-12 — Week 4 prose sweep for table-missing reserves
+
+Second-pass check: do reserves absent from a round's master table have a figure
+in that report's prose? (Same pattern as 2006/2010.)
+
+- **2014:** Orang (then a National Park) has a tiger chapter — 15 unique
+  captured, density 10.55(2.82)/100 km²; recorded as a **supplementary** row,
+  not within-reserve abundance. Mukundara "does not have tigers" in 2014 —
+  recorded as a real within-reserve **0** (0→1→1 trajectory). Kawal/Rajaji
+  surveyed but no tiger abundance figure. Others post-date 2014.
+- **2018:** no new reserve-level figures (missing reserves are post-2018 or
+  NP/WLS mentions only).
+- **2022:** Ratapani (then a WLS) has 56 individuals / density 2.30(0.31) for
+  the Bhopal-Ratapani complex — recorded as a **supplementary** row, not the
+  reserve. Corrected Ranipur 2022 note (camera-capture count, not scat).
+- **Handling:** supplementary prose figures use
+  `census_status = measured_prose_supplementary` and a non-within `spatial_unit`
+  so they are preserved but excluded from the within-reserve growth series
+  (Decision 6). Net series change: +1 row (Mukundara 2014 = 0).
+
+### 2026-09-12 — Week 4 census extraction + spot-check (tasks 4.4–4.6)
+
+- **Full census time series extracted**, not the planned half. All three SECR
+  tables keyed into `data/raw/ntca/census_reserve_long.csv` (long format,
+  Decision 6 series 2014/2018/2022): 44 rows (2014, Table 2.2), 50 (2018,
+  Table 3.4, within column), 53 (2022, Table I.3.3, within column) = 147
+  measured rows across 53 reserves, plus 5 never-estimated flag rows (Decision
+  7). All 58 reserves accounted for. 2022 values transcribed from a page raster
+  (its PDF text layer is corrupt).
+- **Two Pench reserves** disambiguated by state (unit_id 23 MP, 33 MH).
+- **Spot-check passed** (`outputs/tables/tbl_04_spotcheck_log.md`): 2022 within
+  values match the PIB government release 17/17 exactly; the 2014 column sums to
+  the report's own Table 2.2 total (1586) exactly. The 2018 within sum (1958) is
+  +35 vs the report's de-double-counted 1923 — expected, since a per-reserve sum
+  keeps shared-tiger reserves' own figures; logged, not corrected.
+- **Carried flags:** 2018/2022 SEs are printed to implausible precision
+  (transcribed verbatim); Sundarban 2022 within is blank (biosphere-level only);
+  17 scat-DNA minimums have no SE. All flagged in the table `notes` column.
+- **Not yet joined to boundaries** — that is Week 5 (the pivot to wide
+  `stats_reserve_census_7755.gpkg`).
+
+### 2026-09-12 — Week 4 missing-year Decision (task 4.2)
+
+- **Decision 7 written:** missing (reserve, round) figures are stored `NA` — no
+  carry-forward, interpolation, or gap-fill. Grounded in the observed gap
+  structure: the three-round series is left-censored (reserves enter when first
+  estimated) with **no true internal gaps**, so interpolation has nothing to
+  bridge and carry-forward would fabricate stability. Closes the [Week 4]
+  pending item.
+- **Schema note:** `stats_reserve_census_7755.gpkg` gains a `census_status`
+  flag so never-estimated reserves (post-2022 notifications) read as "mapped,
+  not measured" rather than silently missing.
+
+### 2026-09-12 — Week 4 census source location (task 4.1)
+
+Located the reserve-level population figures in all five NTCA rounds before
+extraction. Findings drove **Decision 6** and corrected a Limitations line.
+
+- **Per-reserve SECR tables exist only for 2014, 2018, 2022.** 2014 Table 2.2
+  (pp. 22–23), 2018 Table 3.4 (pp. 42–43), 2022 Table I.3.3 (pp. 28–29). 2018
+  and 2022 split "within reserve" vs "utilising"; the **within** column is the
+  comparable figure. 2014 has a single `Tiger Population` column.
+- **2006 and 2010 have no per-reserve table.** Their finest tabulated unit is
+  state × landscape complex (Table ES.1). Reserve-anchored numbers appear only
+  in landscape-chapter prose, cover a subset (~18 in 2006, ~26 in 2010), are
+  double-sampling estimates over the reserve **and surrounding occupied forest**,
+  and are not like-for-like with the SECR series. (Corrects the earlier
+  assumption that "NTCA figures are SECR estimates" for all rounds.)
+- **2022 table text layer is corrupt.** `pdftotext` returns column-scrambled
+  output for Table I.3.3; values are transcribed from a 150-DPI page raster.
+- **New output:** `outputs/tables/tbl_04_census_source_map.csv` — per-round
+  locators (page, table, figure type, spatial unit, method) plus a per-reserve
+  availability matrix across all five rounds. No population values are extracted
+  yet; that is the next task.
 
 ### 2026-09-11 — Week 3 reserve boundary build (`scripts/02`)
 
@@ -263,8 +480,14 @@ refine, but do not change, Decision 4.
   is why the effort thread is a first-class part of the analysis, not a caveat.
 - **Census cadence.** NTCA rounds are four years apart; within-period dynamics
   are not captured.
-- **Population estimates, not counts.** NTCA figures are SECR estimates; point
-  midpoints are used for comparability.
+- **Population estimates, not counts — and not one figure type across rounds.**
+  NTCA figures are estimates, not counts, and the estimate type changes over the
+  series (see Decision 6). 2014, 2018 and 2022 give per-reserve **within-reserve
+  SECR** estimates in a table; the point midpoint is used. 2006 and 2010 give no
+  such table — reserve-anchored figures appear only in landscape-chapter prose,
+  cover a subset of reserves, are **double-sampling** estimates over the reserve
+  **plus surrounding occupied forest**, and are therefore not a like-for-like
+  baseline for the SECR series. Handling is fixed in Decision 6.
 - **Boundary basis (see Decision 4).** No open source holds legal
   tiger-reserve (core + buffer) extents. The chosen source (NTCA DSS KML) stores
   core national-park / sanctuary polygons, which in general under-state reserve

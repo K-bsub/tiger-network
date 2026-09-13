@@ -12,6 +12,22 @@ India* (2006, 2010, 2014, 2018 rounds). NTCA & WII.
 Singh, B.V.R., & Sen, A. (2015). Comparative Analysis of Tiger Landscape
 Complexes and Reserves in India. *Am Research Thoughts*, 1, 1796–1812.
 
+Gopal, R., Qureshi, Q., Bhardwaj, M., Singh, R.K.J., & Jhala, Y.V. (2010).
+Evaluating the status of the Endangered tiger *Panthera tigris* and its prey in
+Panna Tiger Reserve, Madhya Pradesh, India. *Oryx*, 44(3), 383–389.
+https://doi.org/10.1017/S0030605310000529 · *(Reserve-specific 2006 occupancy;
+secondary context only — see docs/tbl_04_secondary_sources_2006_2010.md.)*
+
+Jhala, Y.V., Qureshi, Q., & Gopal, R. (2011). Can the abundance of tigers be
+assessed from their signs? *Journal of Applied Ecology*, 48, 14–24.
+https://doi.org/10.1111/j.1365-2664.2010.01901.x · *(Method behind the 2010
+double-sampling; source-population scale, not per-reserve.)*
+
+Harihar, A., Pandav, B., MacMillan, D.C., et al. (2017). Defensible inference:
+questioning global trends in tiger populations. *Conservation Letters*, 10(5),
+502–505. · *(Documents non-comparability of 2006/2010 vs 2014+ estimates —
+supports Decision 6.)*
+
 Wikramanayake, E., Dinerstein, E., Seidensticker, J., et al. (2011). A
 landscape-based conservation strategy to double the wild tiger population.
 *Conservation Letters*, 4(3), 219–227.

@@ -67,7 +67,9 @@ what is still on disk before any re-download.
 Summarised in `docs/methodology.md` §5.
 
 - **Growth:** per-reserve census metrics (absolute change, % growth, AAGR,
-  density); regional roll-up; animated choropleth across five census years.
+  density); regional roll-up; animated choropleth across the census years with a
+  per-reserve table (2014/2018/2022 — see §8 and Decision 6; 2006/2010 have no
+  per-reserve table).
 - **Connectivity:** land-cover + road resistance surface; least-cost paths
   between reserve pairs; reserve network as a graph (`igraph`) for linchpin and
   isolation metrics; road pinch points.
@@ -106,3 +108,15 @@ open are documented as numbered Decisions in `docs/methodology.md`, not here.*
   KML holds protected-area polygons, not reserve entities, so the reserve layer
   is built from a hand-reviewed reserve→constituent-PA crosswalk rather than a
   direct name match. See `docs/methodology.md` (Decision 4 + Week-3 change log).
+- **Census series is 2014/2018/2022, not five rounds (§2 Q1, §5 growth).** Q1
+  asks about change "between 2006 and 2022". Week-4 extraction found that
+  **per-reserve figures are tabulated only from 2014** — the 2006 and 2010
+  rounds report at state × landscape-complex scale, with only partial,
+  prose-level, different-unit reserve figures (**Decision 6**). The all-reserve
+  growth series therefore runs **2014 → 2018 → 2022**, and the animated
+  choropleth has **3 frames, not 5**. The country-level 2006→2022 trajectory
+  (1,411 → 3,682) is retained as framing narrative only. 2006/2010 reserve prose
+  figures are kept as secondary context (`census_reserve_long_2006_2010.csv`) for
+  the 7-reserve Phase-1 comparison, not the all-reserve series. Missing
+  (reserve, round) cells are `NA` with no imputation (**Decision 7**). See
+  `docs/methodology.md` (Decisions 6 + 7).

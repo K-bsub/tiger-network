@@ -25,7 +25,10 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
   cross-cutting effort/observer-bias thread. Reserve-level, rolled up to
   landscape complex and state.
 - **Fixed Decisions (see `docs/methodology.md`):** D1 suitability not occupancy;
-  D2 reserve unit rolled up; D3 CRS 7755.
+  D2 reserve unit rolled up; D3 CRS 7755; D4 NTCA KML geometry, census area;
+  D5 Mammalia target group; **D6 census series = within-reserve SECR 2014/2018/2022
+  only (2006/2010 are context, not a baseline)**; **D7 missing (reserve, round)
+  cells = `NA`, no imputation**.
 
 ## Ways of working (apply every chat)
 
@@ -43,38 +46,74 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
 
 ---
 
-## Current state  ·  updated after **Week 3** (reserve boundary layer built)
+## Current state  ·  updated after **Week 4** (census time series extracted — full)
 
-- **Done this week:** `scripts/02_prepare_boundaries.R` written and run. It builds
-  `boundary_reserves_all_7755.gpkg` — **58 reserves, 55 with KML geometry, 3
-  geometry-absent** (Amrabad, Pilibhit, Dholpur-Karauli). Also writes
-  `boundary_states_7755.gpkg` (36) and a QA report
-  (`tbl_02_reserve_build_report.csv`). The five NTCA census reports (2006–2022)
-  are on disk (task 3.1). Docs updated: `data-dictionary.md` (new reserve
-  schema), `methodology.md` (Week-3 change log + Nagarjunsagar limitation),
-  `data-sources.md`, `proposal.md` (§8 deviation), `README.md`, `project-plan.md`
-  (Week 3 ✅, Week 4 breakdown added).
-- **How reserves are built (important — the KML is not what the plan assumed):**
-  the NTCA KML holds **705 protected-area polygons, not reserve entities**. Each
-  reserve is built from its constituent PA(s) named in
-  `data/raw/ntca/reserve_pa_crosswalk.csv` (hand-reviewed), matched on **name +
-  state**, and dissolved to one polygon per `unit_id`. 10 reserves are
-  multi-part (e.g. Corbett = Corbett NP + Sonanadi WLS).
-- **`area_km2` is a flagged placeholder.** `area_provisional = TRUE`,
-  `area_source = wikipedia_ntca_2022_PLACEHOLDER`. **Week 5 overwrites it from
-  the NTCA census** (Decision 4) and sets `area_provisional = FALSE`. The
-  `area_provisional` column is how to find every row to replace.
-- **Next: Week 4** — start the all-reserve census time-series extraction (manual,
-  from the five NTCA reports). Make the **missing-year Decision** first
-  (numbered). See `project-plan.md` → Week 4 breakdown.
+- **Done this week:** the whole all-reserve census extraction — **ahead of plan
+  (full series, not half)**, because the figures were already located.
+  `census_reserve_long.csv` holds **148 within-reserve SECR rows across 53
+  reserves** (2014/2018/2022) + 5 never-estimated flag rows. Two numbered
+  Decisions made (**D6**, **D7**). Spot-check passed (17/17 vs the government PIB
+  release; 2014 column sums to the report total exactly). Docs updated:
+  `methodology.md` (D6, D7, four Week-4 change-log entries), `data-dictionary.md`
+  (long + wide census schema), `references.md` (3 refs added), plus the new
+  output tables below.
+- **Series is 2014/2018/2022 only (Decision 6).** The per-reserve figures are
+  tabular **only** in those three rounds (2014 Table 2.2 / 2018 Table 3.4 / 2022
+  Table I.3.3). **2006 and 2010 have no per-reserve table** — reserve-anchored
+  numbers are in landscape-chapter prose, partial, and a different spatial unit
+  (reserve + surrounds) and method (double sampling). So the growth series starts
+  at 2014, and the planned 5-frame animation becomes **3 frames** (proposal
+  deviation, logged).
+- **Missing handling is `NA` (Decision 7).** No carry-forward, no interpolation,
+  no gap-fill. The gaps are all left-censoring (reserves enter when first
+  estimated); there are **no true internal gaps** to bridge. 5 post-2022 reserves
+  are `census_status = not_estimated_post2022_notification` — mapped, not measured.
+- **Use the WITHIN-reserve column, never "utilising".** 2018 and 2022 split the
+  two; the comparable figure is "within". 2014 has a single `Tiger Population`
+  column. Baked into the extraction.
+- **`area_km2` is STILL the provisional placeholder** (`area_provisional = TRUE`).
+  Week 4 was population only. **Week 5 overwrites area from the census** and
+  computes density — that is the whole Week-5 job.
+- **Next: Week 5** — pivot long → wide, join the census to
+  `boundary_reserves_all_7755.gpkg`, overwrite `area_km2`, compute `density_2022`,
+  write `stats_reserve_census_7755.gpkg`. See `project-plan.md` → Week 5 breakdown.
+
+### New output files this week (under `outputs/tables/` and `data/raw/ntca/`)
+
+- `census_reserve_long.csv` — **the deliverable.** Full within-reserve series;
+  long format; pivots to wide on the Week-5 join. Stored in `data/raw/ntca/`.
+- `tbl_04_census_source_map.csv` — per-round locators (page/table/figure type)
+  + per-reserve availability matrix. The 4.1 output.
+- `tbl_04_spotcheck_log.md` — the 4.5 cross-source validation (PIB + report totals).
+- `census_reserve_long_2006_2010.csv` — **secondary, context only.** 24
+  prose-derived 2006/2010 figures, confidence-graded. NOT a series input.
+- `tbl_04_secondary_sources_2006_2010.md` — why Singh & Sen and other refs
+  cannot supply reserve-level 2006/2010 counts.
+
+### Census extraction cheat-sheet (for the Week-5 join)
+
+- **Filter before pivoting:** `census_status == "measured"` AND
+  `spatial_unit == "within_reserve"`. That excludes the 5 flag rows, the 2
+  supplementary prose rows (Orang 2014, Ratapani 2022), and everything in the
+  2006/2010 file.
+- **Row types in `census_reserve_long.csv`:** `measured` (148 within-reserve),
+  `measured_prose_supplementary` (2 — Orang/Ratapani, non-within `spatial_unit`),
+  `not_estimated_post2022_notification` (5 flags, `pop = NA`, no year).
+- **Mukundara 2014 = 0** is a real within-reserve zero (report: "does not have
+  tigers"), not missing — it gives Mukundara a 0→1→1 trajectory.
+- **2022 SEs are printed to implausible precision** (e.g. Corbett 260±0.4);
+  transcribed verbatim — treat SE as indicative, not exact.
+- **Sundarban 2022 within is blank** (only the biosphere-level 101±10 given);
+  stored NA-within. 2018 within (88) and 2014 (68) exist if a value is needed.
 
 ### Crosswalk review rows (carry into Week 5 census join)
 
 6 crosswalk rows are `match_status = review` — accepted and matched, but worth a
 glance when the census is joined (they are the name-collision / false-match
 cases): **Kamlang, Pench (MP), Pench (MH), Bor, Similipal, Nagarhole**
-(KML `Rajiv Gandhi` — the Karnataka one, not the AP duplicate). All resolved in
-the build; the flag just marks them for a second look.
+(KML `Rajiv Gandhi` — the Karnataka one, not the AP duplicate). The census
+extraction already split Pench-MP (`unit_id` 23) and Pench-MH (33) correctly —
+the join must keep them on their own `unit_id`.
 
 ### Data on disk (from Week 2, via `scripts/01` — unchanged)
 
@@ -107,8 +146,7 @@ All on the 1 km EPSG:7755 grid where raster.
 ### Open pending Decisions (decide in the week noted)
 
 Full text in `methodology.md` → "Decisions pending".
-- **[Week 4]** Missing-year census handling (the Kaziranga-2006 problem, at
-  scale) — **due next week, before entering census data.**
+- ~~**[Week 4]** Missing-year census handling~~ — **resolved (Decision 7).**
 - **[Week 8–9]** Settlement layer for the KDE — village-dominated (~195k);
   trim to city/town (4,597) or change radius?
 - **[Week 9]** Land-cover resistance values (starting set in `R/00_config.R`).
@@ -159,6 +197,32 @@ Full text in `methodology.md` → "Decisions pending".
 - **`00b` glob is recursive and case-insensitive.** A stray matching file in a
   nested subfolder still counts as `PRESENT`. Keep `data/raw/<subfolder>/` clean
   so a leftover file does not create a false `PRESENT`.
+- **2022 census table (Table I.3.3) — the PDF text layer is CORRUPT.**
+  `pdftotext` on pages 28-29 returns column-scrambled garbage (reserve names and
+  numbers do not line up). The 2022 values were transcribed from a **150-DPI page
+  raster** (`pdftoppm`), read visually. Do not trust a text-extraction of that
+  table; re-raster if you need to re-check a value. 2014 (Table 2.2) and 2018
+  (Table 3.4) text layers are clean.
+- **"Within" vs "utilising" — take WITHIN.** 2018 Table 3.4 and 2022 Table I.3.3
+  each give two population columns per reserve: "tigers utilising the reserve"
+  (larger, double-counts tigers shared between abutting reserves) and "tigers
+  within the reserve". The series uses **within**. The 2018 report says so
+  explicitly. Getting this wrong inflates every 2018/2022 figure.
+- **2006/2010 have NO per-reserve table.** Do not go looking for one — it does
+  not exist. Those rounds report at state × landscape-complex scale (Table ES.1);
+  reserve numbers are only in landscape-chapter prose, partial, and a different
+  spatial unit. This is why Decision 6 starts the series at 2014.
+- **Singh & Sen (2015) is not a numeric source.** Its per-reserve bars (Figs
+  9-16) are **normalised indices** (0-120 axis, captioned "Source: NTCA"), not
+  counts — Corbett's ~100 bar vs its real 215 proves it. Useful for trend
+  direction only. Do not read values off it.
+- **Two Pench = two `unit_id` (23 MP, 33 MH).** Both print as "Pench" in every
+  census table; disambiguate by the state column. The extraction did; the Week-5
+  join must key on `unit_id`, never `unit_name`.
+- **`-` or `0` in a census table is a real within-reserve zero**, not missing —
+  enter `0` (Dampa, Kamlang, Kawal, Satkosia, Sahyadri, Palamau-2018,
+  Buxa-2018). Missing = the row is simply absent (reserve not estimated that
+  round).
 - **PROJ / PostGIS `proj.db` clash (this machine).** PostgreSQL 16 / PostGIS 3.6
   puts an old `proj.db` on PATH
   (`C:\Program Files\PostgreSQL\16\share\contrib\postgis-3.6\proj\proj.db`,
@@ -175,6 +239,51 @@ Full text in `methodology.md` → "Decisions pending".
 ---
 
 ## Weekly log (newest first)
+
+### Week 4 — Census time series extracted (full) · 2026-09-12
+- Entry state: boundary layer built with **provisional** `area_km2`; the five NTCA
+  reports on disk, not parsed; missing-year Decision pending.
+- Did:
+  - **4.1** — located the per-reserve figures in all five reports. Found the
+    tabular figures exist **only for 2014/2018/2022** (Table 2.2 / 3.4 / I.3.3);
+    2006/2010 have no per-reserve table. Wrote `tbl_04_census_source_map.csv`.
+  - **Decision 6** — census figure type + baseline: within-reserve SECR,
+    2014/2018/2022 only; 2006/2010 are context, not a baseline. Corrected the
+    methodology limitation that wrongly called all rounds SECR.
+  - **4.2 → Decision 7** — missing (reserve, round) = `NA`; no imputation.
+    Grounded in the observed gap structure (left-censoring, no internal gaps).
+  - **4.3** — long table shape fixed; `census_reserve_long.csv` template;
+    data-dictionary updated (long + wide schema; dropped `pop_2006/2010`).
+  - **4.4** — extracted the **full** series (planned as half):
+    `census_reserve_long.csv`, 148 within-reserve rows / 53 reserves + 5 flags.
+    2022 transcribed from a page raster.
+  - **4.5** — spot-check passed: 2022 vs PIB release **17/17**; 2014 sum = report
+    total (1586) exactly; 2018 sum +35 vs report's de-double-counted 1923
+    (expected). Wrote `tbl_04_spotcheck_log.md`.
+  - **Prose sweep** (extra) — table-missing reserves checked in prose. Added
+    Orang 2014 + Ratapani 2022 as **supplementary** (segregated), Mukundara 2014
+    = real within-reserve 0. No 2018 additions.
+  - **2006/2010 secondary table** (user request) —
+    `census_reserve_long_2006_2010.csv` (24 prose figures, confidence-graded,
+    context only). Confirmed Singh & Sen supplies no values; no other reference
+    gives a comparable reserve-level count set
+    (`tbl_04_secondary_sources_2006_2010.md`). Added 3 references.
+- Decisions made: **Decision 6** (census figure type + baseline), **Decision 7**
+  (missing-year handling = `NA`).
+- Outputs: `census_reserve_long.csv`, `census_reserve_long_2006_2010.csv`,
+  `tbl_04_census_source_map.csv`, `tbl_04_spotcheck_log.md`,
+  `tbl_04_secondary_sources_2006_2010.md`; updated `methodology.md`,
+  `data-dictionary.md`, `references.md`, `project-plan.md` (Week 4 ✅ + Week 5
+  tasks), this handoff.
+- Gotchas found (all now in "Known gotchas"): 2022 Table I.3.3 PDF text layer is
+  corrupt → read from a page raster; take the **within** column not "utilising";
+  2006/2010 have no per-reserve table; Singh & Sen bars are normalised indices,
+  not counts; two Pench = two `unit_id`; `-`/`0` is a real zero.
+- Carried forward / next week: **Week 5** — pivot long → wide, join census to the
+  boundary layer, **overwrite `area_km2`** from the census area (find that table
+  first — task 5.1), compute `density_2022`, write
+  `stats_reserve_census_7755.gpkg`. Also reconcile `R/00_config.R` `BASELINE_YEAR`
+  drift (still 2006, pre-Decision-6). Glance at the 6 crosswalk `review` rows.
 
 ### Week 3 — Reserve boundary layer built · 2026-09-11
 - Entry state: all covariates + admin boundaries + NTCA DSS KML on disk; boundary
