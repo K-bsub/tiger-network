@@ -2,8 +2,9 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** Week 2 — data acquisition underway (GBIF pulls complete). No
-analysis has run.
+**Status:** Week 5 complete — `stats_reserve_census_7755.gpkg` built (wide census
+joined to boundaries; notified area per Decision 8; density; baseline_year).
+Growth metrics (change/%/AAGR) are Week 6.
 
 This document is the processing log and the decision record. Every significant
 choice becomes a **numbered Decision** with a date and a justification, recorded
@@ -290,11 +291,78 @@ first estimated) with **no true internal gaps**:
 
 This closes the **[Week 4] Missing-year census handling** pending item.
 
+### Decision 8 — Reserve area source (core+buffer notified total; A1-revised)
+**Date:** 2026-09-13
+**Choice:** Set each reserve's `area_km2` (the Decision-4 census/notified area) to
+the **NTCA-notified core + buffer total**, for all 58 reserves, `area_source =
+ntca_notification`. Assemble it from the NTCA / state tiger-reserve notifications
+(consolidated in the Wikipedia "Tiger reserves of India" table, which cites the
+NTCA notifications and FSI ISFR 2021). Use **FSI ISFR 2021 Ch.4 as a cross-check
+only**, never as the area value. Do not use the KML polygon area (Decision 4).
+
+**Reason (what task 5.1 found across three source classes):**
+1. **The census reports carry no area table.** Read directly: 2018 Table 3.4
+   (pp.42-43, clean text) and 2022 Table I.3.3 (pp.28-29, page raster) each have
+   four columns only — State, Tiger Reserve, Within +-SE, Utilising +-SE. No
+   area column; no area annexure. Area is only in scattered per-reserve prose.
+2. **ISFR 2021 Ch.4 does NOT carry the notified area.** On reading the chapter
+   (image-only PDF; read from page rasters), its per-reserve area column
+   (Table 4.5) is "**Area as per digitized Tiger Reserve Boundary**", source
+   **WII Dehradun** — a GIS polygon area, not the legal notified core+buffer
+   total. Its 52-reserve total is **74,710.53 km2** (report's own figure;
+   independently re-summed to 74,710.41 from the transcribed column), far below
+   the all-India notified total of ~84,487 km2. This is the same *class* of
+   quantity Decision 4 rejected for the KML. ISFR also covers only 52 of 58.
+   -> ISFR cannot be the area source; it is demoted to a cross-check.
+3. **No single downloadable NTCA file lists all-58 core/buffer/total.** NTCA
+   publishes the national aggregate (84,487 total; 46,701 core; 38,244.74 buffer)
+   plus per-reserve notifications. The consolidated per-reserve notified figures
+   are the Wikipedia table (citing those notifications). Assembled here for all 58.
+
+**Cross-checks (raise confidence):**
+- Sum of the 58 notified totals = **84,507 km2** vs NTCA stated **84,487**
+  (0.02% apart). Sum core = 46,693 vs 46,701. Essentially exact.
+- **ISFR cross-check (52 reserves, `tbl_05b_isfr_area_crosscheck.csv`):** median
+  |difference| between ISFR digitized area and the notified total is **5.2%** —
+  close for most reserves, validating the notified figures. **15 reserves diverge
+  >15%** (WII polygon vs legal extent genuinely differ): most extreme Bor -84%,
+  Orang -84%, Ramgarh Vishdhari -80%, Srivilliputhur-Megamalai -51%, and
+  Palamau +75%. Density uses the notified total, so these do not affect any metric;
+  they are flagged in `tbl_05` `notes`.
+- Two-Pench collision handled: unit_id 23 = Pench (MP) total 1179.63; unit_id 33 =
+  Pench (MH) total 741.22 (MP figure independently confirmed by its notification:
+  core 411.33, buffer 768.30).
+
+**Consequences for the pipeline:**
+- `outputs/tables/tbl_05_area_source_map.csv` holds per-reserve core/buffer/total,
+  `area_source = ntca_notification`, the ISFR cross-check columns, and a
+  confidence grade (high where ISFR agrees within 15%; medium where ISFR diverges
+  >15% or the reserve is post-2021 with no ISFR row).
+- `area_total_km2` overwrites `boundary_reserves` `area_km2` in Week-5 `scripts/03`
+  (task 5.4); `area_provisional` -> FALSE; `area_source` copied from this table.
+- `density_2022 = pop_2022 / area_total_km2 * 100` (task 5.5) uses the notified total.
+- `total` is used as given, not recomputed from core+buffer. Two rows have a source
+  core+buffer != total quirk (Madhav -120; Sahyadri +11.88) — flagged, harmless.
+
+**Open verification (does NOT block Week 5):**
+- The notified figures were consolidated via Wikipedia (citing NTCA/FSI), not read
+  from 58 individual notification PDFs. They pass both national-total and ISFR
+  cross-checks. If a reserve-level value is ever disputed, confirm against that
+  reserve's NTCA/state notification; record the locator in `tbl_05` `source_ref`.
+- ISFR provenance is now correct: ISFR is a cross-check column, not the area source.
+
 ### Decisions pending (raised, not yet made)
 
 These forks are open. Each is decided in the week noted in the project plan,
 before the relevant code is written.
 
+- **[Week 6] Zero-baseline handling in growth metrics (→ Decision 9).** Real
+  within-reserve zeros in an endpoint break ratio-based metrics: Mukundara Hills
+  (2014 = 0, a 0→1→1 trajectory) makes `change_pct` and `aagr` divide by zero,
+  and reserves declining to 0 in 2022 (Kamlang, Dampa, Kawal, Satkosia, Sahyadri)
+  give a −100% endpoint. Decide the rule: `change_abs` stays valid throughout;
+  `change_pct`/`aagr` are `NA` (flagged) where the baseline is 0; no `Inf`/`NaN`.
+  Fix as a numbered Decision before the Week-6 metric code.
 - **[Week 9] Land-cover resistance values.** The `WORLDCOVER_RESISTANCE` lookup
   in `R/00_config.R` holds literature-informed starting values; the final set is
   a numbered Decision before the resistance surface is built.
@@ -320,6 +388,54 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-09-13 — Week 5 complete: census joined, area overwritten, density built
+
+`scripts/03_prepare_census.R` finished (tasks 5.2–5.9). As built:
+- **Pivot (5.2):** long → wide, 53 reserves, row presence 45/50/53 by round.
+  Sundarbans 2022 kept `NA`-within (blank within-figure); Mukundara 2014 = 0
+  kept as a real zero.
+- **Join (5.3):** left join onto `boundary_reserves_all_7755.gpkg` — all 58
+  reserves survive (53 measured + 5 flagged); the 3 geometry-absent reserves
+  keep their census rows.
+- **Area overwrite (5.4, Decision 8):** `area_km2` ← notified core+buffer total
+  from `tbl_05_area_source_map.csv`, `area_provisional` → `FALSE`, `area_source`
+  → `ntca_notification`, for all 58. **Value change was zero** — the Week-3
+  placeholder already equalled the notified totals to the cent, so the overwrite
+  was provenance-only. `poly_census_ratio` recomputed against the notified area.
+- **Density (5.5):** `density_2022 = pop_2022 / area_km2 × 100` — 52 values;
+  `NA` for the 5 flagged + Sundarbans; `0` for real within-reserve zeros. Note:
+  per **total notified area**, not core-only, so it will not match a core-based
+  NTCA density figure.
+- **baseline_year (5.6):** earliest non-`NA` round — 45 at 2014, 5 at 2018,
+  3 at 2022; `NA` for the 5 flagged.
+- **Layer written (5.7):** `stats_reserve_census_7755.gpkg`, 58 reserves, 20
+  attribute columns + geometry. Re-read confirmed. QA tables tbl_06–tbl_09.
+- **Crosswalk review rows (5.8):** all 6 (Kamlang, Pench-MP, Pench-MH, Bor,
+  Similipal, Nagarhole) verified on the correct `unit_id` + state.
+- **Config reconciled (5.9):** added `CENSUS_SERIES_YEARS` (2014/2018/2022) and
+  `CENSUS_BASELINE_YEAR` (2014) to `R/00_config.R`; `CENSUS_YEARS` now aliases
+  the series. `BASELINE_YEAR`/`CURRENT_YEAR` kept at 2006/2022 and re-commented:
+  they are the **GBIF occurrence-download bounds** (`scripts/01` YR_MIN/YR_MAX),
+  not the census baseline — narrowing them would silently change the GBIF pull.
+- **`change_abs/change_pct/aagr` are NOT yet computed** — Week 6.
+
+
+
+Located the reserve core+buffer area for `area_km2` (task 5.1) and wrote
+**Decision 8** (A1-revised). Key findings:
+- **Neither census report tabulates area** (2018 Table 3.4 / 2022 Table I.3.3 are
+  population-only; verified by reading, incl. a 2022 page raster).
+- **ISFR 2021 Ch.4 does not carry the notified area either** — its per-reserve
+  column (Table 4.5) is the **WII digitized-boundary** GIS area (52 reserves,
+  total 74,710.53 km2), a different quantity from the legal notified total. It is
+  therefore used as a **cross-check only**, not the area source (corrects the
+  earlier A1 assumption that ISFR would supply the notified area).
+- **Area source is the NTCA/state notification** (consolidated), all 58 reserves;
+  notified-total sum 84,507 vs NTCA stated 84,487 (0.02%).
+- Outputs: `outputs/tables/tbl_05_area_source_map.csv` (per-reserve area + source +
+  ISFR cross-check + confidence), `outputs/tables/tbl_05b_isfr_area_crosscheck.csv`
+  (52-reserve ISFR-vs-notified comparison; median |diff| 5.2%, 15 reserves >15%).
 
 ### 2026-09-12 — 2006/2010 secondary table + reference sweep
 
@@ -508,5 +624,14 @@ refine, but do not change, Decision 4.
   centre falls outside the polygon). No metric is affected — area and density
   are census-sourced — so the polygon is kept as-is for mapping. Flag for the
   connectivity track: this reserve's mapped footprint is over-large.
+- **Reserve area is the notified core+buffer total, not a GIS polygon
+  (Decision 8).** No census report tabulates area, and ISFR-2021 Ch.4 carries a
+  WII digitized-boundary area (a polygon area, 52 reserves) that diverges from the
+  legal notified total by a median 5.2% and by >15% for 15 reserves (Bor -84%,
+  Orang -84%, Palamau +75%, etc.). `area_km2` and `density_2022` use the notified
+  total; ISFR is a cross-check only. Notified figures were consolidated from
+  NTCA/state notifications (via the Wikipedia consolidation that cites them), not
+  read from 58 individual notification PDFs — they pass national-total and ISFR
+  cross-checks but carry that provenance caveat.
 - **Resistance parameters are judgement calls.** Documented and justified, not
   ground-truthed against telemetry (which is not public).

@@ -101,23 +101,49 @@ note it, do not leave blank. Reserves absent from a round have **no row** for
 that round (Decision 7); never-estimated reserves get one flag row with
 `pop = NA`.
 
-## stats_reserve_census_7755.gpkg  *(Weeks 5–6)*
+## stats_reserve_census_7755.gpkg  *(Week 5 — built; growth metrics Week 6)*
 
-Wide layer, pivoted from `census_reserve_long.csv`. Per Decision 6 the series is
-**2014/2018/2022 only** — there are no `pop_2006` / `pop_2010` columns (those
-rounds have no comparable per-reserve figure). Per Decision 7, missing
-(reserve, round) cells are `NA`; no carry-forward or interpolation.
+Built by `scripts/03_prepare_census.R`. The wide census (pivoted from
+`census_reserve_long.csv`) LEFT-joined onto `boundary_reserves_all_7755.gpkg`
+by `unit_id`, so it carries **all 58 reserves** and **inherits every reserve
+boundary field** plus the census columns. Per Decision 6 the series is
+**2014/2018/2022 only** (no `pop_2006`/`pop_2010`). Per Decision 7, missing
+(reserve, round) cells are `NA` — no carry-forward or interpolation. Per
+Decision 8, `area_km2` is the **NTCA-notified core+buffer total** (from
+`outputs/tables/tbl_05_area_source_map.csv`), never the KML polygon.
+
+**As built (Week 5):** `area_km2` overwritten from the notified total for all 58
+(`area_provisional = FALSE`, `area_source = ntca_notification`); `density_2022`
+and `baseline_year` computed. **`change_abs`, `change_pct`, `aagr` are NOT in the
+Week-5 layer** — they are added in Week 6.
 
 | Field | Type | Meaning |
 |---|---|---|
-| `unit_id` | integer | Join key to reserves |
-| `pop_2014`, `pop_2018`, `pop_2022` | numeric | Within-reserve SECR estimate per round; `NA` where the reserve has no figure that round |
-| `change_abs` | numeric | 2022 − baseline (each reserve's earliest available round); `NA` if only one round |
-| `change_pct` | numeric | Percent change over the reserve's observed span; `NA` if only one round |
-| `aagr` | numeric | Average annual growth rate over the observed span; `NA` if only one round |
-| `density_2022` | numeric | Tigers per 100 km², 2022 (census pop ÷ official census area) |
-| `baseline_year` | integer | Earliest round with a non-`NA` figure (2014 for the 42-reserve core; 2018/2022 for late entries) |
-| `census_status` | character | `measured` or `not_estimated_post2022_notification` (mapped-but-not-measured reserves) |
+| `unit_id` | integer | Stable reserve ID (primary join key) |
+| `unit_name` | character | Reserve display name |
+| `unit_name_std` | character | Standardised name (from the boundary layer) |
+| `state` | character | State name |
+| `landscape_complex` | character | One of `LANDSCAPE_COMPLEXES` |
+| `area_km2` | numeric | Reserve area (core+buffer), km². **Notified total (Decision 8)**, not the polygon |
+| `area_provisional` | logical | `FALSE` once `area_km2` is the notified total (all 58 in Week 5) |
+| `area_source` | character | `ntca_notification` (Decision 8). Placeholder tag only if a reserve ever lacks a notified area |
+| `pop_2014`, `pop_2018`, `pop_2022` | numeric | Within-reserve SECR estimate per round; `NA` where the reserve has no figure that round (incl. Sundarbans 2022, within-blank) |
+| `density_2022` | numeric | Tigers per 100 km², 2022 = `pop_2022 / area_km2 * 100`. `NA` where `pop_2022` or area is `NA`; `0` for a real within-reserve zero. **Per total notified area** (not core-only, so it will not match a core-based NTCA density) |
+| `baseline_year` | integer | Earliest round with a non-`NA` `pop` (2014 for 45 reserves; 2018 for 5; 2022 for 3). `NA` for the 5 never-estimated reserves |
+| `census_status` | character | `measured` (53) or `not_estimated_post2022_notification` (5 mapped-but-not-measured) |
+| `n_parts` | integer | KML PA polygons dissolved into this reserve (from the boundary layer; 0 for geometry-absent) |
+| `match_status` | character | Crosswalk match class (from the boundary layer) |
+| `geometry_present` | logical | `TRUE` if the reserve has KML geometry; `FALSE` for the 3 gaps |
+| `source` | character | Boundary geometry source: `ntca` (KML) |
+| `poly_km2` | numeric | QA only. KML polygon area, km². `NA` for geometry-absent reserves |
+| `poly_census_ratio` | numeric | QA only. `poly_km2 / area_km2`, **recomputed in 5.4 against the notified area**. `NA` for geometry-absent reserves |
+| `change_abs` | numeric | **Week 6.** 2022 − baseline; `NA` if only one round |
+| `change_pct` | numeric | **Week 6.** Percent change over the observed span; `NA` if only one round |
+| `aagr` | numeric | **Week 6.** Average annual growth rate; `NA` if only one round |
+
+**QA tables written by `scripts/03` (Week 5):** `tbl_06_census_wide_check.csv`
+(pivot), `tbl_07_census_join_check.csv` (join), `tbl_08_area_overwrite_check.csv`
+(area before/after), `tbl_09_density_check.csv` (density).
 
 ## census_reserve_long_2006_2010.csv  *(Week 4 — SECONDARY / context only)*
 

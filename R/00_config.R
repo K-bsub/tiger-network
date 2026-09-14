@@ -14,11 +14,26 @@ CRS_ANALYSIS <- 7755L
 CRS_WGS84    <- 4326L
 
 # ---- Census years ----------------------------------------------------------
-# NTCA All India Tiger Estimation rounds. The full time series, not just the
-# 2006/2022 endpoints used in Phase 1.
-CENSUS_YEARS   <- c(2006L, 2010L, 2014L, 2018L, 2022L)
-BASELINE_YEAR  <- 2006L
-CURRENT_YEAR   <- 2022L
+# The per-reserve growth series is the within-reserve SECR estimate for
+# 2014 / 2018 / 2022 ONLY (Decision 6, docs/methodology.md). 2006 and 2010 have
+# no comparable per-reserve table and are context only. Use these two constants
+# for anything census/growth-related.
+CENSUS_SERIES_YEARS  <- c(2014L, 2018L, 2022L)  # Decision 6
+CENSUS_BASELINE_YEAR <- 2014L                    # series baseline (per-reserve
+                                                 # earliest in practice; 2014 core)
+
+# CENSUS_YEARS kept as an alias for the Decision-6 series (was the five-round
+# vector c(2006,2010,2014,2018,2022) before Decision 6 - that predated the
+# Week-4 finding that only 2014/2018/2022 are tabulated per reserve).
+CENSUS_YEARS   <- CENSUS_SERIES_YEARS
+
+# GBIF OCCURRENCE-DOWNLOAD year bounds (NOT the census baseline). These set the
+# year window for the GBIF pull in scripts/01 (YR_MIN / YR_MAX). The occurrence /
+# effort thread legitimately spans 2006-2022 (GBIF data range), independent of
+# Decision 6, which governs only the census tables. Do NOT set these to the
+# census series - narrowing them would silently change the occurrence pull.
+BASELINE_YEAR  <- 2006L   # GBIF download lower bound (scripts/01 YR_MIN)
+CURRENT_YEAR   <- 2022L   # GBIF download upper bound (scripts/01 YR_MAX)
 
 # ---- Occurrence temporal windows (for KDE / effort comparisons) ------------
 BASELINE_WINDOW <- c(2006L, 2010L)

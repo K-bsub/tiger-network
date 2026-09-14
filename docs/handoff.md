@@ -28,7 +28,8 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
   D2 reserve unit rolled up; D3 CRS 7755; D4 NTCA KML geometry, census area;
   D5 Mammalia target group; **D6 census series = within-reserve SECR 2014/2018/2022
   only (2006/2010 are context, not a baseline)**; **D7 missing (reserve, round)
-  cells = `NA`, no imputation**.
+  cells = `NA`, no imputation**; **D8 reserve area = NTCA-notified core+buffer
+  total (ISFR-2021 Ch.4 is cross-check only, not the area source)**.
 
 ## Ways of working (apply every chat)
 
@@ -46,74 +47,75 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
 
 ---
 
-## Current state  ·  updated after **Week 4** (census time series extracted — full)
+## Current state  ·  updated after **Week 5** (census joined; stats layer built)
 
-- **Done this week:** the whole all-reserve census extraction — **ahead of plan
-  (full series, not half)**, because the figures were already located.
-  `census_reserve_long.csv` holds **148 within-reserve SECR rows across 53
-  reserves** (2014/2018/2022) + 5 never-estimated flag rows. Two numbered
-  Decisions made (**D6**, **D7**). Spot-check passed (17/17 vs the government PIB
-  release; 2014 column sums to the report total exactly). Docs updated:
-  `methodology.md` (D6, D7, four Week-4 change-log entries), `data-dictionary.md`
-  (long + wide census schema), `references.md` (3 refs added), plus the new
-  output tables below.
-- **Series is 2014/2018/2022 only (Decision 6).** The per-reserve figures are
-  tabular **only** in those three rounds (2014 Table 2.2 / 2018 Table 3.4 / 2022
-  Table I.3.3). **2006 and 2010 have no per-reserve table** — reserve-anchored
-  numbers are in landscape-chapter prose, partial, and a different spatial unit
-  (reserve + surrounds) and method (double sampling). So the growth series starts
-  at 2014, and the planned 5-frame animation becomes **3 frames** (proposal
-  deviation, logged).
-- **Missing handling is `NA` (Decision 7).** No carry-forward, no interpolation,
-  no gap-fill. The gaps are all left-censoring (reserves enter when first
-  estimated); there are **no true internal gaps** to bridge. 5 post-2022 reserves
-  are `census_status = not_estimated_post2022_notification` — mapped, not measured.
-- **Use the WITHIN-reserve column, never "utilising".** 2018 and 2022 split the
-  two; the comparable figure is "within". 2014 has a single `Tiger Population`
-  column. Baked into the extraction.
-- **`area_km2` is STILL the provisional placeholder** (`area_provisional = TRUE`).
-  Week 4 was population only. **Week 5 overwrites area from the census** and
-  computes density — that is the whole Week-5 job.
-- **Next: Week 5** — pivot long → wide, join the census to
-  `boundary_reserves_all_7755.gpkg`, overwrite `area_km2`, compute `density_2022`,
-  write `stats_reserve_census_7755.gpkg`. See `project-plan.md` → Week 5 breakdown.
+- **Done this week:** `scripts/03_prepare_census.R` (tasks 5.1–5.9) built the
+  Week-5 deliverable **`data/processed/stats_reserve_census_7755.gpkg`** — all 58
+  reserves, 20 attribute columns + geometry. Made **Decision 8** (reserve area
+  source) and reconciled the config to Decision 6. Docs updated: `methodology.md`
+  (D8 + Week-5 change-log), `data-dictionary.md` (stats layer as-built),
+  `project-plan.md` (Week 5 ✅ + Week 6 tasks), `README.md`, this handoff.
+- **The stats layer holds:** `unit_id, unit_name, unit_name_std, state,
+  landscape_complex, area_km2, area_provisional, area_source, pop_2014/2018/2022,
+  density_2022, baseline_year, census_status, n_parts, match_status,
+  geometry_present, source, poly_km2, poly_census_ratio`. **`change_abs`,
+  `change_pct`, `aagr` are NOT yet computed — that is Week 6.**
+- **Numbers, as built:** 53 measured reserves + 5 flagged
+  (`not_estimated_post2022_notification`) = 58. `pop` row presence 45/50/53 by
+  round. `density_2022` = 52 values (`NA` for the 5 flagged + Sundarbans).
+  `baseline_year` = 45 at 2014, 5 at 2018, 3 at 2022, `NA` for the 5 flagged.
+- **Decision 8 — area source (NEW):** `area_km2` is the **NTCA-notified
+  core+buffer total**, from `outputs/tables/tbl_05_area_source_map.csv`
+  (`area_source = ntca_notification`), for all 58; `area_provisional` now `FALSE`.
+  **ISFR-2021 Ch.4 is a cross-check only** — its per-reserve column (Table 4.5)
+  is a WII *digitized-boundary* GIS area (52 reserves, total 74,710 km²), NOT the
+  notified total; median cross-check diff 5.2%, 15 reserves >15% (Bor −84%,
+  Orang −84%, Palamau +75%). Neither census report tabulates area at all.
+- **The area overwrite changed ZERO values.** The Week-3 placeholder already
+  equalled the notified totals to the cent, so 5.4 only changed provenance (flag
+  `TRUE`→`FALSE`, source → `ntca_notification`). Retroactively validates the
+  placeholder. `poly_census_ratio` recomputed against the notified area.
+- **Config reconciled (task 5.9):** `R/00_config.R` now has
+  `CENSUS_SERIES_YEARS = c(2014,2018,2022)` and `CENSUS_BASELINE_YEAR = 2014`
+  (Decision 6); `CENSUS_YEARS` aliases the series. **`BASELINE_YEAR`/`CURRENT_YEAR`
+  kept at 2006/2022** — `scripts/01` uses `BASELINE_YEAR` as the GBIF download
+  lower bound (YR_MIN), NOT the census baseline; narrowing it would silently
+  change the occurrence pull. `scripts/03` reads `CENSUS_SERIES_YEARS`.
+- **Next: Week 6** — growth metrics (`change_abs`, `change_pct`, `aagr`) over each
+  reserve's baseline→2022 span → `outputs/tables/tbl_01_reserve_growth.csv`, and
+  append the three columns to the stats layer. Make **Decision 9** first
+  (zero-baseline handling — Mukundara 2014 = 0 breaks ratio metrics). See
+  `project-plan.md` → Week 6 breakdown.
 
-### New output files this week (under `outputs/tables/` and `data/raw/ntca/`)
+### Output files this week (under `outputs/tables/` and `data/processed/`)
 
-- `census_reserve_long.csv` — **the deliverable.** Full within-reserve series;
-  long format; pivots to wide on the Week-5 join. Stored in `data/raw/ntca/`.
-- `tbl_04_census_source_map.csv` — per-round locators (page/table/figure type)
-  + per-reserve availability matrix. The 4.1 output.
-- `tbl_04_spotcheck_log.md` — the 4.5 cross-source validation (PIB + report totals).
-- `census_reserve_long_2006_2010.csv` — **secondary, context only.** 24
-  prose-derived 2006/2010 figures, confidence-graded. NOT a series input.
-- `tbl_04_secondary_sources_2006_2010.md` — why Singh & Sen and other refs
-  cannot supply reserve-level 2006/2010 counts.
+- `stats_reserve_census_7755.gpkg` — **the deliverable layer** (in `data/processed/`).
+- `tbl_05_area_source_map.csv` — per-reserve notified core/buffer/total + source +
+  ISFR cross-check + confidence (task 5.1 / Decision 8).
+- `tbl_05b_isfr_area_crosscheck.csv` — 52-reserve ISFR-vs-notified comparison.
+- `tbl_06_census_wide_check.csv` — pivot QA (5.2).
+- `tbl_07_census_join_check.csv` — per-reserve join QA (5.3).
+- `tbl_08_area_overwrite_check.csv` — area before/after QA (5.4).
+- `tbl_09_density_check.csv` — density QA (5.5).
+- **Housekeeping:** a stale `tbl_05_census_wide_check.csv` from the first 5.2 run
+  was renamed to `tbl_06_*`; delete the stale `tbl_05_census_wide_check.csv` so
+  the `tbl_05` slot means the area-source map only.
 
-### Census extraction cheat-sheet (for the Week-5 join)
+### Growth-metric inputs for Week 6 (edge cases that break ratio metrics)
 
-- **Filter before pivoting:** `census_status == "measured"` AND
-  `spatial_unit == "within_reserve"`. That excludes the 5 flag rows, the 2
-  supplementary prose rows (Orang 2014, Ratapani 2022), and everything in the
-  2006/2010 file.
-- **Row types in `census_reserve_long.csv`:** `measured` (148 within-reserve),
-  `measured_prose_supplementary` (2 — Orang/Ratapani, non-within `spatial_unit`),
-  `not_estimated_post2022_notification` (5 flags, `pop = NA`, no year).
-- **Mukundara 2014 = 0** is a real within-reserve zero (report: "does not have
-  tigers"), not missing — it gives Mukundara a 0→1→1 trajectory.
-- **2022 SEs are printed to implausible precision** (e.g. Corbett 260±0.4);
-  transcribed verbatim — treat SE as indicative, not exact.
-- **Sundarban 2022 within is blank** (only the biosphere-level 101±10 given);
-  stored NA-within. 2018 within (88) and 2014 (68) exist if a value is needed.
-
-### Crosswalk review rows (carry into Week 5 census join)
-
-6 crosswalk rows are `match_status = review` — accepted and matched, but worth a
-glance when the census is joined (they are the name-collision / false-match
-cases): **Kamlang, Pench (MP), Pench (MH), Bor, Similipal, Nagarhole**
-(KML `Rajiv Gandhi` — the Karnataka one, not the AP duplicate). The census
-extraction already split Pench-MP (`unit_id` 23) and Pench-MH (33) correctly —
-the join must keep them on their own `unit_id`.
+- **Zero baseline:** Mukundara Hills (`unit_id` 42) 2014 = 0 (0→1→1). `change_pct`
+  and `aagr` divide by the baseline → undefined; store `NA` and flag. `change_abs`
+  (+1) is valid. This is what **Decision 9** must settle.
+- **Zero 2022 (local extirpation):** Kamlang (0), Dampa, Kawal, Satkosia, Sahyadri
+  — real within-reserve zeros in 2022. `change_abs`/`change_pct` valid (a
+  decline); `aagr` to 0 is a −100% end — handle without `Inf`/`NaN`.
+- **Sundarbans (`unit_id` 57):** `pop_2022` is `NA` (within-figure blank; only the
+  biosphere-level 101±10 was published). All three metrics `NA` even though
+  2014 (68) and 2018 (88) exist.
+- **Single-round (2022-only):** Navegaon-Nagzira, Ramgarh Vishdhari,
+  Srivilliputhur-Megamalai, Ranipur — one point, no trend → `NA` growth.
+- **Per-reserve span:** AAGR uses each reserve's own `baseline_year`→2022 gap
+  (8/4/0 years), not a fixed 2014→2022.
 
 ### Data on disk (from Week 2, via `scripts/01` — unchanged)
 
@@ -128,25 +130,26 @@ All on the 1 km EPSG:7755 grid where raster.
 - **Terrain** — elevation/slope/TRI, 1 km (elevatr AWS z7). Full-India coverage.
 - **Admin boundaries** — Natural Earth states (36) + DataMeet Census-2011
   districts (641). Districts are pre-redistricting vintage.
-- **Manual PDFs:** ISFR 2021 Ch.4, Singh & Sen 2015, **and the five NTCA census
-  reports (2006–2022)** — the census figures still need manual extraction
-  (Weeks 4–5); the reports are only on disk, not yet parsed.
+- **Manual PDFs:** ISFR 2021 Ch.4 (parsed for the Week-5 area cross-check),
+  Singh & Sen 2015, and the five NTCA census reports (2006–2022, parsed Week 4).
 
 ### Boundary Decision (Decision 4 — settled Week 2, as-built Week 3)
 
 - **Chosen:** NTCA DSS `PA_TR_Corridor_Final` KML as the single geometry source.
-  Reserve **area/density come from the NTCA census, not the KML polygon** (the
-  polygon under-states the legal total; as-built poly/census ratio median ~0.58).
+  Reserve **area/density come from the NTCA notified total, not the KML polygon**
+  (the polygon under-states the legal total; as-built poly/census ratio ~0.58).
 - **As-built refinements (Week 3):** the "2 false matches" (Bor, Kamlang) were
   name-lookup artefacts — both have correct in-state polygons and are matched.
-  Real gaps are the 3 above. Corridors are **named polygons**, not unnamed
-  centrelines. Full detail in `methodology.md` (Week-3 change log).
+  Real gaps are the 3 geometry-absent reserves (Amrabad, Pilibhit,
+  Dholpur-Karauli). Corridors are **named polygons**, not unnamed centrelines.
 - **Raw:** `data/raw/ntca/PA_TR_Corridor_Final/`.
 
 ### Open pending Decisions (decide in the week noted)
 
 Full text in `methodology.md` → "Decisions pending".
-- ~~**[Week 4]** Missing-year census handling~~ — **resolved (Decision 7).**
+- **[Week 6]** Zero-baseline handling in growth metrics — Mukundara 2014 = 0
+  makes `change_pct`/`aagr` undefined; `NA` + flag, `change_abs` still valid.
+  Becomes **Decision 9**.
 - **[Week 8–9]** Settlement layer for the KDE — village-dominated (~195k);
   trim to city/town (4,597) or change radius?
 - **[Week 9]** Land-cover resistance values (starting set in `R/00_config.R`).
@@ -154,6 +157,9 @@ Full text in `methodology.md` → "Decisions pending".
   to motorway–secondary?
 - **[Week 13–14]** Target-group scope — all Mammalia vs large-bodied guild.
 - **[Week 14]** Terrain variables in the SDM — collinearity check (slope vs TRI).
+
+_Resolved: [Week 4] missing-year handling → Decision 7; [Week 5] area source →
+Decision 8._
 
 ### Known gotchas (do not relearn)
 
@@ -174,9 +180,22 @@ Full text in `methodology.md` → "Decisions pending".
 - **`unit_name` is not a unique key.** Two `Pench` (MP + MH) and two
   `Rajiv Gandhi` (Karnataka + AP) exist in the KML. Any KML→reserve match must
   use **name + state**, never name alone. `scripts/02` does; keep it that way.
-- **`area_km2` is provisional until Week 5.** The reserve layer's `area_km2` is a
-  placeholder (`area_provisional = TRUE`). Do not treat it as census area until
-  Week 5 overwrites it and flips the flag to `FALSE`.
+- **`area_km2` is the notified total from Week 5 on (`area_provisional = FALSE`).**
+  Resolved: `scripts/03` overwrote it from `tbl_05_area_source_map.csv`
+  (Decision 8). The overwrite changed zero values — the Week-3 placeholder already
+  matched. Never derive area/density from `poly_km2` (the KML polygon).
+- **`BASELINE_YEAR` in `R/00_config.R` is the GBIF download bound, NOT the census
+  baseline.** It doubles as `scripts/01`'s YR_MIN (2006). Decision 6's census
+  baseline is `CENSUS_BASELINE_YEAR` (2014). Do NOT set `BASELINE_YEAR` to 2014 —
+  it would silently narrow the GBIF occurrence pull. The two were separated in
+  task 5.9; keep them separate.
+- **`census_reserve_long.csv` has a quoted `#` comment block before the header.**
+  `read_csv(comment = "#")` does NOT strip quoted `#` lines — drop them by hand
+  first (`raw[!str_detect(raw, '^\\s*"?#')]`), as `scripts/03` does. Same trap in
+  pandas.
+- **`density_2022` is per TOTAL notified area, not core-only.** It will not match
+  an NTCA density figure that used core area (Corbett especially). Deliberate,
+  per Decision 8 — consistent across all reserves.
 - **First GitHub Pages publish:** the Action deploys to `gh-pages` but cannot
   create it. Bootstrap the branch once from the **Terminal tab** (not R
   console): `quarto publish gh-pages site`. Do **not** use
@@ -239,6 +258,39 @@ Full text in `methodology.md` → "Decisions pending".
 ---
 
 ## Weekly log (newest first)
+
+### Week 5 — Census join, area overwrite, density, stats layer · 2026-09-13
+- Entry state: `census_reserve_long.csv` extracted (Week 4); boundary layer with
+  provisional `area_km2`; no stats layer.
+- Did (tasks 5.1–5.9):
+  - **5.1 + Decision 8** — located the reserve area source. Neither census report
+    tabulates area; ISFR-2021 Ch.4 carries a WII digitized-boundary GIS area, not
+    the notified total. Chose the NTCA-notified core+buffer total (consolidated
+    notifications), ISFR as cross-check only. Built `tbl_05_area_source_map.csv`
+    (58) + `tbl_05b_isfr_area_crosscheck.csv` (52). Notified total 84,507 vs NTCA
+    stated 84,487.
+  - **5.2** — `scripts/03` reads long, validates, pivots wide (53 reserves;
+    45/50/53). **5.3** — left-join onto boundaries (58; 53 measured + 5 flagged;
+    3 geometry-absent keep census). **5.4** — area overwrite (zero value change).
+    **5.5** — density_2022 (52 values). **5.6** — baseline_year (45/5/3). **5.7** —
+    wrote `stats_reserve_census_7755.gpkg` (58 reserves, 20 cols + geometry).
+  - **5.8** — verified the 6 crosswalk `review` rows (all correct). **5.9** —
+    reconciled config to Decision 6 (added `CENSUS_SERIES_YEARS`/
+    `CENSUS_BASELINE_YEAR`; kept `BASELINE_YEAR` as the GBIF bound).
+- Decisions made: **Decision 8** (reserve area source).
+- Outputs: `scripts/03_prepare_census.R`, `stats_reserve_census_7755.gpkg`,
+  `tbl_05`, `tbl_05b`, `tbl_06`–`tbl_09`; updated `methodology.md`,
+  `data-dictionary.md`, `project-plan.md`, `README.md`, `R/00_config.R`, this handoff.
+- Gotchas found (now in "Known gotchas"): `BASELINE_YEAR` double-duty (census vs
+  GBIF bound); quoted-`#` comment block in the census CSV breaks `comment="#"`;
+  ISFR area is a WII polygon area not the notified total; density is per-total-area
+  not core-only; `table(useNA="ifany")` NA bin breaks name-indexed printing (fixed
+  by index iteration). Process note: one mis-placed str_replace scrambled step
+  order mid-build; caught in the coherence check and rebuilt — re-read the file
+  before large edits.
+- Carried forward / next week: **Week 6** — growth metrics (change/%/AAGR) →
+  `tbl_01_reserve_growth.csv` + append to the stats layer. **Decision 9**
+  (zero-baseline handling) first. Delete the stale `tbl_05_census_wide_check.csv`.
 
 ### Week 4 — Census time series extracted (full) · 2026-09-12
 - Entry state: boundary layer built with **provisional** `area_km2`; the five NTCA

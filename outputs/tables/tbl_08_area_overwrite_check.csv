@@ -1,0 +1,59 @@
+"unit_id","unit_name","geometry_present","census_status","area_km2_provisional_old","area_km2","area_provisional","area_source","poly_km2","poly_census_ratio"
+1,"Nagarjunsagar-Srisailam",TRUE,"measured",3296.31,3296.31,FALSE,"ntca_notification",5073.9,1.54
+2,"Namdapha",TRUE,"measured",2052.82,2052.82,FALSE,"ntca_notification",1809.1,0.88
+3,"Pakke",TRUE,"measured",1198.45,1198.45,FALSE,"ntca_notification",622,0.52
+4,"Kamlang",TRUE,"measured",783,783,FALSE,"ntca_notification",678.7,0.87
+5,"Manas",TRUE,"measured",2837.1,2837.1,FALSE,"ntca_notification",2843.9,1
+6,"Nameri",TRUE,"measured",464,464,FALSE,"ntca_notification",371.5,0.8
+7,"Kaziranga",TRUE,"measured",1173.58,1173.58,FALSE,"ntca_notification",401.8,0.34
+8,"Orang",TRUE,"measured",492.46,492.46,FALSE,"ntca_notification",70.4,0.14
+9,"Valmiki",TRUE,"measured",899.38,899.38,FALSE,"ntca_notification",874.4,0.97
+10,"Indravati",TRUE,"measured",2799.07,2799.07,FALSE,"ntca_notification",1266.2,0.45
+11,"Udanti-Sitanadi",TRUE,"measured",1842.54,1842.54,FALSE,"ntca_notification",841.7,0.46
+12,"Achanakmar",TRUE,"measured",914.02,914.02,FALSE,"ntca_notification",532.1,0.58
+13,"Guru Ghasidas-Tamor Pingla",TRUE,"not_estimated_post2022_notification",2829.38,2829.38,FALSE,"ntca_notification",2006.1,0.71
+14,"Palamau",TRUE,"measured",1129.93,1129.93,FALSE,"ntca_notification",1069.6,0.95
+15,"Bandipur",TRUE,"measured",1456.3,1456.3,FALSE,"ntca_notification",901.3,0.62
+16,"Bhadra",TRUE,"measured",1064.29,1064.29,FALSE,"ntca_notification",500.3,0.47
+17,"Kali",TRUE,"measured",1097.51,1097.51,FALSE,"ntca_notification",675.9,0.62
+18,"Nagarhole",TRUE,"measured",1205.76,1205.76,FALSE,"ntca_notification",714.9,0.59
+19,"Biligiri Ranganatha Temple",TRUE,"measured",574.82,574.82,FALSE,"ntca_notification",587.9,1.02
+20,"Periyar",TRUE,"measured",925,925,FALSE,"ntca_notification",800.9,0.87
+21,"Parambikulam",TRUE,"measured",643.66,643.66,FALSE,"ntca_notification",292,0.45
+22,"Kanha",TRUE,"measured",2051.79,2051.79,FALSE,"ntca_notification",898.8,0.44
+23,"Pench",TRUE,"measured",1179.63,1179.63,FALSE,"ntca_notification",121.3,0.1
+24,"Bandhavgarh",TRUE,"measured",1536.93,1536.93,FALSE,"ntca_notification",439,0.29
+25,"Panna",TRUE,"measured",1598.1,1598.1,FALSE,"ntca_notification",545.5,0.34
+26,"Satpura",TRUE,"measured",2133.31,2133.31,FALSE,"ntca_notification",449.7,0.21
+27,"Sanjay Dubri",TRUE,"measured",1674.5,1674.5,FALSE,"ntca_notification",774.1,0.46
+28,"Veerangana Durgavati",TRUE,"not_estimated_post2022_notification",2339.12,2339.12,FALSE,"ntca_notification",22.9,0.01
+29,"Ratapani",TRUE,"not_estimated_post2022_notification",1271.47,1271.47,FALSE,"ntca_notification",781.7,0.61
+30,"Madhav",TRUE,"not_estimated_post2022_notification",1751,1751,FALSE,"ntca_notification",320.4,0.18
+31,"Melghat",TRUE,"measured",2768.52,2768.52,FALSE,"ntca_notification",1172.4,0.42
+32,"Tadoba-Andhari",TRUE,"measured",1727.59,1727.59,FALSE,"ntca_notification",592.3,0.34
+33,"Pench (MH)",TRUE,"measured",741.22,741.22,FALSE,"ntca_notification",503.2,0.68
+34,"Sahyadri",TRUE,"measured",1165.57,1165.57,FALSE,"ntca_notification",745.9,0.64
+35,"Nawegaon-Nagzira",TRUE,"measured",1894.94,1894.94,FALSE,"ntca_notification",294,0.16
+36,"Bor",TRUE,"measured",816.27,816.27,FALSE,"ntca_notification",79.4,0.1
+37,"Dampa",TRUE,"measured",988,988,FALSE,"ntca_notification",284.2,0.29
+38,"Similipal",TRUE,"measured",2750,2750,FALSE,"ntca_notification",2267.4,0.82
+39,"Satkosia",TRUE,"measured",963.87,963.87,FALSE,"ntca_notification",634.9,0.66
+40,"Ranthambore",TRUE,"measured",1411.29,1411.29,FALSE,"ntca_notification",362.8,0.26
+41,"Sariska",TRUE,"measured",1213.34,1213.34,FALSE,"ntca_notification",846.3,0.7
+42,"Mukundara Hills",TRUE,"measured",759.99,759.99,FALSE,"ntca_notification",314.5,0.41
+43,"Ramgarh Vishdhari",TRUE,"measured",1501.9,1501.9,FALSE,"ntca_notification",283.7,0.19
+44,"Dholpur-Karauli",FALSE,"not_estimated_post2022_notification",599.64,599.64,FALSE,"ntca_notification",NA,NA
+45,"Kalakad-Mundanthurai",TRUE,"measured",1601.54,1601.54,FALSE,"ntca_notification",465.9,0.29
+46,"Anamalai",TRUE,"measured",1479.87,1479.87,FALSE,"ntca_notification",1006.2,0.68
+47,"Mudumalai",TRUE,"measured",688.59,688.59,FALSE,"ntca_notification",352.5,0.51
+48,"Sathyamangalam",TRUE,"measured",1408.4,1408.4,FALSE,"ntca_notification",577.7,0.41
+49,"Srivilliputhur-Megamalai",TRUE,"measured",1016.57,1016.57,FALSE,"ntca_notification",827.2,0.81
+50,"Kawal",TRUE,"measured",2015.44,2015.44,FALSE,"ntca_notification",943.4,0.47
+51,"Amrabad",FALSE,"measured",2611.39,2611.39,FALSE,"ntca_notification",NA,NA
+52,"Dudhwa",TRUE,"measured",2201.77,2201.77,FALSE,"ntca_notification",746.8,0.34
+53,"Pilibhit",FALSE,"measured",730.25,730.25,FALSE,"ntca_notification",NA,NA
+54,"Ranipur",TRUE,"measured",529.36,529.36,FALSE,"ntca_notification",236.4,0.45
+55,"Corbett",TRUE,"measured",1288.31,1288.31,FALSE,"ntca_notification",798.4,0.62
+56,"Rajaji",TRUE,"measured",1075.17,1075.17,FALSE,"ntca_notification",844.4,0.79
+57,"Sundarbans",TRUE,"measured",2584.89,2584.89,FALSE,"ntca_notification",2543.7,0.98
+58,"Buxa",TRUE,"measured",757.9,757.9,FALSE,"ntca_notification",409.7,0.54

@@ -177,7 +177,7 @@ the main new work, and it is manual PDF/Excel extraction.
 |---|---|---|---|
 | **3** | Boundary layer built | `02` output: reserves layer with unit_id, state, landscape_complex, area_km2 | 3–4 h |
 | **4** | Census extraction *(done — full series, not half)* | Full within-reserve census entered (`census_reserve_long.csv`); **Decisions 6 + 7** made | 3–4 h |
-| **5** | Census join + area overwrite | `03` output: `stats_reserve_census_7755.gpkg` (wide census joined to boundaries; `area_km2` overwritten; density) | 3–4 h |
+| **5** | Census join + area overwrite *(done)* | `03` output: `stats_reserve_census_7755.gpkg` (wide census joined to boundaries; `area_km2` overwritten from notified total per **Decision 8**; density) | 3–4 h |
 | **6** | Growth metrics | `03` output: `tbl_01_reserve_growth.csv` (change, %, AAGR, density) | 2–3 h |
 | **7** | Growth visuals + roll-up | `04` outputs: ranking figure, regional roll-up table, animated choropleth (**3 frames — 2014/2018/2022 — per Decision 6, not 5**) | 3–4 h |
 
@@ -371,6 +371,67 @@ overwritten where a census area exists), `density_2022`, `baseline_year`,
 `census_status`. Growth metrics (change/%/AAGR) are **not** computed yet — that is
 Week 6. Config drift reconciled.
 
+**Week 5 outcome (as run):** completed. `scripts/03_prepare_census.R` reads the
+long census, validates + pivots wide (53 reserves; 45/50/53 by round), left-joins
+onto the boundary layer (58 reserves; 53 measured + 5 flagged; 3 geometry-absent
+keep their census), overwrites `area_km2` from `tbl_05_area_source_map.csv`, and
+computes `density_2022` (52 values; NA for the 5 flagged + Sundarbans) and
+`baseline_year` (45 at 2014, 5 at 2018, 3 at 2022). **Decision 8** (area source =
+NTCA-notified core+buffer total; ISFR-2021 Ch.4 is cross-check only, not the
+area source) was made this week. **The area overwrite changed zero values** — the
+Week-3 placeholder already matched the notified totals to the cent, so the
+overwrite was provenance-only (flag + source). Config drift reconciled
+(task 5.9): `CENSUS_SERIES_YEARS`/`CENSUS_BASELINE_YEAR` added; `BASELINE_YEAR`/
+`CURRENT_YEAR` kept at 2006/2022 because `scripts/01` uses `BASELINE_YEAR` as the
+GBIF download bound — not the census baseline. QA tables tbl_06–tbl_09 written.
+Crosswalk `review` rows (task 5.8) all verified correct.
+
+---
+
+## Week 6 — task breakdown
+
+Entry state: `stats_reserve_census_7755.gpkg` written with `pop_2014/2018/2022`,
+`area_km2` (notified), `density_2022`, `baseline_year`, `census_status`. The
+growth-metric columns (`change_abs`, `change_pct`, `aagr`) exist in the
+data-dictionary schema but are **not yet populated** — Week 6 computes them.
+
+Week 6 extends `scripts/03` (or adds `scripts/04`, see 6.1) to compute per-reserve
+growth over each reserve's **own observed span** (baseline → 2022), per Decision 6
+(series 2014/2018/2022) and Decision 7 (`NA`, no imputation). No new data.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 6.1 | Decide where growth metrics live: extend `scripts/03` (append columns to the same layer) **or** add `scripts/04_growth_metrics.R` reading the stats layer. Recommend `04` — keeps `03` as "assemble the layer", `04` as "derive metrics", and matches the `tbl_01`/`fig` output naming | Location chosen; script header written | 10 min |
+| 6.2 | `change_abs` = `pop_2022 − pop_baseline`, where `pop_baseline` is the pop in each reserve's `baseline_year`. `NA` for reserves with only one round (2022-only entries) or `NA` `pop_2022` (Sundarbans, the 5 flagged) | `change_abs` populated; `NA` exactly where < 2 rounds or endpoint missing | 20–30 min |
+| 6.3 | `change_pct` = `change_abs / pop_baseline × 100`. Guard `pop_baseline == 0` (Mukundara baseline 2014 = 0): a 0→N change is undefined as a percent — store `NA` and flag, do not divide by zero | `change_pct` populated; `NA` for single-round and zero-baseline reserves; zero-baseline cases flagged | 20–30 min |
+| 6.4 | `aagr` = `(pop_2022 / pop_baseline)^(1 / (2022 − baseline_year)) − 1`, as a percent. Same zero-baseline and single-round guards (`NA`, not error/Inf) | `aagr` populated with the same `NA` pattern; no `Inf`/`NaN` | 20–30 min |
+| 6.5 | Decide the treatment of **real within-reserve zeros** in the endpoints as a numbered Decision (they break ratio-based metrics): baseline 0 (Mukundara 0→1→1) and 2022 = 0 (Kamlang, Dampa, Kawal, Satkosia, Sahyadri — declines to local extirpation). `change_abs` is always valid; `change_pct`/`aagr` are `NA` where baseline = 0. Record as **Decision 9** | Decision 9 written in `methodology.md`; guards match it | 15–20 min |
+| 6.6 | Write `outputs/tables/tbl_01_reserve_growth.csv` — per-reserve `unit_id, unit_name, state, landscape_complex, baseline_year, pop_<baseline>, pop_2022, change_abs, change_pct, aagr, density_2022, census_status`, sorted by a sensible growth metric | `tbl_01_reserve_growth.csv` written | 15–20 min |
+| 6.7 | Verify: no `Inf`/`NaN` anywhere; `NA` pattern matches Decision 7/9; national picture sane (most reserves growing; the handful of declines/zeros identified); spot-check 2–3 known reserves (e.g. Corbett, Ranthambore, a zero-2022 case) | Verification block passes; spot-checks match the source figures | 15 min |
+| 6.8 | Append `change_abs/change_pct/aagr` to `stats_reserve_census_7755.gpkg` (so the layer and `tbl_01` agree), update `data-dictionary.md` (mark the three columns as built, drop the "Week 6" tag) | Layer updated; dictionary matches as-built | 15 min |
+| 6.9 | Commit (`analysis:` for the metrics + layer/table; `docs:` for Decision 9 + dictionary) | Committed and pushed | 10 min |
+
+**Week 6 pitfalls:**
+- **Zero baseline breaks ratios.** Mukundara's 2014 = 0 makes `change_pct` and
+  `aagr` undefined (÷0). Store `NA` and flag — do not report an infinite growth
+  rate. `change_abs` (0→1 = +1) is still valid. This is what Decision 9 fixes.
+- **Per-reserve span, not a fixed 2014→2022.** AAGR uses each reserve's own
+  `baseline_year` → 2022 gap (8, 4, or 0 years). A reserve with only a 2022 row
+  has a zero-length span → no metric (`NA`), not a divide-by-zero.
+- **Sundarbans has no 2022 within-figure.** Its `pop_2022` is `NA`, so all three
+  metrics are `NA` even though it has 2014/2018 values. Correct per Decision 7.
+- **Single-round reserves.** The 2022-only entries (Navegaon-Nagzira, Ramgarh
+  Vishdhari, Srivilliputhur-Megamalai, Ranipur) get `NA` growth — one point is
+  not a trend.
+
+**Decision due this week:** **Decision 9** — treatment of real within-reserve
+zeros in growth metrics (task 6.5).
+
+**Exit state:** `tbl_01_reserve_growth.csv` written and the three growth columns
+populated on the stats layer; Decision 9 recorded; dictionary updated. The
+priority-1 growth **numbers** are complete — only the Week-7 visuals/roll-up
+remain to finish Stage 1.
+
 ---
 
 ## Stage 2 — Connectivity (Weeks 8–12) · priority 2
@@ -444,7 +505,7 @@ deliverable exists.
 | 2 | Boundary decision + gap downloads | ✅ Complete |
 | 3 | Reserve boundary layer | ✅ Complete |
 | 4 | Census time series extracted (all reserves) | ✅ Complete |
-| 5 | Census joined to boundaries + area overwrite | ⚪ Not started |
+| 5 | Census joined to boundaries + area overwrite | ✅ Complete |
 | 6 | Growth metrics table | ⚪ Not started |
 | 7 | Growth visuals + roll-up | ⚪ Not started |
 | 8–12 | Connectivity track | ⚪ Not started |

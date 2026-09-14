@@ -1,0 +1,59 @@
+"unit_id","unit_name","state","geometry_present","census_status","pop_2014","pop_2018","pop_2022"
+1,"Nagarjunsagar-Srisailam","Andhra Pradesh",TRUE,"measured",54,38,58
+2,"Namdapha","Arunachal Pradesh",TRUE,"measured",11,11,1
+3,"Pakke","Arunachal Pradesh",TRUE,"measured",7,3,6
+4,"Kamlang","Arunachal Pradesh",TRUE,"measured",NA,4,0
+5,"Manas","Assam",TRUE,"measured",11,31,58
+6,"Nameri","Assam",TRUE,"measured",5,3,3
+7,"Kaziranga","Assam",TRUE,"measured",103,104,104
+8,"Orang","Assam",TRUE,"measured",NA,21,16
+9,"Valmiki","Bihar",TRUE,"measured",22,32,54
+10,"Indravati","Chhattisgarh",TRUE,"measured",12,3,1
+11,"Udanti-Sitanadi","Chhattisgarh",TRUE,"measured",4,1,1
+12,"Achanakmar","Chhattisgarh",TRUE,"measured",11,5,5
+13,"Guru Ghasidas-Tamor Pingla","Chhattisgarh",TRUE,"not_estimated_post2022_notification",NA,NA,NA
+14,"Palamau","Jharkhand",TRUE,"measured",3,0,1
+15,"Bandipur","Karnataka",TRUE,"measured",120,126,150
+16,"Bhadra","Karnataka",TRUE,"measured",22,30,28
+17,"Kali","Karnataka",TRUE,"measured",5,4,17
+18,"Nagarhole","Karnataka",TRUE,"measured",101,127,141
+19,"Biligiri Ranganatha Temple","Karnataka",TRUE,"measured",68,52,37
+20,"Periyar","Kerala",TRUE,"measured",20,26,30
+21,"Parambikulam","Kerala",TRUE,"measured",19,26,31
+22,"Kanha","Madhya Pradesh",TRUE,"measured",80,88,105
+23,"Pench","Madhya Pradesh",TRUE,"measured",43,61,77
+24,"Bandhavgarh","Madhya Pradesh",TRUE,"measured",63,104,135
+25,"Panna","Madhya Pradesh",TRUE,"measured",17,25,55
+26,"Satpura","Madhya Pradesh",TRUE,"measured",26,40,50
+27,"Sanjay Dubri","Madhya Pradesh",TRUE,"measured",8,5,16
+28,"Veerangana Durgavati","Madhya Pradesh",TRUE,"not_estimated_post2022_notification",NA,NA,NA
+29,"Ratapani","Madhya Pradesh",TRUE,"not_estimated_post2022_notification",NA,NA,NA
+30,"Madhav","Madhya Pradesh",TRUE,"not_estimated_post2022_notification",NA,NA,NA
+31,"Melghat","Maharashtra",TRUE,"measured",25,46,57
+32,"Tadoba-Andhari","Maharashtra",TRUE,"measured",51,83,97
+33,"Pench (MH)","Maharashtra",TRUE,"measured",35,53,48
+34,"Sahyadri","Maharashtra",TRUE,"measured",7,3,0
+35,"Nawegaon-Nagzira","Maharashtra",TRUE,"measured",7,6,11
+36,"Bor","Maharashtra",TRUE,"measured",5,6,9
+37,"Dampa","Mizoram",TRUE,"measured",3,0,0
+38,"Similipal","Odisha",TRUE,"measured",17,8,16
+39,"Satkosia","Odisha",TRUE,"measured",3,1,0
+40,"Ranthambore","Rajasthan",TRUE,"measured",37,53,57
+41,"Sariska","Rajasthan",TRUE,"measured",9,11,19
+42,"Mukundara Hills","Rajasthan",TRUE,"measured",0,1,1
+43,"Ramgarh Vishdhari","Rajasthan",TRUE,"measured",NA,NA,1
+44,"Dholpur-Karauli","Rajasthan",FALSE,"not_estimated_post2022_notification",NA,NA,NA
+45,"Kalakad-Mundanthurai","Tamil Nadu",TRUE,"measured",10,7,5
+46,"Anamalai","Tamil Nadu",TRUE,"measured",13,20,16
+47,"Mudumalai","Tamil Nadu",TRUE,"measured",89,103,114
+48,"Sathyamangalam","Tamil Nadu",TRUE,"measured",72,83,85
+49,"Srivilliputhur-Megamalai","Tamil Nadu",TRUE,"measured",NA,NA,12
+50,"Kawal","Telangana",TRUE,"measured",NA,1,0
+51,"Amrabad","Telangana",FALSE,"measured",NA,7,12
+52,"Dudhwa","Uttar Pradesh",TRUE,"measured",58,82,135
+53,"Pilibhit","Uttar Pradesh",FALSE,"measured",25,57,63
+54,"Ranipur","Uttar Pradesh",TRUE,"measured",NA,NA,4
+55,"Corbett","Uttarakhand",TRUE,"measured",215,231,260
+56,"Rajaji","Uttarakhand",TRUE,"measured",NA,38,54
+57,"Sundarbans","West Bengal",TRUE,"measured",68,88,NA
+58,"Buxa","West Bengal",TRUE,"measured",2,0,1

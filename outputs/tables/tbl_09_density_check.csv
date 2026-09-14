@@ -1,0 +1,59 @@
+"unit_id","unit_name","census_status","pop_2022","area_km2","area_source","density_2022"
+55,"Corbett","measured",260,1288.31,"ntca_notification",20.18
+47,"Mudumalai","measured",114,688.59,"ntca_notification",16.56
+18,"Nagarhole","measured",141,1205.76,"ntca_notification",11.69
+15,"Bandipur","measured",150,1456.3,"ntca_notification",10.3
+7,"Kaziranga","measured",104,1173.58,"ntca_notification",8.86
+24,"Bandhavgarh","measured",135,1536.93,"ntca_notification",8.78
+53,"Pilibhit","measured",63,730.25,"ntca_notification",8.63
+23,"Pench","measured",77,1179.63,"ntca_notification",6.53
+33,"Pench (MH)","measured",48,741.22,"ntca_notification",6.48
+19,"Biligiri Ranganatha Temple","measured",37,574.82,"ntca_notification",6.44
+52,"Dudhwa","measured",135,2201.77,"ntca_notification",6.13
+48,"Sathyamangalam","measured",85,1408.4,"ntca_notification",6.04
+9,"Valmiki","measured",54,899.38,"ntca_notification",6
+32,"Tadoba-Andhari","measured",97,1727.59,"ntca_notification",5.61
+22,"Kanha","measured",105,2051.79,"ntca_notification",5.12
+56,"Rajaji","measured",54,1075.17,"ntca_notification",5.02
+21,"Parambikulam","measured",31,643.66,"ntca_notification",4.82
+40,"Ranthambore","measured",57,1411.29,"ntca_notification",4.04
+25,"Panna","measured",55,1598.1,"ntca_notification",3.44
+8,"Orang","measured",16,492.46,"ntca_notification",3.25
+20,"Periyar","measured",30,925,"ntca_notification",3.24
+16,"Bhadra","measured",28,1064.29,"ntca_notification",2.63
+26,"Satpura","measured",50,2133.31,"ntca_notification",2.34
+31,"Melghat","measured",57,2768.52,"ntca_notification",2.06
+5,"Manas","measured",58,2837.1,"ntca_notification",2.04
+1,"Nagarjunsagar-Srisailam","measured",58,3296.31,"ntca_notification",1.76
+41,"Sariska","measured",19,1213.34,"ntca_notification",1.57
+17,"Kali","measured",17,1097.51,"ntca_notification",1.55
+49,"Srivilliputhur-Megamalai","measured",12,1016.57,"ntca_notification",1.18
+36,"Bor","measured",9,816.27,"ntca_notification",1.1
+46,"Anamalai","measured",16,1479.87,"ntca_notification",1.08
+27,"Sanjay Dubri","measured",16,1674.5,"ntca_notification",0.96
+54,"Ranipur","measured",4,529.36,"ntca_notification",0.76
+6,"Nameri","measured",3,464,"ntca_notification",0.65
+35,"Nawegaon-Nagzira","measured",11,1894.94,"ntca_notification",0.58
+38,"Similipal","measured",16,2750,"ntca_notification",0.58
+12,"Achanakmar","measured",5,914.02,"ntca_notification",0.55
+3,"Pakke","measured",6,1198.45,"ntca_notification",0.5
+51,"Amrabad","measured",12,2611.39,"ntca_notification",0.46
+45,"Kalakad-Mundanthurai","measured",5,1601.54,"ntca_notification",0.31
+42,"Mukundara Hills","measured",1,759.99,"ntca_notification",0.13
+58,"Buxa","measured",1,757.9,"ntca_notification",0.13
+14,"Palamau","measured",1,1129.93,"ntca_notification",0.09
+43,"Ramgarh Vishdhari","measured",1,1501.9,"ntca_notification",0.07
+2,"Namdapha","measured",1,2052.82,"ntca_notification",0.05
+11,"Udanti-Sitanadi","measured",1,1842.54,"ntca_notification",0.05
+10,"Indravati","measured",1,2799.07,"ntca_notification",0.04
+4,"Kamlang","measured",0,783,"ntca_notification",0
+34,"Sahyadri","measured",0,1165.57,"ntca_notification",0
+37,"Dampa","measured",0,988,"ntca_notification",0
+39,"Satkosia","measured",0,963.87,"ntca_notification",0
+50,"Kawal","measured",0,2015.44,"ntca_notification",0
+13,"Guru Ghasidas-Tamor Pingla","not_estimated_post2022_notification",NA,2829.38,"ntca_notification",NA
+28,"Veerangana Durgavati","not_estimated_post2022_notification",NA,2339.12,"ntca_notification",NA
+29,"Ratapani","not_estimated_post2022_notification",NA,1271.47,"ntca_notification",NA
+30,"Madhav","not_estimated_post2022_notification",NA,1751,"ntca_notification",NA
+44,"Dholpur-Karauli","not_estimated_post2022_notification",NA,599.64,"ntca_notification",NA
+57,"Sundarbans","measured",NA,2584.89,"ntca_notification",NA

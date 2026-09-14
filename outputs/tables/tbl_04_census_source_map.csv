@@ -1,0 +1,80 @@
+# tbl_04_census_source_map.csv  --  Task 4.1 output
+"# Where each NTCA round's reserve-level tiger population figures live, plus the exact figure type."
+# Built 2026-09-12 from the five Tiger_Status_*.pdf reports. 'pdf_pages' are physical PDF page numbers.
+# Values are NOT extracted here (that is task 4.2/4.3); this file only maps the source location + type.
+
+SECTION_A_round_locators
+round,location,form,pdf_pages,reserve_coverage,spatial_unit,figure_type,uncertainty_form,estimation_method
+2006,"Landscape chapters (Ch.2-6), prose text",prose,"e.g. 23,33,50,52,54; state summary Table ES.1 p.144",partial (~18 reserves carry a reserve-anchored figure),reserve + surrounding occupied forest ('reserve and its surrounds'); several figures are landscape/source-population totals,midpoint,'(low-high)' or '+/- 1 se range low-high'; frequently no interval,double sampling (NOT SECR)
+2010,"State/landscape chapters (Sec.2), prose text",prose,"e.g. 30,31,36,48,49,52,56,66,67,74,81; state summary Table ES.1 (front-matter)",partial (~26 reserves carry a reserve-anchored figure),reserve-anchored occupied area (occupancy km2 typically larger than the reserve); several figures are landscape totals,midpoint,'(low-high)' or 'low to high'; sometimes no interval,double sampling (NOT SECR); reserve-level SECR density given for a handful of reserves only
+2014,Table 2.2 'Population estimates of tigers in tiger reserves in the year 2014',TABLE,22-23,44 reserves (near-complete),within reserve (SECR),midpoint,'Tiger Population' + 'Lower SE Limit' + 'Upper SE Limit'; scat-DNA reserves (*) carry no SE,"SECR (secr package, R)"
+2018,Table 3.4 'Population estimates of tigers in tiger reserves for the year 2018-19',TABLE,42-43,50 reserves,"within reserve (SECR) -- take 'Tigers WITHIN the Tiger Reserve' Number, NOT the 'utilising' column",point estimate,"'Number' + 'SE' (within); '-' where no camera estimate; #=MaxEnt, *=scat DNA",SECR
+2022,Table I.3.3 'A comparative account of the estimated tiger numbers in Tiger Reserves and tigers utilising Tiger Reserves in 2022',TABLE (text layer garbled -- READ VIA PAGE RASTER),28-29,~56 reserves,"within reserve (SECR) -- take 'Tiger Number Within Tiger Reserves +/- SE', NOT the 'utilising' column",point estimate +/- SE,'value +/- SE'; scat-genetic minimum flagged (*); '-' for Sundarban within (biosphere-level only),SECR
+
+# KEY POINTS
+# 1. 2014 has a SINGLE 'Tiger Population' column (no within/utilising split). 2018 & 2022 split them;
+#    for comparability take the WITHIN-reserve column in 2018 and 2022.
+# 2. 2006/2010 are a DIFFERENT spatial unit (reserve + surrounds) and are PARTIAL and PROSE-ONLY.
+#    A raw 2006/2010 -> 2014/2018/2022 series is NOT like-for-like. See docs/methodology.md Decision 6.
+# 3. 2022 values must be transcribed from a page raster; the PDF text layer for Table I.3.3 is unreliable.
+
+SECTION_B_per_reserve_availability
+unit_id,unit_name,state,y2006_source,y2006_pdf_pages,y2010_source,y2010_pdf_pages,y2014_source,y2018_source,y2022_source
+1,Nagarjunsagar-Srisailam,Andhra Pradesh,landscape-only / absent,,prose (candidate; verify),6; 57,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+2,Namdapha,Arunachal Pradesh,landscape-only / absent,,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+3,Pakke,Arunachal Pradesh,prose (candidate; verify),62,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+4,Kamlang,Arunachal Pradesh,landscape-only / absent,,landscape-only / absent,,not in table,Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+5,Manas,Assam,prose (candidate; verify),62,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+6,Nameri,Assam,prose (candidate; verify),62,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+7,Kaziranga,Assam,landscape-only / absent,,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+8,Orang,Assam,landscape-only / absent,,landscape-only / absent,,not in table,Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+9,Valmiki,Bihar,prose (candidate; verify),23,prose (candidate; verify),6; 31,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+10,Indravati,Chhattisgarh,landscape-only / absent,,prose (candidate; verify),6,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+11,Udanti-Sitanadi,Chhattisgarh,landscape-only / absent,,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+12,Achanakmar,Chhattisgarh,landscape-only / absent,,prose (candidate; verify),6,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+13,Guru Ghasidas-Tamor Pingla,Chhattisgarh,landscape-only / absent,,landscape-only / absent,,not in table,not in table,not in table
+14,Palamau,Jharkhand,landscape-only / absent,,prose (candidate; verify),37; 56,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+15,Bandipur,Karnataka,prose (candidate; verify),54,prose (candidate; verify),66,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+16,Bhadra,Karnataka,landscape-only / absent,,prose (candidate; verify),67,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+17,Kali,Karnataka,landscape-only / absent,,prose (candidate; verify),74,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+18,Nagarhole,Karnataka,prose (candidate; verify),50; 52; 54,prose (candidate; verify),66,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+19,Biligiri Ranganatha Temple,Karnataka,landscape-only / absent,,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+20,Periyar,Kerala,prose (candidate; verify),54,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+21,Parambikulam,Kerala,landscape-only / absent,,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+22,Kanha,Madhya Pradesh,prose (candidate; verify),33; 34,prose (candidate; verify),6; 36; 49; 123,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+23,Pench,Madhya Pradesh,prose (candidate; verify),33,prose (candidate; verify),6; 36,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+24,Bandhavgarh,Madhya Pradesh,landscape-only / absent,,prose (candidate; verify),36; 49; 123,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+25,Panna,Madhya Pradesh,prose (candidate; verify),33,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+26,Satpura,Madhya Pradesh,landscape-only / absent,,prose (candidate; verify),6; 36; 49,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),not in table
+27,Sanjay Dubri,Madhya Pradesh,landscape-only / absent,,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+28,Veerangana Durgavati,Madhya Pradesh,landscape-only / absent,,landscape-only / absent,,not in table,not in table,not in table
+29,Ratapani,Madhya Pradesh,landscape-only / absent,,landscape-only / absent,,not in table,not in table,not in table
+30,Madhav,Madhya Pradesh,landscape-only / absent,,landscape-only / absent,,not in table,not in table,not in table
+31,Melghat,Maharashtra,landscape-only / absent,,prose (candidate; verify),6; 52,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+32,Tadoba-Andhari,Maharashtra,landscape-only / absent,,prose (candidate; verify),123,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+33,Pench (MH),Maharashtra,prose (candidate; verify),33; 41,prose (candidate; verify),6; 36; 52,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+34,Sahyadri,Maharashtra,landscape-only / absent,,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+35,Nawegaon-Nagzira,Maharashtra,landscape-only / absent,,landscape-only / absent,,not in table,not in table,Table I.3.3 (pp.28-29)
+36,Bor,Maharashtra,prose (candidate; verify),4; 62,prose (candidate; verify),36,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+37,Dampa,Mizoram,landscape-only / absent,,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+38,Similipal,Odisha,prose (candidate; verify),4,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+39,Satkosia,Odisha,landscape-only / absent,,prose (candidate; verify),6,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+40,Ranthambore,Rajasthan,landscape-only / absent,,prose (candidate; verify),48,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+41,Sariska,Rajasthan,landscape-only / absent,,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+42,Mukundara Hills,Rajasthan,prose (candidate; verify),4,prose (candidate; verify),6; 20,not in table,Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+43,Ramgarh Vishdhari,Rajasthan,landscape-only / absent,,landscape-only / absent,,not in table,not in table,Table I.3.3 (pp.28-29)
+44,Dholpur-Karauli,Rajasthan,landscape-only / absent,,landscape-only / absent,,not in table,not in table,not in table
+45,Kalakad-Mundanthurai,Tamil Nadu,prose (candidate; verify),54,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+46,Anamalai,Tamil Nadu,landscape-only / absent,,prose (candidate; verify),17,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+47,Mudumalai,Tamil Nadu,prose (candidate; verify),50; 52,prose (candidate; verify),66; 81,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+48,Sathyamangalam,Tamil Nadu,landscape-only / absent,,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+49,Srivilliputhur-Megamalai,Tamil Nadu,landscape-only / absent,,landscape-only / absent,,not in table,not in table,Table I.3.3 (pp.28-29)
+50,Kawal,Telangana,landscape-only / absent,,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+51,Amrabad,Telangana,landscape-only / absent,,landscape-only / absent,,not in table,Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+52,Dudhwa,Uttar Pradesh,landscape-only / absent,,prose (candidate; verify),19; 29,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+53,Pilibhit,Uttar Pradesh,landscape-only / absent,,prose (candidate; verify),19; 30,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+54,Ranipur,Uttar Pradesh,landscape-only / absent,,landscape-only / absent,,not in table,not in table,Table I.3.3 (pp.28-29)
+55,Corbett,Uttarakhand,landscape-only / absent,,prose (candidate; verify),6; 12; 19; 20,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+56,Rajaji,Uttarakhand,prose (candidate; verify),4,prose (candidate; verify),6; 26,not in table,Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)
+57,Sundarbans,West Bengal,landscape-only / absent,,landscape-only / absent,,not in table,not in table,Table I.3.3 (pp.28-29)
+58,Buxa,West Bengal,prose (candidate; verify),4,landscape-only / absent,,Table 2.2 (pp.22-23),Table 3.4 (pp.42-43),Table I.3.3 (pp.28-29)

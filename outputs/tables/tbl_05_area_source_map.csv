@@ -1,0 +1,69 @@
+# tbl_05_area_source_map.csv  --  Reserve area source map (Task 5.1, Decision 8; A1-revised)
+# Per-reserve NTCA-NOTIFIED core/buffer/total area (km2), all 58 tiger reserves.
+# area_source = ntca_notification for ALL reserves (consolidated NTCA/state notifications).
+# ISFR-2021 Ch.4 is a CROSS-CHECK ONLY, not the area source: it reports a WII digitized-boundary
+#   area (Table 4.5), a different quantity from the legal notified total. Median |diff| 5.2%; 15
+#   reserves diverge >15% (e.g. Bor -84%, Orang -84%, Palamau +75%). Density uses the NOTIFIED total.
+# area_total_km2 overwrites boundary_reserves area_km2 in Week-5 scripts/03 (Decision 4/task 5.4).
+# Cross-check: sum(notified total 58)=84,507 vs NTCA stated 84,487; sum(ISFR 52)=74,710 vs report 74,710.53.
+# Two rows (Madhav, Sahyadri) have source core+buffer != total; total used as-is.
+#
+unit_id,unit_name,area_core_km2,area_buffer_km2,area_total_km2,area_source,source_ref,area_confidence,isfr2021_digitized_km2,isfr_vs_notified_pct,notes
+1,Nagarjunsagar-Srisailam,2595.72,700.59,3296.31,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,3843.88,+16.6,ISFR digitized area differs +17% (WII polygon vs notified; density uses notified)
+2,Namdapha,1807.82,245.0,2052.82,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,2085.17,+1.6,
+3,Pakke,683.45,515.0,1198.45,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,1507.71,+25.8,ISFR digitized area differs +26% (WII polygon vs notified; density uses notified)
+4,Kamlang,671.0,112.0,783.0,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,792.03,+1.2,
+5,Manas,526.22,2310.88,2837.1,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,3030.24,+6.8,
+6,Nameri,320.0,144.0,464.0,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,371.86,-19.9,ISFR digitized area differs -20% (WII polygon vs notified; density uses notified)
+7,Kaziranga,625.58,548.0,1173.58,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1180.35,+0.6,
+8,Orang,79.28,413.18,492.46,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,80.21,-83.7,ISFR digitized area differs -84% (WII polygon vs notified; density uses notified)
+9,Valmiki,598.45,300.93,899.38,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,928.8,+3.3,
+10,Indravati,1258.37,1540.7,2799.07,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,2922.39,+4.4,
+11,Udanti-Sitanadi,851.09,991.45,1842.54,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1794.91,-2.6,
+12,Achanakmar,626.19,287.82,914.02,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,936.34,+2.4,
+13,Guru Ghasidas-Tamor Pingla,2049.23,780.15,2829.38,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,,,post-2021 reserve; not in ISFR-2021 Ch.4 (52-reserve set); no ISFR cross-check
+14,Palamau,414.08,715.85,1129.93,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,1980.64,+75.3,ISFR digitized area differs +75% (WII polygon vs notified; density uses notified)
+15,Bandipur,872.24,584.06,1456.3,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,1784.47,+22.5,ISFR digitized area differs +22% (WII polygon vs notified; density uses notified)
+16,Bhadra,492.46,571.83,1064.29,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1071.24,+0.7,
+17,Kali,814.88,282.63,1097.51,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,1411.75,+28.6,ISFR digitized area differs +29% (WII polygon vs notified; density uses notified)
+18,Nagarhole,643.35,562.41,1205.76,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1152.74,-4.4,
+19,Biligiri Ranganatha Temple,359.1,215.72,574.82,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,654.96,+13.9,
+20,Periyar,881.0,44.0,925.0,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,935.3,+1.1,
+21,Parambikulam,390.89,252.77,643.66,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,652.21,+1.3,
+22,Kanha,917.43,1134.36,2051.79,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,2070.63,+0.9,
+23,Pench,411.33,768.3,1179.63,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1168.66,-0.9,
+24,Bandhavgarh,716.9,820.03,1536.93,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1684.53,+9.6,
+25,Panna,576.13,1021.97,1598.1,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1783.48,+11.6,
+26,Satpura,1339.26,794.04,2133.31,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,2033.79,-4.7,
+27,Sanjay Dubri,812.57,861.93,1674.5,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1490.33,-11.0,
+28,Veerangana Durgavati,1414.0,925.12,2339.12,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,,,post-2021 reserve; not in ISFR-2021 Ch.4 (52-reserve set); no ISFR cross-check
+29,Ratapani,763.81,507.65,1271.47,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,,,post-2021 reserve; not in ISFR-2021 Ch.4 (52-reserve set); no ISFR cross-check
+30,Madhav,355.0,1276.0,1751.0,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,,,core+buffer=1631.0 != total 1751.0 (source inconsistency; post-2021 reserve; not in ISFR-2021 Ch.4 (52-reserve set); no ISFR cross-check
+31,Melghat,1500.49,1268.03,2768.52,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,2028.47,-26.7,ISFR digitized area differs -27% (WII polygon vs notified; density uses notified)
+32,Tadoba-Andhari,625.82,1101.77,1727.59,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1647.22,-4.7,
+33,Pench (MH),257.26,483.96,741.22,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,738.28,-0.4,
+34,Sahyadri,612.0,565.45,1165.57,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1169.6,+0.3,core+buffer=1177.45 != total 1165.57 (source inconsistency
+35,Nawegaon-Nagzira,653.67,1241.27,1894.94,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1781.22,-6.0,
+36,Bor,138.12,678.15,816.27,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,131.77,-83.9,ISFR digitized area differs -84% (WII polygon vs notified; density uses notified)
+37,Dampa,500.0,488.0,988.0,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,821.89,-16.8,ISFR digitized area differs -17% (WII polygon vs notified; density uses notified)
+38,Similipal,1194.75,1555.25,2750.0,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,2721.62,-1.0,
+39,Satkosia,523.61,440.26,963.87,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,981.97,+1.9,
+40,Ranthambore,1113.36,297.92,1411.29,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,1765.57,+25.1,ISFR digitized area differs +25% (WII polygon vs notified; density uses notified)
+41,Sariska,881.11,332.23,1213.34,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1145.8,-5.6,
+42,Mukundara Hills,417.17,342.82,759.99,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,758.4,-0.2,
+43,Ramgarh Vishdhari,481.91,1019.99,1501.9,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,294.67,-80.4,ISFR digitized area differs -80% (WII polygon vs notified; density uses notified)
+44,Dholpur-Karauli,599.64,0.0,599.64,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,,,post-2021 reserve; not in ISFR-2021 Ch.4 (52-reserve set); no ISFR cross-check
+45,Kalakad-Mundanthurai,895.0,706.54,1601.54,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1564.14,-2.3,
+46,Anamalai,958.59,521.28,1479.87,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,1767.76,+19.5,ISFR digitized area differs +20% (WII polygon vs notified; density uses notified)
+47,Mudumalai,321.0,367.59,688.59,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,750.81,+9.0,
+48,Sathyamangalam,793.49,614.91,1408.4,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1581.77,+12.3,
+49,Srivilliputhur-Megamalai,641.86,374.7,1016.57,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,501.01,-50.7,ISFR digitized area differs -51% (WII polygon vs notified; density uses notified)
+50,Kawal,892.23,1123.21,2015.44,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,2259.79,+12.1,
+51,Amrabad,2166.37,445.02,2611.39,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,2684.23,+2.8,
+52,Dudhwa,1093.79,1107.98,2201.77,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,1524.33,-30.8,ISFR digitized area differs -31% (WII polygon vs notified; density uses notified)
+53,Pilibhit,602.79,127.45,730.25,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,758.64,+3.9,
+54,Ranipur,230.31,299.05,529.36,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",medium,,,post-2021 reserve; not in ISFR-2021 Ch.4 (52-reserve set); no ISFR cross-check
+55,Corbett,821.99,466.32,1288.31,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1462.66,+13.5,
+56,Rajaji,819.54,255.63,1075.17,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,1102.41,+2.5,
+57,Sundarbans,1699.62,885.27,2584.89,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,2634.74,+1.9,
+58,Buxa,390.58,367.32,757.9,ntca_notification,"NTCA/state TR notification, consolidated via Wikipedia 'Tiger reserves of India' (cites NTCA+FSI)",high,783.02,+3.3,

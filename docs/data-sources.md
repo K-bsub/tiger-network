@@ -239,9 +239,32 @@ rejections are not re-litigated.
 
 ### ISFR 2021 Chapter 4 — forest and corridors
 - **Role:** Per-reserve forest cover (VDF/MDF/OF) and documented corridors.
+  **Also used (Week 5) as a cross-check for reserve area** — see the note below.
 - **Source:** Forest Survey of India (https://fsi.nic.in). **Manual.**
 - **Licence:** Government of India.
 - **Acquired:** ISFR 2021 report fetched to `data/raw/forest/` (manual). This is
   the 2021 edition — the Phase-1 survivor was ISFR 2017 (wrong edition), so a
   fresh 2021 pull was needed. Per-reserve forest tables are extracted from the
   PDF in a later step (Stage 1/2), not at download.
+- **Area cross-check (Week 5, NOT the area source):** ISFR Table 4.5 carries an
+  "Area as per digitized Tiger Reserve Boundary" column (source: WII Dehradun) —
+  a **GIS polygon area** for 52 reserves, total 74,710.53 km². This is **not** the
+  legal notified core+buffer total and is **not** used for `area_km2` (Decision 8).
+  It served only as a cross-check against the notified areas
+  (`outputs/tables/tbl_05b_isfr_area_crosscheck.csv`): median difference 5.2%,
+  15 reserves >15% (WII polygon vs notified extent genuinely differ).
+
+### Reserve area — NTCA-notified core+buffer total (PRIMARY for area, Decision 8)
+- **Role:** `area_km2` and `density_2022` in `stats_reserve_census_7755.gpkg`.
+- **Source:** NTCA / state tiger-reserve notifications, consolidated in the
+  Wikipedia "Tiger reserves of India" table (which cites the NTCA notifications
+  and FSI ISFR 2021). All 58 reserves.
+- **Why not the census reports or ISFR:** neither NTCA census report (2018/2022)
+  tabulates reserve area — their reserve tables are population only. ISFR 2021
+  carries a WII *digitized-boundary* GIS area, not the notified total (see above).
+  So the notified core+buffer figures are the only all-58 legal-extent source.
+  See **Decision 8** in `docs/methodology.md`.
+- **File:** `outputs/tables/tbl_05_area_source_map.csv` (per-reserve core / buffer
+  / total + `area_source = ntca_notification` + ISFR cross-check + confidence).
+- **Check:** sum of the 58 notified totals = 84,507 km² vs NTCA's stated
+  national total 84,487 km² (0.02% apart).
