@@ -2,10 +2,13 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** Week 6 complete — per-reserve growth metrics derived. `scripts/04_growth_metrics.R`
-appended `change_abs`, `change_pct`, `aagr`, and `growth_zero_flag` (Decision 9) to
-`stats_reserve_census_7755.gpkg`, and wrote `tbl_01_reserve_growth.csv` (58 reserves).
-Week 7 is the growth visuals and regional roll-up (`scripts/05`).
+**Status:** Week 7 complete — **Stage 1 (Growth) done.** `scripts/05_growth_analysis.R`
+built the regional roll-up (`tbl_02_regional_rollup.csv`) and the two growth
+figures (`fig_01_growth_ranking.png`, `fig_02_growth_animation.gif`), all reading
+`stats_reserve_census_7755.gpkg` only. No new numbered Decision (the roll-up `NA`
+rule is an inline analytical choice — see the Week-7 change-log entry). The 7.6
+verification block passes all 13 checks. Week 8 starts Stage 2 (Connectivity):
+`scripts/06_build_covariate_stack.R` → `cov_stack_1km_7755.tif`.
 
 This document is the processing log and the decision record. Every significant
 choice becomes a **numbered Decision** with a date and a justification, recorded
@@ -440,6 +443,61 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-09-20 — Week 7 complete: regional roll-up + growth figures (Stage 1 done)
+
+`scripts/05_growth_analysis.R` turned the Week-6 per-reserve metrics into the
+Stage-1 deliverables. It reads `stats_reserve_census_7755.gpkg` only and writes
+nothing back to it. No new numbered Decision was needed; the one analytical choice
+(the regional roll-up rule) is recorded here and inline in the script, kept
+un-numbered because it is uncontested — promote it to a Decision only if that
+changes.
+
+**Regional roll-up rule (inline analytical choice, task 7.2).** Rolled the
+per-reserve layer up to two units — landscape complex and state — into one long
+`tbl_02_regional_rollup.csv` (`unit_level` column; 23 rows = 5 landscape + 18
+state). Rule:
+- **Absolute fields** (`pop_2014/2018/2022`, `change_abs`) are summed over
+  **non-`NA` reserves only**, each with its own **coverage count**
+  (`n_pop_<year>`, `n_change_abs`), because coverage differs by field. A region
+  with no non-`NA` contributor for a field gets `NA`, not 0.
+- **Ratio fields** (`change_pct`, `aagr`) are **recomputed on the summed pops**,
+  never averaged from per-reserve percentages (which would over-weight small
+  reserves — a 0→1 reserve is not equal weight to a 200→260 reserve). Numerator
+  and denominator use the **same contributor set**: reserves with a valid
+  two-round span that are not `growth_zero_flag`.
+- **Regional AAGR** needs one span (reserve spans mix 8 yr from a 2014 baseline
+  and 4 yr from 2018), so it is annualised over a **`pop_baseline`-weighted mean
+  span** (`span_region`). `change_pct` is the primary regional ratio; `aagr` is
+  secondary and carries the mixed-span caveat.
+- Added **`n_measured`** per region (`census_status == "measured"`): reserves that
+  have census data at all, distinct from per-round coverage.
+
+**Reconciliation (task 7.6, verified).** The landscape total, the state total,
+and the per-reserve `na.rm` sum agree for every pop round and for `change_abs`:
+pop_2014 = 1586, pop_2018 = 1958, pop_2022 = 2257, change_abs = +651;
+n_measured = 53. Landscape picture: Central India +282 (+59.7%), Shivalik-Gangetic
++239 (+58.9%), Western Ghats +108 (+19.8%), North-East Hills +22 (+13.2%),
+Sundarbans `NA`.
+
+**Figures — how the `NA`/zero/absent cases are shown (Decisions 7/9 in the
+visuals).**
+- **fig_01** (ranking): reserves ranked by `change_pct` (default), faceted by
+  landscape, filled by growth sign. Reserves with a `NA` ratio are excluded from
+  the bars **and** counted per facet ("N not ranked") — shown separately, not
+  dropped silently. The `growth_zero_flag` reserve (Mukundara) has a `NA` ratio,
+  so it is not on the bars and cannot read as a decline (its `change_abs` is +1).
+- **fig_02** (choropleth, 3 frames 2014/2018/2022 — Decision 6): per-round tiger
+  count, fixed bins so a colour means the same count in every frame. `NA` pop →
+  grey **"No estimate"** (never 0); a real within-reserve 0 → near-white
+  **"0 (real)"** on the ramp (Decision 9); the 3 geometry-absent reserves
+  (Amrabad, Pilibhit, Dholpur-Karauli) are named off-map and never drawn.
+  `transition_manual` holds each round as a discrete frame so the polygons are
+  fixed (an earlier `transition_states` build tweened the geometry — wrong for a
+  fixed-geometry map).
+
+**Tooling.** Added `gifski` to `renv` (the `fig_02` GIF renderer; `gganimate` was
+already present). No change to any data layer.
 
 ### 2026-09-13 — Week 5 complete: census joined, area overwritten, density built
 

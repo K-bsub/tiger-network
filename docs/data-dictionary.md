@@ -175,6 +175,60 @@ narrative context. Stored under `data/raw/ntca/`.
 | `entered_by`, `entered_date` | character | Provenance of the entry |
 | `notes` | character | Attribution reasoning / caveats |
 
+## tbl_02_regional_rollup.csv  *(Week 7 — built)*
+
+Written by `scripts/05_growth_analysis.R` (STEP 4). The per-reserve growth layer
+rolled up to **two units** — landscape complex and state — stacked into one long
+table with a `unit_level` column. 23 rows as built: 5 landscape complexes + 18
+states. Roll-up rule (recorded inline in `scripts/05` STEP 2): absolute fields
+are summed over non-`NA` reserves only, with a **coverage count per field**; the
+ratio fields are **recomputed on the summed pops**, never averaged from
+per-reserve percentages. The contributor set for the ratio is the reserves with a
+valid two-round span that are not `growth_zero_flag` (same set in numerator and
+denominator). Regional `aagr` is annualised over a `pop_baseline`-weighted mean
+span; `change_pct` is the primary regional ratio.
+
+Reconciliation (7.6, verified): the landscape total, the state total, and the
+per-reserve `na.rm` sum agree for every pop round and for `change_abs`
+(pop_2014 1586, pop_2018 1958, pop_2022 2257, change_abs +651; n_measured 53).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `unit_level` | character | `landscape_complex` or `state` — which roll-up this row belongs to |
+| `region` | character | The landscape complex (one of `LANDSCAPE_COMPLEXES`) or state name |
+| `n_reserves` | integer | All reserves assigned to the region (the denominator) |
+| `n_measured` | integer | Reserves with `census_status == "measured"` (have census data at all; the 5 mapped-but-not-measured are excluded) |
+| `pop_2014`, `pop_2018`, `pop_2022` | numeric | Sum of within-reserve `pop_<year>` over reserves with a non-`NA` figure that round. `NA` if no reserve in the region has a figure that round |
+| `n_pop_2014`, `n_pop_2018`, `n_pop_2022` | integer | Coverage count per round: reserves contributing to each `pop_<year>` sum |
+| `change_abs` | numeric | Sum of per-reserve `change_abs` over reserves with a valid span. Grouping-invariant: the landscape total, state total, and per-reserve total all equal +651 |
+| `n_change_abs` | integer | Reserves contributing to `change_abs` (valid two-round span) |
+| `change_pct` | numeric | Regional % change **on the summed pops**: `(Σpop_2022 − Σpop_baseline) / Σpop_baseline × 100` over the ratio contributor set. `NA` where the region has no contributor. Never an average of per-reserve % |
+| `aagr` | numeric | Regional average annual growth: `(Σpop_2022 / Σpop_baseline)^(1 / span_region) − 1`, as a percent. Secondary to `change_pct` (carries the mixed-span caveat) |
+| `span_region` | numeric | `pop_baseline`-weighted mean span (years) over the ratio contributors — the single span the regional `aagr` is annualised over. `NA` where no contributor |
+| `n_ratio` | integer | Reserves in the ratio recompute (valid two-round span, not `growth_zero_flag`). Ordering per region: `n_reserves ≥ n_measured ≥ n_pop_2022 ≥ n_ratio` |
+
+## Output figures — fig_01, fig_02  *(Week 7 — built)*
+
+Not data layers; recorded here so the growth-track outputs are documented in one
+place. Both from `scripts/05_growth_analysis.R`; both carry the effort/detection
+caveat in the caption (proposal success criterion).
+
+- **`outputs/figures/fig_01_growth_ranking.png`** — reserves ranked by
+  `change_pct` (default; `RANK_METRIC` switches to `change_abs`/`aagr`), faceted
+  by landscape complex, bars filled by growth sign (site palette). Reserves with
+  a `NA` ratio (single-round, missing endpoint, or `growth_zero_flag`) are
+  excluded from the bars **and** counted in each facet strip ("N not ranked").
+  The Sundarbans facet (0 ranked reserves) is dropped from the plot and reported
+  in the console.
+- **`outputs/figures/fig_02_growth_animation.gif`** — 3-frame choropleth
+  (2014/2018/2022, Decision 6). Each reserve is filled by that round's within-
+  reserve tiger count, binned with fixed breaks (`POP_BREAKS`) so a colour means
+  the same count in every frame. `transition_manual` holds each round as a
+  discrete frame (fixed geometry). Three classes stay distinct: a `NA`-pop cell
+  is grey **"No estimate"** (never 0); a real within-reserve 0 is a near-white
+  **"0 (real)"** class on the ramp (Decision 9); the 3 geometry-absent reserves
+  (Amrabad, Pilibhit, Dholpur-Karauli) are named off-map and never drawn.
+
 ## occ_tiger_gbif_clean_7755.gpkg  *(Week 13)*
 
 | Field | Type | Meaning |

@@ -47,54 +47,69 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
 
 ---
 
-## Current state  ·  updated after **Week 6** (per-reserve growth metrics derived)
+## Current state  ·  updated after **Week 7** (growth visuals + roll-up — Stage 1 done)
 
-- **Done this week:** `scripts/04_growth_metrics.R` (tasks 6.1-6.8) derived the
-  per-reserve growth metrics and wrote **`outputs/tables/tbl_01_reserve_growth.csv`**
-  (58 reserves) + appended four columns to
-  **`data/processed/stats_reserve_census_7755.gpkg`**. Made **Decision 9**
-  (real within-reserve zeros). Renumbered the visuals stub `04_growth_analysis.R`
-  -> `05_growth_analysis.R`. Docs updated: `methodology.md` (D9 + status),
-  `data-dictionary.md` (growth columns as-built + `growth_zero_flag`),
-  `project-plan.md` (Week 6 ✅ + Week 7 tasks), `README.md`, this handoff.
-- **Script location (task 6.1):** metrics live in a NEW `scripts/04_growth_metrics.R`
-  (derive), leaving `scripts/03` as assemble-only. The old `04_growth_analysis.R`
-  (visuals) is now `05_growth_analysis.R` (Week 7). Each filename matches its week.
-- **The stats layer now also holds:** `change_abs, change_pct, aagr,
-  growth_zero_flag` (appended after `poly_census_ratio`). `pop_baseline` is NOT on
-  the layer - it is a `tbl_01` convenience, derivable from `baseline_year` + `pop_*`.
-- **Metrics, as built:** `change_abs` non-`NA` 49; `change_pct`/`aagr` non-`NA` 48;
-  `growth_zero_flag` TRUE 1 (Mukundara). National split: **32 growing, 17 declining,
-  0 flat, 9 `change_abs` `NA`**. Fastest growth Manas (+23.1%/yr, 11->58); Corbett
-  215->260 (+2.4%/yr); Ranthambore 37->57 (+5.6%/yr). Five extirpations at
-  -100%/yr: Kamlang, Sahyadri, Dampa, Satkosia, Kawal.
-- **Decision 9 - real within-reserve zeros (NEW):** `change_abs` always valid
-  (a subtraction is defined at 0). **Zero baseline** (Mukundara 0->1->1):
-  `change_pct`/`aagr` = `NA`, `growth_zero_flag = TRUE` (ratio undefined).
-  **Zero 2022 endpoint** (real decline, base > 0): `change_pct = -100`,
-  `aagr = -100%/yr`, computed and kept, NOT flagged. Never `Inf`/`NaN`.
-- **NA set for the ratio metrics (10):** 5 flagged + Sundarbans (`pop_2022` `NA`) +
-  Mukundara (zero baseline, flagged) + 3 single-round 2022-only (Ramgarh Vishdhari,
-  Srivilliputhur-Megamalai, Ranipur). **Note:** only **3** single-round reserves,
-  not the 4 the old planning note listed - Navegaon-Nagzira has a 2014/2018 figure
-  and is NOT single-round. The data-driven NA set is authoritative.
-- **Sort / schema of `tbl_01`:** columns `unit_id, unit_name, state,
-  landscape_complex, baseline_year, pop_baseline, pop_2022, change_abs, change_pct,
-  aagr, growth_zero_flag, density_2022, census_status`; sorted by `change_pct` desc,
-  `NA`s last; all 58 reserves kept.
-- **Next: Week 7** - growth visuals + regional roll-up. Fill in
-  `scripts/05_growth_analysis.R` (reads the stats layer only): `fig_01` ranking,
-  `fig_02` animated choropleth (**3 frames, 2014/2018/2022 - Decision 6**),
-  `tbl_02_regional_rollup.csv`. No new Decision required. See `project-plan.md`
-  -> Week 7 breakdown. Key trap: `NA`/geometry-absent reserves must render as a
-  distinct "no estimate" class, never as 0.
+- **Done this week:** `scripts/05_growth_analysis.R` (tasks 7.1-7.6) built the
+  regional roll-up and the two growth figures, all reading
+  `stats_reserve_census_7755.gpkg` only (no new data, no new Decision). Wrote
+  **`outputs/tables/tbl_02_regional_rollup.csv`** (23 rows),
+  **`outputs/figures/fig_01_growth_ranking.png`**, and
+  **`outputs/figures/fig_02_growth_animation.gif`**. The 7.6 verification block
+  (STEP 7) passes all 13 checks. **Stage 1 (Growth) is complete and publishable.**
+  Docs updated: `data-dictionary.md` (tbl_02 schema + fig_01/fig_02 notes),
+  `project-plan.md` (Week 7 ✅ + Week 8 breakdown), `README.md`, this handoff.
+- **Script structure of `scripts/05`:** STEP 1 read+guard; STEP 2 the roll-up
+  rule (recorded inline); STEP 3 `rollup_by()` engine; STEP 4 write tbl_02;
+  STEP 5 fig_01; STEP 6 fig_02 (with a renderer fallback); STEP 7 the 7.6
+  verification block. It reads the stats layer only and writes nothing back to it.
+- **Roll-up rule (the analytical choice this week):** absolute fields
+  (`pop_2014/2018/2022`, `change_abs`) are summed over **non-`NA` reserves only**,
+  with a **coverage count per field** (`n_pop_2014`, `n_pop_2018`, `n_pop_2022`,
+  `n_change_abs`) plus `n_reserves` and `n_measured`. Ratio fields (`change_pct`,
+  `aagr`) are **recomputed on the summed pops**, never averaged from per-reserve %.
+  Numerator and denominator use the SAME contributor set (valid two-round span,
+  not `growth_zero_flag`). Regional `aagr` is annualised over a
+  `pop_baseline`-weighted mean span (`span_region`); `change_pct` is primary. Left
+  inline (not a numbered Decision) — uncontested.
+- **tbl_02 as built:** 5 landscape complexes + 18 states. Landscape picture:
+  Central India +282 (+59.7%, aagr +6.1%/yr), Shivalik-Gangetic +239 (+58.9%,
+  +6.3%/yr), Western Ghats +108 (+19.8%, +2.3%/yr), North-East Hills +22 (+13.2%,
+  +1.7%/yr), Sundarbans NA (its one reserve is `pop_2022` `NA`).
+- **fig_01:** reserves ranked by `change_pct` (default; `RANK_METRIC` switches to
+  `change_abs`/`aagr`), faceted by landscape (top strips, alternating region
+  wash), fill = growth sign. 48 ranked, 10 not-ranked (NA ratio) shown separately
+  as a per-facet "(N not ranked)" count. Sundarbans facet (0 ranked) dropped from
+  the plot, reported in console. Effort caveat wrapped in the caption.
+- **fig_02:** 3-frame choropleth (2014/2018/2022, Decision 6) via
+  `transition_manual` (fixed geometry — polygons do not move). Per-round tiger
+  count binned with fixed breaks. Three classes kept distinct: `NA` pop → grey
+  **"No estimate"**; real within-reserve 0 → near-white **"0 (real)"** (Decision
+  9); 3 geometry-absent reserves (Amrabad, Pilibhit, Dholpur-Karauli) named
+  off-map, **never drawn as 0**. Per-frame class counts: No-estimate 11/7/5,
+  "0 (real)" 1/3/5 across the rounds.
+- **7.6 verification (all OK):** roll-up reconciles across both groupings and the
+  per-reserve `na.rm` sum (pop_2014 1586, pop_2018 1958, pop_2022 2257, change_abs
+  +651; n_measured 53); frames = 3 = {2014,2018,2022}; every `NA`-pop cell is
+  "No estimate" (never a number) and every "0 (real)" cell is a measured 0; the
+  `growth_zero_flag` reserve (Mukundara) is absent from the ranked bars, shown as
+  not-ranked, and its `change_abs` is +1 (not a decline).
+- **Next: Week 8** — **Stage 2 (Connectivity) starts.** Build
+  `scripts/06_build_covariate_stack.R`: one aligned 1 km EPSG:7755 covariate stack
+  (`cov_stack_1km_7755.tif`) from the Week-2 layers (WorldCover, gHM, terrain,
+  distance-to-road). Assembly/alignment only — the resistance-value and
+  barrier-road-class Decisions are Week 9. See `project-plan.md` → Week 8
+  breakdown. No census dependency in Stage 2.
 
-### Output files this week (under `outputs/tables/` and `data/processed/`)
+### Output files this week (under `outputs/`)
 
-- `tbl_01_reserve_growth.csv` - **the Week-6 deliverable table** (58 reserves).
-- `stats_reserve_census_7755.gpkg` - updated in place; four growth columns appended.
-- No QA `tbl_NN` files this week (the metric verification runs inline in
-  `scripts/04` steps 3a-7d; nothing separate is written to disk).
+- `outputs/tables/tbl_02_regional_rollup.csv` — the Week-7 roll-up table (23 rows).
+- `outputs/figures/fig_01_growth_ranking.png` — the ranking figure.
+- `outputs/figures/fig_02_growth_animation.gif` — the 3-frame choropleth.
+- No change to `data/processed/` this week — `scripts/05` reads the stats layer,
+  writes nothing back to it. (The three `fig_02_frame_*.png` files are a
+  fallback-only output when gganimate/gifski are missing; they were removed after
+  the GIF rendered — do not commit them.)
+- New dependency locked in `renv.lock`: **`gifski`** (the `fig_02` GIF renderer).
 
 ### Data on disk (from Week 2, via `scripts/01` — unchanged)
 
@@ -136,6 +151,9 @@ Full text in `methodology.md` → "Decisions pending".
 
 _Resolved: [Week 4] missing-year handling → Decision 7; [Week 5] area source →
 Decision 8; [Week 6] zero-baseline handling → Decision 9._
+_Week 7 added no numbered Decision (the roll-up `NA` rule is an inline choice,
+uncontested). **Two pending Decisions come due at Week 9** — land-cover resistance
+values and barrier road classes; surface both at Week-8 close._
 
 ### Known gotchas (do not relearn)
 
@@ -230,10 +248,79 @@ Decision 8; [Week 6] zero-baseline handling → Decision 9._
   `crs(rast(crs="EPSG:7755"))` — it must print the "India NSF LCC" WKT. The env
   var must be set in a clean session; setting it after terra is already loaded
   does not take (PROJ caches the path at first use).
+- **`gganimate` `transition_states` tweens `geom_sf` geometry.** On a fixed-
+  geometry choropleth the reserves appeared to morph/drift between frames because
+  gganimate interpolated the polygon vertices. Use **`transition_manual(year)`**
+  for any fixed-geometry animated map — it holds each state as a discrete frame,
+  no vertex tween. `ease_aes` makes the wrong version worse; drop it. Label var
+  becomes `{current_frame}` (not `{closest_state}`).
+- **`gifski` is a separate install from `gganimate`.** `gganimate` was in `renv`;
+  `gifski` (the default GIF renderer) was not, so `fig_02` fell back to 3 static
+  PNGs. Fix: `renv::install("gifski")` (CRAN Windows binary — no Rust toolchain),
+  then `renv::snapshot(packages = c("gganimate","gifski"))`. A bare
+  `renv::snapshot()` may miss `gifski` because `scripts/05` calls it via
+  `requireNamespace`, not `library` — name it explicitly in the snapshot.
+- **`dplyr::summarise` name collision.** Expressions evaluate IN ORDER within one
+  `summarise()`. An output column must NOT reuse an input column name that a later
+  expression still reads: `pop_2022 = sum(pop_2022, ...)` then
+  `n_pop_2022 = sum(!is.na(pop_2022))` counts the 1-length summary (=> n=1), not
+  the group. `scripts/05` emits sums under `sum_*` names and renames only at the
+  end. Watch for this in every roll-up.
+- **`forcats` is not in `renv`.** `scripts/05` uses base `reorder()` for
+  within-facet bar ordering, not `fct_reorder`. Do not add `forcats` just for one
+  reorder. (`row_key` is unique per reserve, so base `reorder()` orders correctly
+  inside a free-`y` facet.)
+- **Roll-up: never average per-reserve percentages.** Sum the absolute pops per
+  region, then compute the regional % on those sums (population-weighted).
+  Averaging % over-weights small reserves. For a regional AAGR (spans differ,
+  8 yr vs 4 yr), annualise over a `pop_baseline`-weighted mean span; report
+  `change_pct` as primary.
+- **`facet_wrap` has no `space="free_y"`.** Bar thickness therefore varies between
+  facets in fig_01 (a 20-bar facet has thinner bars than a 7-bar facet). Cosmetic;
+  `facet_grid(rows, space="free_y")` would equalise but loses the clean top strips.
+  Left as-is for Week 7 (see the fig_01 cosmetic backlog for the story-map pass).
 
 ---
 
 ## Weekly log (newest first)
+
+### Week 7 — Growth visuals + regional roll-up · 2026-09-20
+- Entry state: `stats_reserve_census_7755.gpkg` carried all growth columns;
+  `tbl_01_reserve_growth.csv` written (Week 6); `scripts/05_growth_analysis.R` was
+  the renumbered header-only stub.
+- Did (tasks 7.1-7.6, all in `scripts/05_growth_analysis.R`):
+  - **7.1** rewrote the header/scope — fixed the frame count (the stub said "five
+    census years"; Decision 6 fixes it to 3) and replaced the stale
+    `# ... (fill in Week 4)` with `TODO(Week 7)` staging.
+  - **7.2** `rollup_by()` for landscape complex and state; roll-up rule recorded
+    inline (STEP 2): sum non-NA with a per-field coverage count; ratio recomputed
+    on the summed pops, single contributor set; regional AAGR over a
+    pop_baseline-weighted mean span.
+  - **7.3** wrote `tbl_02_regional_rollup.csv` (23 rows); added `n_measured`.
+  - **7.4** `fig_01` ranking, faceted by landscape, NAs shown separately, effort
+    caveat wrapped in caption.
+  - **7.5** `fig_02` 3-frame choropleth (`transition_manual`, fixed geometry);
+    NA → grey "No estimate", real 0 → "0 (real)", 3 geometry-absent named off-map.
+  - **7.6** STEP 7 hard-stopping verification block — all 13 checks OK.
+- Decisions made: none (the roll-up NA rule is an inline choice, uncontested).
+- Outputs: `scripts/05_growth_analysis.R` (filled), `tbl_02_regional_rollup.csv`,
+  `fig_01_growth_ranking.png`, `fig_02_growth_animation.gif`; updated
+  `data-dictionary.md`, `project-plan.md`, `README.md`, this handoff; `renv.lock`
+  gains `gifski`.
+- Gotchas found (now in "Known gotchas"): `transition_states` tweens `geom_sf`
+  geometry → use `transition_manual`; `gifski` is a separate install from
+  `gganimate`; `summarise` name-collision (summed col shadows the input a later
+  expr reads); `forcats` not in `renv` → base `reorder()`; never average
+  per-reserve % in a roll-up; `facet_wrap` has no `space="free_y"`.
+- Data notes (not bugs): Sundarbans has a `pop_2022` `NA`, so it is grey in fig_02
+  2022, absent from the fig_01 bars, and NA in the tbl_02 ratio — correct. Amrabad
+  ranks in fig_01 (tabular) but is one of the 3 geometry-absent reserves, so it is
+  named off-map in fig_02 (cannot be a polygon).
+- Carried forward / next week: **Week 8** — Stage 2 (Connectivity) starts. Build
+  `scripts/06_build_covariate_stack.R` → `cov_stack_1km_7755.tif` (WorldCover,
+  gHM, terrain, distance-to-road on one 1 km EPSG:7755 template). Assembly only;
+  the resistance-value + barrier-road-class Decisions are Week 9. Watch the
+  categorical-vs-continuous resample rule and the PROJ `proj.db` clash.
 
 ### Week 6 — Growth metrics derived · 2026-09-19
 - Entry state: `stats_reserve_census_7755.gpkg` built (Week 5) with

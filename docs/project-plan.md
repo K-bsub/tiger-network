@@ -451,7 +451,7 @@ remain to finish Stage 1.
   (a single `pop_<baseline>` column is impossible - reserves have different
   baseline years); sorted by `change_pct` desc, `NA`s last.
 
-### Week 7 — task breakdown
+### Week 7 — task breakdown *(complete)*
 
 Entry state: `stats_reserve_census_7755.gpkg` carries all growth columns
 (`change_abs`, `change_pct`, `aagr`, `growth_zero_flag`); `tbl_01_reserve_growth.csv`
@@ -464,16 +464,28 @@ Decision 6 the animation has **3 frames (2014/2018/2022)**, not 5. Per Decisions
 7/9 the visuals must show `NA` reserves (single-round, Sundarbans, the 5 flagged)
 and the `growth_zero_flag` reserve as a distinct category, never as 0 or a gap.
 
-| # | Task | Done when | Est. |
-|---|---|---|---|
-| 7.1 | Header/scope of `scripts/05_growth_analysis.R`: reads `stats_reserve_census_7755.gpkg`; writes `fig_01`, `fig_02`, `tbl_02`. Confirm the old "fill in Week 4" stub comment is replaced | Script header matches the deliverable; no stale week reference | 10 min |
-| 7.2 | Regional roll-up: aggregate `pop_2014/2018/2022`, `change_abs`, and a coverage count to **landscape_complex** and **state**. Decide the roll-up rule for `NA` pops (sum over non-`NA` only; report n contributing) and for the ratio metrics (roll up absolute pops, then recompute % on the sums — do NOT average per-reserve %). Record the rule inline | Roll-up computed for both units; `NA`-handling rule stated | 40–60 min |
-| 7.3 | Write `outputs/tables/tbl_02_regional_rollup.csv` (landscape_complex + state blocks; pops per round, absolute change, % change on summed pops, reserve count, n measured) | `tbl_02_regional_rollup.csv` written | 20–30 min |
-| 7.4 | `fig_01` ranking figure: reserves ranked by a chosen growth metric (default `change_pct`, `NA`s excluded or shown separately), faceted or coloured by landscape_complex. State the effort/detection caveat in the caption (success criterion) | `fig_01_growth_ranking.png` written; caveat in caption | 45–60 min |
-| 7.5 | `fig_02` animated choropleth: reserve polygons coloured by a per-round growth category across **3 frames** (2014/2018/2022). Geometry-absent reserves (Amrabad, Pilibhit, Dholpur-Karauli) and `NA`-pop reserves shown as a distinct "no estimate" class, never as 0 | `fig_02_growth_animation.gif` written; `NA`/absent reserves visibly distinct | 60–90 min |
-| 7.6 | Verify: roll-up sums reconcile to the per-reserve table; frame counts = 3; no reserve rendered as 0 where it is actually `NA`; the `growth_zero_flag` reserve is not shown as a decline | Verification block passes | 20 min |
-| 7.7 | Update `data-dictionary.md` (add `tbl_02_regional_rollup.csv` schema) and `README.md`/handoff (Week 7 -> complete, Stage 1 done) | Docs match as-built | 15–20 min |
-| 7.8 | Commit (`analysis:` for `05` + figures/table; `docs:` for dictionary/handoff, separate) | Committed and pushed | 10 min |
+**As built:** all of 7.1–7.6 done in `scripts/05_growth_analysis.R` (STEP 1 read;
+STEP 2–3 roll-up engine; STEP 4 tbl_02; STEP 5 fig_01; STEP 6 fig_02; STEP 7 the
+7.6 verification block). `tbl_02_regional_rollup.csv` (23 rows: 5 landscape + 18
+state), `fig_01_growth_ranking.png`, and `fig_02_growth_animation.gif` written.
+The 7.6 block passes all 13 checks. Regional totals reconcile across both
+groupings and the per-reserve table (pop_2014 1586, pop_2018 1958, pop_2022 2257,
+change_abs +651; n_measured 53). Roll-up ratio is population-weighted (sum pops,
+then %); regional AAGR uses a pop_baseline-weighted mean span, with change_pct as
+the primary regional ratio. Landscape picture: Central India +282 (+59.7%),
+Shivalik-Gangetic +239 (+58.9%), Western Ghats +108 (+19.8%), North-East Hills
++22 (+13.2%), Sundarbans NA. 7.7 (this doc pass) and 7.8 (commit) close the week.
+
+| # | Task | Done when | Est. | Status |
+|---|---|---|---|---|
+| 7.1 | Header/scope of `scripts/05_growth_analysis.R`: reads `stats_reserve_census_7755.gpkg`; writes `fig_01`, `fig_02`, `tbl_02`. Confirm the old "fill in Week 4" stub comment is replaced | Script header matches the deliverable; no stale week reference | 10 min | ✅ Header rewritten; frame count fixed to 3 (was "five census years"); stale `# ... (fill in Week 4)` replaced with `TODO(Week 7)` staging |
+| 7.2 | Regional roll-up: aggregate `pop_2014/2018/2022`, `change_abs`, and a coverage count to **landscape_complex** and **state**. Decide the roll-up rule for `NA` pops (sum over non-`NA` only; report n contributing) and for the ratio metrics (roll up absolute pops, then recompute % on the sums — do NOT average per-reserve %). Record the rule inline | Roll-up computed for both units; `NA`-handling rule stated | 40–60 min | ✅ `rollup_by()` for both units; rule recorded inline (STEP 2). Ratio recomputed on summed pops over a single contributor set; regional AAGR over a pop_baseline-weighted mean span |
+| 7.3 | Write `outputs/tables/tbl_02_regional_rollup.csv` (landscape_complex + state blocks; pops per round, absolute change, % change on summed pops, reserve count, n measured) | `tbl_02_regional_rollup.csv` written | 20–30 min | ✅ 23 rows. Added `n_measured` (census_status == "measured"); kept per-field coverage counts + `aagr`/`span_region` as extensions |
+| 7.4 | `fig_01` ranking figure: reserves ranked by a chosen growth metric (default `change_pct`, `NA`s excluded or shown separately), faceted or coloured by landscape_complex. State the effort/detection caveat in the caption (success criterion) | `fig_01_growth_ranking.png` written; caveat in caption | 45–60 min | ✅ Faceted by landscape (top strips), fill = growth sign, site palette. NAs excluded from bars AND counted per facet ("N not ranked"). Caveat wrapped in caption. Sundarbans facet (0 ranked) dropped from plot, reported in console |
+| 7.5 | `fig_02` animated choropleth: reserve polygons coloured by a per-round growth category across **3 frames** (2014/2018/2022). Geometry-absent reserves (Amrabad, Pilibhit, Dholpur-Karauli) and `NA`-pop reserves shown as a distinct "no estimate" class, never as 0 | `fig_02_growth_animation.gif` written; `NA`/absent reserves visibly distinct | 60–90 min | ✅ 3 held frames via `transition_manual` (fixed geometry). NA → grey "No estimate"; real 0 → near-white "0 (real)"; 3 geometry-absent named off-map, never drawn. Renderer fallback to 3 PNGs if gganimate/gifski missing |
+| 7.6 | Verify: roll-up sums reconcile to the per-reserve table; frame counts = 3; no reserve rendered as 0 where it is actually `NA`; the `growth_zero_flag` reserve is not shown as a decline | Verification block passes | 20 min | ✅ STEP 7 hard-stopping block; all 13 checks OK |
+| 7.7 | Update `data-dictionary.md` (add `tbl_02_regional_rollup.csv` schema) and `README.md`/handoff (Week 7 -> complete, Stage 1 done) | Docs match as-built | 15–20 min | ✅ This pass |
+| 7.8 | Commit (`analysis:` for `05` + figures/table; `docs:` for dictionary/handoff, separate) | Committed and pushed | 10 min | ⬜ Kiran to commit |
 
 **Week 7 pitfalls:**
 - **`NA` is not 0 on a map.** A reserve with no estimate for a round (single-round,
@@ -490,10 +502,29 @@ and the `growth_zero_flag` reserve as a distinct category, never as 0 or a gap.
 
 **Decision due this week:** none required. (The roll-up `NA` rule in 7.2 is an
 inline analytical choice; promote it to a numbered Decision only if it proves
-contested.)
+contested — it is not, so it stays inline.)
 
 **Exit state:** `fig_01`, `fig_02`, and `tbl_02` written; the Stage-1 growth track
 is complete and publishable on its own. Docs updated; Week 7 ticked.
+
+**Week 7 — discovered facts (carry forward):**
+- **`gifski` was missing from `renv`; `gganimate` was present.** `fig_02` needs a
+  renderer. Installed `gifski` (CRAN ships a Windows binary — no Rust toolchain),
+  `renv::snapshot(packages = c("gganimate","gifski"))` (a bare snapshot may miss
+  it because the script uses `requireNamespace`, not `library`). Now locked.
+- **`transition_states` tweens `geom_sf` geometry** — reserves appeared to move
+  between frames. For a fixed-geometry choropleth use **`transition_manual`**
+  (discrete held frames, no vertex interpolation). Do the same for any future
+  animated map.
+- **`summarise()` name collision:** an output column must not reuse an input
+  column name that a later expression in the same call still reads (a summed
+  `pop_2022` shadowed the original, making `sum(!is.na(pop_2022))` return 1).
+  Emit sums under `sum_*` names, rename at the end. Cost one debug cycle.
+- **`forcats` is not in `renv`.** Used base `reorder()` for within-facet bar
+  ordering instead of `fct_reorder`. Do not add `forcats` just for this.
+- **Roll-up ratio is population-weighted, not a mean of per-reserve %.** Regional
+  AAGR needs one span; used the pop_baseline-weighted mean span. `change_pct` is
+  the primary regional ratio, `aagr` secondary (mixed-span caveat).
 
 ---
 
@@ -501,11 +532,65 @@ is complete and publishable on its own. Docs updated; Week 7 ticked.
 
 | Week | Focus | Exit state (deliverable) | Est. |
 |---|---|---|---|
-| **8** | Covariate stack | `06` output: land cover, terrain, gHM, dist-to-road aligned to a 1 km grid | 3–4 h |
-| **9** | Resistance surface | **Decision:** resistance values (numbered); `07` resistance raster | 2–3 h |
+| **8** | Covariate stack | `scripts/06` output: land cover, terrain, gHM, dist-to-road aligned to one 1 km grid | 3–4 h |
+| **9** | Resistance surface | **Decision:** resistance values (numbered); `scripts/07` resistance raster | 2–3 h |
 | **10** | Least-cost paths | LCPs between neighbouring reserve pairs | 3–4 h |
 | **11** | Reserve network graph | `igraph` metrics: betweenness (linchpins), components (isolated reserves) | 3–4 h |
 | **12** | Pinch points + visuals | Road-crossing pinch points; `fig_04` network figure; `tbl_03` metrics | 3–4 h |
+
+### Week 8 — task breakdown
+
+Entry state (as of Week-7 close): Stage 1 (growth) is done. On disk from Week 2
+(`scripts/01`), all on the 1 km EPSG:7755 grid where raster: WorldCover 2021
+(1 km modal), gHM 2022 (1 km), terrain (elevation/slope/TRI, 1 km), OSM roads
+(885,669) and settlements (199,800). `boundary_reserves_all_7755.gpkg` and
+`boundary_states_7755.gpkg` built (Week 3). No census dependency in Stage 2.
+
+Week 8 builds `scripts/06_build_covariate_stack.R`: assemble one aligned,
+analysis-ready covariate raster stack on a single 1 km EPSG:7755 template, so the
+Week-9 resistance surface and the Week-13+ SDM read the same grid. This week is
+**assembly and alignment only** — no resistance values yet (that is Week 9's
+numbered Decision), no modelling.
+
+Naming (naming-conventions §2/§6): stack `cov_stack_1km_7755.tif`; per-layer
+interim `cov_<subject>_1km_7755.tif`; QA tables `tbl_10`+ (output counter is
+independent of the script prefix).
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 8.1 | Header/scope of `scripts/06_build_covariate_stack.R`: reads the Week-2 covariate layers + boundaries; writes `cov_stack_1km_7755.tif` + QA. Confirm no stale stub text | Header matches the deliverable; runs `source(00_config, 00_functions_io)` | 10 min |
+| 8.2 | Define the **1 km analysis template** (extent = India boundary buffered to a clean grid; res 1000 m; CRS 7755). Record it once so every layer resamples to it. Use `GRID_CELL_M` from config, never a hardcoded 1000 | One `terra::rast` template; extent/res/CRS asserted; written or held for reuse | 30–40 min |
+| 8.3 | Align the existing covariates to the template: WorldCover (categorical → **nearest**), gHM and terrain (continuous → **bilinear**). Guard against silent CRS/res mismatch (`read_rast` reprojects; re-assert against the template after) | 3 covariate layers on the identical grid; `compareGeom` passes | 40–60 min |
+| 8.4 | Derive **distance-to-road** from OSM roads on the template grid (`terra::distance` to the road layer, or rasterise + distance). Decide the road-class set for "road" here as an **inline** choice (record it); the *barrier* road-class Decision is Week 9, keep them separate | `cov_distroad_1km_7755.tif` on the grid; class set recorded inline | 40–60 min |
+| 8.5 | Stack the aligned layers into `cov_stack_1km_7755.tif` with stable, documented band names (`landcover`, `ghm`, `elev`, `slope`, `tri`, `dist_road_m`). NA-mask consistently (a cell NA in one layer policy — decide and record) | Multi-band GeoTIFF written via `write_processed_rast`; band names set | 30–40 min |
+| 8.6 | QA: per-band coverage (% non-NA over India), min/max sanity, and a value spot-check against the Week-2 interim layers. Write `tbl_10_covariate_stack_qa.csv` | QA table written; no all-NA band; ranges plausible | 30 min |
+| 8.7 | Update `data-dictionary.md` (add `cov_stack_1km_7755.tif` band schema) and `README.md`/handoff (Week 8 status, entry point for Stage 2) | Docs match as-built | 15–20 min |
+| 8.8 | Commit (`analysis:` for `06` + stack/QA; `docs:` separate) | Committed and pushed | 10 min |
+
+**Week 8 pitfalls:**
+- **One template, resample everything to it.** Do not resample layers to each
+  other pairwise — pick the India-extent 1 km template once and align every layer
+  to it, or bands will drift by a cell and `compareGeom` will fail at stack time.
+- **Categorical vs continuous resampling.** WorldCover must use **nearest**
+  (`categorical = TRUE` in `read_rast`); gHM/terrain use **bilinear**. Bilinear on
+  a class raster invents fractional land-cover codes.
+- **PROJ `proj.db` clash still applies.** Same machine trap as Stage 1 — confirm
+  `crs(rast(crs="EPSG:7755"))` prints the India NSF LCC WKT in a fresh session
+  before any reprojection (see handoff "Known gotchas").
+- **Keep the barrier-road Decision for Week 9.** 8.4's road set is only for a
+  distance covariate; the resistance/barrier road-class choice is a numbered
+  Decision next week. Do not pre-empt it.
+- **Settlement layer is village-dominated (~195k).** It is a Week 8–9 pending
+  Decision (trim to city/town, or change KDE radius). If distance-to-settlement
+  is wanted as a covariate, raise the trim first — do not stack the raw 199,800.
+
+**Decision due this week:** none numbered required for the covariate stack itself.
+Two pending Decisions come due next (Week 9): land-cover **resistance values** and
+the **barrier road classes**. Surface both at Week-8 close so Week 9 opens with
+them ready to decide.
+
+**Exit state:** `cov_stack_1km_7755.tif` written and QA'd — one aligned 1 km grid
+that Weeks 9 (resistance) and 13+ (SDM) both read. Docs updated; Week 8 ticked.
 
 ---
 
@@ -537,7 +622,7 @@ is complete and publishable on its own. Docs updated; Week 7 ticked.
 |---|---|---|
 | Scaffold committed to GitHub | 0 | Version-controlled, data-free base to build on |
 | Data audited and gaps closed | 2 | Know exactly what must be rebuilt |
-| **Growth track complete** | 7 | Priority-1 deliverable done and publishable |
+| **Growth track complete** | 7 | ✅ Achieved Week 7 — priority-1 deliverable done and publishable (tbl_01, tbl_02, fig_01, fig_02) |
 | Connectivity track complete | 12 | Priority-2 deliverable done |
 | Suitability track complete | 16 | Priority-3 deliverable done |
 | **Site published** | 20 | Full project live |
@@ -570,7 +655,8 @@ deliverable exists.
 | 4 | Census time series extracted (all reserves) | ✅ Complete |
 | 5 | Census joined to boundaries + area overwrite | ✅ Complete |
 | 6 | Growth metrics table | ✅ Complete |
-| 7 | Growth visuals + roll-up | ⚪ Not started |
-| 8–12 | Connectivity track | ⚪ Not started |
+| 7 | Growth visuals + roll-up | ✅ Complete |
+| 8 | Covariate stack (Stage 2 start) | ⚪ Not started |
+| 9–12 | Connectivity track | ⚪ Not started |
 | 13–16 | Suitability track | ⚪ Not started |
 | 17–20 | Site + close | ⚪ Not started |
