@@ -2,9 +2,10 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** Week 5 complete — `stats_reserve_census_7755.gpkg` built (wide census
-joined to boundaries; notified area per Decision 8; density; baseline_year).
-Growth metrics (change/%/AAGR) are Week 6.
+**Status:** Week 6 complete — per-reserve growth metrics derived. `scripts/04_growth_metrics.R`
+appended `change_abs`, `change_pct`, `aagr`, and `growth_zero_flag` (Decision 9) to
+`stats_reserve_census_7755.gpkg`, and wrote `tbl_01_reserve_growth.csv` (58 reserves).
+Week 7 is the growth visuals and regional roll-up (`scripts/05`).
 
 This document is the processing log and the decision record. Every significant
 choice becomes a **numbered Decision** with a date and a justification, recorded
@@ -351,18 +352,69 @@ only**, never as the area value. Do not use the KML polygon area (Decision 4).
   reserve's NTCA/state notification; record the locator in `tbl_05` `source_ref`.
 - ISFR provenance is now correct: ISFR is a cross-check column, not the area source.
 
+### Decision 9 — Real within-reserve zeros in growth metrics
+**Date:** 2026-09-19
+**Choice:** A published `0` is a **real within-reserve figure**, not missing data
+(Decision 7), and is carried into the growth metrics as follows.
+- `change_abs = pop_2022 - pop_baseline` is **always computed** where the reserve
+  has a real two-round span and both endpoints are present — a zero at either
+  endpoint does not make it `NA`.
+- **Zero baseline** (`pop_baseline == 0`, e.g. Mukundara Hills, `unit_id` 42, a
+  0→1→1 trajectory): `change_pct` and `aagr` are **`NA`**, because both divide by
+  the baseline and a 0→N change is undefined as a ratio. These reserves are marked
+  `growth_zero_flag = TRUE` so the `NA` is visibly **ratio-undefined**, not
+  missing data.
+- **Zero endpoint in 2022** (`pop_2022 == 0`, `pop_baseline > 0`, a real decline
+  to local extirpation — e.g. Kamlang, Dampa, Kawal, Satkosia): `pop_2022` is a
+  valid numerator, so `change_pct = -100` and `aagr = -100`%/yr are **computed and
+  reported as-is**. These are not flagged (`growth_zero_flag = FALSE`) — the value
+  is real, not a special-cased `NA`.
+- No metric ever stores `Inf` or `NaN`.
+
+**Reason:**
+1. **A subtraction is defined at zero; a ratio is not.** `change_abs` needs no
+   guard — 0→1 is +1, 12→0 is −12. Only the ratio metrics (`change_pct`, `aagr`)
+   have a zero **denominator** problem, and that occurs only when the **baseline**
+   is 0. Guarding on the baseline, not on "any zero", keeps every defined value.
+2. **A zero baseline is genuinely undefined as growth, not −∞ or 0.** Mukundara's
+   0→1 is real recovery, but "percent growth from 0" and "annual growth rate from
+   0" have no finite value. Reporting `NA` (flagged) is the honest statement;
+   inventing a number (or `Inf`) would misrepresent it. `change_abs = +1` already
+   carries the real information for this reserve.
+3. **A real decline to 0 is defined and informative.** `pop_2022 = 0` after a
+   positive baseline is a −100% total change and a −100%/yr annualised rate — a
+   true statement about a reserve that lost its within-reserve tigers over the
+   observed span. `NA`-ing it would hide a conservation-relevant result; the
+   effort/interpretation caveats belong in the narrative, not in a suppressed
+   cell. (This is the wider scope task 6.5 asks for — both endpoints — beyond the
+   baseline-only framing of the original pending item.)
+4. **The flag separates two kinds of `NA`.** After this Decision the growth
+   columns carry `NA` for three distinct reasons: single-round reserves (no span),
+   `pop_2022` missing (Sundarbans), and zero baseline (ratio-undefined). Only the
+   third is a *modelling* `NA`; `growth_zero_flag` marks it so a reader (and the
+   Week-7 visuals) never confuses "we cannot compute a rate from 0" with "no data".
+
+**Implementation consequences:**
+- `change_abs`: computed wherever a two-round span exists (task 6.2); `NA` only
+  for single-round reserves and reserves with a missing endpoint (Sundarbans, the
+  5 flagged).
+- `change_pct = change_abs / pop_baseline * 100`: `NA` where `pop_baseline == 0`;
+  otherwise computed (including −100 for a real 2022 zero).
+- `aagr = (pop_2022 / pop_baseline)^(1 / (2022 - baseline_year)) - 1`, as a
+  percent: `NA` where `pop_baseline == 0`; otherwise computed (including −100 for
+  a real 2022 zero). Single-round reserves have a zero-length span → `NA`, never a
+  divide-by-zero.
+- New column `growth_zero_flag` (logical) on `stats_reserve_census_7755.gpkg` and
+  in `tbl_01_reserve_growth.csv`: `TRUE` iff the reserve has a real two-round span
+  and `pop_baseline == 0`. In the current data this is Mukundara Hills only.
+
+This closes the **[Week 6] Zero-baseline handling** pending item.
+
 ### Decisions pending (raised, not yet made)
 
 These forks are open. Each is decided in the week noted in the project plan,
 before the relevant code is written.
 
-- **[Week 6] Zero-baseline handling in growth metrics (→ Decision 9).** Real
-  within-reserve zeros in an endpoint break ratio-based metrics: Mukundara Hills
-  (2014 = 0, a 0→1→1 trajectory) makes `change_pct` and `aagr` divide by zero,
-  and reserves declining to 0 in 2022 (Kamlang, Dampa, Kawal, Satkosia, Sahyadri)
-  give a −100% endpoint. Decide the rule: `change_abs` stays valid throughout;
-  `change_pct`/`aagr` are `NA` (flagged) where the baseline is 0; no `Inf`/`NaN`.
-  Fix as a numbered Decision before the Week-6 metric code.
 - **[Week 9] Land-cover resistance values.** The `WORLDCOVER_RESISTANCE` lookup
   in `R/00_config.R` holds literature-informed starting values; the final set is
   a numbered Decision before the resistance surface is built.

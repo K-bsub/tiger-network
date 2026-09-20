@@ -178,8 +178,8 @@ the main new work, and it is manual PDF/Excel extraction.
 | **3** | Boundary layer built | `02` output: reserves layer with unit_id, state, landscape_complex, area_km2 | 3–4 h |
 | **4** | Census extraction *(done — full series, not half)* | Full within-reserve census entered (`census_reserve_long.csv`); **Decisions 6 + 7** made | 3–4 h |
 | **5** | Census join + area overwrite *(done)* | `03` output: `stats_reserve_census_7755.gpkg` (wide census joined to boundaries; `area_km2` overwritten from notified total per **Decision 8**; density) | 3–4 h |
-| **6** | Growth metrics | `03` output: `tbl_01_reserve_growth.csv` (change, %, AAGR, density) | 2–3 h |
-| **7** | Growth visuals + roll-up | `04` outputs: ranking figure, regional roll-up table, animated choropleth (**3 frames — 2014/2018/2022 — per Decision 6, not 5**) | 3–4 h |
+| **6** | Growth metrics *(done)* | `04` output: `tbl_01_reserve_growth.csv` (change_abs, %, AAGR) + 4 columns appended to the stats layer; **Decision 9** made | 2–3 h |
+| **7** | Growth visuals + roll-up | `05` outputs: ranking figure, regional roll-up table, animated choropleth (**3 frames — 2014/2018/2022 — per Decision 6, not 5**) | 3–4 h |
 
 **At the end of Stage 1 the priority-1 track is complete and publishable on its
 own.** If the project stops here, it is still a finished, worthwhile piece.
@@ -432,6 +432,69 @@ populated on the stats layer; Decision 9 recorded; dictionary updated. The
 priority-1 growth **numbers** are complete — only the Week-7 visuals/roll-up
 remain to finish Stage 1.
 
+**Week 6 outcome (as run):** `scripts/04_growth_metrics.R` built (tasks 6.1-6.8).
+- **6.1 — script location.** Metrics live in a new `scripts/04_growth_metrics.R`
+  (derive), NOT in `scripts/03` (assemble). The pre-existing visuals stub
+  `04_growth_analysis.R` was **renumbered to `05_growth_analysis.R`** (Week 7), so
+  each filename matches its week's deliverable.
+- **Decision 9** made (real within-reserve zeros): `change_abs` always valid;
+  `change_pct`/`aagr` = `NA` + `growth_zero_flag = TRUE` where the baseline is 0
+  (Mukundara); a real decline to 0 in 2022 is a valid -100 / -100%·yr, not `NA`;
+  never `Inf`/`NaN`.
+- **Metrics as built:** `change_abs` non-`NA` 49; `change_pct`/`aagr` non-`NA` 48;
+  `growth_zero_flag` TRUE 1 (Mukundara). National split: 32 growing, 17 declining,
+  0 flat, 9 `change_abs` `NA`. Fastest growth Manas (+23.1%/yr, 11->58); five
+  extirpations at -100%/yr (Kamlang, Sahyadri, Dampa, Satkosia, Kawal).
+- **New column** `growth_zero_flag` added to `tbl_01` and the stats layer, so a
+  ratio-undefined `NA` is distinct from a missing-data `NA`.
+- **Deviation from the 6.6 spec:** `tbl_01` carries `pop_baseline` + `baseline_year`
+  (a single `pop_<baseline>` column is impossible - reserves have different
+  baseline years); sorted by `change_pct` desc, `NA`s last.
+
+### Week 7 — task breakdown
+
+Entry state: `stats_reserve_census_7755.gpkg` carries all growth columns
+(`change_abs`, `change_pct`, `aagr`, `growth_zero_flag`); `tbl_01_reserve_growth.csv`
+written. `scripts/05_growth_analysis.R` is the renumbered stub (header only).
+No new data. This week is the Stage-1 finish: turn the numbers into the
+publishable ranking figure, the regional roll-up, and the animated choropleth.
+
+Week 7 fills in `scripts/05_growth_analysis.R`, reading the stats layer only. Per
+Decision 6 the animation has **3 frames (2014/2018/2022)**, not 5. Per Decisions
+7/9 the visuals must show `NA` reserves (single-round, Sundarbans, the 5 flagged)
+and the `growth_zero_flag` reserve as a distinct category, never as 0 or a gap.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 7.1 | Header/scope of `scripts/05_growth_analysis.R`: reads `stats_reserve_census_7755.gpkg`; writes `fig_01`, `fig_02`, `tbl_02`. Confirm the old "fill in Week 4" stub comment is replaced | Script header matches the deliverable; no stale week reference | 10 min |
+| 7.2 | Regional roll-up: aggregate `pop_2014/2018/2022`, `change_abs`, and a coverage count to **landscape_complex** and **state**. Decide the roll-up rule for `NA` pops (sum over non-`NA` only; report n contributing) and for the ratio metrics (roll up absolute pops, then recompute % on the sums — do NOT average per-reserve %). Record the rule inline | Roll-up computed for both units; `NA`-handling rule stated | 40–60 min |
+| 7.3 | Write `outputs/tables/tbl_02_regional_rollup.csv` (landscape_complex + state blocks; pops per round, absolute change, % change on summed pops, reserve count, n measured) | `tbl_02_regional_rollup.csv` written | 20–30 min |
+| 7.4 | `fig_01` ranking figure: reserves ranked by a chosen growth metric (default `change_pct`, `NA`s excluded or shown separately), faceted or coloured by landscape_complex. State the effort/detection caveat in the caption (success criterion) | `fig_01_growth_ranking.png` written; caveat in caption | 45–60 min |
+| 7.5 | `fig_02` animated choropleth: reserve polygons coloured by a per-round growth category across **3 frames** (2014/2018/2022). Geometry-absent reserves (Amrabad, Pilibhit, Dholpur-Karauli) and `NA`-pop reserves shown as a distinct "no estimate" class, never as 0 | `fig_02_growth_animation.gif` written; `NA`/absent reserves visibly distinct | 60–90 min |
+| 7.6 | Verify: roll-up sums reconcile to the per-reserve table; frame counts = 3; no reserve rendered as 0 where it is actually `NA`; the `growth_zero_flag` reserve is not shown as a decline | Verification block passes | 20 min |
+| 7.7 | Update `data-dictionary.md` (add `tbl_02_regional_rollup.csv` schema) and `README.md`/handoff (Week 7 -> complete, Stage 1 done) | Docs match as-built | 15–20 min |
+| 7.8 | Commit (`analysis:` for `05` + figures/table; `docs:` for dictionary/handoff, separate) | Committed and pushed | 10 min |
+
+**Week 7 pitfalls:**
+- **`NA` is not 0 on a map.** A reserve with no estimate for a round (single-round,
+  Sundarbans 2022, the 5 flagged, the 3 geometry-absent) must render as a distinct
+  "no estimate" class, never as a zero-population choropleth cell. This is the most
+  likely way the visuals could misrepresent Decision 7.
+- **Do not average per-reserve percentages for the roll-up.** Sum absolute pops per
+  region, then compute the regional % on those sums. Averaging % over-weights small
+  reserves (a 0->1 reserve and a 200->260 reserve are not equal weight).
+- **3 frames, not 5.** The animation is 2014/2018/2022 (Decision 6). 2006/2010 have
+  no per-reserve series.
+- **`growth_zero_flag` reserve.** Mukundara (0->1->1) is real recovery with an
+  undefined %; show it in a category that is not "decline" and not "no data".
+
+**Decision due this week:** none required. (The roll-up `NA` rule in 7.2 is an
+inline analytical choice; promote it to a numbered Decision only if it proves
+contested.)
+
+**Exit state:** `fig_01`, `fig_02`, and `tbl_02` written; the Stage-1 growth track
+is complete and publishable on its own. Docs updated; Week 7 ticked.
+
 ---
 
 ## Stage 2 — Connectivity (Weeks 8–12) · priority 2
@@ -506,7 +569,7 @@ deliverable exists.
 | 3 | Reserve boundary layer | ✅ Complete |
 | 4 | Census time series extracted (all reserves) | ✅ Complete |
 | 5 | Census joined to boundaries + area overwrite | ✅ Complete |
-| 6 | Growth metrics table | ⚪ Not started |
+| 6 | Growth metrics table | ✅ Complete |
 | 7 | Growth visuals + roll-up | ⚪ Not started |
 | 8–12 | Connectivity track | ⚪ Not started |
 | 13–16 | Suitability track | ⚪ Not started |

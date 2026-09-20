@@ -101,7 +101,7 @@ note it, do not leave blank. Reserves absent from a round have **no row** for
 that round (Decision 7); never-estimated reserves get one flag row with
 `pop = NA`.
 
-## stats_reserve_census_7755.gpkg  *(Week 5 — built; growth metrics Week 6)*
+## stats_reserve_census_7755.gpkg  *(Week 5 — built; growth metrics Week 6 — built)*
 
 Built by `scripts/03_prepare_census.R`. The wide census (pivoted from
 `census_reserve_long.csv`) LEFT-joined onto `boundary_reserves_all_7755.gpkg`
@@ -114,8 +114,14 @@ Decision 8, `area_km2` is the **NTCA-notified core+buffer total** (from
 
 **As built (Week 5):** `area_km2` overwritten from the notified total for all 58
 (`area_provisional = FALSE`, `area_source = ntca_notification`); `density_2022`
-and `baseline_year` computed. **`change_abs`, `change_pct`, `aagr` are NOT in the
-Week-5 layer** — they are added in Week 6.
+and `baseline_year` computed.
+
+**As built (Week 6):** `scripts/04_growth_metrics.R` appended `change_abs`,
+`change_pct`, `aagr`, and `growth_zero_flag` (Decision 9). Growth is over each
+reserve's own `baseline_year` → 2022 span (Decision 7). Non-`NA` counts: 49
+`change_abs`; 48 `change_pct`/`aagr` (the extra `NA` is Mukundara Hills, zero
+baseline, `growth_zero_flag = TRUE`). Real 2022 zeros (Kamlang, Sahyadri, Dampa,
+Satkosia, Kawal) carry a valid −100% / −100 %·yr⁻¹, not `NA`. No `Inf`/`NaN`.
 
 | Field | Type | Meaning |
 |---|---|---|
@@ -137,9 +143,10 @@ Week-5 layer** — they are added in Week 6.
 | `source` | character | Boundary geometry source: `ntca` (KML) |
 | `poly_km2` | numeric | QA only. KML polygon area, km². `NA` for geometry-absent reserves |
 | `poly_census_ratio` | numeric | QA only. `poly_km2 / area_km2`, **recomputed in 5.4 against the notified area**. `NA` for geometry-absent reserves |
-| `change_abs` | numeric | **Week 6.** 2022 − baseline; `NA` if only one round |
-| `change_pct` | numeric | **Week 6.** Percent change over the observed span; `NA` if only one round |
-| `aagr` | numeric | **Week 6.** Average annual growth rate; `NA` if only one round |
+| `change_abs` | numeric | `pop_2022 − pop_baseline` over the reserve's own span. `NA` if only one round (2022-only) or an endpoint is `NA` (Sundarbans, the 5 flagged). A real endpoint `0` keeps a valid value |
+| `change_pct` | numeric | `change_abs / pop_baseline × 100`. `NA` where `change_abs` is `NA` **or** the baseline is `0` (Decision 9, flagged below). A real decline to 0 in 2022 is `−100`, not `NA` |
+| `aagr` | numeric | Average annual growth rate over the reserve's own span, `(pop_2022 / pop_baseline)^(1 / (2022 − baseline_year)) − 1`, as a percent. Same `NA` set as `change_pct`; a real decline to 0 in 2022 is `−100` %·yr⁻¹. Spans differ (8 yr from a 2014 baseline, 4 yr from 2018), so `aagr` is comparable across reserves where `change_pct` is not |
+| `growth_zero_flag` | logical | **Decision 9.** `TRUE` iff the reserve has a real two-round span and `pop_baseline == 0`, i.e. the case where `change_pct`/`aagr` are `NA` because the ratio is undefined (Mukundara Hills only, as built). `FALSE` otherwise — including single-round/missing-endpoint `NA`s and real 2022-zero declines. Lets a reader tell a ratio-undefined `NA` from a missing-data `NA` |
 
 **QA tables written by `scripts/03` (Week 5):** `tbl_06_census_wide_check.csv`
 (pivot), `tbl_07_census_join_check.csv` (join), `tbl_08_area_overwrite_check.csv`

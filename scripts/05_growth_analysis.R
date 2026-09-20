@@ -1,5 +1,5 @@
 # =============================================================================
-# 04_growth_analysis.R  [GROWTH — priority 1]
+# 05_growth_analysis.R  [GROWTH — priority 1]
 # Rank reserves within landscape complex and state; build the animated
 # choropleth of growth category across the five census years (gganimate).
 #
