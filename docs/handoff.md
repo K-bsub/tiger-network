@@ -29,7 +29,11 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
   D5 Mammalia target group; **D6 census series = within-reserve SECR 2014/2018/2022
   only (2006/2010 are context, not a baseline)**; **D7 missing (reserve, round)
   cells = `NA`, no imputation**; **D8 reserve area = NTCA-notified core+buffer
-  total (ISFR-2021 Ch.4 is cross-check only, not the area source)**.
+  total (ISFR-2021 Ch.4 is cross-check only, not the area source)**; **D9 real
+  within-reserve zeros — `change_abs` always valid, ratio metrics `NA`+flag only
+  when the baseline is 0, a real 2022 zero is −100 not `NA`**; **D10 covariate
+  stack common NA mask (any band `NA` → all bands `NA`); gHM coastal/edge gap-fill
+  deferred to Week 9 pending a per-reserve relevance check**.
 
 ## Ways of working (apply every chat)
 
@@ -47,69 +51,81 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
 
 ---
 
-## Current state  ·  updated after **Week 7** (growth visuals + roll-up — Stage 1 done)
+## Current state  ·  updated after **Week 8** (covariate stack — Stage 2 input assembly)
 
-- **Done this week:** `scripts/05_growth_analysis.R` (tasks 7.1-7.6) built the
-  regional roll-up and the two growth figures, all reading
-  `stats_reserve_census_7755.gpkg` only (no new data, no new Decision). Wrote
-  **`outputs/tables/tbl_02_regional_rollup.csv`** (23 rows),
-  **`outputs/figures/fig_01_growth_ranking.png`**, and
-  **`outputs/figures/fig_02_growth_animation.gif`**. The 7.6 verification block
-  (STEP 7) passes all 13 checks. **Stage 1 (Growth) is complete and publishable.**
-  Docs updated: `data-dictionary.md` (tbl_02 schema + fig_01/fig_02 notes),
-  `project-plan.md` (Week 7 ✅ + Week 8 breakdown), `README.md`, this handoff.
-- **Script structure of `scripts/05`:** STEP 1 read+guard; STEP 2 the roll-up
-  rule (recorded inline); STEP 3 `rollup_by()` engine; STEP 4 write tbl_02;
-  STEP 5 fig_01; STEP 6 fig_02 (with a renderer fallback); STEP 7 the 7.6
-  verification block. It reads the stats layer only and writes nothing back to it.
-- **Roll-up rule (the analytical choice this week):** absolute fields
-  (`pop_2014/2018/2022`, `change_abs`) are summed over **non-`NA` reserves only**,
-  with a **coverage count per field** (`n_pop_2014`, `n_pop_2018`, `n_pop_2022`,
-  `n_change_abs`) plus `n_reserves` and `n_measured`. Ratio fields (`change_pct`,
-  `aagr`) are **recomputed on the summed pops**, never averaged from per-reserve %.
-  Numerator and denominator use the SAME contributor set (valid two-round span,
-  not `growth_zero_flag`). Regional `aagr` is annualised over a
-  `pop_baseline`-weighted mean span (`span_region`); `change_pct` is primary. Left
-  inline (not a numbered Decision) — uncontested.
-- **tbl_02 as built:** 5 landscape complexes + 18 states. Landscape picture:
-  Central India +282 (+59.7%, aagr +6.1%/yr), Shivalik-Gangetic +239 (+58.9%,
-  +6.3%/yr), Western Ghats +108 (+19.8%, +2.3%/yr), North-East Hills +22 (+13.2%,
-  +1.7%/yr), Sundarbans NA (its one reserve is `pop_2022` `NA`).
-- **fig_01:** reserves ranked by `change_pct` (default; `RANK_METRIC` switches to
-  `change_abs`/`aagr`), faceted by landscape (top strips, alternating region
-  wash), fill = growth sign. 48 ranked, 10 not-ranked (NA ratio) shown separately
-  as a per-facet "(N not ranked)" count. Sundarbans facet (0 ranked) dropped from
-  the plot, reported in console. Effort caveat wrapped in the caption.
-- **fig_02:** 3-frame choropleth (2014/2018/2022, Decision 6) via
-  `transition_manual` (fixed geometry — polygons do not move). Per-round tiger
-  count binned with fixed breaks. Three classes kept distinct: `NA` pop → grey
-  **"No estimate"**; real within-reserve 0 → near-white **"0 (real)"** (Decision
-  9); 3 geometry-absent reserves (Amrabad, Pilibhit, Dholpur-Karauli) named
-  off-map, **never drawn as 0**. Per-frame class counts: No-estimate 11/7/5,
-  "0 (real)" 1/3/5 across the rounds.
-- **7.6 verification (all OK):** roll-up reconciles across both groupings and the
-  per-reserve `na.rm` sum (pop_2014 1586, pop_2018 1958, pop_2022 2257, change_abs
-  +651; n_measured 53); frames = 3 = {2014,2018,2022}; every `NA`-pop cell is
-  "No estimate" (never a number) and every "0 (real)" cell is a measured 0; the
-  `growth_zero_flag` reserve (Mukundara) is absent from the ranked bars, shown as
-  not-ranked, and its `change_abs` is +1 (not a decline).
-- **Next: Week 8** — **Stage 2 (Connectivity) starts.** Build
-  `scripts/06_build_covariate_stack.R`: one aligned 1 km EPSG:7755 covariate stack
-  (`cov_stack_1km_7755.tif`) from the Week-2 layers (WorldCover, gHM, terrain,
-  distance-to-road). Assembly/alignment only — the resistance-value and
-  barrier-road-class Decisions are Week 9. See `project-plan.md` → Week 8
-  breakdown. No census dependency in Stage 2.
+- **Done this week:** `scripts/06_build_covariate_stack.R` (tasks 8.1-8.6) built
+  the aligned Stage-2 covariate stack. Wrote
+  **`data/processed/cov_stack_1km_7755.tif`** (6 bands), the interim
+  **`data/interim/cov_distroad_1km_7755.tif`**, and
+  **`outputs/tables/tbl_10_covariate_stack_qa.csv`**. **Decision 10** added
+  (common NA mask; gHM gap-fill deferred to Week 9). Assembly and alignment only —
+  no resistance values, no barrier road classes (both Week 9). Docs updated:
+  `methodology.md` (Decision 10 + Week-8 change log), `data-dictionary.md`
+  (`cov_stack`/`cov_distroad`/`tbl_10` schemas), `project-plan.md` (Week 8 ✅ +
+  Week 9 pointer), `README.md`, this handoff.
+- **FILENAME — resolve at commit:** the script is delivered as
+  **`scripts/06_build_covariate_stack.R`** (matches `project-plan.md` + naming
+  §3 verb_object). The old stub **`scripts/06_covariates.R`** (header-only,
+  `# ... (fill in Week 6)`) must be **deleted** so the `06` slot is not
+  duplicated. `git rm scripts/06_covariates.R` before committing the new file.
+- **Script structure of `scripts/06`:** header/scope + path block + fail-early
+  guards (GRID_CELL_M from config; a fresh-session EPSG:7755 resolve check for
+  the PROJ clash; input-existence check); STEP 8.2 build+assert the one 1 km
+  template; STEP 8.3 align the 3 covariates (near/bilinear) + `compareGeom`;
+  STEP 8.4 distance-to-road (rasterise→distance) → `cov_distroad`; STEP 8.5 stack
+  6 bands + common NA mask → `cov_stack`; STEP 8.6 QA → `tbl_10`. Reads the
+  Week-2 layers + boundaries; writes the stack, the distance covariate, and the
+  QA table only. Touches no Stage-1 layer.
+- **Template (8.2):** ONE 1 km EPSG:7755 grid from the national boundary
+  (`boundary_india_national_7755.gpkg`), 5 km collar (`COLLAR_M`), extent
+  **snapped out to whole `GRID_CELL_M`** → **3093 × 2864 = 8,858,352 cells**.
+  Snapped so it is reproducible from the boundary alone (not tied to whatever
+  bbox origin `scripts/01` used). Every covariate resamples ONTO it; extent/res/
+  CRS asserted once. Held in memory as `tmpl` (not written — the stack is the
+  on-disk record).
+- **Alignment (8.3):** WorldCover → **nearest** (categorical); gHM + terrain →
+  **bilinear** (continuous). Deliberately **not** via `read_rast()` (it reprojects
+  to an auto grid; the inputs are already 7755, so a straight `resample` onto the
+  template is one interpolation each — avoids double-interpolating and stepping
+  the class layer twice). `compareGeom` re-asserted vs the template — all PASS.
+- **Distance-to-road (8.4):** `cov_distroad_1km_7755.tif` via
+  **rasterise-then-`terra::distance`** (`touches = TRUE`) over the 885,669
+  major-road lines — cheaper than cell-to-line, identical at 1 km. **Inline
+  road-class choice (covariate only):** all 5 major classes + `_link` (tertiary
+  **kept** — the barrier-class question is the Week-9 Decision). Min 0, max
+  ~278.9 km, mean ~2.0 km inside India.
+- **Stack + NA policy (8.5, Decision 10):** 6 bands in fixed order
+  `landcover, ghm, elev, slope, tri, dist_road_m` → `cov_stack_1km_7755.tif`.
+  **Common NA mask** — any band `NA` → all bands `NA` (complete-case predictor
+  for Week-9 resistance + Week-13+ SDM). gHM is the **binding NA layer**; mask
+  drops ~56,840 cells (~1.8%). gHM coastal/edge gap-fill **deferred to Week 9**
+  (Decision 10).
+- **QA (8.6):** `tbl_10` — all 6 bands **3,010,738 cells, 98.15% of India,
+  range_ok TRUE**. Stacked-vs-source spot-check confirms values not corrupted:
+  gHM 0.377/0.377, landcover modal 40 (cropland) n_class 11 both, elev
+  577.3/570.8, slope 2.54/2.50, tri 23.4/23.1, dist_road 2018.9/2044.9 (small
+  gaps = the ~1.8% common-mask trim; source means are over the larger pre-mask
+  footprint).
+- **Next: Week 9** — **Stage 2 resistance surface.** Two numbered Decisions come
+  due: land-cover **resistance values** (`WORLDCOVER_RESISTANCE` starting set)
+  and **barrier road classes** (keep tertiary or restrict to motorway–secondary).
+  Plus the **Decision-10 relevance check**: intersect the ~56.8k dropped cells
+  with reserve/corridor footprints (watch Sundarbans + coastal Western Ghats); if
+  material coverage is lost, gHM edge gap-fill + re-stack as a new Decision, else
+  the common mask is final. See `project-plan.md` → Week 9.
 
-### Output files this week (under `outputs/`)
+### Output files this week
 
-- `outputs/tables/tbl_02_regional_rollup.csv` — the Week-7 roll-up table (23 rows).
-- `outputs/figures/fig_01_growth_ranking.png` — the ranking figure.
-- `outputs/figures/fig_02_growth_animation.gif` — the 3-frame choropleth.
-- No change to `data/processed/` this week — `scripts/05` reads the stats layer,
-  writes nothing back to it. (The three `fig_02_frame_*.png` files are a
-  fallback-only output when gganimate/gifski are missing; they were removed after
-  the GIF rendered — do not commit them.)
-- New dependency locked in `renv.lock`: **`gifski`** (the `fig_02` GIF renderer).
+- `data/processed/cov_stack_1km_7755.tif` — the 6-band aligned covariate stack
+  (Stage-2 input). **Gitignored** with the rest of `data/processed`.
+- `data/interim/cov_distroad_1km_7755.tif` — distance-to-road covariate (feeds the
+  stack's `dist_road_m` band; kept un-common-masked for a possible Week-9
+  re-stack). **Gitignored.**
+- `outputs/tables/tbl_10_covariate_stack_qa.csv` — per-band QA (coverage, ranges,
+  source spot-check). Committed (small text table).
+- No change to any Stage-1 layer — `scripts/06` reads the Week-2 layers +
+  boundaries and writes only the three files above.
+- No new `renv` dependency — `terra`, `sf`, `dplyr`, `here` were already locked.
 
 ### Data on disk (from Week 2, via `scripts/01` — unchanged)
 
@@ -145,15 +161,23 @@ Full text in `methodology.md` → "Decisions pending".
   trim to city/town (4,597) or change radius?
 - **[Week 9]** Land-cover resistance values (starting set in `R/00_config.R`).
 - **[Week 9]** Road classes for the barrier surface — keep tertiary or restrict
-  to motorway–secondary?
+  to motorway–secondary? (Separate from the 8.4 distance-covariate class set,
+  which keeps all major classes.)
+- **[Week 9]** gHM coastal/edge gap-fill relevance check (from **Decision 10**) —
+  intersect the ~56.8k common-mask-dropped cells with reserve/corridor footprints
+  (watch Sundarbans + coastal Western Ghats). If material coverage is lost inside
+  a reserve, gHM edge gap-fill + re-stack as a new Decision; else the common mask
+  is final.
 - **[Week 13–14]** Target-group scope — all Mammalia vs large-bodied guild.
 - **[Week 14]** Terrain variables in the SDM — collinearity check (slope vs TRI).
 
 _Resolved: [Week 4] missing-year handling → Decision 7; [Week 5] area source →
-Decision 8; [Week 6] zero-baseline handling → Decision 9._
+Decision 8; [Week 6] zero-baseline handling → Decision 9; [Week 8] covariate-stack
+NA policy → Decision 10._
 _Week 7 added no numbered Decision (the roll-up `NA` rule is an inline choice,
-uncontested). **Two pending Decisions come due at Week 9** — land-cover resistance
-values and barrier road classes; surface both at Week-8 close._
+uncontested). **Three pending Decisions come due at Week 9** — land-cover
+resistance values, barrier road classes, and the Decision-10 gHM gap-fill
+relevance check._
 
 ### Known gotchas (do not relearn)
 
@@ -279,10 +303,62 @@ values and barrier road classes; surface both at Week-8 close._
   facets in fig_01 (a 20-bar facet has thinner bars than a 7-bar facet). Cosmetic;
   `facet_grid(rows, space="free_y")` would equalise but loses the clean top strips.
   Left as-is for Week 7 (see the fig_01 cosmetic backlog for the story-map pass).
+- **`terra::ext()` returns an S4 `SpatExtent` — not subsettable with `["xmin"]`.**
+  `ext(r)["xmin"]` throws "object of type 'S4' is not subsettable". Coerce first:
+  `as.vector(terra::ext(r))` gives a named numeric (`xmin,xmax,ymin,ymax`), then
+  subset that. `scripts/06` STEP 8.2 does this for the extent-snap assertion.
+- **`is.na()` on a SpatRaster is the BASE generic — call it unqualified.** There is
+  no `terra::is.na` export (`'is.na' is not an exported object from 'namespace:terra'`);
+  terra supplies the S4 method for the base generic, so `sum(is.na(stack))` and
+  `!is.na(r)` work but `terra::is.na(...)` errors. Same pattern for other base
+  generics terra dispatches (`mean`, `sum`, `min`, `max`) — do not prefix them
+  with `terra::`. `scripts/06` STEP 8.5 uses `sum(is.na(cov_stack))` for the
+  common NA mask.
 
 ---
 
 ## Weekly log (newest first)
+
+### Week 8 — Covariate stack (Stage 2 input assembly) · 2026-09-20
+- Entry state: Stage 1 (growth) done. Week-2 covariate layers on disk in
+  `data/interim/` (WorldCover 1 km modal, gHM 1 km, terrain 3-band 1 km) + OSM
+  roads in `data/raw/osm/`; boundaries in `data/processed/`. `06` slot was the
+  header-only stub `06_covariates.R` (`# ... (fill in Week 6)`).
+- Did (tasks 8.1-8.6, all in `scripts/06_build_covariate_stack.R`):
+  - **8.1** header/scope + path block + fail-early guards. Renamed the deliverable
+    to `06_build_covariate_stack.R` (naming §3); corrected the input path (Week-2
+    covariate rasters are in `data/interim/`, not `data/processed/`).
+  - **8.2** one 1 km EPSG:7755 template from the national boundary, 5 km collar,
+    extent snapped to whole `GRID_CELL_M` (3093 × 2864 = 8,858,352 cells);
+    extent/res/CRS asserted.
+  - **8.3** aligned the 3 covariates onto the template — WorldCover near, gHM +
+    terrain bilinear; `compareGeom` PASS all three. Did NOT use `read_rast()`
+    (already-7755 inputs → straight `resample`, one interpolation each).
+  - **8.4** `cov_distroad_1km_7755.tif` by rasterise→`terra::distance`
+    (`touches=TRUE`) over 885,669 roads; min 0 / max ~278.9 km / mean ~2.0 km.
+    Inline road-class set = all 5 major classes (tertiary kept — barrier class is
+    Week 9).
+  - **8.5 + Decision 10** stacked 6 bands (`landcover, ghm, elev, slope, tri,
+    dist_road_m`) → `cov_stack_1km_7755.tif`; common NA mask (any band NA → all
+    NA). 3,010,738 complete-case cells; gHM binding, ~56,840 (~1.8%) dropped.
+  - **8.6** `tbl_10_covariate_stack_qa.csv` — all 6 bands 3,010,738 cells / 98.15%
+    / range_ok TRUE; stacked-vs-source spot-check matches (gHM 0.377/0.377, elev
+    577/571, slope 2.54/2.50, tri 23.4/23.1, dist_road 2019/2045, landcover modal
+    40 n_class 11 both).
+- Decisions made: **Decision 10** (covariate-stack common NA mask; gHM gap-fill
+  deferred to Week 9).
+- Outputs: `scripts/06_build_covariate_stack.R`, `cov_stack_1km_7755.tif`,
+  `cov_distroad_1km_7755.tif`, `tbl_10_covariate_stack_qa.csv`; updated
+  `methodology.md`, `data-dictionary.md`, `project-plan.md`, `README.md`, this
+  handoff. No new `renv` dependency.
+- Gotchas found (now in "Known gotchas"): `terra::ext()` returns an S4
+  SpatExtent — not subsettable with `["xmin"]`; coerce with `as.vector()` first.
+  `is.na()` on a SpatRaster is the base generic (terra S4 method) — call it
+  unqualified, `terra::is.na` is not an exported symbol.
+- Carried forward / next week: **Week 9** — Stage 2 resistance surface. Decide
+  land-cover resistance values + barrier road classes (numbered), and run the
+  Decision-10 gHM gap-fill relevance check. **At commit: `git rm
+  scripts/06_covariates.R`** (the old stub) so the `06` slot is not duplicated.
 
 ### Week 7 — Growth visuals + regional roll-up · 2026-09-20
 - Entry state: `stats_reserve_census_7755.gpkg` carried all growth columns;

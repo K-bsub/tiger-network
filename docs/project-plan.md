@@ -538,7 +538,20 @@ is complete and publishable on its own. Docs updated; Week 7 ticked.
 | **11** | Reserve network graph | `igraph` metrics: betweenness (linchpins), components (isolated reserves) | 3–4 h |
 | **12** | Pinch points + visuals | Road-crossing pinch points; `fig_04` network figure; `tbl_03` metrics | 3–4 h |
 
-### Week 8 — task breakdown
+### Week 8 — task breakdown *(complete)*
+
+**Week 8 outcome (as run):** all six tasks done in
+`scripts/06_build_covariate_stack.R`. Built the 1 km EPSG:7755 template (3093 ×
+2864 = 8,858,352 cells; boundary + 5 km collar, extent snapped to whole
+`GRID_CELL_M`), aligned the three Week-2 covariates onto it (WorldCover nearest;
+gHM + terrain bilinear; `compareGeom` PASS), derived `cov_distroad_1km_7755.tif`
+(rasterise→distance over 885,669 roads), and stacked six bands to
+`cov_stack_1km_7755.tif` under a common NA mask (**Decision 10**). QA
+(`tbl_10_covariate_stack_qa.csv`): all bands 3,010,738 cells / 98.15% of India /
+range_ok TRUE; stacked-vs-source spot-check confirms values intact. gHM is the
+binding NA layer (~1.8% dropped); a gHM gap-fill relevance check is deferred to
+Week 9 (Decision 10). Deliverable renamed `06_covariates.R` →
+`06_build_covariate_stack.R` (naming §3); delete the old stub at commit.
 
 Entry state (as of Week-7 close): Stage 1 (growth) is done. On disk from Week 2
 (`scripts/01`), all on the 1 km EPSG:7755 grid where raster: WorldCover 2021
@@ -584,13 +597,75 @@ independent of the script prefix).
   Decision (trim to city/town, or change KDE radius). If distance-to-settlement
   is wanted as a covariate, raise the trim first — do not stack the raw 199,800.
 
-**Decision due this week:** none numbered required for the covariate stack itself.
-Two pending Decisions come due next (Week 9): land-cover **resistance values** and
-the **barrier road classes**. Surface both at Week-8 close so Week 9 opens with
-them ready to decide.
+**Decision due this week:** none numbered required for the covariate stack itself
+beyond **Decision 10** (the cross-band common NA mask — made as built). Three
+items come due next (Week 9): land-cover **resistance values**, the **barrier road
+classes**, and the **Decision-10 gHM gap-fill relevance check**. All three are
+surfaced at Week-8 close so Week 9 opens with them ready to decide.
 
 **Exit state:** `cov_stack_1km_7755.tif` written and QA'd — one aligned 1 km grid
 that Weeks 9 (resistance) and 13+ (SDM) both read. Docs updated; Week 8 ticked.
+
+---
+
+### Week 9 — task breakdown
+
+Entry state (as of Week-8 close): `cov_stack_1km_7755.tif` written (6 bands:
+`landcover`, `ghm`, `elev`, `slope`, `tri`, `dist_road_m`; common NA mask,
+3,010,738 complete-case cells) and QA'd (`tbl_10`). `cov_distroad_1km_7755.tif`
+held un-common-masked in `data/interim/`. `WORLDCOVER_RESISTANCE` in
+`R/00_config.R` holds a literature-informed **starting** set (not yet a Decision).
+OSM roads (`osm_roads_major_7755.gpkg`, 885,669 features, tertiary-dominated) on
+disk. Reserve + corridor geometry available (`boundary_reserves_all_7755.gpkg`;
+corridors re-extracted from the NTCA KML this stage).
+
+Week 9 builds `scripts/07_build_resistance.R`: turn the covariate stack into a
+movement-**resistance** surface on the same 1 km EPSG:7755 grid, so Week 10's
+least-cost paths read it directly. This week is where the two deferred
+connectivity Decisions are **made before any resistance raster is written**, and
+where the Decision-10 gap-fill question is **resolved**.
+
+Naming (naming-conventions §2/§6): resistance raster
+`resist_tiger_baseline_7755.tif`; QA tables `tbl_11`+ (output counter independent
+of the script prefix).
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 9.1 | Header/scope of `scripts/07_build_resistance.R`: reads `cov_stack_1km_7755.tif` (+ OSM roads for the barrier class); writes `resist_tiger_baseline_7755.tif` + QA. Confirm no stale stub text; `source(00_config, 00_functions_io)` | Header matches the deliverable; runs the sources | 10 min |
+| 9.2 | **Resolve Decision 10 (gHM gap-fill relevance check).** Intersect the ~56,840 common-mask-dropped cells with the reserve + corridor footprints. If a reserve/corridor loses material interior coverage (watch Sundarbans, coastal Western Ghats), apply a bounded gHM edge gap-fill (focal/nearest-fill of the NA fringe) and re-stack; record the fill method + radius as a **numbered Decision**. If not, record "no fill needed" and the common mask stands | Dropped-cell/reserve overlap quantified; gap-fill applied + re-stacked **or** closed as not-needed; outcome recorded in methodology | 40–60 min |
+| 9.3 | **Make the land-cover resistance-value Decision (numbered).** Review `WORLDCOVER_RESISTANCE` against tiger movement literature; confirm or revise the 11 class values (1 = easiest … high = barrier). Record the final set + rationale as a numbered Decision. Do **not** hardcode values in `scripts/07` — read them from `R/00_config.R` | Numbered Decision written; `WORLDCOVER_RESISTANCE` finalised in config | 30–45 min |
+| 9.4 | **Make the barrier road-class Decision (numbered).** Decide which OSM road classes act as movement barriers in the resistance surface — keep tertiary or restrict to motorway–secondary. Separate from the 8.4 distance covariate (which kept all classes). Record the class set + barrier weight rationale | Numbered Decision written; barrier class set fixed | 20–30 min |
+| 9.5 | Reclassify `landcover` → resistance via the finalised `WORLDCOVER_RESISTANCE` (categorical `classify()`; assert every present class code has a value, no `NA` leak) | Land-cover resistance layer on the 1 km grid; all classes mapped | 30–40 min |
+| 9.6 | Add the road barrier: rasterise the barrier-class roads onto the grid (`touches = TRUE`) and combine with the land-cover resistance (max/additive per the 9.4 Decision). Record the combine rule inline | Combined resistance layer; combine rule recorded | 30–40 min |
+| 9.7 | Write `resist_tiger_baseline_7755.tif` via `write_processed_rast`; assert grid match vs the stack (`compareGeom`) and a sane value range (min ≥ 1, finite max, no `NA` inside India) | Resistance raster written; asserts pass | 20 min |
+| 9.8 | QA: value distribution, per-class contribution, and a spot-check that known barriers (built-up, major roads, water) score high and tree cover scores low. Write `tbl_11_resistance_qa.csv` | QA table written; barrier/low-cost sanity holds | 30 min |
+| 9.9 | Update `data-dictionary.md` (`resist_tiger_baseline_7755.tif` schema), `methodology.md` (the new numbered Decisions + Week-9 change log), `README.md`/handoff (Week 9 status, entry point for Week 10) | Docs match as-built | 20 min |
+| 9.10 | Commit (`analysis:` for `07` + resistance/QA; `docs:` separate) | Committed and pushed | 10 min |
+
+**Week 9 pitfalls:**
+- **Decisions before the raster.** 9.2–9.4 are numbered Decisions and must be
+  fixed **before** the resistance surface is written (pre-registration). Do not
+  write `resist_*` then back-fill the rationale.
+- **Read resistance values from config, never hardcode.** `scripts/07` must read
+  `WORLDCOVER_RESISTANCE`; a literal lookup in the script would drift from the
+  recorded Decision.
+- **Categorical reclass, not interpolation.** Land cover → resistance is a
+  `classify()`/lookup on class codes, never a bilinear/continuous op.
+- **Assert no unmapped class.** If a WorldCover code present in the stack has no
+  resistance value, the reclass leaks `NA` into the surface — assert every present
+  code is covered before writing.
+- **PROJ `proj.db` clash still applies.** Same machine trap — confirm
+  `crs(rast(crs="EPSG:7755"))` prints the India NSF LCC WKT in a fresh session.
+- **Keep the barrier road set separate from the 8.4 distance set.** 8.4 kept all
+  major classes for a distance covariate; 9.4 is the independent barrier choice.
+
+**Decisions due this week:** the land-cover **resistance values** (9.3) and the
+**barrier road classes** (9.4), both numbered; plus the resolution of **Decision
+10** (9.2 — gHM gap-fill applied as a new Decision, or closed as not-needed).
+
+**Exit state:** `resist_tiger_baseline_7755.tif` written and QA'd on the 1 km
+grid; the two connectivity Decisions recorded; Decision 10 resolved. Ready for
+Week 10 least-cost paths. Docs updated; Week 9 ticked.
 
 ---
 
@@ -656,7 +731,7 @@ deliverable exists.
 | 5 | Census joined to boundaries + area overwrite | ✅ Complete |
 | 6 | Growth metrics table | ✅ Complete |
 | 7 | Growth visuals + roll-up | ✅ Complete |
-| 8 | Covariate stack (Stage 2 start) | ⚪ Not started |
+| 8 | Covariate stack (Stage 2 start) | ✅ Complete |
 | 9–12 | Connectivity track | ⚪ Not started |
 | 13–16 | Suitability track | ⚪ Not started |
 | 17–20 | Site + close | ⚪ Not started |

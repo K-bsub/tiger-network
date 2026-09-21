@@ -2,13 +2,16 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** Week 7 complete — **Stage 1 (Growth) done.** `scripts/05_growth_analysis.R`
-built the regional roll-up (`tbl_02_regional_rollup.csv`) and the two growth
-figures (`fig_01_growth_ranking.png`, `fig_02_growth_animation.gif`), all reading
-`stats_reserve_census_7755.gpkg` only. No new numbered Decision (the roll-up `NA`
-rule is an inline analytical choice — see the Week-7 change-log entry). The 7.6
-verification block passes all 13 checks. Week 8 starts Stage 2 (Connectivity):
-`scripts/06_build_covariate_stack.R` → `cov_stack_1km_7755.tif`.
+**Status:** Week 8 complete — **Stage 2 (Connectivity) input assembly done.**
+`scripts/06_build_covariate_stack.R` assembled the aligned 1 km EPSG:7755
+covariate stack `cov_stack_1km_7755.tif` (bands: `landcover`, `ghm`, `elev`,
+`slope`, `tri`, `dist_road_m`) from the Week-2 layers, plus the interim
+distance-to-road covariate `cov_distroad_1km_7755.tif` and the QA table
+`tbl_10_covariate_stack_qa.csv`. Assembly and alignment only — resistance values
+and barrier road classes remain Week-9 Decisions. **Decision 10** records the
+cross-band common-NA-mask policy and defers a gHM coastal/edge gap-fill to Week 9
+pending a per-reserve relevance check. Prior: Week 7 — Stage 1 (Growth) done
+(`scripts/05_growth_analysis.R`; `tbl_02`, `fig_01`, `fig_02`; 13/13 checks).
 
 This document is the processing log and the decision record. Every significant
 choice becomes a **numbered Decision** with a date and a justification, recorded
@@ -413,6 +416,54 @@ only**, never as the area value. Do not use the KML polygon area (Decision 4).
 
 This closes the **[Week 6] Zero-baseline handling** pending item.
 
+### Decision 10 — Covariate-stack cross-band NA policy (common mask; gHM gap-fill deferred)
+**Date:** 2026-09-20
+**Choice:** In the assembled covariate stack `cov_stack_1km_7755.tif`
+(`scripts/06_build_covariate_stack.R`, task 8.5), apply a **common NA mask**: a
+cell is kept only where **all six bands** (`landcover`, `ghm`, `elev`, `slope`,
+`tri`, `dist_road_m`) are non-`NA`; if any band is `NA` in a cell, the whole cell
+is set `NA` across every band. Do **not** gap-fill any band now. A gHM
+coastal/edge gap-fill is **deferred to Week 9**, to be done only if a per-reserve
+relevance check shows the trimmed cells matter for the connectivity / SDM extent.
+
+**Reason (what the Week-8 QA showed):**
+- The Week-9 resistance surface and the Week-13+ `maxnet` SDM consume the stack
+  as a multi-band predictor and need **complete cases** — no band should present
+  a partial covariate vector for a cell. The common mask guarantees that.
+- The bands do not share an identical valid footprint. Per the Week-8 QA
+  (`tbl_10_covariate_stack_qa.csv`), five bands cover ~3,067,58x cells but **gHM
+  covers only ~3,012,007** — it is the **binding NA layer**. gHM was built by a
+  windowed 300 m COG read reprojected by bilinear (`scripts/01` Block 5); its
+  valid extent is slightly smaller than WorldCover/terrain along the coast/border
+  and at small interior water/fill gaps.
+- The common mask therefore trims every band to gHM's footprint: **complete-case
+  cells = 3,010,738 (98.15% of the India grid); ~56,840 cells (~1.8%) dropped**,
+  almost all of them cells where gHM is `NA` but the other five have data.
+
+**Why defer the gap-fill rather than fill or close now:**
+- Filling gHM's `NA` fringe (a focal/nearest-fill of the edge) is a covariate
+  *treatment* choice, not a stacking mechanic. Making it inside the Week-8
+  assembly step would bury an analytical decision in a mechanical one.
+- Whether the ~1.8% loss matters is an **empirical question not yet checked**:
+  the concern is specific reserves on the coast/edge (Sundarbans mangrove edge,
+  coastal Western Ghats reserves) losing cells inside their footprint. Deciding
+  "no fill, ever" before that check would be the same premature closure the
+  pre-registration discipline avoids; deciding "always fill" would add an
+  unvalidated covariate edit.
+- **Week-9 action:** before the resistance surface is built, intersect the
+  dropped-cell set with the reserve/corridor footprints. If material coverage is
+  lost inside a reserve, apply a bounded gHM edge gap-fill and re-stack (a new
+  numbered Decision recording the fill method and radius); if not, the common
+  mask stands as final and this Decision closes with "no fill needed".
+
+**Consequences for the pipeline:**
+- `cov_stack_1km_7755.tif` is the complete-case stack (six bands, common mask).
+- `tbl_10_covariate_stack_qa.csv` records per-band valid-before counts, the
+  common-case count, and the per-band drop, so the coverage cost is visible.
+- The interim single-purpose layers (`cov_distroad_1km_7755.tif` and the Week-2
+  `cov_*_1km_7755.tif`) are **not** common-masked, so a Week-9 gap-fill can start
+  from gHM's own footprint without re-deriving the others.
+
 ### Decisions pending (raised, not yet made)
 
 These forks are open. Each is decided in the week noted in the project plan,
@@ -430,6 +481,12 @@ before the relevant code is written.
   motorway–tertiary (885,669 features, tertiary-dominated: 432,689). Decide
   whether tertiary stays in the barrier/resistance surface or the layer is
   restricted to motorway–secondary, when the resistance surface is built.
+- **[Week 9] gHM coastal/edge gap-fill (from Decision 10).** The common NA mask
+  trims the stack to gHM's footprint, dropping ~56,840 cells (~1.8%). Before the
+  resistance surface is built, intersect the dropped-cell set with the
+  reserve/corridor footprints. If a reserve loses material coverage (watch
+  Sundarbans and coastal Western Ghats), apply a bounded gHM edge gap-fill and
+  re-stack as a new numbered Decision; if not, Decision 10's common mask is final.
 - **[Week 13–14] Target-group scope.** Decision 5 pulled all Mammalia. Decide at
   model fit whether to narrow to a large-bodied guild (carnivores + ungulates,
   the camera-trap/sighting group that shares the tiger's detection method),
@@ -443,6 +500,55 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-09-20 — Week 8: covariate stack assembled (Stage 2 input; Decision 10)
+
+`scripts/06_build_covariate_stack.R` built the aligned covariate stack — the
+first Stage-2 (Connectivity) deliverable. Assembly and alignment only; no
+resistance values and no barrier road-class choice (both Week 9).
+
+**Template (task 8.2).** One 1 km EPSG:7755 template, built from the national
+boundary buffered by a 5 km collar (`COLLAR_M`), with the extent **snapped out to
+whole multiples of `GRID_CELL_M`** so the grid is reproducible from the boundary
+alone (independent of whatever bbox origin `scripts/01` used). 3093 × 2864 =
+8,858,352 cells. Every covariate resamples onto this one template; extent / res /
+CRS asserted once.
+
+**Alignment (task 8.3).** The three Week-2 covariate layers (which live in
+`data/interim/`, not `data/processed/`) are resampled onto the template —
+WorldCover **nearest** (categorical), gHM and terrain **bilinear** (continuous).
+`read_rast()` is deliberately **not** used here: it reprojects to an auto grid,
+but the inputs are already EPSG:7755, so a straight `resample` onto the template
+is one interpolation each (avoids double-interpolating, and stepping the class
+layer twice). `compareGeom` re-asserted against the template after each.
+
+**Distance-to-road (task 8.4).** `cov_distroad_1km_7755.tif` derived by
+**rasterize-then-distance** (rasterise the 885,669 major-road lines onto the
+template with `touches = TRUE`, then `terra::distance`) — far cheaper than
+cell-to-line over 886k lines × 8.86M cells, identical at 1 km. **Inline road-class
+choice (covariate only, not a Decision):** all five major classes + `_link` ramps
+(the layer is already major-only from `scripts/01`); tertiary is **kept** on
+purpose — whether tertiary is a movement *barrier* is the separate Week-9 road
+Decision. Result: min 0 m, max ~278.9 km, mean ~2.0 km inside India.
+
+**Stack + NA policy (task 8.5 + Decision 10).** Six bands assembled in the fixed
+order `landcover, ghm, elev, slope, tri, dist_road_m` and written to
+`data/processed/cov_stack_1km_7755.tif`. Cross-band **common NA mask** (Decision
+10): any band `NA` → all bands `NA`, giving a complete-case predictor. gHM is the
+binding NA layer; the mask drops ~56,840 cells (~1.8%). A gHM coastal/edge
+gap-fill is **deferred to Week 9** pending a per-reserve relevance check.
+
+**QA (task 8.6).** `tbl_10_covariate_stack_qa.csv`: all six bands **3,010,738
+cells, 98.15% of India, `range_ok` TRUE**. Stacked-vs-source spot-check confirms
+alignment did not corrupt values — gHM 0.377/0.377, landcover modal 40 (cropland)
+n_class 11 both, elev 577.3/570.8, slope 2.54/2.50, tri 23.4/23.1, dist_road
+2018.9/2044.9 (the small gaps are the ~1.8% common-mask trim, source means being
+over the larger pre-mask footprint).
+
+**Data notes (not bugs).** gHM's smaller footprint is a windowed-COG-read edge
+effect, documented in Decision 10. The `write_processed_rast` console message
+lacks a trailing newline, so it visually abuts the next line — cosmetic, in the
+shared `R/00_functions_io.R`; left untouched.
 
 ### 2026-09-20 — Week 7 complete: regional roll-up + growth figures (Stage 1 done)
 

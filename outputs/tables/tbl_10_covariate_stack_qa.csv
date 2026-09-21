@@ -1,0 +1,7 @@
+"band","n_valid","pct_of_india","min","max","range_ok","stack_stat","source_stat"
+"landcover",3010738,98.15,10,100,TRUE,"modal=40; n_class=11","modal=40; n_class=11"
+"ghm",3010738,98.15,0,0.993,TRUE,"mean=0.377","mean=0.377"
+"elev",3010738,98.15,-111.585,7843.875,TRUE,"mean=577.333","mean=570.773"
+"slope",3010738,98.15,0.001,42.334,TRUE,"mean=2.540","mean=2.504"
+"tri",3010738,98.15,0.007,554.364,TRUE,"mean=23.419","mean=23.101"
+"dist_road_m",3010738,98.15,0,278926.5,TRUE,"mean=2018.946","mean=2044.985"

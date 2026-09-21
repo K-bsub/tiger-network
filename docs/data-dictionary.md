@@ -229,6 +229,66 @@ caveat in the caption (proposal success criterion).
   **"0 (real)"** class on the ramp (Decision 9); the 3 geometry-absent reserves
   (Amrabad, Pilibhit, Dholpur-Karauli) are named off-map and never drawn.
 
+## cov_stack_1km_7755.tif  *(Week 8 — built)*
+
+Built by `scripts/06_build_covariate_stack.R` (Stage 2 input). One aligned,
+analysis-ready **multi-band** raster on a single 1 km EPSG:7755 template, so the
+Week-9 resistance surface and the Week-13+ SDM read the identical grid. All bands
+resampled onto one template (task 8.2/8.3): WorldCover **nearest** (categorical),
+gHM / terrain **bilinear** (continuous); distance-to-road derived on the grid
+(task 8.4). Cross-band **common NA mask** (Decision 10): a cell is present only
+where **all six bands** are non-`NA`. As built: **3,010,738 complete-case cells,
+98.15% of the India grid** (gHM is the binding NA layer; the mask drops ~56,840
+cells, ~1.8% — a gHM coastal/edge gap-fill is deferred to Week 9, Decision 10).
+
+**Grid:** EPSG:7755, 1 km, 3093 × 2864 = 8,858,352 template cells (extent snapped
+to whole `GRID_CELL_M`; 5 km collar). Band order is fixed (`STACK_BANDS`) so later
+scripts index by name, never by position.
+
+| Band | Type | Units / domain | Source (Week-2 layer) | Resample |
+|---|---|---|---|---|
+| `landcover` | categorical | ESA WorldCover 2021 class code (10–100; 11 classes present, modal 40 = cropland) | `cov_landcover_worldcover2021_1km_7755.tif` | nearest |
+| `ghm` | continuous | Global Human Modification 2022, 0–1 (India mean 0.377) | `cov_ghm2022_1km_7755.tif` | bilinear |
+| `elev` | continuous | Elevation, metres (India: coastal lows to Himalaya) | `cov_terrain_1km_7755.tif` (band `elevation`) | bilinear |
+| `slope` | continuous | Slope, degrees (1 km-aggregated) | `cov_terrain_1km_7755.tif` (band `slope`) | bilinear |
+| `tri` | continuous | Terrain Ruggedness Index (1 km-aggregated) | `cov_terrain_1km_7755.tif` (band `tri`) | bilinear |
+| `dist_road_m` | continuous | Distance to nearest major road, metres (min 0, max ~278.9 km, mean ~2.0 km) | `cov_distroad_1km_7755.tif` (this script) | derived on grid |
+
+**Not applied here:** `WORLDCOVER_RESISTANCE` (a starting set, not a Decision) and
+any barrier road-class choice — both are Week-9 numbered Decisions. The stack is
+covariate values only.
+
+## cov_distroad_1km_7755.tif  *(Week 8 — built, interim)*
+
+Written by `scripts/06_build_covariate_stack.R` (task 8.4). Distance-to-road
+covariate; feeds the stack's `dist_road_m` band. Single band on the 1 km EPSG:7755
+template. **Inline road-class basis** (covariate only, not a Decision): all five
+major OSM classes + `_link` ramps (motorway, trunk, primary, secondary, tertiary),
+885,669 features — tertiary **kept** (the barrier-class question is Week 9).
+Derived by rasterise-then-`terra::distance` (`touches = TRUE`), computed on the
+full template then masked to India. Kept **un-common-masked** (its own gHM-free
+footprint) so a Week-9 gap-fill can re-stack without re-deriving it.
+
+| Band | Type | Units | Meaning |
+|---|---|---|---|
+| `dist_road_m` | continuous | metres | Distance from the cell centre to the nearest major-road cell (0 on a road cell) |
+
+## tbl_10_covariate_stack_qa.csv  *(Week 8 — built)*
+
+Written by `scripts/05`/`06`'s `write_table(nn = 10, ...)` — per-band QA for the
+stack (task 8.6). One row per band. Coverage is against the full India footprint
+(before the common mask), so the common-mask trim shows as bands below 100%.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `band` | character | Band name (one of `STACK_BANDS`) |
+| `n_valid` | integer | Non-`NA` cells in the stacked band (equal across bands after the common mask: 3,010,738) |
+| `pct_of_india` | numeric | `n_valid` as % of India-grid cells (98.15% as built) |
+| `min`, `max` | numeric | Band min / max (categorical band: class-code range) |
+| `range_ok` | logical | `TRUE` if `[min,max]` sits inside the band's physical sanity range; a `FALSE` warns, does not stop |
+| `stack_stat` | character | Summary of the **stacked** band — `mean=…` for continuous, `modal=…; n_class=…` for `landcover` |
+| `source_stat` | character | Same summary for the **source** Week-2 layer (pre-common-mask), for the alignment spot-check. Close agreement confirms values were not corrupted; small gaps are the ~1.8% common-mask trim |
+
 ## occ_tiger_gbif_clean_7755.gpkg  *(Week 13)*
 
 | Field | Type | Meaning |
