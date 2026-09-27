@@ -18,7 +18,7 @@ Most datasets come from the two earlier tiger projects. **Run the audit
 - **Access:** https://ntca.gov.in — PDF reports + Excel. **Manual.**
 - **Licence:** Government of India.
 - **Extracted (Week 4):** the per-reserve within-reserve SECR series lives in a
-  **table only for 2014 (Table 2.2, pp.22-23), 2018 (Table 3.4, pp.22-43), and
+  **table only for 2014 (Table 2.2, pp.22-23), 2018 (Table 3.4, pp.42-43), and
   2022 (Table I.3.3, pp.28-29)**. **2006 and 2010 carry no per-reserve table** —
   their finest tabulated unit is state × landscape complex (Table ES.1), and
   reserve-anchored figures appear only in landscape-chapter prose. So the growth
@@ -117,6 +117,8 @@ rejections are not re-litigated.
 - **File:** `data/raw/ntca/reserve_pa_crosswalk.csv` (hand-reviewed;
   gitignored with the rest of `data/raw`).
 - **Built:** Week 3, from the KML PA names + the NTCA 58-reserve reference list.
+
+### Administrative boundaries — states and districts
 - **Role:** State/district context and roll-up (Decision 2 units).
 - **States:** Natural Earth admin-1 via `rnaturalearth::ne_states` (public
   domain). 36 states/UTs. Output `boundary_states_ne_7755.gpkg`.
@@ -175,6 +177,14 @@ rejections are not re-litigated.
   clipped to India. 88 tiles overlap the AOI. Output:
   `data/interim/cov_landcover_worldcover2021_1km_7755.tif`; per-tile 1 km cache
   in `data/raw/worldcover/tiles_1km/` (resumable).
+- **Stack source since Decision 12 (Week 9):** the covariate stack no longer
+  uses the masked interim layer. `scripts/06` merges the 88 **unmasked** cached
+  tiles, resamples them onto the stack template, and masks to India on the
+  template. The interim layer above was masked on the `scripts/01` grid, which
+  left 1,778 India cells with no class after the resample (a one-cell edge
+  shift). **Keep the tile cache** — it is now a required input. 7 India cells
+  still have no class; all sit on 3° tile corners (24°N with 75°E, 87°E, 93°E),
+  probably a seam from the per-tile reprojection. Accepted (Decision 13).
 - **Class codes present:** 10,20,30,40,50,60,70,80,90,95,100 (all 11 expected).
 - **Known issue (from Bay Area):** under-maps chaparral/shrub; check relevance
   for Indian dry-forest classes at model fit. Per-class fractional cover, if
@@ -195,8 +205,19 @@ rejections are not re-litigated.
   `data/raw/terrain/dem_india_aws_z7_4326.tif`; 3-band output
   `data/interim/cov_terrain_1km_7755.tif`.
 - **Coverage check:** DEM covers the full India bbox; interior fully filled
-  (3,067,585 cells inside India). Ranges: elevation −413 to 7,914 m (Himalaya to
-  coastal/salt-flat lows), slope 0–45° (1 km-aggregated), TRI 0–635.
+  (3,067,585 cells inside India). Ranges: elevation −413 to 7,914 m, slope 0–45°
+  (1 km-aggregated), TRI 0–635. *(Note 2026-09-26: the −413 m minimum was first
+  read as "coastal/salt-flat lows". India's lowest land is about −2 m, so the
+  negative values are probably sea-floor depths that the AWS terrain tiles carry
+  for water. Not verified. After the Week-9 rebuild the stack includes more
+  water and edge cells and its elevation minimum is −434.2 m (`d13` build).
+  Treatment is a Week-14 decision.)*
+- **Stack source since Decision 13 (Week 9):** `scripts/06` rebuilds the three
+  terrain bands from the raw DEM `dem_india_aws_z7_4326.tif` along the same path
+  as `scripts/01` Block 7, but without its India mask, then masks to India on
+  the stack template. The interim layer above was masked on the `scripts/01`
+  grid, which left the stack's edge cells without terrain after the resample.
+  **Keep the raw DEM** — it is now a required input.
 - **Superseded plan:** Phase 1 used SRTM 30 m tiles (EarthExplorer). Replaced
   here by elevatr AWS tiles at 1 km — no national 30 m pull needed for a 1 km
   covariate.
@@ -214,6 +235,13 @@ rejections are not re-litigated.
   `data/interim/cov_ghm2022_1km_7755.tif`; source stamp in
   `data/raw/ghm/ghm_source_stamp.txt`.
 - **Check:** India min/max 0 / 0.993, mean 0.377 (values correctly within 0–1).
+- **Coverage gap and fill (Week 9):** the 1 km layer is `NA` in 55,049 India
+  cells where the other covariates have values — mostly water and the land
+  cells next to it (likely cause: gHM is `NA` over water and the bilinear
+  resample spreads `NA` one cell onto land; not tested). `scripts/06` STEP 8.4b
+  fills these by an iterative 3 × 3 focal mean, at most 5 passes (Decision 11):
+  56,729 filled in the final (`d13`) build; 91 water cells stay `NA`. The
+  interim layer itself is not changed.
 - **Chosen over** Kennedy 2019 (per Bay Area Decision 15).
 
 ### OpenStreetMap — roads and settlements (India)

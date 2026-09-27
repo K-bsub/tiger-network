@@ -1,0 +1,173 @@
+"unit_type","unit_id","unit_name","state","landscape_complex","n_india_cells","n_land","n_water","n_dropped_land","n_dropped_water","pct_dropped_land","material","checked","note"
+"buffer",1,"Nagarjunsagar-Srisailam (10 km ring)","Andhra Pradesh","central_india_eastern",5368,5272,96,199,51,3.77,TRUE,TRUE,"reserve polygon over-extends the notified area (Decision 4 limitation)"
+"reserve",57,"Sundarbans","West Bengal","sundarbans",1828,1442,386,177,306,12.27,TRUE,TRUE,NA
+"buffer",26,"Satpura (10 km ring)","Madhya Pradesh","central_india_eastern",1969,1876,93,69,80,3.68,TRUE,TRUE,NA
+"buffer",57,"Sundarbans (10 km ring)","West Bengal","sundarbans",713,517,196,52,133,10.06,TRUE,TRUE,NA
+"reserve",1,"Nagarjunsagar-Srisailam","Andhra Pradesh","central_india_eastern",5483,5161,322,48,232,0.93,TRUE,TRUE,"reserve polygon over-extends the notified area (Decision 4 limitation)"
+"buffer",9,"Valmiki (10 km ring)","Bihar","shivalik_gangetic",1810,1697,113,42,31,2.47,TRUE,TRUE,NA
+"buffer",7,"Kaziranga (10 km ring)","Assam","northeast_hills",1525,1165,360,40,127,3.43,TRUE,TRUE,NA
+"buffer",10,"Indravati (10 km ring)","Chhattisgarh","central_india_eastern",2226,2187,39,40,20,1.83,TRUE,TRUE,NA
+"buffer",29,"Ratapani (10 km ring)","Madhya Pradesh","central_india_eastern",2985,2895,90,40,54,1.38,TRUE,TRUE,NA
+"buffer",35,"Nawegaon-Nagzira (10 km ring)","Maharashtra","central_india_eastern",2042,1994,48,36,37,1.81,TRUE,TRUE,NA
+"buffer",5,"Manas (10 km ring)","Assam","northeast_hills",4038,4002,36,35,6,0.87,TRUE,TRUE,NA
+"buffer",18,"Nagarhole (10 km ring)","Karnataka","western_ghats",2090,2033,57,35,37,1.72,TRUE,TRUE,NA
+"buffer",15,"Bandipur (10 km ring)","Karnataka","western_ghats",2989,2931,58,34,36,1.16,TRUE,TRUE,NA
+"buffer",17,"Kali (10 km ring)","Karnataka","western_ghats",2188,2099,89,34,57,1.62,TRUE,TRUE,NA
+"reserve",34,"Sahyadri","Maharashtra","western_ghats",908,796,112,34,83,4.27,TRUE,TRUE,NA
+"buffer",46,"Anamalai (10 km ring)","Tamil Nadu","western_ghats",2723,2688,35,32,24,1.19,TRUE,TRUE,NA
+"buffer",42,"Mukundara Hills (10 km ring)","Rajasthan","shivalik_gangetic",2351,2312,39,26,33,1.12,TRUE,TRUE,NA
+"buffer",16,"Bhadra (10 km ring)","Karnataka","western_ghats",1999,1948,51,25,37,1.28,TRUE,TRUE,NA
+"buffer",32,"Tadoba-Andhari (10 km ring)","Maharashtra","central_india_eastern",1782,1755,27,25,22,1.42,TRUE,TRUE,NA
+"reserve",7,"Kaziranga","Assam","northeast_hills",478,409,69,25,29,6.11,TRUE,TRUE,NA
+"corridor",26,"kaziranga-itanagar",NA,NA,336,242,94,13,30,5.37,TRUE,TRUE,NA
+"corridor",39,"Dibru Saikhowa-D &apos;e",NA,NA,87,27,60,9,20,33.33,TRUE,TRUE,NA
+"corridor",28,"kaziranga-nameri2",NA,NA,113,69,44,7,8,10.14,TRUE,TRUE,NA
+"corridor",3,"dhudwa_nepal2",NA,NA,44,43,1,6,0,13.95,TRUE,TRUE,NA
+"reserve",8,"Orang","Assam","northeast_hills",99,73,26,4,3,5.48,TRUE,TRUE,NA
+"corridor",29,"kaziranga-orang",NA,NA,201,39,162,3,66,7.69,TRUE,TRUE,NA
+"corridor",40,"dibru-ering1",NA,NA,58,23,35,2,5,8.7,TRUE,TRUE,NA
+"buffer",19,"Biligiri Ranganatha Temple (10 km ring)","Karnataka","western_ghats",1877,1871,6,24,1,1.28,FALSE,TRUE,NA
+"buffer",34,"Sahyadri (10 km ring)","Maharashtra","western_ghats",2850,2770,80,23,41,0.83,FALSE,TRUE,NA
+"buffer",21,"Parambikulam (10 km ring)","Kerala","western_ghats",1395,1383,12,22,10,1.59,FALSE,TRUE,NA
+"corridor",1,"dudwa_lagga_bagga_philib",NA,NA,1157,1077,80,22,12,2.04,FALSE,TRUE,NA
+"reserve",5,"Manas","Assam","northeast_hills",3054,3038,16,22,1,0.72,FALSE,TRUE,NA
+"reserve",16,"Bhadra","Karnataka","western_ghats",636,581,55,22,52,3.79,FALSE,TRUE,NA
+"buffer",50,"Kawal (10 km ring)","Telangana","central_india_eastern",2280,2248,32,21,15,0.93,FALSE,TRUE,NA
+"reserve",55,"Corbett","Uttarakhand","shivalik_gangetic",906,853,53,19,49,2.23,FALSE,TRUE,NA
+"reserve",26,"Satpura","Madhya Pradesh","central_india_eastern",556,520,36,18,31,3.46,FALSE,TRUE,NA
+"buffer",52,"Dudhwa (10 km ring)","Uttar Pradesh","shivalik_gangetic",1101,1067,34,16,13,1.5,FALSE,TRUE,NA
+"reserve",9,"Valmiki","Bihar","shivalik_gangetic",1000,987,13,16,3,1.62,FALSE,TRUE,NA
+"reserve",18,"Nagarhole","Karnataka","western_ghats",850,843,7,16,3,1.9,FALSE,TRUE,NA
+"buffer",8,"Orang (10 km ring)","Assam","northeast_hills",839,569,270,15,131,2.64,FALSE,TRUE,NA
+"buffer",13,"Guru Ghasidas-Tamor Pingla (10 km ring)","Chhattisgarh","central_india_eastern",4996,4995,1,15,0,0.3,FALSE,TRUE,NA
+"buffer",14,"Palamau (10 km ring)","Jharkhand","central_india_eastern",2710,2705,5,15,1,0.55,FALSE,TRUE,NA
+"corridor",12,"Kanha-Indravati",NA,NA,3394,3367,27,15,19,0.45,FALSE,TRUE,NA
+"reserve",10,"Indravati","Chhattisgarh","central_india_eastern",1381,1363,18,15,8,1.1,FALSE,TRUE,NA
+"buffer",25,"Panna (10 km ring)","Madhya Pradesh","central_india_eastern",1850,1836,14,14,8,0.76,FALSE,TRUE,NA
+"buffer",39,"Satkosia (10 km ring)","Odisha","central_india_eastern",1842,1795,47,14,21,0.78,FALSE,TRUE,NA
+"buffer",45,"Kalakad-Mundanthurai (10 km ring)","Tamil Nadu","western_ghats",2327,2293,34,14,26,0.61,FALSE,TRUE,NA
+"buffer",58,"Buxa (10 km ring)","West Bengal","northeast_hills",1616,1602,14,14,1,0.87,FALSE,TRUE,NA
+"reserve",52,"Dudhwa","Uttar Pradesh","shivalik_gangetic",754,754,0,14,0,1.86,FALSE,TRUE,NA
+"buffer",30,"Madhav (10 km ring)","Madhya Pradesh","central_india_eastern",1632,1604,28,13,2,0.81,FALSE,TRUE,NA
+"buffer",48,"Sathyamangalam (10 km ring)","Tamil Nadu","western_ghats",2539,2481,58,13,41,0.52,FALSE,TRUE,NA
+"buffer",49,"Srivilliputhur-Megamalai (10 km ring)","Tamil Nadu","western_ghats",4122,4109,13,13,2,0.32,FALSE,TRUE,NA
+"reserve",21,"Parambikulam","Kerala","western_ghats",357,338,19,12,15,3.55,FALSE,TRUE,NA
+"reserve",39,"Satkosia","Odisha","central_india_eastern",727,701,26,12,11,1.71,FALSE,TRUE,NA
+"buffer",3,"Pakke (10 km ring)","Arunachal Pradesh","northeast_hills",1741,1736,5,11,0,0.63,FALSE,TRUE,NA
+"buffer",40,"Ranthambore (10 km ring)","Rajasthan","shivalik_gangetic",1636,1614,22,11,11,0.68,FALSE,TRUE,NA
+"reserve",2,"Namdapha","Arunachal Pradesh","northeast_hills",1842,1842,0,11,0,0.6,FALSE,TRUE,NA
+"reserve",6,"Nameri","Assam","northeast_hills",445,436,9,11,1,2.52,FALSE,TRUE,NA
+"reserve",20,"Periyar","Kerala","western_ghats",938,925,13,10,2,1.08,FALSE,TRUE,NA
+"buffer",2,"Namdapha (10 km ring)","Arunachal Pradesh","northeast_hills",1693,1692,1,9,0,0.53,FALSE,TRUE,NA
+"buffer",20,"Periyar (10 km ring)","Kerala","western_ghats",2287,2275,12,9,5,0.4,FALSE,TRUE,NA
+"buffer",41,"Sariska (10 km ring)","Rajasthan","shivalik_gangetic",2809,2807,2,9,2,0.32,FALSE,TRUE,NA
+"reserve",25,"Panna","Madhya Pradesh","central_india_eastern",649,645,4,9,1,1.4,FALSE,TRUE,NA
+"buffer",33,"Pench (MH) (10 km ring)","Maharashtra","central_india_eastern",1531,1460,71,8,33,0.55,FALSE,TRUE,NA
+"corridor",51,"dendeli-sharavathi2",NA,NA,594,590,4,8,3,1.36,FALSE,TRUE,NA
+"buffer",27,"Sanjay Dubri (10 km ring)","Madhya Pradesh","central_india_eastern",2937,2936,1,7,0,0.24,FALSE,TRUE,NA
+"reserve",15,"Bandipur","Karnataka","western_ghats",1099,1096,3,7,1,0.64,FALSE,TRUE,NA
+"buffer",36,"Bor (10 km ring)","Maharashtra","central_india_eastern",808,802,6,6,5,0.75,FALSE,TRUE,NA
+"buffer",38,"Similipal (10 km ring)","Odisha","central_india_eastern",3093,3072,21,6,11,0.2,FALSE,TRUE,NA
+"buffer",56,"Rajaji (10 km ring)","Uttarakhand","shivalik_gangetic",2446,2434,12,6,4,0.25,FALSE,TRUE,NA
+"reserve",14,"Palamau","Jharkhand","central_india_eastern",1265,1265,0,6,0,0.47,FALSE,TRUE,NA
+"reserve",17,"Kali","Karnataka","western_ghats",802,796,6,6,5,0.75,FALSE,TRUE,NA
+"reserve",19,"Biligiri Ranganatha Temple","Karnataka","western_ghats",712,710,2,6,0,0.85,FALSE,TRUE,NA
+"reserve",42,"Mukundara Hills","Rajasthan","shivalik_gangetic",434,429,5,6,2,1.4,FALSE,TRUE,NA
+"reserve",46,"Anamalai","Tamil Nadu","western_ghats",1173,1158,15,6,6,0.52,FALSE,TRUE,NA
+"reserve",56,"Rajaji","Uttarakhand","shivalik_gangetic",994,985,9,6,3,0.61,FALSE,TRUE,NA
+"reserve",58,"Buxa","West Bengal","northeast_hills",496,490,6,6,0,1.22,FALSE,TRUE,NA
+"buffer",12,"Achanakmar (10 km ring)","Chhattisgarh","central_india_eastern",1458,1440,18,5,4,0.35,FALSE,TRUE,NA
+"buffer",31,"Melghat (10 km ring)","Maharashtra","central_india_eastern",2413,2409,4,5,0,0.21,FALSE,TRUE,NA
+"buffer",43,"Ramgarh Vishdhari (10 km ring)","Rajasthan","shivalik_gangetic",1437,1433,4,5,4,0.35,FALSE,TRUE,NA
+"buffer",54,"Ranipur (10 km ring)","Uttar Pradesh","shivalik_gangetic",1685,1683,2,5,2,0.3,FALSE,TRUE,NA
+"buffer",55,"Corbett (10 km ring)","Uttarakhand","shivalik_gangetic",1906,1893,13,5,12,0.26,FALSE,TRUE,NA
+"reserve",13,"Guru Ghasidas-Tamor Pingla","Chhattisgarh","central_india_eastern",2360,2360,0,5,0,0.21,FALSE,TRUE,NA
+"reserve",35,"Nawegaon-Nagzira","Maharashtra","central_india_eastern",396,390,6,5,6,1.28,FALSE,TRUE,NA
+"buffer",6,"Nameri (10 km ring)","Assam","northeast_hills",1660,1639,21,4,4,0.24,FALSE,TRUE,NA
+"corridor",14,"NSTR-Tirupati",NA,NA,704,700,4,4,1,0.57,FALSE,TRUE,NA
+"corridor",22,"Simlipal-Satkosia-F",NA,NA,1365,1355,10,4,5,0.3,FALSE,TRUE,NA
+"reserve",27,"Sanjay Dubri","Madhya Pradesh","central_india_eastern",974,971,3,4,2,0.41,FALSE,TRUE,NA
+"reserve",29,"Ratapani","Madhya Pradesh","central_india_eastern",991,980,11,4,6,0.41,FALSE,TRUE,NA
+"buffer",4,"Kamlang (10 km ring)","Arunachal Pradesh","northeast_hills",1555,1555,0,3,0,0.19,FALSE,TRUE,NA
+"buffer",24,"Bandhavgarh (10 km ring)","Madhya Pradesh","central_india_eastern",1724,1724,0,3,0,0.17,FALSE,TRUE,NA
+"corridor",25,"kane-tale",NA,NA,195,195,0,3,0,1.54,FALSE,TRUE,NA
+"corridor",31,"manas-manas-buxa",NA,NA,115,115,0,3,0,2.61,FALSE,TRUE,NA
+"corridor",32,"mehao",NA,NA,636,634,2,3,0,0.47,FALSE,TRUE,NA
+"reserve",11,"Udanti-Sitanadi","Chhattisgarh","central_india_eastern",981,971,10,3,8,0.31,FALSE,TRUE,NA
+"reserve",33,"Pench (MH)","Maharashtra","central_india_eastern",582,551,31,3,11,0.54,FALSE,TRUE,NA
+"reserve",43,"Ramgarh Vishdhari","Rajasthan","shivalik_gangetic",351,351,0,3,0,0.85,FALSE,TRUE,NA
+"reserve",50,"Kawal","Telangana","central_india_eastern",1066,1066,0,3,0,0.28,FALSE,TRUE,NA
+"buffer",11,"Udanti-Sitanadi (10 km ring)","Chhattisgarh","central_india_eastern",2515,2491,24,2,11,0.08,FALSE,TRUE,NA
+"buffer",22,"Kanha (10 km ring)","Madhya Pradesh","central_india_eastern",2469,2464,5,2,0,0.08,FALSE,TRUE,NA
+"buffer",23,"Pench (10 km ring)","Madhya Pradesh","central_india_eastern",1036,1024,12,2,0,0.2,FALSE,TRUE,NA
+"buffer",47,"Mudumalai (10 km ring)","Tamil Nadu","western_ghats",1618,1618,0,2,0,0.12,FALSE,TRUE,NA
+"corridor",10,"Sonabeda-Sitanadi",NA,NA,1242,1242,0,2,0,0.16,FALSE,TRUE,NA
+"corridor",16,"Pench-Satpura",NA,NA,2091,2087,4,2,3,0.1,FALSE,TRUE,NA
+"corridor",17,"Kailadevi-Kuno",NA,NA,160,156,4,2,4,1.28,FALSE,TRUE,NA
+"corridor",21,"radhangiri-chandoli",NA,NA,421,414,7,2,5,0.48,FALSE,TRUE,NA
+"corridor",27,"Kaziranga-Nameri",NA,NA,140,138,2,2,0,1.45,FALSE,TRUE,NA
+"corridor",30,"kaziranga-papumpare",NA,NA,101,99,2,2,0,2.02,FALSE,TRUE,NA
+"corridor",38,"Dibru Saikhowa-",NA,NA,108,105,3,2,2,1.9,FALSE,TRUE,NA
+"corridor",53,"mookambika_someshwara",NA,NA,279,274,5,2,2,0.73,FALSE,TRUE,NA
+"corridor",56,"pushpagiri_nagarhole",NA,NA,173,173,0,2,0,1.16,FALSE,TRUE,NA
+"reserve",3,"Pakke","Arunachal Pradesh","northeast_hills",718,718,0,2,0,0.28,FALSE,TRUE,NA
+"reserve",30,"Madhav","Madhya Pradesh","central_india_eastern",423,388,35,2,2,0.52,FALSE,TRUE,NA
+"reserve",40,"Ranthambore","Rajasthan","shivalik_gangetic",469,468,1,2,1,0.43,FALSE,TRUE,NA
+"reserve",48,"Sathyamangalam","Tamil Nadu","western_ghats",721,717,4,2,3,0.28,FALSE,TRUE,NA
+"reserve",49,"Srivilliputhur-Megamalai","Tamil Nadu","western_ghats",1174,1174,0,2,0,0.17,FALSE,TRUE,NA
+"buffer",28,"Veerangana Durgavati (10 km ring)","Madhya Pradesh","central_india_eastern",671,671,0,1,0,0.15,FALSE,TRUE,NA
+"corridor",7,"kahna-boramdev",NA,NA,895,892,3,1,1,0.11,FALSE,TRUE,NA
+"corridor",18,"Kuno-Madhav",NA,NA,595,593,2,1,2,0.17,FALSE,TRUE,NA
+"corridor",19,"extn-radhangiri",NA,NA,486,480,6,1,1,0.21,FALSE,TRUE,NA
+"corridor",33,"paake-nameri-sonai-rupai",NA,NA,59,59,0,1,0,1.69,FALSE,TRUE,NA
+"corridor",36,"buxa-jaldapara2",NA,NA,23,22,1,1,0,4.55,FALSE,TRUE,NA
+"corridor",41,"kamlong-mehao",NA,NA,232,232,0,1,0,0.43,FALSE,TRUE,NA
+"corridor",43,"pambadum-mathaikettan",NA,NA,92,92,0,1,0,1.09,FALSE,TRUE,NA
+"corridor",55,"shethali-bhadra2",NA,NA,141,141,0,1,0,0.71,FALSE,TRUE,NA
+"reserve",4,"Kamlang","Arunachal Pradesh","northeast_hills",755,755,0,1,0,0.13,FALSE,TRUE,NA
+"reserve",41,"Sariska","Rajasthan","shivalik_gangetic",1093,1092,1,1,1,0.09,FALSE,TRUE,NA
+"reserve",45,"Kalakad-Mundanthurai","Tamil Nadu","western_ghats",616,613,3,1,3,0.16,FALSE,TRUE,NA
+"reserve",54,"Ranipur","Uttar Pradesh","shivalik_gangetic",356,356,0,1,0,0.28,FALSE,TRUE,NA
+"buffer",37,"Dampa (10 km ring)","Mizoram","northeast_hills",997,997,0,0,0,0,FALSE,TRUE,NA
+"corridor",2,"dhudwa_nepal1",NA,NA,0,0,0,0,0,NA,FALSE,TRUE,"no India-grid cells in this unit"
+"corridor",4,"kat_khata_corri",NA,NA,0,0,0,0,0,NA,FALSE,TRUE,"no India-grid cells in this unit"
+"corridor",5,"rajaji_jhilmil",NA,NA,49,49,0,0,0,0,FALSE,TRUE,NA
+"corridor",6,"rajaji_sonanadi",NA,NA,131,131,0,0,0,0,FALSE,TRUE,NA
+"corridor",8,"kahna-boramdev",NA,NA,576,576,0,0,0,0,FALSE,TRUE,NA
+"corridor",9,"kahna-boramdev",NA,NA,952,952,0,0,0,0,FALSE,TRUE,NA
+"corridor",11,"kahna-boramdev",NA,NA,398,398,0,0,0,0,FALSE,TRUE,NA
+"corridor",13,"Kanha-Pench1",NA,NA,768,768,0,0,0,0,FALSE,TRUE,NA
+"corridor",15,"Lankamalleshwar-Ventakes",NA,NA,192,192,0,0,0,0,FALSE,TRUE,NA
+"corridor",20,"koyana-chandoli",NA,NA,37,37,0,0,0,0,FALSE,TRUE,NA
+"corridor",23,"kaziranga-karbianlong1",NA,NA,24,24,0,0,0,0,FALSE,TRUE,NA
+"corridor",24,"kaziranga-karbianlong2",NA,NA,32,32,0,0,0,0,FALSE,TRUE,NA
+"corridor",34,"sonai-rupai-manas",NA,NA,158,158,0,0,0,0,FALSE,TRUE,NA
+"corridor",35,"buxa-jaldapara",NA,NA,34,34,0,0,0,0,FALSE,TRUE,NA
+"corridor",37,"D&apos; Ering-mehao",NA,NA,45,45,0,0,0,0,FALSE,TRUE,NA
+"corridor",42,"mudumalai-mukurthi2",NA,NA,256,256,0,0,0,0,FALSE,TRUE,NA
+"corridor",44,"periyar-sh",NA,NA,205,205,0,0,0,0,FALSE,TRUE,NA
+"corridor",45,"cauveri-bannerghata",NA,NA,268,268,0,0,0,0,FALSE,TRUE,NA
+"corridor",46,"bandipur-cauveri",NA,NA,192,192,0,0,0,0,FALSE,TRUE,NA
+"corridor",47,"Mathikettan-Periyar",NA,NA,190,190,0,0,0,0,FALSE,TRUE,NA
+"corridor",48,"chimmony-parambikulum",NA,NA,90,90,0,0,0,0,FALSE,TRUE,NA
+"corridor",49,"bhramagiri_waynad",NA,NA,19,19,0,0,0,0,FALSE,TRUE,NA
+"corridor",50,"Talakaveri_bhramagiri",NA,NA,185,185,0,0,0,0,FALSE,TRUE,NA
+"corridor",52,"someshwara_kuderemukh",NA,NA,56,56,0,0,0,0,FALSE,TRUE,NA
+"corridor",54,"sehtali-bhadra1",NA,NA,37,33,4,0,1,0,FALSE,TRUE,NA
+"corridor",57,"pushpagiri_talakaveri",NA,NA,131,131,0,0,0,0,FALSE,TRUE,NA
+"corridor",58,"kuderemukh-pushpgiri2",NA,NA,438,438,0,0,0,0,FALSE,TRUE,NA
+"corridor",59,"kuderemukh_bhadra",NA,NA,101,101,0,0,0,0,FALSE,TRUE,NA
+"reserve",12,"Achanakmar","Chhattisgarh","central_india_eastern",599,599,0,0,0,0,FALSE,TRUE,NA
+"reserve",22,"Kanha","Madhya Pradesh","central_india_eastern",1052,1052,0,0,0,0,FALSE,TRUE,NA
+"reserve",23,"Pench","Madhya Pradesh","central_india_eastern",167,167,0,0,0,0,FALSE,TRUE,NA
+"reserve",24,"Bandhavgarh","Madhya Pradesh","central_india_eastern",553,553,0,0,0,0,FALSE,TRUE,NA
+"reserve",28,"Veerangana Durgavati","Madhya Pradesh","central_india_eastern",45,45,0,0,0,0,FALSE,TRUE,NA
+"reserve",31,"Melghat","Maharashtra","central_india_eastern",1304,1304,0,0,0,0,FALSE,TRUE,NA
+"reserve",32,"Tadoba-Andhari","Maharashtra","central_india_eastern",692,692,0,0,0,0,FALSE,TRUE,NA
+"reserve",36,"Bor","Maharashtra","central_india_eastern",110,100,10,0,8,0,FALSE,TRUE,NA
+"reserve",37,"Dampa","Mizoram","northeast_hills",341,341,0,0,0,0,FALSE,TRUE,NA
+"reserve",38,"Similipal","Odisha","central_india_eastern",2553,2552,1,0,0,0,FALSE,TRUE,NA
+"reserve",47,"Mudumalai","Tamil Nadu","western_ghats",434,434,0,0,0,0,FALSE,TRUE,NA
+"reserve",44,"Dholpur-Karauli","Rajasthan","shivalik_gangetic",NA,NA,NA,NA,NA,NA,NA,FALSE,"geometry absent in the NTCA KML — cannot be checked"
+"reserve",51,"Amrabad","Telangana","central_india_eastern",NA,NA,NA,NA,NA,NA,NA,FALSE,"geometry absent in the NTCA KML — cannot be checked"
+"reserve",53,"Pilibhit","Uttar Pradesh","shivalik_gangetic",NA,NA,NA,NA,NA,NA,NA,FALSE,"geometry absent in the NTCA KML — cannot be checked"

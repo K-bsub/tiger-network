@@ -73,22 +73,96 @@ PUBLISH_FLOOR_M <- 1000L
 # KDE search radius (metres) — starting value; test 10/20/30 km as in Phase 1.
 KDE_RADIUS_M <- 20000L
 
-# ---- Connectivity: land-cover resistance lookup ----------------------------
-# ESA WorldCover 2021 class -> movement resistance (1 = easiest, high = barrier).
-# Values are literature-informed starting points and MUST be recorded as a
-# numbered Decision before the resistance surface is built. Do not treat as final.
+# ---- Decision 11: gHM gap-fill relevance rule (Week 9, task 9.2) ------------
+# Fixed BEFORE the check is run (pre-registration). See docs/methodology.md,
+# Decision 11, for the sources and reasons. scripts/07_connectivity.R STEP 9.2
+# reads these; do not repeat the values as literals in any script.
+GAP_BUFFER_M      <- 10000L  # reserve approach-zone ring width, metres
+                             # (MoEF 2011 ESZ default; ~1 female home-range
+                             #  diameter in Indian telemetry studies)
+GAP_MIN_PCT       <- 5       # a unit is "materially affected" if >= this % of
+                             # its land cells are dropped ...
+GAP_MIN_CELLS     <- 25L     # ... OR >= this many dropped land cells
+                             # (25 km2 at 1 km; below a resident female range)
+GAP_WATER_CLASS   <- 80L     # WorldCover permanent water: reported, not counted
+GAP_FILL_WINDOW   <- 3L      # focal window (cells) for the gHM fill
+GAP_FILL_MAX_ITER <- 5L      # max fill passes: fill reaches <= 5 km from real
+                             # gHM data. The fill runs ONLY if STEP 9.2 triggers.
+
+# Decision-11 OUTCOME switch. The pre-fill check (2026-09-26) TRIGGERED
+# (27 units materially affected), so the fill applies. scripts/06 STEP 8.4b
+# fills gHM when this is TRUE and records the count in tbl_10 (n_filled).
+# Set by the recorded outcome in docs/methodology.md — do not change it to
+# test alternatives.
+GHM_GAP_FILL      <- TRUE
+
+# ---- Connectivity: resistance surface (Decision 14, 2026-09-26) -------------
+# Fixed BEFORE any resistance surface is built. See docs/methodology.md,
+# Decision 14, for the sources and reasons. scripts/07_connectivity.R STEP 9.5
+# reads these; do not repeat the values as literals in any script.
+#
+# Order of operations (Decision 14, point 5):
+#   class value -> Sundarban water override -> gHM multiplier (not on the
+#   Decision-16 exempt classes) -> cap -> road barrier (Decision 15, task 9.6)
+#   resistance = min(RESIST_MAX, value * (1 + RESIST_GHM_K * gHM))   # land
+#   resistance = value                                               # water
+
+# ESA WorldCover 2021 class -> movement resistance (1 = easiest ... 100 = max).
 WORLDCOVER_RESISTANCE <- c(
-  "10" =   1,   # Tree cover
-  "20" =   3,   # Shrubland
-  "30" =   5,   # Grassland
-  "40" =   7,   # Cropland
-  "50" =  50,   # Built-up
-  "60" =  10,   # Bare / sparse vegetation
-  "70" = 100,   # Snow and ice
-  "80" = 100,   # Permanent water bodies
-  "90" =  15,   # Herbaceous wetland
-  "95" =  10,   # Mangroves
-  "100" =  8    # Moss and lichen
+  "10"  =   1,   # Tree cover            (Week-0 start: 1)
+  "20"  =   3,   # Shrubland             (3)
+  "30"  =   3,   # Grassland             (5)   judgement
+  "40"  =  10,   # Cropland              (7)   judgement; evidence mixed
+  "50"  = 100,   # Built-up              (50)
+  "60"  =  10,   # Bare / sparse veg.    (10)  judgement
+  "70"  = 100,   # Snow and ice          (100)
+  "80"  =  50,   # Permanent water       (100) 10 inside the Sundarban region
+  "90"  =   3,   # Herbaceous wetland    (15)  judgement; absent from reserves
+  "95"  =   1,   # Mangroves             (10)
+  "100" =  50    # Moss and lichen       (8)   judgement; absent from reserves
+)
+
+RESIST_MAX   <- 100   # cap applied after the gHM multiplier
+RESIST_GHM_K <- 4     # gHM multiplier: x1 at gHM 0 ... x5 at gHM 1 (judgement)
+
+# Decision 16 (2026-09-26, post-result): classes EXEMPT from the gHM multiplier.
+# gHM has no data over water; the Decision-11 fill imputed water cells from
+# their land neighbours only to keep them in the stack. Water resistance comes
+# from land cover (50; 10 in the Sundarban region), not from imputed gHM.
+RESIST_GHM_EXEMPT_CLASSES <- c(80L)   # permanent water
+
+# Sundarban water region: water cells inside the Sundarbans reserve polygon plus
+# a ring of RESIST_WATER_REGION_BUFFER_M take RESIST_WATER_REGION_VALUE instead
+# of the class-80 value. unit_id is the stable reserve key (naming §5); STEP 9.5
+# asserts that it resolves to the named reserve.
+RESIST_WATER_CLASS            <- 80L
+RESIST_WATER_REGION_UNIT_IDS  <- c(57L)          # Sundarbans
+RESIST_WATER_REGION_NAMES     <- c("Sundarbans") # guard: must match unit_id
+RESIST_WATER_REGION_BUFFER_M  <- GAP_BUFFER_M    # 10 km (Decision 11 value)
+RESIST_WATER_REGION_VALUE     <- 10
+
+# ---- Connectivity: road barrier (Decision 15, 2026-09-26) -----------------
+# Fixed BEFORE any resistance surface is built. See docs/methodology.md,
+# Decision 15. scripts/07_connectivity.R STEP 9.6 reads these.
+#   road cell resistance = max(Decision-14 surface, ROAD_BARRIER_VALUE)
+# `_link` ramps take their parent class (e.g. trunk_link -> trunk). Tertiary is
+# NOT a barrier class; its effect is left to gHM ("minor roads").
+ROAD_BARRIER_CLASSES <- c("motorway", "trunk", "primary", "secondary")
+ROAD_BARRIER_VALUE   <- 30     # one value for every barrier class (judgement)
+ROAD_BARRIER_TOUCHES <- TRUE   # rasterise every cell a road touches (no
+                               # diagonal leaks for an 8-neighbour path)
+
+# ---- Connectivity: sensitivity variants (Decisions 14 + 15) ------------------
+# Each variant changes ONE choice against the baseline (k = RESIST_GHM_K, road
+# value = ROAD_BARRIER_VALUE), so the Week-10 comparison can trace a difference
+# to that choice. Written beside the baseline as resist_tiger_<name>_7755.tif.
+#   noghm  — Decision 14: no gHM multiplier (k = 0), road value 30
+#   road15 — Decision 15: weaker road barrier (15), k = 4
+#   road50 — Decision 15: stronger road barrier (50), k = 4
+RESIST_VARIANTS <- list(
+  noghm  = list(ghm_k = 0,            road_value = ROAD_BARRIER_VALUE),
+  road15 = list(ghm_k = RESIST_GHM_K, road_value = 15),
+  road50 = list(ghm_k = RESIST_GHM_K, road_value = 50)
 )
 
 # ---- Convenience -----------------------------------------------------------

@@ -130,6 +130,21 @@ Execution-order numbers (script prefixes) and output table numbers are
 **independent counters**. A script header matches its filename; output table
 numbers are their own sequence.
 
+**Table numbers group; slugs identify.** One table number can hold more than one
+related table (the tables of one task, week, or check). The **slug is the unique
+key** — the full filename must be unique, the number alone need not be. A letter
+suffix marks a companion table to a numbered one (`tbl_05b_…`). As built:
+
+| Number | Tables |
+|---|---|
+| `tbl_00` | `data_audit`, `kba_tr_match` |
+| `tbl_02` | `reserve_build_report` (`scripts/02`), `regional_rollup` (`scripts/05`) |
+| `tbl_04` | `census_source_map`, `spotcheck_log` (`.md`), `secondary_sources_2006_2010` (`.md`, in `docs/`) |
+| `tbl_05` / `tbl_05b` | `area_source_map` / `isfr_area_crosscheck` |
+
+Before a new table is written, check that its full filename is not already in
+use. A new, unrelated table takes the next free number.
+
 ---
 
 ## 7. Git

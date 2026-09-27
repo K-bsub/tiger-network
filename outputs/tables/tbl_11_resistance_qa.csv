@@ -1,0 +1,5 @@
+"surface","file","ghm_k","road_value","n_cells","n_na_in_footprint","n_outside_footprint","min","max","mean","pct_at_max","pct_ge_road_value","n_road_cells","n_road_raised","n_water_override","n_ghm_exempt"
+"baseline","resist_tiger_baseline_7755.tif",4,30,3067467,0,0,1,100,22.463,1.67,41.4,535592,255502,546,51587
+"noghm","resist_tiger_noghm_7755.tif",0,30,3067467,0,0,1,100,12.973,1.67,20.31,535592,510408,546,51587
+"road15","resist_tiger_road15_7755.tif",4,15,3067467,0,0,1,100,21.584,1.67,65.09,535592,164340,546,51587
+"road50","resist_tiger_road50_7755.tif",4,50,3067467,0,0,1,100,25.45,1.67,20.31,535592,510408,546,51587

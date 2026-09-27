@@ -64,6 +64,22 @@ for inspection so nothing is silently dropped.
 India state polygons (Natural Earth admin-1), reprojected to EPSG:7755. 36
 features. Fields are the Natural Earth admin-1 attributes as supplied.
 
+## boundary_corridors_7755.gpkg  *(Week 9 — built, task 9.2a)*
+
+The 59 NTCA corridor **polygons** from the DSS KML (Decision 4), written by
+`scripts/02_prepare_boundaries.R` STEP 6. They are the KML placemarks with a
+`Corridor` field and no `DESIG` field. Set aside in Week 3; written from Week 9
+for the connectivity track (Decision 11 relevance check; Week-10 least-cost
+paths). They are corridor polygons, not centrelines, and not reserve inputs.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `corridor_id` | integer | Row number in KML order (stable while the KML is unchanged) |
+| `kml_name` | character | Placemark `<name>`; `NA` where blank (the Week-3 KML inspection found the corridor placemarks have a blank name) |
+| `corridor_label` | character | KML SimpleData `Corridor` field as written; `NA` where blank. No name is invented |
+| `state` | character | KML SimpleData `state_name`; `NA` where blank |
+| `source` | character | `ntca` |
+
 ## census_reserve_long.csv  *(Week 4 — entry format; raw)*
 
 The census figures are **entered in long format**, one row per (reserve, census
@@ -237,9 +253,20 @@ Week-9 resistance surface and the Week-13+ SDM read the identical grid. All band
 resampled onto one template (task 8.2/8.3): WorldCover **nearest** (categorical),
 gHM / terrain **bilinear** (continuous); distance-to-road derived on the grid
 (task 8.4). Cross-band **common NA mask** (Decision 10): a cell is present only
-where **all six bands** are non-`NA`. As built: **3,010,738 complete-case cells,
-98.15% of the India grid** (gHM is the binding NA layer; the mask drops ~56,840
-cells, ~1.8% — a gHM coastal/edge gap-fill is deferred to Week 9, Decision 10).
+where **all six bands** are non-`NA`. Week-8 build: 3,010,738 complete-case
+cells (98.15% of the 3,067,565-cell India grid). **Week-9 changes:** the gHM
+gap-fill (Decision 11, `scripts/06` STEP 8.4b) and the source fixes for land
+cover (unmasked tile cache, Decision 12) and terrain (unmasked raw DEM,
+Decision 13), both masked on the template, raised this to **3,067,467** of
+3,067,565 India-grid cells (98 dropped: 91 water cells beyond the gHM fill and
+7 no-class cells at WorldCover tile corners). Decision 10 closed 2026-09-26.
+The current figures are always in
+`tbl_10_covariate_stack_qa.csv` — read them there, not here.
+
+**Storage (fixed 2026-09-26):** the file is written as 32-bit float (`FLT4S`)
+for all six bands, and read back and verified after every write. Builds before
+`build_tag` `d13f` were written as `INT1U` and are **not usable** from disk
+(gHM and distance-to-road 0; elevation and TRI cut to 0–254).
 
 **Grid:** EPSG:7755, 1 km, 3093 × 2864 = 8,858,352 template cells (extent snapped
 to whole `GRID_CELL_M`; 5 km collar). Band order is fixed (`STACK_BANDS`) so later
@@ -247,12 +274,12 @@ scripts index by name, never by position.
 
 | Band | Type | Units / domain | Source (Week-2 layer) | Resample |
 |---|---|---|---|---|
-| `landcover` | categorical | ESA WorldCover 2021 class code (10–100; 11 classes present, modal 40 = cropland) | `cov_landcover_worldcover2021_1km_7755.tif` | nearest |
+| `landcover` | categorical | ESA WorldCover 2021 class code (10–100; 11 classes present, modal 40 = cropland) | Since Decision 12: the 88 unmasked 1 km tiles in `data/raw/worldcover/tiles_1km/`, merged, then masked to India on the template (Week 8: `cov_landcover_worldcover2021_1km_7755.tif`) | nearest |
 | `ghm` | continuous | Global Human Modification 2022, 0–1 (India mean 0.377) | `cov_ghm2022_1km_7755.tif` | bilinear |
-| `elev` | continuous | Elevation, metres (India: coastal lows to Himalaya) | `cov_terrain_1km_7755.tif` (band `elevation`) | bilinear |
-| `slope` | continuous | Slope, degrees (1 km-aggregated) | `cov_terrain_1km_7755.tif` (band `slope`) | bilinear |
-| `tri` | continuous | Terrain Ruggedness Index (1 km-aggregated) | `cov_terrain_1km_7755.tif` (band `tri`) | bilinear |
-| `dist_road_m` | continuous | Distance to nearest major road, metres (min 0, max ~278.9 km, mean ~2.0 km) | `cov_distroad_1km_7755.tif` (this script) | derived on grid |
+| `elev` | continuous | Elevation, metres. Water cells probably carry sea-floor depths from the source tiles (minimum −434.2 m in the `d13` build — read the current value in `tbl_10`; treatment is a Week-14 decision) | Since Decision 13: raw DEM `data/raw/terrain/dem_india_aws_z7_4326.tif`, via the `scripts/01` path without its mask, then masked on the template (Week 8: `cov_terrain_1km_7755.tif`, band `elevation`) | bilinear |
+| `slope` | continuous | Slope, degrees (derived on the native DEM, then 1 km) | As `elev` (band `slope`) | bilinear |
+| `tri` | continuous | Terrain Ruggedness Index (derived on the native DEM, then 1 km) | As `elev` (band `tri`) | bilinear |
+| `dist_road_m` | continuous | Distance to nearest major road, metres, after the common mask (min 0, max 278,926.5 m ≈ 278.9 km, mean 2,019 m) | `cov_distroad_1km_7755.tif` (this script) | derived on grid |
 
 **Not applied here:** `WORLDCOVER_RESISTANCE` (a starting set, not a Decision) and
 any barrier road-class choice — both are Week-9 numbered Decisions. The stack is
@@ -267,27 +294,154 @@ major OSM classes + `_link` ramps (motorway, trunk, primary, secondary, tertiary
 885,669 features — tertiary **kept** (the barrier-class question is Week 9).
 Derived by rasterise-then-`terra::distance` (`touches = TRUE`), computed on the
 full template then masked to India. Kept **un-common-masked** (its own gHM-free
-footprint) so a Week-9 gap-fill can re-stack without re-deriving it.
+footprint) so a Week-9 gap-fill can re-stack without re-deriving it. As built
+(2026-09-26 re-run): 3,067,565 valid cells (= the India grid), min 0, max
+279,693 m (~279.7 km), mean 2,045 m. The stack band is smaller (max 278.9 km,
+mean 2,019 m) because the common mask removes the cells where gHM is `NA`.
 
 | Band | Type | Units | Meaning |
 |---|---|---|---|
 | `dist_road_m` | continuous | metres | Distance from the cell centre to the nearest major-road cell (0 on a road cell) |
 
-## tbl_10_covariate_stack_qa.csv  *(Week 8 — built)*
+## tbl_10_covariate_stack_qa.csv  *(Week 8 — built; 2 columns added 2026-09-26)*
 
-Written by `scripts/05`/`06`'s `write_table(nn = 10, ...)` — per-band QA for the
-stack (task 8.6). One row per band. Coverage is against the full India footprint
-(before the common mask), so the common-mask trim shows as bands below 100%.
+Written by `scripts/06_build_covariate_stack.R` (STEP 8.6,
+`write_table(nn = 10, ...)`) — per-band QA for the stack (task 8.6). One row per
+band. `n_valid_before` and `n_dropped_by_mask` were added in the 2026-09-26 fix
+pass so the Decision-10 coverage cost is a saved figure; they appear after
+`scripts/06` is re-run. The denominator of `pct_of_india` is the full India
+footprint on the grid; the numerator is the after-mask count, so
+`pct_of_india` is equal on every row (98.15% as built; India grid = 3,067,565
+cells).
+
+**Edge offset (data note; corrected 2026-09-26).** `dist_road_m`, `landcover`
+(since Decision 12) and terrain (since Decision 13) are masked to India on the
+template, so their `n_valid_before` is at most the India-grid count (3,067,565).
+gHM is the only band still taken from a `scripts/01` layer masked on the
+`scripts/01` grid; the resample onto the snapped template shifts its edge by
+about one cell, so it can hold cells outside India and miss cells inside it at
+the same time, and its difference from the India count is only a **net**
+figure. Before Decisions 12/13, landcover had 1,791 cells outside India and no
+class in 1,778 India cells (net +13 — an earlier note called this a "+13
+halo", which was wrong); terrain was net +20 and lacked values at the same
+edge cells. The India-footprint loss is always the `dist_road_m`
+row's `n_dropped_by_mask`.
 
 | Field | Type | Meaning |
 |---|---|---|
 | `band` | character | Band name (one of `STACK_BANDS`) |
-| `n_valid` | integer | Non-`NA` cells in the stacked band (equal across bands after the common mask: 3,010,738) |
+| `lc_source` | character | Land-cover source of this build: `tile_cache` since Decision 12 (same value on every row). Absent in earlier builds |
+| `terrain_source` | character | Terrain source of this build: `raw_dem` since Decision 13 (same value on every row). Absent in earlier builds |
+| `build_tag` | character | Label of this build (`BUILD_TAG` in `scripts/06`; `d13` after Decision 13, `d13f` after the FLT4S write fix; same value on every row). `scripts/07` names its STEP-9.2 outputs `postfill_<build_tag>`. Absent in earlier builds |
+| `n_filled` | numeric | gHM cells filled by the Decision-11 fill (`scripts/06` STEP 8.4b); `0` for every other band, and `0` for gHM when `GHM_GAP_FILL` is `FALSE`. Added Week 9. `scripts/07` uses it to label its outputs pre-fill / post-fill |
+| `n_valid_before` | numeric | Non-`NA` cells in the band **before** the common mask (Decision 10). For gHM this is **after** the Decision-11 fill, when it ran. The band with the lowest value is the binding NA layer (gHM in the Week-8 build) |
+| `n_dropped_by_mask` | numeric | `n_valid_before − n_valid`: cells the common mask removed from this band. Never negative (hard stop) |
+| `n_valid` | integer | Non-`NA` cells in the stacked band **after** the common mask. Equal across bands (hard stop): 3,010,738 as built |
 | `pct_of_india` | numeric | `n_valid` as % of India-grid cells (98.15% as built) |
 | `min`, `max` | numeric | Band min / max (categorical band: class-code range) |
 | `range_ok` | logical | `TRUE` if `[min,max]` sits inside the band's physical sanity range; a `FALSE` warns, does not stop |
 | `stack_stat` | character | Summary of the **stacked** band — `mean=…` for continuous, `modal=…; n_class=…` for `landcover` |
-| `source_stat` | character | Same summary for the **source** Week-2 layer (pre-common-mask), for the alignment spot-check. Close agreement confirms values were not corrupted; small gaps are the ~1.8% common-mask trim |
+| `source_stat` | character | Same summary for the **source** Week-2 layer (pre-common-mask), for the alignment spot-check. Close agreement confirms values were not corrupted; small gaps are the 1.85% common-mask trim |
+
+## cov_landcover_worldcover2021_aligned_1km_7755.tif  *(Week 9 — built, interim)*
+
+Written by `scripts/06_build_covariate_stack.R` STEP 8.3 (Decision 12). WorldCover
+2021 land cover on the stack template, masked to India on the template, **before**
+the common mask. Built from the 88 unmasked 1 km tiles in
+`data/raw/worldcover/tiles_1km/`. Read by `scripts/07` STEP 9.2 to classify
+dropped cells. Equal to the stack's `landcover` band wherever the stack has a
+value.
+
+| Band | Type | Meaning |
+|---|---|---|
+| `worldcover_2021` | categorical | WorldCover 2021 class code; `NA` outside India or where no tile has a class |
+
+## cov_commonmask_dropped_<state>_1km_7755.tif  *(Week 9 — built, interim)*
+
+Written by `scripts/07_connectivity.R` STEP 9.2a. `<state>` is `prefill`,
+`postfill`, `postfill_d12`, or `postfill_<build_tag>` (for example
+`postfill_d13`), set from `tbl_10` `n_filled`, `lc_source` and `build_tag`, so
+every version is kept. The
+India-grid cells that the Decision-10 common mask removed from the stack
+(56,827 pre-fill; 1,869 post-fill and `postfill_d12`; 98 in `postfill_d13`), on
+the stack grid. Kept for the Decision-11 check and for Week 10, where these cells are
+`NA` in any stack-derived surface.
+
+| Band | Type | Meaning |
+|---|---|---|
+| `dropped_lc_class` | categorical | WorldCover 2021 class of a dropped India cell (before the mask); `0` = India cell with no WorldCover class; `NA` = not dropped, or outside India |
+
+## tbl_11_ghm_gap_relevance_<state>.csv  *(Week 9 — built, task 9.2)*
+
+Written by `scripts/07_connectivity.R` STEP 9.2c. `<state>` is `prefill`,
+`postfill`, `postfill_d12`, or `postfill_<build_tag>` (from `tbl_10`). Each
+earlier table is the evidence for the decision that followed it and is never
+overwritten (pre-fill → Decision-11 fill; post-fill → Decision 12;
+postfill_d12 → Decision 13). One row per footprint unit under
+the **Decision-11** rule. Shares the number `tbl_11` with the Week-9
+resistance QA table (naming §6: numbers group, slugs identify). Sorted:
+material units first, then by dropped land cells.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `unit_type` | character | `reserve` (KML polygon), `buffer` (the `GAP_BUFFER_M` ring outside a reserve polygon), or `corridor` (NTCA corridor polygon) |
+| `unit_id` | integer | Reserve `unit_id` for `reserve`/`buffer`; `corridor_id` for `corridor` |
+| `unit_name` | character | Reserve name; buffer = reserve name + ring width; corridor = `corridor_label`, or `corridor_<id> (no label)` |
+| `state` | character | State (from the source layer) |
+| `landscape_complex` | character | Reserve landscape complex; `NA` for corridors |
+| `n_india_cells` | integer | India-grid cells the unit touches |
+| `n_land` | integer | Of those, cells with WorldCover ≠ `GAP_WATER_CLASS` (80); no-class cells count as land |
+| `n_water` | integer | Cells with WorldCover = 80 (permanent water) |
+| `n_dropped_land` | integer | Land cells removed by the common mask (the counted quantity) |
+| `n_dropped_water` | integer | Water cells removed by the common mask (reported, not counted) |
+| `pct_dropped_land` | numeric | `n_dropped_land / n_land × 100`; `NA` if `n_land` is 0 |
+| `material` | logical | Decision 11: `pct_dropped_land ≥ GAP_MIN_PCT` (5) **or** `n_dropped_land ≥ GAP_MIN_CELLS` (25). `NA` for unchecked rows |
+| `checked` | logical | `FALSE` for the 3 geometry-absent reserves (listed, not counted) |
+| `note` | character | Unit-level caveat (geometry absent; over-extended polygon, for example Nagarjunsagar-Srisailam) |
+
+## resist_tiger_<surface>_7755.tif  *(Week 9 — built, tasks 9.5–9.7)*
+
+Written by `scripts/07_connectivity.R` STEP 9.7 (`FLT4S`, read-back verified).
+Four files, one per surface: `baseline`, `noghm`, `road15`, `road50`
+(`RESIST_VARIANTS`). On the stack grid; a value on every complete-case cell
+(Decision 10) and `NA` elsewhere. Continuous 1 km surface: the sensitive-data
+publish floor (≥ 1 km) is met.
+
+| Band | Type | Meaning |
+|---|---|---|
+| `resistance` | continuous | Movement resistance, 1 (easiest) to `RESIST_MAX` (100). Built as: WorldCover class value (Decision 14) → Sundarban water override (class 80 → 10 inside the Sundarbans reserve + 10 km ring) → × (1 + k × gHM), **except water** (Decision 16) → cap at 100 → on barrier-road cells, max(value, road value) (Decision 15) |
+
+| Surface | k (gHM) | Road value | Changes against the baseline |
+|---|---|---|---|
+| `baseline` | 4 | 30 | — |
+| `noghm` | 0 | 30 | no gHM multiplier (Decision 14) |
+| `road15` | 4 | 15 | weaker road barrier (Decision 15) |
+| `road50` | 4 | 50 | stronger road barrier (Decision 15) |
+
+## tbl_11_resistance_qa.csv  *(Week 9 — built, task 9.8)*
+
+Written by `scripts/07_connectivity.R` STEP 9.8. One row per resistance surface.
+Shares `tbl_11` with the gap-relevance tables (naming §6).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `surface` | character | `baseline`, `noghm`, `road15`, `road50` |
+| `file` | character | Output raster file name |
+| `ghm_k` | numeric | gHM multiplier k used |
+| `road_value` | numeric | Barrier-road value used |
+| `n_cells` | numeric | Complete-case footprint cells (the surface must cover all) |
+| `n_na_in_footprint` | numeric | Footprint cells with no value — must be 0 (hard stop) |
+| `n_outside_footprint` | numeric | Values outside the footprint — must be 0 (hard stop) |
+| `min`, `max`, `mean` | numeric | Surface statistics; min ≥ 1 and max ≤ 100 (hard stops) |
+| `pct_at_max` | numeric | % of footprint cells at `RESIST_MAX` |
+| `pct_ge_road_value` | numeric | % of footprint cells at or above this surface's road value |
+| `n_road_cells` | numeric | Barrier-road cells in the footprint (`touches = TRUE`) |
+| `n_road_raised` | numeric | Road cells whose value the maximum rule raised to the road value |
+| `n_water_override` | numeric | Water cells set by the Sundarban water override |
+| `n_ghm_exempt` | numeric | Footprint cells exempt from the gHM multiplier (water; Decision 16). Absent in the first build |
+
+The first build (before Decision 16) is kept as `tbl_11_resistance_qa_pred16.csv`
+(same fields, without `n_ghm_exempt`): the evidence for Decision 16.
 
 ## occ_tiger_gbif_clean_7755.gpkg  *(Week 13)*
 

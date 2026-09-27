@@ -32,8 +32,14 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
   total (ISFR-2021 Ch.4 is cross-check only, not the area source)**; **D9 real
   within-reserve zeros — `change_abs` always valid, ratio metrics `NA`+flag only
   when the baseline is 0, a real 2022 zero is −100 not `NA`**; **D10 covariate
-  stack common NA mask (any band `NA` → all bands `NA`); gHM coastal/edge gap-fill
-  deferred to Week 9 pending a per-reserve relevance check**.
+  stack common NA mask (any band `NA` → all bands `NA`) — closed Week 9**; **D11
+  gHM gap-fill relevance rule + fill method**; **D12 gHM closed; land cover from
+  the unmasked tile cache** (post-result); **D13 terrain from the raw DEM; 7
+  tile-corner no-class cells accepted** (post-result); **D14 resistance: set-B
+  class values × (1 + 4 × gHM), cap 100, Sundarban water 10 (50 elsewhere),
+  variant `noghm`**; **D15 road barrier motorway–secondary, value 30, maximum
+  rule, `touches = TRUE`, variants `road15`/`road50`**; **D16 water exempt from
+  the gHM multiplier** (post-result).
 
 ## Ways of working (apply every chat)
 
@@ -51,81 +57,71 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
 
 ---
 
-## Current state  ·  updated after **Week 8** (covariate stack — Stage 2 input assembly)
+## Current state  ·  updated after **Week 9** (Stage 2 resistance surfaces) · 2026-09-26
 
-- **Done this week:** `scripts/06_build_covariate_stack.R` (tasks 8.1-8.6) built
-  the aligned Stage-2 covariate stack. Wrote
-  **`data/processed/cov_stack_1km_7755.tif`** (6 bands), the interim
-  **`data/interim/cov_distroad_1km_7755.tif`**, and
-  **`outputs/tables/tbl_10_covariate_stack_qa.csv`**. **Decision 10** added
-  (common NA mask; gHM gap-fill deferred to Week 9). Assembly and alignment only —
-  no resistance values, no barrier road classes (both Week 9). Docs updated:
-  `methodology.md` (Decision 10 + Week-8 change log), `data-dictionary.md`
-  (`cov_stack`/`cov_distroad`/`tbl_10` schemas), `project-plan.md` (Week 8 ✅ +
-  Week 9 pointer), `README.md`, this handoff.
-- **FILENAME — resolve at commit:** the script is delivered as
-  **`scripts/06_build_covariate_stack.R`** (matches `project-plan.md` + naming
-  §3 verb_object). The old stub **`scripts/06_covariates.R`** (header-only,
-  `# ... (fill in Week 6)`) must be **deleted** so the `06` slot is not
-  duplicated. `git rm scripts/06_covariates.R` before committing the new file.
-- **Script structure of `scripts/06`:** header/scope + path block + fail-early
-  guards (GRID_CELL_M from config; a fresh-session EPSG:7755 resolve check for
-  the PROJ clash; input-existence check); STEP 8.2 build+assert the one 1 km
-  template; STEP 8.3 align the 3 covariates (near/bilinear) + `compareGeom`;
-  STEP 8.4 distance-to-road (rasterise→distance) → `cov_distroad`; STEP 8.5 stack
-  6 bands + common NA mask → `cov_stack`; STEP 8.6 QA → `tbl_10`. Reads the
-  Week-2 layers + boundaries; writes the stack, the distance covariate, and the
-  QA table only. Touches no Stage-1 layer.
-- **Template (8.2):** ONE 1 km EPSG:7755 grid from the national boundary
-  (`boundary_india_national_7755.gpkg`), 5 km collar (`COLLAR_M`), extent
-  **snapped out to whole `GRID_CELL_M`** → **3093 × 2864 = 8,858,352 cells**.
-  Snapped so it is reproducible from the boundary alone (not tied to whatever
-  bbox origin `scripts/01` used). Every covariate resamples ONTO it; extent/res/
-  CRS asserted once. Held in memory as `tmpl` (not written — the stack is the
-  on-disk record).
-- **Alignment (8.3):** WorldCover → **nearest** (categorical); gHM + terrain →
-  **bilinear** (continuous). Deliberately **not** via `read_rast()` (it reprojects
-  to an auto grid; the inputs are already 7755, so a straight `resample` onto the
-  template is one interpolation each — avoids double-interpolating and stepping
-  the class layer twice). `compareGeom` re-asserted vs the template — all PASS.
-- **Distance-to-road (8.4):** `cov_distroad_1km_7755.tif` via
-  **rasterise-then-`terra::distance`** (`touches = TRUE`) over the 885,669
-  major-road lines — cheaper than cell-to-line, identical at 1 km. **Inline
-  road-class choice (covariate only):** all 5 major classes + `_link` (tertiary
-  **kept** — the barrier-class question is the Week-9 Decision). Min 0, max
-  ~278.9 km, mean ~2.0 km inside India.
-- **Stack + NA policy (8.5, Decision 10):** 6 bands in fixed order
-  `landcover, ghm, elev, slope, tri, dist_road_m` → `cov_stack_1km_7755.tif`.
-  **Common NA mask** — any band `NA` → all bands `NA` (complete-case predictor
-  for Week-9 resistance + Week-13+ SDM). gHM is the **binding NA layer**; mask
-  drops ~56,840 cells (~1.8%). gHM coastal/edge gap-fill **deferred to Week 9**
-  (Decision 10).
-- **QA (8.6):** `tbl_10` — all 6 bands **3,010,738 cells, 98.15% of India,
-  range_ok TRUE**. Stacked-vs-source spot-check confirms values not corrupted:
-  gHM 0.377/0.377, landcover modal 40 (cropland) n_class 11 both, elev
-  577.3/570.8, slope 2.54/2.50, tri 23.4/23.1, dist_road 2018.9/2044.9 (small
-  gaps = the ~1.8% common-mask trim; source means are over the larger pre-mask
-  footprint).
-- **Next: Week 9** — **Stage 2 resistance surface.** Two numbered Decisions come
-  due: land-cover **resistance values** (`WORLDCOVER_RESISTANCE` starting set)
-  and **barrier road classes** (keep tertiary or restrict to motorway–secondary).
-  Plus the **Decision-10 relevance check**: intersect the ~56.8k dropped cells
-  with reserve/corridor footprints (watch Sundarbans + coastal Western Ghats); if
-  material coverage is lost, gHM edge gap-fill + re-stack as a new Decision, else
-  the common mask is final. See `project-plan.md` → Week 9.
+- **Week 9 complete** (tasks 9.1–9.10, committed).
+  `scripts/07_connectivity.R` is the one Stage-2 script: header for Weeks
+  9–12, STEP 9.2 (Decision-10 relevance check, labelled by `build_tag`) and
+  STEPs 9.5–9.8 (resistance). It refuses to build resistance if STEP 9.2 is
+  triggered on the stack.
+- **Decision 10 closed** through Decisions 11–13: pre-fill check triggered (27
+  units) → gHM fill (`scripts/06` STEP 8.4b) → still triggered (land-cover edge
+  shift) → Decision 12 (land cover from the unmasked tile cache) → still
+  triggered (terrain edge shift) → Decision 13 (terrain from the raw DEM) →
+  CLEAR (`postfill_d13`, confirmed `postfill_d13f`).
+- **Stack** `data/processed/cov_stack_1km_7755.tif`: `build_tag` **d13f**,
+  `FLT4S`, verified on read-back. 3,067,467 complete-case cells of 3,067,565
+  India-grid cells; 98 dropped (91 water > 5 km from gHM data + 7 no-class cells
+  at 3° WorldCover tile corners). gHM filled: 56,729 cells. Elevation reaches
+  −434.2 m on water/edge cells (probably sea-floor depth) — Week-14 decision.
+- **Resistance** (Decisions 14–16; all values in `R/00_config.R`):
+  class value → Sundarban water override (10 inside the reserve + 10 km ring;
+  50 elsewhere) → × (1 + k × gHM) on land only (water exempt) → cap 100 → on
+  barrier-road cells max(value, road value). Four surfaces in
+  `data/processed/`: `resist_tiger_{baseline,noghm,road15,road50}_7755.tif`
+  (k / road: 4/30, 0/30, 4/15, 4/50). QA `tbl_11_resistance_qa.csv`: means
+  22.46 / 12.97 / 21.58 / 25.45; share at or above the road value 41.4 % /
+  20.3 % / 65.1 % / 20.3 %. Barrier-road cells: 535,592 (17.5 %).
+- **Read before Week 10:** in the baseline ~41 % of cells are ≥ 30, because
+  busy cropland × gHM reaches 30 (cropland mean 30.3). In busy farmland the road
+  barrier adds nothing (only 255,502 of 535,592 road cells raised). This follows
+  from Decision 14; the `noghm` comparison tests it. Changing k now would be a
+  post-result choice.
+- **Week-10 entry point** (`project-plan.md` → Week 10, tasks 10.1–10.10).
+  Before any path is built, **Decision 17** (set-up): (a) which reserve pairs
+  are "neighbouring"; (b) path method and tool (`leastcostpath` or `gdistance`;
+  8 or 16 neighbours; diagonal correction); (c) start and end at the polygon
+  edge or a point; (d) the 3 geometry-absent reserves; (e) whether to compare
+  baseline paths with the NTCA corridors (descriptive). Before any variant path
+  is run, **Decision 18** (the variant comparison metric). Inputs: the
+  four resistance surfaces, `boundary_reserves_all_7755.gpkg` (55 with
+  geometry), `boundary_corridors_7755.gpkg` (59 NTCA corridors, for comparison).
+  Remember: the 98 `NA` cells block paths; assert "no `NA` in the footprint",
+  not "no `NA` in India".
+- **References still to verify** (entries say "et al."): Sarkar et al. 2016,
+  Jhala et al. 2021, Habib et al. 2020.
+- **Pending, not scheduled:** SDM-based resistance (1 − suitability) and a
+  circuit-theory check after Stage 3.
 
-### Output files this week
+### Output files this week (Week 9)
 
-- `data/processed/cov_stack_1km_7755.tif` — the 6-band aligned covariate stack
-  (Stage-2 input). **Gitignored** with the rest of `data/processed`.
-- `data/interim/cov_distroad_1km_7755.tif` — distance-to-road covariate (feeds the
-  stack's `dist_road_m` band; kept un-common-masked for a possible Week-9
-  re-stack). **Gitignored.**
-- `outputs/tables/tbl_10_covariate_stack_qa.csv` — per-band QA (coverage, ranges,
-  source spot-check). Committed (small text table).
-- No change to any Stage-1 layer — `scripts/06` reads the Week-2 layers +
-  boundaries and writes only the three files above.
-- No new `renv` dependency — `terra`, `sf`, `dplyr`, `here` were already locked.
+- `data/processed/boundary_corridors_7755.gpkg` — 59 NTCA corridor polygons
+  (`scripts/02`, task 9.2a). Gitignored.
+- `data/processed/cov_stack_1km_7755.tif` — rebuilt (`build_tag` d13f).
+  Gitignored.
+- `data/interim/cov_landcover_worldcover2021_aligned_1km_7755.tif` — aligned
+  land cover (`scripts/06`; read by `07`). Gitignored.
+- `data/interim/cov_commonmask_dropped_<state>_1km_7755.tif` — dropped-cell
+  layers (`prefill`, `postfill`, `postfill_d12`, `postfill_d13`,
+  `postfill_d13f`). Gitignored.
+- `data/processed/resist_tiger_{baseline,noghm,road15,road50}_7755.tif` — the
+  resistance surfaces. Gitignored.
+- `outputs/tables/`: `tbl_10_covariate_stack_qa.csv` (rebuilt);
+  `tbl_11_ghm_gap_relevance_{prefill,postfill,postfill_d12,postfill_d13,postfill_d13f}.csv`;
+  `tbl_11_resistance_qa.csv`; `tbl_11_resistance_qa_pred16.csv`;
+  `tbl_02_reserve_build_report.csv` (rewritten, identical). Committed.
+- Code: `R/00_config.R`, `R/00_functions_io.R` (explicit datatype + read-back
+  check), `scripts/02`, `scripts/06`, `scripts/07`.
 
 ### Data on disk (from Week 2, via `scripts/01` — unchanged)
 
@@ -157,27 +153,23 @@ All on the 1 km EPSG:7755 grid where raster.
 ### Open pending Decisions (decide in the week noted)
 
 Full text in `methodology.md` → "Decisions pending".
-- **[Week 8–9]** Settlement layer for the KDE — village-dominated (~195k);
-  trim to city/town (4,597) or change radius?
-- **[Week 9]** Land-cover resistance values (starting set in `R/00_config.R`).
-- **[Week 9]** Road classes for the barrier surface — keep tertiary or restrict
-  to motorway–secondary? (Separate from the 8.4 distance-covariate class set,
-  which keeps all major classes.)
-- **[Week 9]** gHM coastal/edge gap-fill relevance check (from **Decision 10**) —
-  intersect the ~56.8k common-mask-dropped cells with reserve/corridor footprints
-  (watch Sundarbans + coastal Western Ghats). If material coverage is lost inside
-  a reserve, gHM edge gap-fill + re-stack as a new Decision; else the common mask
-  is final.
+- **[Week 10] Decision 17** — least-cost-path set-up: reserve pairs, path
+  method/tool, start and end points, geometry-absent reserves, NTCA-corridor
+  comparison — before any path.
+- **[Week 10] Decision 18** — variant comparison metric — before any variant
+  path is run.
+- **[Week 8–9 → Week 13]** Settlement layer for the KDE — village-dominated
+  (~195k); trim to city/town (4,597) or change radius?
 - **[Week 13–14]** Target-group scope — all Mammalia vs large-bodied guild.
-- **[Week 14]** Terrain variables in the SDM — collinearity check (slope vs TRI).
+- **[Week 14]** Terrain variables in the SDM — collinearity (slope vs TRI) and
+  elevation on water/coastal cells (−434.2 m; probably sea-floor depth).
+- **[After Stage 3]** SDM-based resistance + circuit-theory check.
 
 _Resolved: [Week 4] missing-year handling → Decision 7; [Week 5] area source →
 Decision 8; [Week 6] zero-baseline handling → Decision 9; [Week 8] covariate-stack
-NA policy → Decision 10._
-_Week 7 added no numbered Decision (the roll-up `NA` rule is an inline choice,
-uncontested). **Three pending Decisions come due at Week 9** — land-cover
-resistance values, barrier road classes, and the Decision-10 gHM gap-fill
-relevance check._
+NA policy → Decision 10; [Week 9] gHM gap-fill relevance → Decisions 11–13
+(Decision 10 closed); [Week 9] resistance values → Decision 14; [Week 9] barrier
+road classes → Decision 15; [Week 9] water and gHM → Decision 16._
 
 ### Known gotchas (do not relearn)
 
@@ -314,10 +306,107 @@ relevance check._
   generics terra dispatches (`mean`, `sum`, `min`, `max`) — do not prefix them
   with `terra::`. `scripts/06` STEP 8.5 uses `sum(is.na(cov_stack))` for the
   common NA mask.
+- **A layer masked on one grid and resampled onto another has a one-cell edge
+  shift** (corrected 2026-09-26; an earlier note called it a "+13 halo").
+  `scripts/01` masked each covariate to India on its own grid; `scripts/06`
+  resamples onto the snapped template. The edge moves by about one cell, so a
+  band can hold cells OUTSIDE India and miss cells INSIDE it at the same time.
+  Before Decision 12, landcover had 1,791 cells outside and no class in 1,778
+  India cells — "+13" was only the net. **Rule:** mask to India on the FINAL
+  template (as `06` now does for landcover, terrain and dist_road_m), never on
+  an intermediate grid. gHM still carries the shift (no local source copy; the
+  Decision-11 fill covers its edge cells). Quote the India-footprint loss from
+  the `dist_road_m` row of `tbl_10`.
+- **Keep `data/raw/worldcover/tiles_1km/` and
+  `data/raw/terrain/dem_india_aws_z7_4326.tif`.** Since Decisions 12 and 13,
+  `scripts/06` builds land cover from the 88 unmasked tiles and terrain from the
+  raw DEM. They are required inputs, not caches to delete.
+- **An imputed value must not feed a rule meant for observed values.** The
+  Decision-11 fill imputed gHM over water to keep cells in the stack; the
+  Decision-14 multiplier then used it as if observed (water mean 87.4 instead of
+  50). Decision 16 exempts water. When a later rule reads a filled band, check
+  whether it should see the filled cells.
+- **QA the file on disk, not only the object in memory.** Until 2026-09-26 the
+  6-band stack was written as `INT1U` (one GeoTIFF = one data type; terra chose
+  unsigned 8-bit), so gHM and distance-to-road were 0 on disk while `tbl_10`,
+  computed in memory, looked correct. `write_processed_rast()` now takes an
+  explicit `datatype` (default `FLT4S`) and reads every raster back. Do not
+  bypass it with a bare `writeRaster()`.
+- **An inference is not a check.** In Week 9 a forecast ("`n_filled` will rise
+  after the land-cover fix") failed because terrain had the same edge defect.
+  When a fix targets one band, check the other bands for the same cause before
+  the re-run.
+- **Terrain tiles carry sea-floor depths (probably).** Stack elevation reaches
+  −434.2 m in the `d13` build (water and edge cells now have terrain); India's
+  lowest land is about −2 m. Decide the treatment in Week 14 (SDM terrain), before terrain enters any
+  model.
+- **`resist_*` will have `NA` inside India under Decision 10.** The 98
+  common-mask cells of the final (`d13`) stack stay `NA` (91 water + 7 tile-
+  corner cells). An assert of "no `NA` inside India" cannot pass; assert "no
+  `NA` inside the complete-case footprint". `NA` cells block least-cost paths
+  in Week 10. An assert of
+  "no `NA` inside India" (old task 9.7 wording) cannot pass; assert "no `NA`
+  inside the complete-case footprint" instead. `NA` cells also block least-cost
+  paths in Week 10.
+- **Table numbers are not unique keys.** `tbl_00`, `tbl_02`, and `tbl_04` each
+  hold more than one table (naming §6). Refer to a table by its full filename.
 
 ---
 
 ## Weekly log (newest first)
+
+### Week 9 — Resistance surfaces (Stage 2) · 2026-09-26
+- Entry state: Week 8 stack (3,010,738 complete-case cells; gHM gap-fill
+  deferred by Decision 10); the doc fix pass done.
+- Did: task 9.2a (corridor layer from `scripts/02`, with a re-run guard); 9.1
+  + 9.2 (`scripts/07` header and the Decision-10 relevance check); the gHM
+  fill in `scripts/06` STEP 8.4b; land cover and terrain rebuilt at source in
+  `scripts/06`; found and fixed the `INT1U` stack write (`write_processed_rast`
+  now has an explicit datatype and a read-back check); 9.3 + 9.4 (resistance
+  and road Decisions, each with a literature review and a data check); 9.5–9.8
+  (four resistance surfaces + QA); 9.9 (docs).
+- Decisions made: **11** (gap-fill rule; pre-registered), **12** and **13**
+  (post-result: land cover and terrain from unmasked sources), **14**
+  (resistance values, gHM multiplier, Sundarban water, `noghm`), **15** (road
+  barrier, `road15`/`road50`), **16** (post-result: water exempt from gHM).
+  Process choices recorded in the change log: fill in `scripts/06` (G1); stop
+  and decide again if a re-check still triggers (H3); outputs labelled by fill
+  state / `build_tag` (I1); XML entities decoded in corridor labels (J1).
+- Outputs: see "Output files this week (Week 9)".
+- Gotchas found: mask on the final template, not an intermediate grid; QA the
+  file on disk, not only memory; when a fix targets one band, check the others
+  for the same cause; imputed covariate values must not leak into a rule meant
+  for observed values (Decision 16).
+- Carried forward / next week: **Week 10** — least-cost paths; Decisions 17
+  (set-up) and 18 (variant comparison metric) first (see Current state and
+  `project-plan.md` → Week 10).
+
+### Doc fix pass (before Week 9) · 2026-09-26
+- Entry state: Week 8 complete; docs carried stale or false statements found by a
+  consistency check.
+- Did: corrected `methodology.md` (§5.2 series; Decision 10 figures + the false
+  `tbl_10` claim; missing Week-5 heading; §5.3 script note), `data-sources.md`
+  (2018 page range; admin-boundaries heading), `data-dictionary.md` (`tbl_10`
+  writer + new columns; exact coverage; halo note; distroad max),
+  `project-plan.md` (script plan; task 8.3/9.1/9.2/9.7 text; Stage 3 numbers),
+  `naming-conventions.md` (§6 table-number rule), `README.md`, this handoff.
+  Added `n_valid_before` + `n_dropped_by_mask` + two hard stops to `scripts/06`
+  STEP 8.6 and fixed its stale comments; **re-ran `scripts/06`** — stack
+  identical, `tbl_10` rewritten with the new columns. Recovered
+  `scripts/00c_verify_wdpa_boundaries.R` (deleted by accident).
+- Decisions made (not numbered — process/doc choices): **A1** table numbers group
+  related tables, slug is the key; **B2** make `tbl_10` hold the before-mask
+  counts; **C** Stage 2 is one script `scripts/07_connectivity.R`, stubs
+  `08_habitat_suitability.R` + `09_build_site.R` deleted.
+- Outputs: updated `scripts/06_build_covariate_stack.R`,
+  `tbl_10_covariate_stack_qa.csv` (2 new columns), the docs above.
+- Gotchas found (now in "Known gotchas"): edge halo outside the India polygon;
+  `NA` inside India in any Decision-10 derived surface; table numbers are not
+  unique keys. The Week-8 figures "~56,840 (~1.8%)" and distroad "max ~278.9 km"
+  in the Week-8 log below are superseded (56,827 / 1.85%; interim max 279.7 km).
+- Carried forward / next week: **Week 9** — start `scripts/07_connectivity.R`;
+  Decision-10 relevance check, land-cover resistance values, barrier road
+  classes.
 
 ### Week 8 — Covariate stack (Stage 2 input assembly) · 2026-09-20
 - Entry state: Stage 1 (growth) done. Week-2 covariate layers on disk in

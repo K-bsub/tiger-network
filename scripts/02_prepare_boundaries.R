@@ -15,7 +15,9 @@
 #          "<X> Tiger Reserve". A tiger reserve is built from one or more of
 #          these constituent PAs (e.g. Corbett TR = Corbett NP + Sonanadi WLS).
 #     -  59 carry a Corridor field (blank <name>, blank DESIG) -> corridors
-#          (POLYGONS, not centrelines). DROPPED here (Stage 2 re-extracts them).
+#          (POLYGONS, not centrelines). Written to their own layer (added
+#          2026-09-26, Week-9 task 9.2a) for the Stage-2 connectivity track;
+#          they are not reserve inputs.
 #     - 156 are unnamed / no attributes. They are SPATIAL DUPLICATES of the
 #          named PA polygons (153/156 sit on top of >=1 named PA). They are NOT
 #          reserve inputs and NOT corridors. Preserved to a separate diagnostic
@@ -40,8 +42,15 @@
 #             area_km2, area_provisional, area_source, n_parts, match_status,
 #             geometry_present, source
 #   data/processed/boundary_states_7755.gpkg
+#   data/processed/boundary_corridors_7755.gpkg        (the 59 corridors;
+#                                                       added Week 9, task 9.2a)
 #   data/interim/boundary_kml_unattributed_7755.gpkg   (the 156 duplicates)
 #   outputs/tables/tbl_02_reserve_build_report.csv     (per-reserve build log)
+#
+# RE-RUN GUARD (added Week 9): if boundary_reserves_all_7755.gpkg already exists,
+# STEP 6 compares the new reserve layer to it BEFORE writing and stops if any
+# attribute or polygon area differs. The Week-9 re-run exists only to add the
+# corridor layer; the reserve layer must come out identical.
 # =============================================================================
 
 suppressPackageStartupMessages({
@@ -66,6 +75,7 @@ kml_path   <- file.path(DIR_RAW, "ntca", "PA_TR_Corridor_Final",
 xwalk_path <- file.path(DIR_RAW, "ntca", "reserve_pa_crosswalk.csv")
 
 reserves_out <- file.path(DIR_PROCESSED, "boundary_reserves_all_7755.gpkg")
+corridors_out <- file.path(DIR_PROCESSED, "boundary_corridors_7755.gpkg")
 states_out   <- file.path(DIR_PROCESSED, "boundary_states_7755.gpkg")
 unattr_out   <- file.path(DIR_INTERIM,   "boundary_kml_unattributed_7755.gpkg")
 report_nn    <- 2L
@@ -222,7 +232,7 @@ corridors  <- kml |> filter(!.has_desig & .has_corr)    # corridors (59) — dro
 unattr     <- kml |> filter(!.has_desig & !.has_corr)   # unnamed duplicates (156)
 
 cat(sprintf("  PA polygons (DESIG): %d\n", nrow(pa_poly)))
-cat(sprintf("  corridors (Corridor field): %d  [DROPPED - Stage 2 re-extracts]\n",
+cat(sprintf("  corridors (Corridor field): %d  [written to boundary_corridors in STEP 6]\n",
             nrow(corridors)))
 cat(sprintf("  unattributed / duplicates: %d  [preserved to diagnostic layer]\n",
             nrow(unattr)))
@@ -460,10 +470,96 @@ if (nrow(over_ext) > 0) {
 # ==============================================================================
 rule("STEP 6 — write outputs")
 
-# Reserve layer.
 if (!dir.exists(DIR_PROCESSED)) dir.create(DIR_PROCESSED, recursive = TRUE)
+
+# ---- Re-run guard: the reserve layer must not change -------------------------
+# Compare against the layer on disk BEFORE overwriting it. Attributes are
+# normalised first (a GeoPackage round trip can return logical fields as
+# integer and change column classes), then compared value by value. Polygon
+# areas are compared as a geometry check. Any difference stops the script with
+# nothing overwritten.
+norm_attrs <- function(x) {
+  d <- as.data.frame(st_drop_geometry(x))
+  d[] <- lapply(d, function(col) {
+    if (is.logical(col)) as.integer(col)
+    else if (is.factor(col)) as.character(col)
+    else col
+  })
+  rownames(d) <- NULL
+  d
+}
+if (file.exists(reserves_out)) {
+  old_sf <- st_read(reserves_out, quiet = TRUE)
+  old_df <- norm_attrs(old_sf)
+  new_df <- norm_attrs(reserves_sf)
+  same_names <- identical(names(old_df), names(new_df))
+  same_attrs <- same_names && isTRUE(all.equal(old_df, new_df,
+                                               check.attributes = FALSE))
+  same_area  <- nrow(old_sf) == nrow(reserves_sf) &&
+    isTRUE(all.equal(as.numeric(st_area(old_sf)),
+                     as.numeric(st_area(reserves_sf)), tolerance = 1e-9))
+  if (!(same_attrs && same_area)) {
+    stop("Re-run guard: the new reserve layer differs from ", reserves_out,
+         " (names equal: ", same_names, "; attributes equal: ", same_attrs,
+         "; areas equal: ", same_area, "). Nothing was overwritten. ",
+         "Inspect the difference before you replace the layer.", call. = FALSE)
+  }
+  cat("re-run guard: reserve layer identical to the one on disk (attributes + areas).\n")
+}
+
+# Reserve layer.
 st_write(reserves_sf, reserves_out, delete_dsn = TRUE, quiet = TRUE)
 cat("wrote", reserves_out, "(", nrow(reserves_sf), "reserves )\n")
+
+# Corridor layer (Week 9, task 9.2a). The 59 NTCA corridor POLYGONS separated in
+# STEP 1. Field names stay close to the KML: `kml_name` is the placemark
+# <name>, `corridor_label` is the SimpleData Corridor field. No name is
+# invented; a blank stays NA.
+blank_to_na <- function(v) ifelse(is.na(v) | str_squish(v) == "", NA_character_, v)
+
+# Decode XML entities left in the text. Some Corridor values are escaped twice
+# in the KML (for example "&amp;apos;"), so xml2 decodes once and leaves
+# "&apos;" in the value (as built: "Dibru Saikhowa-D &apos;e",
+# "D&apos; Ering-mehao"). This restores the character the KML means; it does
+# not change a name. Applied to the corridor fields only — the PA names drive
+# the reserve crosswalk and are left untouched (the re-run guard above would
+# stop on any change there). &amp; is decoded LAST so "&amp;lt;" is not
+# decoded twice.
+decode_xml_entities <- function(v) {
+  v <- str_replace_all(v, fixed("&apos;"), "'")
+  v <- str_replace_all(v, fixed("&quot;"), '"')
+  v <- str_replace_all(v, fixed("&lt;"),   "<")
+  v <- str_replace_all(v, fixed("&gt;"),   ">")
+  v <- str_replace_all(v, fixed("&amp;"),  "&")
+  v
+}
+corridors_sf <- corridors |>
+  mutate(
+    corridor_id    = row_number(),
+    kml_name       = decode_xml_entities(blank_to_na(.name)),
+    corridor_label = decode_xml_entities(blank_to_na(.corr)),
+    state          = decode_xml_entities(blank_to_na(.state)),
+    source         = "ntca"
+  ) |>
+  select(corridor_id, kml_name, corridor_label, state, source)
+left_entities <- grepl("&[A-Za-z#0-9]+;", c(corridors_sf$kml_name,
+                                             corridors_sf$corridor_label,
+                                             corridors_sf$state))
+if (any(left_entities)) {
+  warning(sum(left_entities), " corridor field value(s) still hold an XML ",
+          "entity after decoding — inspect them.")
+}
+n_empty_corr <- sum(st_is_empty(corridors_sf))
+if (nrow(corridors_sf) != 59L) {
+  warning("expected 59 corridor polygons, found ", nrow(corridors_sf),
+          " — inspect the KML split in STEP 1.")
+}
+if (n_empty_corr > 0) {
+  warning(n_empty_corr, " corridor polygon(s) have empty geometry.")
+}
+st_write(corridors_sf, corridors_out, delete_dsn = TRUE, quiet = TRUE)
+cat("wrote", corridors_out, "(", nrow(corridors_sf), "corridors;",
+    sum(!is.na(corridors_sf$corridor_label)), "with a Corridor label )\n")
 
 # States layer (the other declared 02 output) — from the acquired admin layer.
 states_src <- file.path(DIR_RAW, "administrative", "boundary_states_ne_7755.gpkg")
@@ -484,4 +580,4 @@ report <- reserves_sf |>
             n_parts, match_status, geometry_present)
 write_table(report, report_nn, report_slug)
 
-rule("02 done. NEXT: hand-check tbl_02 review/gap rows; overwrite area_km2 from census in Week 5.")
+rule("02 done. Reserve layer, state layer, corridor layer, and build report written.")

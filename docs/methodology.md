@@ -2,16 +2,16 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** Week 8 complete — **Stage 2 (Connectivity) input assembly done.**
-`scripts/06_build_covariate_stack.R` assembled the aligned 1 km EPSG:7755
-covariate stack `cov_stack_1km_7755.tif` (bands: `landcover`, `ghm`, `elev`,
-`slope`, `tri`, `dist_road_m`) from the Week-2 layers, plus the interim
-distance-to-road covariate `cov_distroad_1km_7755.tif` and the QA table
-`tbl_10_covariate_stack_qa.csv`. Assembly and alignment only — resistance values
-and barrier road classes remain Week-9 Decisions. **Decision 10** records the
-cross-band common-NA-mask policy and defers a gHM coastal/edge gap-fill to Week 9
-pending a per-reserve relevance check. Prior: Week 7 — Stage 1 (Growth) done
-(`scripts/05_growth_analysis.R`; `tbl_02`, `fig_01`, `fig_02`; 13/13 checks).
+**Status:** Week 9 complete — **Stage 2 (Connectivity) resistance surfaces
+built.** `scripts/07_connectivity.R` (one script for all of Stage 2) wrote four
+1 km resistance surfaces — `resist_tiger_baseline_7755.tif` and the variants
+`noghm`, `road15`, `road50` — with `tbl_11_resistance_qa.csv`. **Decision 10 is
+closed** through Decisions 11–13 (gHM gap-fill; land cover and terrain rebuilt
+at source); the final stack (`build_tag` d13f, written as `FLT4S` and verified on
+read-back) has 3,067,467 complete-case cells. **Decisions 14–16** set the
+resistance rules (class values, gHM multiplier, Sundarban water, road barrier,
+water exempt from gHM). Next: Week 10 — least-cost paths and the variant
+comparison. Prior: Week 8 — covariate stack; Week 7 — Stage 1 (Growth) done.
 
 This document is the processing log and the decision record. Every significant
 choice becomes a **numbered Decision** with a date and a justification, recorded
@@ -31,10 +31,13 @@ reprojected on load. This differs from tiger Phase 1, which used UTM 43N
 
 ### 5.2 Growth (priority 1)
 
-Per-reserve census metrics across five NTCA rounds (2006–2022): absolute change,
-percent growth, average annual growth rate (AAGR), and density (tigers/100 km²).
-Roll-up to landscape complex and state. Animated choropleth of growth category
-across census years.
+Per-reserve census metrics on the within-reserve SECR series **2014 / 2018 /
+2022** (Decision 6): absolute change, percent growth, average annual growth rate
+(AAGR), and density (tigers/100 km²). Each reserve uses its own baseline → 2022
+span; missing (reserve, round) cells are `NA` (Decision 7); real zeros follow
+Decision 9. The 2006 and 2010 rounds have no per-reserve table and are context
+only. Roll-up to landscape complex and state. Animated choropleth across the
+three census rounds (3 frames).
 
 ### 5.3 Connectivity (priority 2)
 
@@ -42,6 +45,9 @@ Resistance surface from land cover (ESA WorldCover) and roads as barriers.
 Least-cost paths between neighbouring reserve pairs (`leastcostpath`). Reserve
 network as a graph (`igraph`): betweenness identifies linchpin reserves,
 components identify isolated reserves. Road crossings give pinch points.
+All Stage-2 steps (Weeks 9–12: resistance, least-cost paths, network graph,
+pinch points) are built in **one script, `scripts/07_connectivity.R`**, with one
+STEP block per task.
 
 ### 5.4 Habitat suitability (priority 3)
 
@@ -418,6 +424,12 @@ This closes the **[Week 6] Zero-baseline handling** pending item.
 
 ### Decision 10 — Covariate-stack cross-band NA policy (common mask; gHM gap-fill deferred)
 **Date:** 2026-09-20
+**Status:** **Closed 2026-09-26.** The common mask stands on the rebuilt stack
+(Decision-11 gHM fill; land cover and terrain fixed at source, Decisions 12 and
+13). Final: 3,067,467 complete-case cells of 3,067,565 India-grid cells; 98
+dropped (91 water cells beyond the gHM fill + 7 no-class cells at WorldCover
+tile corners). See the `postfill_d13` outcome under Decision 13. Confirmed
+on the correctly written (`FLT4S`) stack by the `postfill_d13f` re-check.
 **Choice:** In the assembled covariate stack `cov_stack_1km_7755.tif`
 (`scripts/06_build_covariate_stack.R`, task 8.5), apply a **common NA mask**: a
 cell is kept only where **all six bands** (`landcover`, `ghm`, `elev`, `slope`,
@@ -430,21 +442,33 @@ relevance check shows the trimmed cells matter for the connectivity / SDM extent
 - The Week-9 resistance surface and the Week-13+ `maxnet` SDM consume the stack
   as a multi-band predictor and need **complete cases** — no band should present
   a partial covariate vector for a cell. The common mask guarantees that.
-- The bands do not share an identical valid footprint. Per the Week-8 QA
-  (`tbl_10_covariate_stack_qa.csv`), five bands cover ~3,067,58x cells but **gHM
-  covers only ~3,012,007** — it is the **binding NA layer**. gHM was built by a
+- The bands do not share an identical valid footprint. Valid cells before the
+  mask (`tbl_10`, `n_valid_before`): landcover 3,067,578; elev / slope / tri
+  3,067,585; dist_road_m 3,067,565 (= the India grid exactly); **gHM
+  3,012,007** — it is the **binding NA layer**. *(Correction, 2026-09-26: this
+  Decision first cited `tbl_10` for these counts, but the Week-8 `tbl_10` held
+  after-mask counts only, and it carried an unfilled figure. `scripts/06` now
+  writes `n_valid_before` and `n_dropped_by_mask` to `tbl_10`; the figures here
+  are from the 2026-09-26 re-run.)* gHM was built by a
   windowed 300 m COG read reprojected by bilinear (`scripts/01` Block 5); its
   valid extent is slightly smaller than WorldCover/terrain along the coast/border
   and at small interior water/fill gaps.
 - The common mask therefore trims every band to gHM's footprint: **complete-case
-  cells = 3,010,738 (98.15% of the India grid); ~56,840 cells (~1.8%) dropped**,
-  almost all of them cells where gHM is `NA` but the other five have data.
+  cells = 3,010,738 (98.15% of the 3,067,565-cell India grid); 56,827 India-grid
+  cells (1.85%) lost** (the `dist_road_m` row of `tbl_10`, whose footprint is the
+  India grid exactly). **55,049** are cells where only gHM is `NA`; the other
+  **1,778** are India cells with no land-cover class (an edge offset found on
+  2026-09-26 — see Decision 12). *(Corrected 2026-09-26. The Week-8 text gave
+  "~56,840 (~1.8%)"; that was the landcover-band drop, which counted 1,791
+  cells outside the India polygon and none of the 1,778 India cells without a
+  class. An earlier correction called the landcover excess a "+13 halo"; +13
+  is only the net of those two figures.)*
 
 **Why defer the gap-fill rather than fill or close now:**
 - Filling gHM's `NA` fringe (a focal/nearest-fill of the edge) is a covariate
   *treatment* choice, not a stacking mechanic. Making it inside the Week-8
   assembly step would bury an analytical decision in a mechanical one.
-- Whether the ~1.8% loss matters is an **empirical question not yet checked**:
+- Whether the 1.85% loss matters is an **empirical question not yet checked**:
   the concern is specific reserves on the coast/edge (Sundarbans mangrove edge,
   coastal Western Ghats reserves) losing cells inside their footprint. Deciding
   "no fill, ever" before that check would be the same premature closure the
@@ -458,48 +482,796 @@ relevance check shows the trimmed cells matter for the connectivity / SDM extent
 
 **Consequences for the pipeline:**
 - `cov_stack_1km_7755.tif` is the complete-case stack (six bands, common mask).
-- `tbl_10_covariate_stack_qa.csv` records per-band valid-before counts, the
-  common-case count, and the per-band drop, so the coverage cost is visible.
+- `tbl_10_covariate_stack_qa.csv` records, per band, the valid cells before the
+  mask (`n_valid_before`), the cells the mask removed (`n_dropped_by_mask`), and
+  the complete-case count after the mask (`n_valid`), so the coverage cost is a
+  saved figure, not a console figure. *(The first two columns were added on
+  2026-09-26; see the change log.)*
 - The interim single-purpose layers (`cov_distroad_1km_7755.tif` and the Week-2
   `cov_*_1km_7755.tif`) are **not** common-masked, so a Week-9 gap-fill can start
   from gHM's own footprint without re-deriving the others.
+
+### Decision 11 — gHM gap-fill relevance rule (resolves Decision 10)
+**Date:** 2026-09-26 (fixed **before** the check was run)
+**Choice:** Decision 10 deferred a gHM gap-fill until a relevance check. The
+rule for that check, and the fill used if it triggers, are fixed here. The
+parameters live in `R/00_config.R` (`GAP_*`); `scripts/07_connectivity.R`
+STEP 9.2 applies them.
+
+1. **Footprint units** (each checked on its own):
+   - the 55 reserve polygons with KML geometry;
+   - the 59 NTCA corridor polygons (`boundary_corridors_7755.gpkg`, written by
+     `scripts/02` in task 9.2a);
+   - a **10 km ring outside each reserve polygon** (`GAP_BUFFER_M = 10000`), the
+     approach zone that a least-cost path must cross to leave a reserve.
+   The 3 geometry-absent reserves (Amrabad, Pilibhit, Dholpur-Karauli) cannot
+   be checked; they are listed, not counted.
+2. **Cell membership:** any 1 km cell the polygon touches
+   (`terra::extract(touches = TRUE)`). Only India-grid cells count.
+3. **Cells counted:** land cells — WorldCover class ≠ 80 (permanent water,
+   `GAP_WATER_CLASS`). Dropped water cells are reported but not counted. An
+   India cell with no WorldCover class counts as land.
+4. **Materiality:** a unit is materially affected if **≥ 5 %** of its land
+   cells are dropped (`GAP_MIN_PCT`) **or ≥ 25** land cells are dropped
+   (`GAP_MIN_CELLS`; 25 km²).
+5. **Outcome:** if **any** unit is materially affected, apply the fill (point 6),
+   rebuild the stack, and re-run STEP 9.2 on the rebuilt stack. If **none** is,
+   Decision 10 closes with "no fill needed" and the common mask is final.
+6. **Fill method (used only if point 5 triggers):** fill a `NA` gHM cell with
+   the mean of the valid gHM cells in its 3 × 3 neighbourhood (`GAP_FILL_WINDOW`),
+   `NA` cells only (`terra::focal(..., na.policy = "only", na.rm = TRUE)`).
+   Repeat up to 5 passes (`GAP_FILL_MAX_ITER`), so no filled cell is more than
+   5 km from real gHM data. Fill only cells where the other five bands have
+   values. Cells still `NA` after 5 passes stay `NA`.
+
+**Reason and sources:**
+- **Why a buffer, and why 10 km.** The reserve polygons are core-PA polygons
+  that under-state the reserve (Decision 4), and a least-cost path starts at the
+  polygon edge. So the zone just outside each polygon matters for connectivity
+  as much as the polygon. Two independent bases give about 10 km:
+  - *Policy.* India's default eco-sensitive zone around a protected area
+    extends up to 10 km (Wildlife Conservation Strategy 2002; MoEF 2011 ESZ
+    guidelines), and the guidelines include connectivity areas in that zone.
+    Indian policy therefore already treats a zone of up to 10 km as the area
+    that affects a protected area.
+  - *Tiger ranging.* Mean resident female home ranges from Indian telemetry are
+    56.4 km² in the Sundarban (Naha et al. 2016) and 73.6 km² in Panna
+    (Sarkar et al. 2016). As circles, these have diameters of about 8.5 km and
+    9.7 km. A 10 km ring is therefore about one female home-range width: the
+    distance a resident animal's range reaches beyond the boundary.
+  - *Rejected — narrower.* Yumnam et al. (2014) buffered least-cost corridors
+    by 1.5 km, but that is a corridor **width**, not a reserve approach zone.
+    It would test too few cells at the reserve edge.
+  - No study was found that sets a buffer for this exact purpose (a
+    covariate-coverage check). The value is a documented judgement from the
+    two bases above.
+- **Why 25 km² / 5 %.** 25 km² is less than half of the mean resident female
+  ranges above (56.4 and 73.6 km²), so a loss below it is unlikely to remove a
+  whole female territory's worth of habitat from a path or a suitability
+  pattern. It is above the smallest female ranges reported in high-prey sites
+  (about 10 km², reviewed in Naha et al. 2016), so it is not a lenient bound
+  there. The 5 % share catches small units (for example narrow corridors),
+  where fewer than 25 cells can still be a large fraction. **No published
+  source gives the 5 % value; it is a judgement call** and is recorded as one.
+- **Why land cells only.** A dropped water cell has no effect on the check's
+  purpose: water will get a high resistance under the Week-9 land-cover values
+  and adds nothing to an SDM. Counting it would make coastal units fail on sea
+  and river channels. *Caveat carried to task 9.3:* Naha et al. (2016) studied
+  tiger movement across water channels in the Sundarban, so treating water as
+  a barrier there needs its own check when the resistance values are decided.
+- **Why this fill.** The gaps are at gHM's coastal/border edge and small
+  interior gaps (Decision 10). A neighbourhood mean of the valid cells is the
+  standard way to fill small raster gaps, and it matches how gHM was already
+  resampled (bilinear, `scripts/01` Block 5). The 5-pass bound keeps every
+  filled value within about one female home-range radius (≈ 4.8 km for 73.6 km²)
+  of real data, so the fill does not invent human-pressure values far inland or
+  offshore. **No published study was found that prescribes a fill method for
+  gHM edge gaps;** the method is a general raster technique
+  (`terra::focal`, Hijmans), chosen before the result is known.
+
+**Consequences:**
+- STEP 9.2 writes `data/interim/cov_commonmask_dropped_1km_7755.tif` and
+  `outputs/tables/tbl_11_ghm_gap_relevance.csv`, and prints the outcome.
+- The outcome (triggered or not) is recorded in this document **before** the
+  resistance STEPs (9.5+) are written.
+- If triggered, where the fill code lives (in `scripts/06`, which builds the
+  stack, or elsewhere) is decided then; the method itself does not change.
+
+**Outcome — pre-fill check (2026-09-26): TRIGGERED.**
+Source: `outputs/tables/tbl_11_ghm_gap_relevance_prefill.csv` (172 rows: 169
+checked units + 3 geometry-absent reserves) and
+`data/interim/cov_commonmask_dropped_prefill_1km_7755.tif`.
+- The 56,827 dropped India-grid cells are 27,880 water (class 80) and 28,947
+  land; the largest land class is cropland (class 40, 17,329 cells).
+- **27 of 169 units are materially affected:** 16 of 55 buffer rings, 5 of 55
+  reserves, 6 of 59 corridors. 17 fail on the 25-cell count only (share below
+  5 %; mostly large buffer rings), 7 on the 5 % share only (small corridors and
+  Orang), and 3 on both (Sundarbans reserve and ring, Kaziranga reserve).
+- Largest losses: Nagarjunsagar-Srisailam ring 199 land cells (3.77 %; its
+  polygon is over-extended, Decision 4 limitation); Sundarbans reserve 177
+  (12.27 %); Satpura ring 69; Sundarbans ring 52 (10.06 %); Nagarjunsagar-
+  Srisailam reserve 48.
+- *Likely cause (hypothesis, not tested):* gHM is `NA` over water, and the
+  bilinear resample in `scripts/01` sets a cell `NA` when a neighbour is `NA`,
+  so land cells next to water are lost. Several failing units are inland next
+  to reservoirs or large rivers (Nagarjunsagar/Srisailam, Satpura, Kali,
+  Mukundara), which fits this.
+
+**Implementation of the outcome (2026-09-26; process choices, not a new
+Decision):**
+- **Fill location:** `scripts/06` STEP 8.4b, between distance-to-road and
+  stacking, switched by `GHM_GAP_FILL <- TRUE` in `R/00_config.R`. `scripts/06`
+  stays the only writer of the stack. `tbl_10` gains `n_filled`.
+- **Water cells:** the fill works by eligibility (other five bands present), so
+  eligible water cells are filled too. Resistance for water comes from land
+  cover (task 9.3), so this does not set any resistance value. *(Correction,
+  2026-09-26: this became false when Decision 14 added a gHM multiplier for
+  every class — in the first resistance build the imputed gHM raised water
+  resistance (mean 87.4 against a class value of 50). Decision 16 exempts water
+  from the multiplier, which makes the statement true again.)*
+- **Pre-fill evidence kept:** `scripts/07` labels its STEP-9.2 outputs
+  `_prefill` / `_postfill` from `tbl_10` `n_filled`, so the post-fill re-check
+  never overwrites the pre-fill result.
+- **If the post-fill re-check still triggers:** stop and decide again before
+  STEP 9.3. No extra fill passes are added automatically. (Decision 11 did not
+  say what to do in this case; this rule was fixed before the post-fill run.)
+
+**Outcome — post-fill check (2026-09-26): STILL TRIGGERED — 1 unit.**
+Source: `tbl_11_ghm_gap_relevance_postfill.csv`,
+`cov_commonmask_dropped_postfill_1km_7755.tif`, `tbl_10` (`n_filled` 54,958).
+- The fill filled **54,958** gHM cells (passes: 48,929 / 4,431 / 1,124 / 360 /
+  114). **91** eligible cells stayed `NA`, all water (class 80). Complete-case
+  cells rose from 3,010,738 to **3,065,696 (99.94 %)**; the India-footprint
+  loss fell from 56,827 to **1,869** cells. Spot-check means of the unchanged
+  bands are within 0.1 % of their sources.
+- The 1,869 dropped cells are the **1,778 India cells with no land-cover class**
+  plus the 91 water cells. **No dropped land cell is now caused by gHM.**
+- The one failing unit is corridor `dhudwa_nepal2`: 6 of 43 land cells
+  (13.95 %), all no-class cells. The fill cannot reach them by design (a cell
+  with no land cover is not eligible).
+- Per the rule fixed before this run, the week stopped for a new decision →
+  **Decision 12.**
+
+### Decision 12 — Post-fill trigger: gHM gap closed; land-cover edge offset fixed at source
+**Date:** 2026-09-26
+**Status:** made **after** the post-fill result (Decision 11 stop rule). It is a
+post-result decision and is recorded as one.
+
+**Facts that led to it:**
+- After the Decision-11 fill, the remaining loss is not a gHM gap. It is 1,778
+  India cells with no WorldCover class (plus 91 water cells > 5 km from gHM
+  data).
+- **Cause (mostly confirmed):** `scripts/01` masked WorldCover to India on its
+  own grid; `scripts/06` resamples that masked layer onto the snapped template,
+  which shifts the class edge by about one cell. As built, the landcover band
+  had **1,791 cells outside** the India polygon and **no class in 1,778 India
+  cells**. A distance check (2026-09-26) put the no-class cells a median 506 m
+  from the India boundary, with 75 % within 587 m (min 204 m) — the one-cell
+  shift. **But the maximum was 291 km** (mean 975 m): a small number of
+  no-class cells are interior gaps that the edge shift does not explain. Their
+  cause is not known.
+- All 88 unmasked 1 km WorldCover tiles that `scripts/01` cached are on disk.
+
+**Choice:**
+1. **gHM:** Decision 10 closes for gHM. The Decision-11 fill resolved the gHM
+   gap; the 91 water cells that stay `NA` are accepted (they are more than 5 km
+   from gHM data, and water resistance comes from land cover).
+2. **Land cover — fix at source.** `scripts/06` STEP 8.3 builds land cover from
+   the 88 unmasked tiles (merged in the `scripts/01` order), resamples it
+   (nearest) onto the template, and masks it to India **on the template** —
+   the same India mask as `dist_road_m`. A guard stops the build if any India
+   cell that had a class changes or loses it. `06` also writes the aligned
+   land cover to `data/interim/cov_landcover_worldcover2021_aligned_1km_7755.tif`
+   for `scripts/07`, and tags the build `lc_source = "tile_cache"` in `tbl_10`.
+3. **Re-check:** re-run `scripts/06` and `scripts/07` STEP 9.2 (labelled
+   `postfill_d12`). The Decision-11 rule applies unchanged. **Clear →** Decision
+   10 closes. **Still triggered →** stop and decide again (the Decision-11 stop
+   rule still applies). `scripts/07` now reports how many no-class cells are
+   edge cells (within 1.5 cells of the boundary) and how many are interior.
+4. The interior no-class cells are **not** addressed by this Decision.
+
+**Rejected:**
+- *Extend the gHM fill* — the stop rule forbids extra passes, and gHM is not
+  the cause.
+- *Majority-class fill of no-class cells* — it would invent land-cover classes
+  at borders when the real classes are in the tile cache.
+- *Leave the cells `NA`* — the defect has a known cause and a fix that uses
+  real data.
+
+**Consequences:**
+- Edge-effect gHM cells at these 1,778 locations become eligible for the
+  Decision-11 fill once they have a land-cover class, so the rebuilt stack may
+  fill slightly more gHM cells than 54,958.
+- Terrain and gHM still come from `scripts/01` layers masked on the
+  `scripts/01` grid, so the same one-cell shift can exist for them (terrain is
+  net +20 against the India count; the split is not measured). Any India cell
+  that lacks terrain will show in the `postfill_d12` check as a dropped cell
+  with a land-cover class.
+
+**Outcome — `postfill_d12` check (2026-09-26): STILL TRIGGERED — 1 unit.**
+Source: `tbl_11_ghm_gap_relevance_postfill_d12.csv`,
+`cov_commonmask_dropped_postfill_d12_1km_7755.tif`, `tbl_10`.
+- The land-cover fix worked. Guard PASS (no interior class changed or lost).
+  India cells with a class rose from 3,065,787 to **3,067,558**; **7** still
+  have none, all interior (31–291 km from the boundary).
+- The loss did **not** change: 1,869 India cells dropped, 3,065,696
+  complete-case cells, `n_filled` 54,958. The 1,771 edge cells that gained a
+  class are still dropped: **terrain is `NA` there** (inferred: they have land
+  cover and distance-to-road, yet the Decision-11 fill still did not treat them
+  as eligible, and terrain is the only other eligibility condition). This is
+  the terrain case named in the consequences above.
+- Dropped cells now: 1,771 terrain-edge cells (463 of them water) + 91 water
+  cells beyond the gHM fill + 7 interior no-class cells.
+- Failing unit: corridor `dhudwa_nepal2` (Nepal border), 5 of 42 land cells
+  (11.9 %) — terrain-edge cells. The stop rule applied → **Decision 13.**
+
+### Decision 13 — Terrain edge shift fixed at source; interior no-class cells accepted
+**Date:** 2026-09-26
+**Status:** made **after** the `postfill_d12` result (stop rule). A post-result
+decision, recorded as one.
+
+**Choice:**
+1. **Terrain — fix at source, the Decision-12 way.** `scripts/06` rebuilds
+   elevation, slope and TRI from the cached raw DEM
+   (`data/raw/terrain/dem_india_aws_z7_4326.tif`, clipped to India + 5 km) by
+   repeating `scripts/01` Block 7 exactly **without its India mask**: slope and
+   TRI on the native DEM; bilinear projection onto the `scripts/01` grid (India
+   + 5,000 m, 1 km); then the Week-8 bilinear resample onto the template; then
+   the India mask **on the template**.
+2. **Guard (fixed before the run):** cells whose 5 × 5 neighbourhood lies wholly
+   inside India ("core") must match the Week-8 terrain within 0.01 in each band
+   (`TERR_GUARD_TOL`; the Week-8 layer is stored as 32-bit float) and must not
+   lose a value; otherwise the build stops. Edge cells that gain or change a
+   value are counted and reported, not stopped.
+3. **Interior no-class cells (7) — accepted.** They are 31–291 km inside India,
+   their cause is not known, and they are 7 of 3.07 million cells. `scripts/07`
+   prints their cell centres; the list is recorded here after the re-check.
+4. **gHM is not rebuilt at source.** It is now the only band masked on the
+   `scripts/01` grid, but `scripts/01` read it remotely and kept no local copy;
+   a source fix would need a new download. Once terrain is present at the edge
+   cells, they become eligible for the Decision-11 fill.
+5. **Re-check:** re-run `scripts/06` and `scripts/07` STEP 9.2. `tbl_10` now
+   carries `build_tag = "d13"`, so the outputs are labelled `postfill_d13`. The
+   Decision-11 rule applies unchanged. **Clear →** Decision 10 closes.
+   **Still triggered →** stop and decide again.
+
+**Rejected:**
+- *Focal-mean fill of the terrain edge cells* — real values exist in the raw
+  DEM.
+- *Accept and close now* — every border and coastal edge cell would stay `NA`,
+  and Week-10 least-cost paths cross borders at transboundary links (Dudhwa–
+  Nepal, Valmiki, Manas–Bhutan, Sundarbans); `NA` cells block paths.
+
+**Consequences:**
+- The rebuilt stack should gain up to about 1,771 complete-case cells, and
+  `n_filled` should rise (gHM edge cells become eligible).
+- Edge-cell terrain values come from the unmasked source, so edge cells that
+  already had a value may change slightly (reported by the guard as
+  `changed_edge`).
+- Decision numbers for Week 9: resistance values (task 9.3) → **Decision 14**;
+  barrier road classes (task 9.4) → **Decision 15**.
+
+**Outcome — `postfill_d13` check (2026-09-26): CLEAR. Decision 10 closes.**
+Source: `tbl_11_ghm_gap_relevance_postfill_d13.csv` (0 units with any dropped
+land cell), `cov_commonmask_dropped_postfill_d13_1km_7755.tif`, `tbl_10`
+(`build_tag` d13).
+- Decision-12 and Decision-13 guards PASS. Terrain core difference: **0** in
+  every band; no core value lost. Terrain now covers all 3,067,565 India-grid
+  cells (before: 3,065,794).
+- Edge report: 1,771 edge cells gained terrain in each band. Edge cells whose
+  value changed by more than 0.01: elevation 8,627, slope 5,298, TRI 8,096.
+  These are expected (the Week-8 edge values were interpolated from a masked
+  source); the size of the changes was not measured.
+- gHM fill: **56,729** cells filled (was 54,958; the edge cells became
+  eligible); 91 eligible cells stay `NA`, all water.
+- **Complete-case cells: 3,067,467** (100.00 % of the India grid after
+  rounding; exactly 3,067,565 − 98). Dropped: **98** = 91 water cells more
+  than 5 km from gHM data + 7 India cells with no WorldCover class.
+- Spot-check (stack vs source mean): gHM 0.377 / 0.377; elevation 571.309 /
+  571.291; slope 2.506 / 2.506; TRI 23.117 / 23.116; distance-to-road 2,044.3 /
+  2,045.0; land cover modal 40, 11 classes.
+- **The 7 no-class cells (accepted, Decision 13):** cell centres in EPSG:7755 —
+  (5294500, 4060500), (5294500, 4059500) ≈ 92.99°E 24.00°N;
+  (4697500, 4020500), (4697500, 4019500), (4697500, 4018500), (4697500, 4017500)
+  ≈ 86.99°E 24.00–24.03°N; (3500500, 4008500) ≈ 74.99°E 24.00°N. All 7 sit on
+  **3° WorldCover tile corners** (24°N with 75°E, 87°E, 93°E). *Likely cause:*
+  a seam where `scripts/01` reprojected each 3° tile on its own and snapped it
+  onto the shared grid. Not tested further; no unit is affected.
+- Elevation minimum in the stack is now **−434.2 m** (edge water cells now
+  have terrain) — see the Week-14 pending item.
+
+### Decision 14 — Land-cover resistance values, human-pressure multiplier, Sundarban water, and a sensitivity variant
+**Date:** 2026-09-26 (fixed **before** any resistance surface is built)
+**Choice:** The baseline resistance surface for Stage 2 is built from land cover
+and human pressure; the road barrier (Decision 15) is added after this step.
+All values live in `R/00_config.R`; `scripts/07_connectivity.R` STEP 9.5 reads
+them.
+
+1. **Class values** (`WORLDCOVER_RESISTANCE`, scale 1 = easiest … 100 = maximum):
+
+   | WorldCover class | Starting value (Week 0) | **Decision 14** | Basis |
+   |---|---|---|---|
+   | 10 Tree cover | 1 | **1** | Preferred by dispersing tigers (Krishnamurthy et al. 2016; Dutta & Krishnamurthy 2024) |
+   | 20 Shrubland | 3 | **3** | Open/degraded forest; negligible resistance in the genetics study (Thatte et al. 2018) |
+   | 30 Grassland | 5 | **3** | At 1 km, mostly open dry forest and savanna inside reserves (data check below). *Judgement.* |
+   | 40 Cropland | 7 | **10** | Avoided at fine scale but crossed, and crossed fast (Krishnamurthy et al. 2016; Dutta & Krishnamurthy 2024); low resistance in the genetics study (Thatte et al. 2018). Evidence mixed. *Judgement.* |
+   | 50 Built-up | 50 | **100** | Dense settlement had the highest resistance in the genetics study (Thatte et al. 2018); dispersers avoided the human-dominated landscape (Dutta & Krishnamurthy 2024) |
+   | 60 Bare / sparse | 10 | **10** | No tiger-specific evidence. *Judgement.* |
+   | 70 Snow and ice | 100 | **100** | Unchanged; not tiger habitat |
+   | 80 Permanent water | 100 | **50** (10 in the Sundarban region, point 3) | Wide water is rarely crossed but is not a barrier (Naha et al. 2016) |
+   | 90 Herbaceous wetland | 15 | **3** | Open natural wet habitat, treated like grassland. It has **no** cells in any reserve polygon and covers 0.1 % of India at 1 km, so its effect is small. *Judgement.* |
+   | 95 Mangroves | 10 | **1** | Preferred habitat of Sundarban tigers (Naha et al. 2016) |
+   | 100 Moss and lichen | 8 | **50** | High alpine; not tiger habitat; 0.3 % of India and absent from reserves. *Judgement.* |
+
+2. **Human-pressure multiplier (gHM):**
+   `resistance = min(100, class value × (1 + 4 × gHM))` (`RESIST_GHM_K = 4`,
+   `RESIST_MAX = 100`). The factor runs from ×1 (gHM 0) to ×5 (gHM 1).
+   Examples: forest at gHM 0.1 → 1.4; cropland at gHM 0.2 → 18; cropland at gHM
+   0.6 → 34; built-up → 100 at any gHM. **k = 4 is a judgement value.**
+   *(Amended by Decision 16: water (class 80) is exempt from the multiplier.)*
+3. **Sundarban water region:** inside the Sundarbans reserve polygon
+   (`unit_id` 57) plus a 10 km ring (the Decision-11 `GAP_BUFFER_M`), a water
+   cell (class 80) takes **10** instead of 50, before the gHM multiplier. No
+   hand-drawn geometry is used.
+4. **Sensitivity variant (fixed now):** the same surface with **k = 0** — set
+   B without the gHM multiplier, same water region. Written beside the
+   baseline and compared with it in Week 10. The comparison metric is fixed
+   before the variant's paths are examined.
+5. **Order of operations:** class value → Sundarban water override → gHM
+   multiplier → cap at 100 → road barrier (Decision 15, task 9.6).
+
+**Reason and sources:**
+- **Why class values now, not 1 − suitability.** The national corridor work
+  estimated habitat resistance as 1 − Ψ from occupancy and modelled corridors
+  between reserves with circuit theory (Jhala et al. 2021; Qureshi et al.
+  2014). This project's habitat model (Stage 3) does not exist yet, so Stage 2
+  uses literature-informed class values. An SDM-based check follows Stage 3
+  (pending item).
+- **Movement evidence (central India).** Six GPS dispersal paths: tigers
+  preferred forest on rugged ridges at broad scale and avoided the
+  agriculture–village matrix at fine scale (Krishnamurthy et al. 2016). Five
+  dispersers avoided the human-dominated landscape and moved faster through
+  non-forest (Dutta & Krishnamurthy 2024). Genetics: dense settlements and
+  high-traffic roads had the highest resistance; degraded forest and
+  plantations almost none; the agriculture–village matrix was low (Thatte et
+  al. 2018). The shared signal is **human settlement and pressure**, not
+  cropland as such — hence the gHM multiplier (point 2) with a moderate
+  cropland base value.
+- **Why ratios matter.** A least-cost path compares costs. With forest 1 and
+  cropland 10, 1 km of cropland costs as much as 10 km of forest; with the gHM
+  multiplier, 1 km of busy farmland (gHM 0.6, value 34) costs as much as 34 km
+  of forest. The cropland value and k are the most sensitive judgement values,
+  which is why the variant (point 4) removes k.
+- **Water.** Sundarban tigers crossed about five channels wider than 30 m each
+  day (mean width 54 m) and rarely crossed channels wider than 400 m, but one
+  male crossed an 800 m river and settled in Bangladesh (Naha et al. 2016). At
+  1 km a cell is class 80 only where water is the most common cover, so class-80
+  cells are wide water: rarely crossed, not a barrier. Outside the Sundarban no
+  peer-reviewed tiger movement evidence on water was found, so water stays at
+  50 there. The Brahmaputra valley was considered and **not** included: the
+  evidence is grey literature only.
+- **Scale.** 1–100 is the common convention. For long-distance movers Keeley et
+  al. (2016) recommend transforms that leave much of the landscape at low
+  resistance; the low values for the open natural classes follow that
+  direction. The transform question returns with the SDM-based check.
+
+**Data check (2026-09-26):** share of 1 km cells by WorldCover class inside the
+55 reserve polygons vs all of India (aligned land cover, `scripts/06`):
+
+| Class | Reserves | India |
+|---|---|---|
+| 10 Tree cover | 75.8 % | 26.1 % |
+| 20 Shrubland | 5.6 % | 3.2 % |
+| 30 Grassland | 6.8 % | 7.3 % |
+| 40 Cropland | 5.8 % | 54.6 % |
+| 50 Built-up | 0.0 % (7 cells) | 0.9 % |
+| 60 Bare / sparse | 0.2 % | 4.8 % |
+| 80 Water | 2.6 % | 1.7 % |
+| 95 Mangroves | 3.2 % | 0.1 % |
+| 70, 90, 100 | none | 0.7 %, 0.1 %, 0.3 % |
+
+Reserves where a class is ≥ 10 % of cells: grassland in Madhav 35.8 %,
+Mukundara Hills 34.2 %, Ratapani 34.1 %, Panna 30.2 %, Sariska 28.2 %,
+Sathyamangalam 24.2 %, Ranthambore 23.5 %, Bandipur 20 % and 6 others;
+cropland in Orang 31 %, Manas 27.8 %, Sanjay Dubri 23.6 %, Nameri 22.2 %,
+Ramgarh Vishdhari 18.2 %, Kaziranga 17.2 % and 5 others; water in Orang 23.9 %,
+Sundarbans 20.4 %, Sahyadri 14.2 %, Kaziranga 11.7 %, Bor 11.2 %; mangroves in
+Sundarbans 79.2 %. **Limit:** reserve composition shows where tigers live and
+where reserves were placed, not how tigers move. It supports the values; it
+does not calibrate them. It also changed one basis: class 90 was first
+justified by the Kaziranga/Dudhwa/Manas floodplains, but WorldCover does not map
+those as class 90 at 1 km.
+
+**Rejected:**
+- *Keep the starting values* — mangroves (10) and herbaceous wetland (15) were
+  too high for preferred or open habitat; built-up (50) too low; water (100)
+  treats a crossable feature as a near-barrier.
+- *Land cover + roads only* (the Week-0 plan) — it cannot separate a busy
+  village belt from remote farmland, which is the main signal in the studies.
+  Kept as the variant.
+- *Water 100 everywhere* — isolates the Sundarban islands against the
+  telemetry evidence.
+- *A Brahmaputra water region* — grey-literature evidence only.
+
+**Consequences:**
+- `scripts/07` STEP 9.5 builds the land-cover × gHM surface and the variant;
+  STEP 9.6 adds the road barrier (Decision 15); STEP 9.7 writes
+  `resist_tiger_baseline_7755.tif` and `resist_tiger_noghm_7755.tif`.
+- QA (`tbl_11_resistance_qa.csv`) must show every present class mapped, no
+  `NA` inside the complete-case footprint, the value range, and the number of
+  cells in the Sundarban water override.
+- Week 10 adds a baseline-vs-variant path comparison.
+
+### Decision 15 — Road barrier: classes, value, combine rule, and road-value variants
+**Date:** 2026-09-26 (fixed **before** any resistance surface is built)
+**Choice:** Roads are added to the Decision-14 surface as a barrier. Settings in
+`R/00_config.R` (`ROAD_BARRIER_*`, `RESIST_VARIANTS`); `scripts/07_connectivity.R`
+STEP 9.6 applies them.
+
+1. **Barrier classes:** OSM `motorway`, `trunk`, `primary`, `secondary`, with
+   each `_link` ramp taking its parent class. **Tertiary is not a barrier
+   class**; its effect is left to gHM, which counts it as a minor road.
+2. **One barrier value, 30,** for every barrier class
+   (`ROAD_BARRIER_VALUE`). A road cell costs at least as much as 30 km of
+   forest to cross. **A judgement value.**
+3. **Combine rule: maximum.** On a road cell, resistance =
+   max(Decision-14 surface, 30). The scale stays 1–100; a road through a town
+   adds nothing (already 100).
+4. **Rasterisation:** every 1 km cell a barrier road touches
+   (`touches = TRUE`), so a diagonal road leaves no corner gaps for an
+   8-neighbour path to slip through.
+5. **Railways:** not a separate barrier; covered only through gHM (its
+   transportation class includes railways). **Limitation.**
+6. **Crossing structures** (for example the nine on NH-44 in Pench): not
+   mapped; resistance is too high where they exist. **Limitation.**
+7. **Variants (fixed now, compared in Week 10):** `road15` and `road50` — the
+   baseline surface (k = 4) with a road value of 15 and 50, bracketing 30.
+   `noghm` (Decision 14) keeps the road value 30. Each variant changes one
+   choice only. The comparison metric is fixed before any variant's paths are
+   examined.
+
+**Reason and sources:**
+- **Traffic, not the road as such.** In the genetics study, high-traffic roads
+  (with dense settlement) had the highest resistance, and long-distance
+  dispersers crossed low-traffic roads (Thatte et al. 2018). No tiger study
+  found gives a resistance value per road class. With no national traffic data
+  (no AADT for India), OSM class is the only traffic proxy. The India tagging
+  guidance maps national highways to `trunk`, but Indian road classification is
+  not uniform across authorities, so class ≈ road type is approximate and may
+  vary by state (OpenStreetMap Wiki). A single value (point 2) does not claim a
+  precision the class data do not have; the variants (point 7) test the value.
+- **Why not tertiary.** Tertiary is the low-traffic class that dispersers
+  cross, and it would double the barrier footprint (data check below).
+- **Double counting with gHM.** gHM's transportation class includes roads and
+  railways (Theobald et al. 2025). The data check shows gHM is only moderately
+  higher on barrier-road cells (0.525 against 0.377 for India), so with k = 4
+  the Decision-14 multiplier on a road cell is about ×3.1 against ×2.5 on
+  average. gHM therefore carries only a small part of the road effect; the
+  barrier value carries most of it. The maximum rule (point 3) keeps the two
+  from stacking.
+- **Mortality and structures (context).** An RTI record counts 26 tiger deaths
+  on roads and railways between January 2010 and January 2021 (news report);
+  camera traps at the NH-44 structures in Pench recorded tigers among 21 mammal
+  species using them (Habib et al. 2020; Saxena & Habib 2022).
+
+**Data check (2026-09-26; `FLT4S` stack, `build_tag` d13f):** OSM major roads
+rasterised onto the 1 km grid with `touches = TRUE`:
+
+| Classes | Length (km) | India cells touched | Reserve cells touched | Mean gHM on those cells |
+|---|---|---|---|---|
+| motorway | 15,366 | 0.3 % | 25 | 0.603 |
+| trunk | 181,537 | 5.1 % | 797 | 0.552 |
+| primary | 164,825 | 5.9 % | 1,183 | 0.546 |
+| secondary | 210,340 | 7.7 % | 806 | 0.518 |
+| tertiary | 658,303 | 22.5 % | 2,852 | 0.510 |
+| motorway–primary | 361,728 | 10.9 % | 1,964 | 0.545 |
+| **motorway–secondary (chosen)** | **572,068** | **17.5 %** | **2,711** | **0.525** |
+| all five | 1,230,370 | 34.8 % | 5,260 | 0.504 |
+
+India mean gHM: 0.377. **Consequence of the footprint:** 17.5 % of India's
+cells will be at least 30 on the baseline surface, so the road value is one of
+the most influential judgement values in Stage 2 — hence two variants.
+*(Outcome note, first resistance build 2026-09-26: **41.4 %** of baseline cells
+are at or above 30, not only the 17.5 % that are road cells, because the gHM
+multiplier raises busy cropland to about 30 (cropland mean 30.3). Only 255,500
+of the 535,592 road cells were raised by the maximum rule; in busy farmland the
+road adds nothing. This follows from Decision 14 (its own example: cropland at
+gHM 0.6 → 34). The `noghm` variant tests it (20.3 % at or above 30). Figures
+after Decision 16 are in `tbl_11_resistance_qa.csv`.)*
+
+**Rejected:**
+- *All five classes* — doubles the barrier footprint to 34.8 % of India with
+  the low-traffic class that dispersers cross.
+- *Graded values by class* (100 / 50 / 30 / 15) — more detail than the OSM
+  classes support; the evidence is qualitative.
+- *Additive or multiplicative combine* — counts the road part of gHM twice;
+  values leave the 1–100 scale.
+- *Render-path rasterisation* — diagonal roads leak for an 8-neighbour path.
+- *A railway barrier* and *hand-coded crossing structures* — no consistent
+  national data; recorded as limitations.
+
+**Consequences:**
+- `scripts/07` STEP 9.6 rasterises the barrier roads and applies the maximum
+  rule to the baseline and to every variant; STEP 9.7 writes
+  `resist_tiger_baseline_7755.tif`, `resist_tiger_noghm_7755.tif`,
+  `resist_tiger_road15_7755.tif` and `resist_tiger_road50_7755.tif`.
+- Week 10 compares the baseline with three variants.
+
+### Decision 16 — Water exempt from the gHM multiplier
+**Date:** 2026-09-26
+**Status:** made **after** the first resistance build, from its QA. A
+post-result decision, recorded as one.
+
+**Facts that led to it:**
+- The gHM source has no data over water. The Decision-11 fill gave eligible
+  water cells gHM values from their land neighbours, only to keep them in the
+  stack; the record said this would not set any resistance value.
+- Decision 14 then applied the gHM multiplier to every class. In the first
+  build (`tbl_11_resistance_qa_pred16.csv`), water (class value 50) had a
+  **mean final resistance of 87.4**: water near busy shores took a high
+  imputed gHM and reached the cap. Sundarban water (10) was multiplied too.
+- The multiplier is meant to measure human pressure on land a tiger walks
+  across; on water it multiplied an imputed value.
+
+**Choice:** the gHM multiplier is **not** applied to water (class 80;
+`RESIST_GHM_EXEMPT_CLASSES`). Water resistance = its land-cover value: 50, or
+10 inside the Sundarban water region. The cap and the road maximum rule still
+apply (a barrier road over water takes max(value, road value)). Every surface
+(baseline and variants) is rebuilt with this rule.
+
+**Rejected:**
+- *Keep the multiplier on water and correct the docs* — keeps a resistance
+  value built on imputed data.
+- *Exempt every cell whose gHM was filled* (water and about 1,771 edge land
+  cells) — filling the land cells was the purpose of Decision 11.
+
+**Consequences:**
+- `scripts/07` STEP 9.5 applies the multiplier through `ifel(exempt, 1,
+  1 + k × gHM)`; `tbl_11_resistance_qa.csv` gains `n_ghm_exempt`.
+- The first-build QA table is kept as `tbl_11_resistance_qa_pred16.csv`
+  (evidence for this Decision); the rebuilt surfaces overwrite the first-build
+  rasters.
+
+**Outcome (2026-09-26, rebuild): all asserts PASS.** 51,587 water cells exempt.
+Water mean final resistance **49.58** (was 87.37; 546 Sundarban cells at 10, the
+rest at 50). The `noghm` row is identical to the first build (k = 0 makes the
+multiplier 1 everywhere), which confirms nothing else changed. Cells capped at
+100 for k = 4: 51,184 (was 80,424). Road cells raised: baseline 255,502 and
+`road15` 164,340 (+2 each: two Sundarban water cells on barrier roads were
+above 30 before and are 10 now, so the maximum rule raises them); `noghm` and
+`road50` unchanged at 510,408. Means: baseline 22.46, `noghm` 12.97, `road15`
+21.58, `road50` 25.45. At or above the road value: 41.40 %, 20.31 %, 65.09 %,
+20.31 %. Baseline class means (value → mean final): tree 1 → 5.91, shrub 3 →
+9.58, grass 3 → 9.16, crop 10 → 30.31, built-up 100 → 100, bare 10 → 14.74,
+snow 100 → 100, water 50 → 49.58, wetland 3 → 5.76, mangrove 1 → 2.48, moss
+50 → 51.39. Barriers score high (built-up, snow, water, road cells) and tree
+cover and mangroves score low — the task-9.8 sanity check holds.
 
 ### Decisions pending (raised, not yet made)
 
 These forks are open. Each is decided in the week noted in the project plan,
 before the relevant code is written.
 
-- **[Week 9] Land-cover resistance values.** The `WORLDCOVER_RESISTANCE` lookup
-  in `R/00_config.R` holds literature-informed starting values; the final set is
-  a numbered Decision before the resistance surface is built.
 - **[Week 8–9] Settlement layer for the KDE.** The OSM settlement pull is
   village-dominated (~195k of 199,800 points: city 495, town 4,102, village
   195,203). A 15 km KDE over all points will near-saturate nationally. Decide
   whether to use all city/town/village, trim to city/town (4,597), or change the
   KDE radius, when the density surface is built.
-- **[Week 9] Road classes for the barrier surface.** The OSM road pull keeps
-  motorway–tertiary (885,669 features, tertiary-dominated: 432,689). Decide
-  whether tertiary stays in the barrier/resistance surface or the layer is
-  restricted to motorway–secondary, when the resistance surface is built.
-- **[Week 9] gHM coastal/edge gap-fill (from Decision 10).** The common NA mask
-  trims the stack to gHM's footprint, dropping ~56,840 cells (~1.8%). Before the
-  resistance surface is built, intersect the dropped-cell set with the
-  reserve/corridor footprints. If a reserve loses material coverage (watch
-  Sundarbans and coastal Western Ghats), apply a bounded gHM edge gap-fill and
-  re-stack as a new numbered Decision; if not, Decision 10's common mask is final.
+- **[Week 10] Least-cost-path set-up → Decision 17 (raised 2026-09-26; decide
+  before any path is built).** (a) Which reserve pairs are "neighbouring" (for
+  example k nearest neighbours, a distance limit, or a Delaunay/Gabriel graph of
+  reserve polygons); (b) the path method and tool (`leastcostpath` or
+  `gdistance`; 8 or 16 neighbours; cost = resistance × distance with a diagonal
+  correction); (c) where a path starts and ends (the polygon edge or a point);
+  (d) how the 3 geometry-absent reserves are handled; (e) whether to compare the
+  baseline paths with the 59 NTCA corridor polygons (descriptive only).
+- **[Week 10] Variant comparison metric → Decision 18 (raised 2026-09-26;
+  decide before any variant path is run).** How a variant's path differs from
+  the baseline's for the same pair (Decisions 14/15 variants `noghm`, `road15`,
+  `road50`), and what counts as a material change.
+- **[After Stage 3] SDM-based resistance + circuit-theory check.** Raised
+  2026-09-26 (Decision 14, F1). After the SDM exists, build a resistance
+  surface from 1 − suitability and run circuit theory between reserves, to
+  reproduce the national method (Jhala et al. 2021; Qureshi et al. 2014) as
+  closely as the data allow and compare it with the Stage-2 least-cost paths.
+  Decide then: the transform (linear 1 − suitability as in the national method,
+  or a negative exponential as Keeley et al. 2016 recommend for long-distance
+  movers), and the tool (at ~3 million cells, probably Circuitscape or
+  Omniscape outside R). Not yet in the week plan.
 - **[Week 13–14] Target-group scope.** Decision 5 pulled all Mammalia. Decide at
   model fit whether to narrow to a large-bodied guild (carnivores + ungulates,
   the camera-trap/sighting group that shares the tiger's detection method),
   based on observed record volumes.
 - **[Week 14] Terrain variables in the SDM.** Elevation, slope, and TRI are all
   acquired. Decide which enter the model after a collinearity check (slope and
-  TRI are correlated; both may not be needed).
+  TRI are correlated; both may not be needed). **Also decide how to treat
+  elevation on water and coastal cells:** the stack elevation now reaches
+  −434.2 m (Week 8: −111.6 m; after the Decision-11 fill: −344.8 m; after
+  Decision 13: −434.2 m — read the current value in `tbl_10`), and India's
+  lowest land is about −2 m. The AWS terrain tiles probably carry sea-floor depths for water.
+  The Week-2 note "coastal/salt-flat lows" for the raw −413 m minimum is
+  probably the same artefact (not verified).
 
 ---
 
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-09-26 — Week 9 (in progress): task 9.2 rule fixed; corridor layer
+
+- **Decision 11** recorded before the check was run: the gHM gap-fill relevance
+  rule (units, membership, land-only count, 5 % / 25-cell threshold) and the
+  fill method if triggered. Sources added to `docs/references.md`.
+- **Plan gap closed (task 9.2a).** No task extracted the 59 NTCA corridor
+  polygons that Week 3 set aside. `scripts/02` now writes them to
+  `data/processed/boundary_corridors_7755.gpkg`. A re-run guard in `scripts/02`
+  STEP 6 compares the rebuilt reserve layer with the one on disk before writing
+  and stops if any attribute or polygon area differs.
+- **`scripts/07_connectivity.R` started:** header for all of Stage 2 (task 9.1)
+  and STEP 9.2 (the check). The resistance STEPs are not written yet.
+- **Pre-fill check run: TRIGGERED** (27 of 169 units; see Decision 11
+  outcome). `scripts/02` re-run: the guard reported the reserve layer
+  identical; 59 corridors written, all with a `Corridor` label.
+- **Fill implemented** in `scripts/06` STEP 8.4b (`GHM_GAP_FILL`), with guards
+  (real gHM values unchanged; filled values inside 0–1). `tbl_10` gains
+  `n_filled`. `scripts/07` output names now carry `_prefill` / `_postfill`, and
+  a post-fill trigger stops the week for a new decision.
+- **Corridor labels:** two labels held an escaped XML entity
+  (`Dibru Saikhowa-D &apos;e`, `D&apos; Ering-mehao`; the KML escapes them
+  twice). `scripts/02` now decodes the standard XML entities in the corridor
+  fields only. The PA names that drive the reserve build are not changed.
+- **Post-fill check run: STILL TRIGGERED** (1 corridor, `dhudwa_nepal2`; 6
+  no-class cells). The gHM fill closed every eligible land gap (54,958 filled;
+  91 water cells left). Complete-case cells 3,065,696 (99.94 %).
+- **Decision 12** made after that result: gHM closed; land cover rebuilt in
+  `scripts/06` from the unmasked tile cache and masked on the template; a
+  `postfill_d12` re-check follows. `scripts/07` reads the aligned land cover
+  that `06` now writes, and reports edge vs interior no-class cells.
+- **Correction to the 2026-09-26 fix-pass entry below:** its "edge halo" item
+  says landcover has +13 cells just outside India. That is a net figure: the
+  landcover band had 1,791 cells outside India and no class in 1,778 India
+  cells. The terrain "+20" is also a net figure.
+- **Elevation on water cells:** the stack minimum is now −344.8 m (probably
+  sea-floor depth in the AWS terrain tiles). Added to the Week-14 pending item.
+- **`postfill_d12` check run: STILL TRIGGERED** (corridor `dhudwa_nepal2`, 5
+  of 42 land cells). Land cover fixed (3,067,558 of 3,067,565 India cells have
+  a class; 7 interior cells do not). The loss stayed at 1,869: terrain is `NA`
+  at the 1,771 edge cells.
+- **Decision 13** made after that result: terrain rebuilt in `scripts/06` from
+  the raw DEM (the `scripts/01` path without its mask), masked on the template,
+  with an interior guard; the 7 interior no-class cells accepted. `tbl_10` gains
+  `terrain_source` and `build_tag`; `scripts/07` labels outputs
+  `postfill_<build_tag>` and prints the interior no-class cells.
+- **`postfill_d13` check run: CLEAR — Decision 10 closed.** 0 units with any
+  dropped land cell. Complete-case cells 3,067,467; 98 dropped (91 water + 7
+  no-class cells at WorldCover tile corners). gHM filled 56,729. Guards PASS
+  (terrain core difference 0).
+- **Task 9.2 is complete.** Next: task 9.3 (Decision 14, land-cover resistance
+  values) and task 9.4 (Decision 15, barrier road classes), both before any
+  resistance STEP is written.
+- **Decision 14 recorded (task 9.3).** Literature review (movement, genetics,
+  Sundarban telemetry, national method) and a data check of WorldCover class
+  shares inside reserves vs India. Set B class values; gHM multiplier k = 4,
+  cap 100; Sundarban water region (reserve + 10 km ring) at 10, water 50
+  elsewhere; variant k = 0 for a Week-10 comparison. The data check removed the
+  first basis for class 90 (no reserve cells); the value 3 stays on a corrected
+  basis. `R/00_config.R` updated; `references.md` gains the sources. Raised a
+  pending item: SDM-based resistance + circuit-theory check after Stage 3.
+- **Defect found and fixed: the stack file was written as `INT1U`.** The
+  task-9.4 road check read the stack from disk and found gHM = 0 everywhere
+  (`tbl_10`: mean 0.377). `datatype()` confirmed `INT1U` for all six bands:
+  a GeoTIFF holds one data type, and `terra::writeRaster()` chose unsigned
+  8-bit. On disk: gHM and distance-to-road 0; elevation and TRI cut to 0–254;
+  slope without decimals; land cover intact. **Scope:** every `scripts/06`
+  build written so far. `tbl_10` and all Decision 10–13 figures were computed
+  in memory and are correct; STEP 9.2 read only the land-cover band and its
+  `NA` pattern from disk and matched `tbl_10`, so its results stand. **Fix:**
+  `write_processed_rast()` now takes an explicit `datatype` (default `FLT4S`;
+  compression predictor 3 for float, 2 for integer) and reads every written
+  raster back, stopping if any band's mean or `NA` count differs from memory.
+  `scripts/06` writes the stack as `FLT4S` (land cover as `INT2U` in its own
+  file); `BUILD_TAG` → `d13f`, so the `scripts/07` re-check is labelled
+  `postfill_d13f`. **Lesson:** QA must run on the file that later scripts read,
+  not only on the object in memory.
+- **Stack rebuilt with the fix (`build_tag` d13f):** every write read back and
+  verified; on disk `FLT4S`, gHM max 0.993 / mean 0.377, elevation min −434.2,
+  distance-to-road mean 2,044. `tbl_10` values unchanged. `scripts/07` re-check
+  `postfill_d13f`: **CLEAR** (98 dropped; 0 units affected) — Decision 10's
+  closure holds on the correctly written file. A colour table inherited from
+  the WorldCover tiles caused write warnings (values unaffected); `scripts/06`
+  now removes it before writing.
+- **Decision 15 recorded (task 9.4).** Barrier classes motorway–secondary
+  (tertiary left to gHM); one value 30; maximum rule; `touches = TRUE`;
+  railways and crossing structures as limitations; variants `road15` and
+  `road50`. Data check: barrier roads touch 17.5 % of India's cells (34.8 %
+  with tertiary); gHM on those cells 0.525 vs 0.377 for India.
+- **Resistance STEPs written (tasks 9.5–9.8)** in `scripts/07_connectivity.R`:
+  the four surfaces (baseline + `RESIST_VARIANTS`) built from config, asserts
+  (all classes mapped; no `NA` in the footprint; no value outside it; 1 ≤ value
+  ≤ 100), `FLT4S` writes with read-back, and `tbl_11_resistance_qa.csv`. The
+  STEPs refuse to run if STEP 9.2 is triggered on the stack. **Implementation
+  note:** Decision 14 does not state a cell-membership rule for the Sundarban
+  water region; the code uses the Decision-11 rule (every cell the region
+  touches), because the ring is the Decision-11 buffer.
+- **First resistance build (2026-09-26): all asserts PASS**, four surfaces
+  written and read-back verified. 11 classes mapped; Sundarban override 546
+  water cells; barrier-road cells 535,592 (17.5 %); k = 4 capped 80,424 cells.
+  QA (baseline / noghm / road15 / road50): mean 23.10 / 12.97 / 22.22 / 26.09;
+  at or above the road value 41.4 % / 20.3 % / 65.1 % / 20.3 %; road cells
+  raised 255,500 / 510,408 / 164,338 / 510,408 (`noghm` and `road50` raise the
+  same cells: every road cell whose class value is 10 or less). Baseline class
+  means: tree 5.91 (road cells in forest pull it up), shrub 9.58, grass 9.16,
+  crop 30.31, built-up 100, bare 14.74, snow 100, **water 87.37**, wetland
+  5.76, mangrove 2.48, moss 51.39.
+- **Decision 16** made from that QA: water exempt from the gHM multiplier.
+  The Decision-11 note that the water fill sets no resistance value is
+  corrected in place. STEPs 9.5–9.8 re-run pending.
+- **Rebuild with Decision 16: all asserts PASS** (see the Decision-16
+  outcome). Four surfaces and `tbl_11_resistance_qa.csv` written; the
+  first-build QA kept as `tbl_11_resistance_qa_pred16.csv`.
+- **Week 9 complete (tasks 9.1–9.9).** Numbered Decisions added this week:
+  11 (gap-fill rule), 12 (post-fill: gHM closed; land cover from the tile
+  cache), 13 (terrain from the raw DEM; 7 tile-corner cells accepted), 14
+  (resistance values, gHM multiplier, Sundarban water, `noghm`), 15 (road
+  barrier, `road15`/`road50`), 16 (water exempt from gHM). Defect found and
+  fixed: the stack file was `INT1U` on disk (now `FLT4S`, verified on
+  read-back). Raised for Week 10: least-cost-path set-up and the variant
+  comparison metric.
+
+### 2026-09-26 — Documentation fix pass (before Week 9)
+
+A consistency check of the docs and scripts found stale or false statements. No
+analytical rule changed. Historical change-log entries below are left as
+written; this entry records the corrections to them.
+
+- **§5.2 Growth** described five rounds (2006–2022). Corrected to the Decision-6
+  series (2014/2018/2022, 3 frames).
+- **Decision 10 / `tbl_10`.** Decision 10 said `tbl_10` records the per-band
+  before-mask counts. The Week-8 `tbl_10` held after-mask counts only; the
+  before-mask counts existed only in the console output, and the Decision
+  carried an unfilled figure (`~3,067,58x`). Fix: `scripts/06` STEP 8.6 now
+  writes `n_valid_before` and `n_dropped_by_mask`, with two new hard stops
+  (after-mask counts equal across bands; no negative drop), and prints the
+  India-grid denominator and the binding layer. **`scripts/06` was re-run on
+  2026-09-26.** The stack did not change: 3,010,738 complete-case cells, and
+  every Week-8 spot-check value is identical (gHM 0.377/0.377; elev
+  577.333/570.773; slope 2.540/2.504; tri 23.419/23.101; dist_road
+  2018.946/2044.985; landcover modal 40, n_class 11).
+- **Coverage figures made exact.** From the re-run `tbl_10`: India grid =
+  3,067,565 cells; valid before the mask — landcover 3,067,578, gHM 3,012,007,
+  elev/slope/tri 3,067,585, dist_road_m 3,067,565. The India-footprint loss is
+  **56,827 cells (1.85%)**, not "~56,840 (~1.8%)". The old figure was the
+  landcover-band drop, which counts 13 cells outside the India polygon.
+- **Edge halo (data note, not a bug).** landcover (+13) and elev/slope/tri (+20)
+  have valid cells just outside the India polygon after the resample onto the
+  snapped template. dist_road_m is masked to India exactly, so the common mask
+  removes them. Recorded in `scripts/06` STEP 8.6 and `data-dictionary.md`.
+- **Distance-to-road maximum.** The Week-8 entry gives "max ~278.9 km" for the
+  task-8.4 covariate. That is the stack band (after the common mask). The interim
+  layer `cov_distroad_1km_7755.tif` (not common-masked) has max 279,693 m
+  (~279.7 km) and mean 2,045 m.
+- **`scripts/06` comments** corrected: the METHOD NOTES said WorldCover goes
+  through `read_rast(..., categorical = TRUE)` (the script uses
+  `terra::resample(method = "near")` on purpose); STEP 8.5 said the common mask
+  trims only cells "where bilinear vs nearest disagree by a cell" (the cause is
+  the gHM windowed-COG footprint, per Decision 10).
+- **Table-number rule** made explicit (`naming-conventions.md` §6): a table
+  number groups related tables, and the slug is the unique key. This matches the
+  existing repeats (`tbl_00` ×2, `tbl_02` ×2, `tbl_04` ×3); no table is renamed.
+- **Script plan.** Stage 2 (Weeks 9–12) is one script, `scripts/07_connectivity.R`
+  (replaces the planned `07_build_resistance.R`). The header-only stubs
+  `scripts/08_habitat_suitability.R` and `scripts/09_build_site.R` are deleted;
+  later stages take the next free number when they start.
+- **`scripts/00c_verify_wdpa_boundaries.R`** was missing from `scripts/` (deleted
+  by accident). It was recovered and is back in place; Decision 4 cites it
+  correctly.
+- **Change log heading** restored for the Week-5 task-5.1 entry (the paragraph
+  had no heading).
+- Other docs: `data-sources.md` (2018 Table 3.4 page range; missing
+  administrative-boundaries heading), `data-dictionary.md` (`tbl_10` writer, new
+  columns, exact coverage), `project-plan.md` (script numbers; task 8.3 text),
+  `README.md` (status figures).
 
 ### 2026-09-20 — Week 8: covariate stack assembled (Stage 2 input; Decision 10)
 
@@ -636,7 +1408,7 @@ already present). No change to any data layer.
   not the census baseline — narrowing them would silently change the GBIF pull.
 - **`change_abs/change_pct/aagr` are NOT yet computed** — Week 6.
 
-
+### 2026-09-13 — Week 5 task 5.1: reserve area source (Decision 8)
 
 Located the reserve core+buffer area for `area_km2` (task 5.1) and wrote
 **Decision 8** (A1-revised). Key findings:
