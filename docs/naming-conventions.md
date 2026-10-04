@@ -139,8 +139,10 @@ suffix marks a companion table to a numbered one (`tbl_05b_…`). As built:
 |---|---|
 | `tbl_00` | `data_audit`, `kba_tr_match` |
 | `tbl_02` | `reserve_build_report` (`scripts/02`), `regional_rollup` (`scripts/05`) |
-| `tbl_04` | `census_source_map`, `spotcheck_log` (`.md`), `secondary_sources_2006_2010` (`.md`, in `docs/`) |
+| `tbl_04` | `census_source_map`, `spotcheck_log` (`.md`), `secondary_sources_2006_2010` (`.md`) |
 | `tbl_05` / `tbl_05b` | `area_source_map` / `isfr_area_crosscheck` |
+| `tbl_11` | `ghm_gap_relevance_<state>` × 5 (`prefill`, `postfill`, `postfill_d12`, `postfill_d13`, `postfill_d13f`; `scripts/07` STEP 9.2), `resistance_qa`, `resistance_qa_pred16` (`scripts/07` STEP 9.8) |
+| `tbl_12` | `reserve_pairs` (STEP 10.1), `lcp_validation` (STEP 10.2b), `lcp_qa` (STEPs 10.3–10.4), `lcp_variant_comparison`, `lcp_variant_summary` (STEP 10.4), `lcp_ntca_overlap`, `lcp_ntca_corridors` (STEP 10.5) — all `scripts/07` |
 
 Before a new table is written, check that its full filename is not already in
 use. A new, unrelated table takes the next free number.

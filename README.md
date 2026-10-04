@@ -12,12 +12,12 @@ Sibling in method to
 | | |
 |---|---|
 | **Author** | Kiran Balasubramanian |
-| **Status** | **Week 9 complete — Stage 2 (Connectivity) resistance surfaces built.** `scripts/07_connectivity.R` (one script for all of Stage 2) wrote four 1 km EPSG:7755 resistance surfaces — `resist_tiger_baseline_7755.tif` and the sensitivity variants `noghm`, `road15`, `road50` — plus `outputs/tables/tbl_11_resistance_qa.csv` (all asserts pass; every raster verified on read-back). Rules are numbered Decisions fixed before the build: **14** land-cover values (1–100) × a human-pressure (gHM) multiplier (k = 4, cap 100) with a lower water value in the Sundarban; **15** a road barrier (motorway–secondary, value 30, maximum rule); **16** water exempt from the gHM multiplier. **Decision 10 is closed** through **Decisions 11–13**: a gHM gap-fill and source rebuilds of land cover and terrain raised the complete-case stack to 3,067,467 of 3,067,565 India cells. A defect was found and fixed: the stack file had been written as 8-bit integer (now 32-bit float, verified on read-back). Next: **Week 10** — least-cost paths between neighbouring reserves and the baseline-vs-variant comparison. Prior: Week 8 — covariate stack; Week 7 — Stage 1 (Growth) done. |
+| **Status** | **Week 10 complete — Stage 2 (Connectivity) least-cost paths built.** `scripts/07_connectivity.R` built 106 reserve pairs (Euclidean-allocation adjacency, gap ≤ 315 km; 56 reserves with geometry after the Amrabad state split) and an edge-to-edge least-cost path for each pair on the baseline and the three variant surfaces, with its own 16-neighbour engine (`R/00_functions_lcp.R`). The engine agrees with `terra` and `gdistance` to 1.5e-15 (`tbl_12_lcp_validation.csv`); every path passes QA (424 of 424). Rules are numbered Decisions fixed before the paths: **17** pairs, method, start and end, network groups; **18** the variant comparison. By the Decision-18 rule the gHM multiplier and the road value are both robust. A literature check and the NTCA-corridor overlap are descriptive (`tbl_12_*`). Next: **Week 11** — the functional-link Decision, then the reserve network graph. Prior: Week 9 — resistance surfaces. |
 | **Focal species** | *Panthera tigris* (Bengal tiger) |
 | **Study area** | India — all tiger reserves with reserve-level census data |
 | **Primary unit** | Reserve, rolled up to landscape complex and state |
 | **Analysis CRS** | EPSG:7755 — WGS 84 / India NSF LCC (national equal-area/conformal frame) |
-| **Stack** | R (sf, terra, xml2, spatstat, sfdep, leastcostpath, igraph, maxnet, ggplot2, gganimate + gifski), Quarto, Leaflet |
+| **Stack** | R (sf, terra, xml2, spatstat, sfdep, igraph, maxnet, ggplot2, gganimate + gifski; least-cost-path tool fixed in Decision 17), Quarto, Leaflet |
 | **Story site** | Planned — Quarto site on GitHub Pages, one page per analysis track |
 
 ---
@@ -38,7 +38,7 @@ This project runs **three analyses in R for all reserves**, not seven:
 
 | Priority | Track | Method | Prior basis |
 |---|---|---|---|
-| 1 | **Growth** | Per-reserve census metrics 2006–2022, animated choropleth | Phase 1, scaled 7 → all |
+| 1 | **Growth** | Per-reserve census metrics 2014/2018/2022 (Decision 6), 3-frame animated choropleth | Phase 1, scaled 7 → all |
 | 2 | **Connectivity** | Least-cost paths + reserve-network graph | Phase 2 plan, ported ArcGIS → R |
 | 3 | **Habitat suitability** | SDM (`maxnet`), sampling-bias corrected | New; the honest form of "occupancy" |
 | — | **Effort / observer bias** | Woven through all three as a caveat | Signature thread from both prior projects |

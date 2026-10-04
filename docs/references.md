@@ -16,7 +16,8 @@ Gopal, R., Qureshi, Q., Bhardwaj, M., Singh, R.K.J., & Jhala, Y.V. (2010).
 Evaluating the status of the Endangered tiger *Panthera tigris* and its prey in
 Panna Tiger Reserve, Madhya Pradesh, India. *Oryx*, 44(3), 383–389.
 https://doi.org/10.1017/S0030605310000529 · *(Reserve-specific 2006 occupancy;
-secondary context only — see docs/tbl_04_secondary_sources_2006_2010.md.)*
+secondary context only — see
+outputs/tables/tbl_04_secondary_sources_2006_2010.md.)*
 
 Jhala, Y.V., Qureshi, Q., & Gopal, R. (2011). Can the abundance of tigers be
 assessed from their signs? *Journal of Applied Ecology*, 48, 14–24.
@@ -42,19 +43,142 @@ range 56.4 km² (95% fixed kernel); review of small female ranges ~10 km² in
 high-prey sites; tiger movement across water channels — about five channels
 > 30 m crossed per day, channels > 400 m rarely crossed, one 800 m crossing.
 Decision 11: buffer width, threshold. Decision 14: water values, the
-Sundarban water region, mangroves.)*
+Sundarban water region, mangroves. Decision 18: the 5 km route tolerance.)*
 
 Sarkar, M.S., Ramesh, K., Johnson, J.A., et al. (2016). Movement and home range
 characteristics of reintroduced tiger (*Panthera tigris*) population in Panna
 Tiger Reserve, central India. *European Journal of Wildlife Research*, 62,
 537–547. https://doi.org/10.1007/s10344-016-1026-9 · *(Mean annual female home
-range 73.6 km², male 132.7 km². Decision 11: buffer width and threshold.)*
+range 73.6 km², male 132.7 km². Decision 11: buffer width and threshold.
+Decision 18: the 5 km route tolerance, with Naha et al. 2016.)*
 
 Yumnam, B., Jhala, Y.V., Qureshi, Q., et al. (2014). Prioritizing tiger
 conservation through landscape genetics and habitat linkages. *PLOS ONE*,
 9(11), e111207. https://doi.org/10.1371/journal.pone.0111207 · *(Least-cost
 corridors between central-Indian tiger reserves, buffered by 1.5 km as the
 minimal corridor. Decision 11: a narrower buffer, considered and rejected.)*
+
+Hussain, Z., Ghaskadbi, P., Panchbhai, P., et al. (2022). Long-distance
+dispersal by a male sub-adult tiger in a human-dominated landscape. *Ecology
+and Evolution*, 12(9), e9307. https://doi.org/10.1002/ece3.9307 · *(T1-C1 from
+Tipeshwar: 315 km straight-line dispersal over 225 days, about 3,000 km
+cumulative. Decision 17: the pair gap cap.)* *(Author list after the third
+name not verified — complete from the DOI.)*
+
+## Connectivity methods (Decision 17)
+
+Washington Wildlife Habitat Connectivity Working Group (WHCWG). (2010).
+*Washington Connected Landscapes Project: Statewide Analysis*, Appendix D.
+Washington Departments of Fish and Wildlife and Transportation, Olympia, WA.
+https://waconnected.org/ · *(Linkage Mapper workflow: adjacent cores in
+Euclidean or cost-weighted space, a maximum Euclidean distance, cost-weighted
+distance from core edges. Decision 17: pair rule, edge to edge.)* *(Publisher
+details not verified — complete from the report.)*
+
+McRae, B.H., & Kavanagh, D.M. (2011). *Linkage Mapper Connectivity Analysis
+Software*. The Nature Conservancy, Seattle, WA. · *(Option to drop corridors
+that cross a core area. Decision 17: point 2.)* *(Year and version not
+verified — complete from the user guide.)*
+
+## Week-10 path extremes — literature check (2026-10-03)
+
+*Context for the least-cost-path extremes of task 10.6 (`tbl_12_lcp_qa.csv`).
+Not used for any value. Grey literature is marked.*
+
+Sharma, R., et al. (2009). mtDNA indicates profound population structure in
+Indian tiger (*Panthera tigris tigris*). *Conservation Genetics*, 10,
+909–912. https://doi.org/10.1007/s10592-008-9568-3 · *(Northern populations
+carry unique haplotypes (genetic isolation); Sariska and Ranthambore are
+genetically similar. Agrees with the high Sariska–Corbett / Sariska–Rajaji
+costs.)* *(Author list and pages not verified — complete from the DOI.)*
+
+Sharma, R., et al. (2011). Genetically distinct population of Bengal tiger
+(*Panthera tigris tigris*) in Terai Arc Landscape (TAL) of India.
+*Mammalian Biology*, 76, 484–490. https://doi.org/10.1016/j.mambio.2010.10.005
+· *(A TAL/Buxa haplotype absent elsewhere; Chitwan distinct from TAL. Agrees
+with the Sariska–Terai costs.)* *(Author list not verified.)*
+
+Johnsingh, A.J.T., et al. (2004). *Conservation status of tiger and
+associated species in the Terai Arc Landscape, India*. Wildlife Institute of
+India, Dehradun. https://digitalrepository.wii.gov.in/handle/123456789/1334 ·
+*(Indian TAL highly fragmented; tiger habitat in nine blocks. Agrees with the
+high Valmiki–Dudhwa cost.)* *(Author list and year not verified.)*
+
+National Tiger Conservation Authority & Department of National Parks and
+Wildlife Conservation, Nepal. *Tigers of the Transboundary Terai Arc
+Landscape: Status, distribution and movement in the Terai of India and
+Nepal*. Wildlife Institute of India.
+https://digitalrepository.wii.gov.in/handle/123456789/1048 · *(Valmiki
+connected with Chitwan; Pilibhit with Shuklaphanta; movement on the Khata and
+Shuklaphanta–Tatarjanj–Pilibhit corridors. The Valmiki and Dudhwa links run
+through Nepal, outside our India-only surface.)* *(Authors and year not
+verified.)*
+
+National Tiger Conservation Authority. *Panna Tiger Reserve* (brief note).
+https://ntca.gov.in/assets/uploads/briefnote/panna.pdf (accessed
+2026-10-03) · *(Corridor links with Bandhavgarh, Nauradehi and the
+Chitrakoot forests of Satna; a ~30 km gap between Panna and Bandhavgarh along
+the Ken and Midhassan needs restoration. Does not support the Bandhavgarh–
+Panna detour.)*
+
+Sarkar, M.S., Niyogi, R., et al. (2021). Long-distance dispersal and home
+range establishment by a female sub-adult tiger (*Panthera tigris*) in the
+Panna landscape, central India. *European Journal of Wildlife Research*,
+67(3), 54. · *(A 99 km dispersal; a major corridor links Panna and Ranipur.
+Agrees with the Panna–Ranipur part of the Bandhavgarh–Panna route.)* *(Author
+list not verified — complete from the paper.)*
+
+National Tiger Conservation Authority. *Kaziranga Tiger Reserve* (brief
+note). https://ntca.gov.in/assets/uploads/briefnote/kaziranga.pdf (accessed
+2026-10-03) · *(Corridor connectivity through the Brahmaputra island systems
+with Orang and Nameri. Does not support the Nameri–Kaziranga and
+Kaziranga–Orang detours.)*
+
+*Demographic history, geographic distance, and landscape features shape the
+genetic divergence of wild tigers in northeast India.* bioRxiv preprint
+(2026). https://www.biorxiv.org/content/10.64898/2026.06.02.729668.full.pdf ·
+*(Three genetic clusters: Kaziranga-Nameri, Manas, Orang; Nameri linked to
+Kaziranga by riverine corridors. Preprint, not peer-reviewed.)* *(Authors not
+verified.)*
+
+Down To Earth. (n.d.). How Maharashtra's dam on 'Human' river threatens
+tigers.
+https://www.downtoearth.org.in/news/wildlife-and-biodiversity/how-maharashtra-s-dam-on-human-river-threatens-tigers-69554
+· *(News: Tadoba tigers move to Umred-Karhandla, Nagzira and Navegaon, over
+100–120 km. Grey literature; partly supports the Tadoba–Pench (MH)
+detour.)*
+
+Times of India (Nagpur). (2015, November 1). NH6, NH7 cut tiger corridors with
+highest movement: Study. Via India Environment Portal.
+https://www.indiaenvironmentportal.org.in/news-clippings/nh6-nh7-cut-tiger-corridors-with-highest-movement-study
+· *(News report of Dutta et al. 2016: highest current flow includes
+Nagzira–Pench. Grey literature; check the claim in the paper.)*
+
+## Path comparison (Decision 18)
+
+Goodchild, M.F., & Hunter, G.J. (1997). A simple positional accuracy measure
+for linear features. *International Journal of Geographical Information
+Science*, 11(3), 299–306. · *(The buffer method. Decision 18: route overlap.)*
+
+Jan, O., Horowitz, A.J., & Peng, Z.-R. (1999). Using global positioning system
+data to understand variations in path choice. *Transportation Research
+Record*, 1725, 37–44. · *(The Path Deviation Index. Decision 18: considered
+and rejected.)* *(Year and pages not verified — complete from the paper.)*
+
+Rayfield, B., Fortin, M.-J., & Fall, A. (2010). The sensitivity of
+least-cost habitat graphs to relative cost surface values. *Landscape
+Ecology*, 25, 519–532. · *(Route position is more sensitive in fragmented
+landscapes and less where the matrix is easy to cross. Decision 18: report
+per pair.)*
+
+Savary, P., Foltête, J.-C., & Garnier, S. (2022). Cost distances and least
+cost paths respond differently to cost scenario variations: a sensitivity
+analysis of ecological connectivity modeling. *International Journal of
+Geographical Information Science*. · *(Path overlap changed more than cost
+distance across cost scenarios; very different scenarios gave highly
+correlated cost-distance matrices. Decision 18: route and cost measured
+separately.)* *(Year, volume and pages not verified — complete from the
+paper; the author version is on HAL, hal-03508121.)*
 
 ## Tiger movement and landscape resistance (Decision 14)
 
@@ -194,7 +318,23 @@ https://github.com/datameet/maps
 Pebesma, E. (2018). Simple Features for R: sf. *The R Journal*, 10(1), 439–446.
 
 Hijmans, R.J. *terra: Spatial Data Analysis*. R package. · *(`focal()` with
-`na.policy = "only"` is the Decision-11 gap-fill method.)*
+`na.policy = "only"` is the Decision-11 gap-fill method. `costDist()` is
+Decision-17 validation check (b).)*
+
+Csardi, G., & Nepusz, T. (2006). The igraph software package for complex
+network research. *InterJournal, Complex Systems*, 1695. · *(Dijkstra search
+in the Decision-17 path engine; Week-11 network metrics.)*
+
+Lewis, J. (2025). *leastcostpath: Modelling Pathways and Movement Potential
+Within a Landscape*. R package version 2.0.13.
+https://CRAN.R-project.org/package=leastcostpath · *(Not used in the pipeline.
+Decision 17: origin handling of `create_lcp`; Decision 18: endpoint handling
+of `PDI_validation`.)*
+
+van Etten, J. (2017). R package gdistance: distances and routes on
+geographical grids. *Journal of Statistical Software*, 76(13), 1–21.
+https://doi.org/10.18637/jss.v076.i13 · *(Validation reference only —
+Decision-17 check (c).)*
 
 Phillips, S.J., Anderson, R.P., & Schapire, R.E. (2006). Maximum entropy
 modeling of species geographic distributions. *Ecological Modelling*, 190,

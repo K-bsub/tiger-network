@@ -1,5 +1,5 @@
 "unit_id","unit_name","geometry_present","census_status","area_km2_provisional_old","area_km2","area_provisional","area_source","poly_km2","poly_census_ratio"
-1,"Nagarjunsagar-Srisailam",TRUE,"measured",3296.31,3296.31,FALSE,"ntca_notification",5073.9,1.54
+1,"Nagarjunsagar-Srisailam",TRUE,"measured",3296.31,3296.31,FALSE,"ntca_notification",2372.7,0.72
 2,"Namdapha",TRUE,"measured",2052.82,2052.82,FALSE,"ntca_notification",1809.1,0.88
 3,"Pakke",TRUE,"measured",1198.45,1198.45,FALSE,"ntca_notification",622,0.52
 4,"Kamlang",TRUE,"measured",783,783,FALSE,"ntca_notification",678.7,0.87
@@ -49,7 +49,7 @@
 48,"Sathyamangalam",TRUE,"measured",1408.4,1408.4,FALSE,"ntca_notification",577.7,0.41
 49,"Srivilliputhur-Megamalai",TRUE,"measured",1016.57,1016.57,FALSE,"ntca_notification",827.2,0.81
 50,"Kawal",TRUE,"measured",2015.44,2015.44,FALSE,"ntca_notification",943.4,0.47
-51,"Amrabad",FALSE,"measured",2611.39,2611.39,FALSE,"ntca_notification",NA,NA
+51,"Amrabad",TRUE,"measured",2611.39,2611.39,FALSE,"ntca_notification",2701.2,1.03
 52,"Dudhwa",TRUE,"measured",2201.77,2201.77,FALSE,"ntca_notification",746.8,0.34
 53,"Pilibhit",FALSE,"measured",730.25,730.25,FALSE,"ntca_notification",NA,NA
 54,"Ranipur",TRUE,"measured",529.36,529.36,FALSE,"ntca_notification",236.4,0.45

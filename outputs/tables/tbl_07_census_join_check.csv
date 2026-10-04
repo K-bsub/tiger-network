@@ -49,7 +49,7 @@
 48,"Sathyamangalam","Tamil Nadu",TRUE,"measured",72,83,85
 49,"Srivilliputhur-Megamalai","Tamil Nadu",TRUE,"measured",NA,NA,12
 50,"Kawal","Telangana",TRUE,"measured",NA,1,0
-51,"Amrabad","Telangana",FALSE,"measured",NA,7,12
+51,"Amrabad","Telangana",TRUE,"measured",NA,7,12
 52,"Dudhwa","Uttar Pradesh",TRUE,"measured",58,82,135
 53,"Pilibhit","Uttar Pradesh",FALSE,"measured",25,57,63
 54,"Ranipur","Uttar Pradesh",TRUE,"measured",NA,NA,4

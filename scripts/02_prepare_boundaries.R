@@ -32,25 +32,42 @@
 #   placeholder column and flagged provisional (overwritten in Week 5 from the
 #   NTCA census).
 #
-# 3 reserves have NO KML geometry (Amrabad, Pilibhit, Dholpur-Karauli). They are
-# written as geometry-absent rows (empty geometry) so the census still has a
-# home; resolve by hand later if a geometry is wanted.
+# 3 reserves have NO KML polygon of their own (Amrabad, Pilibhit,
+# Dholpur-Karauli). Pilibhit and Dholpur-Karauli are written as geometry-absent
+# rows (empty geometry) so the census still has a home (Decision 17, G1).
+#
+# STATE SPLIT (STEP 4b; Decision 17 point 7, D1a; added 2026-10-02): the KML
+# polygon matched to Nagarjunsagar-Srisailam is the undivided reserve, and
+# about 2,701 km2 of it lies in Telangana, where Amrabad now is. The parent
+# polygon is split at the state boundary (data/raw/administrative/
+# boundary_states_ne_7755.gpkg) per BOUNDARY_STATE_SPLITS in R/00_config.R:
+# the Andhra Pradesh part stays unit_id 1, the Telangana part becomes Amrabad
+# (unit_id 51). Both parts get match_status = BOUNDARY_SPLIT_STATUS
+# ("state_split") and the parent's n_parts. Result: 56 reserves with geometry,
+# 2 geometry-absent.
 #
 # Outputs:
 #   data/processed/boundary_reserves_all_7755.gpkg
 #     fields: unit_id, unit_name, unit_name_std, state, landscape_complex,
 #             area_km2, area_provisional, area_source, n_parts, match_status,
-#             geometry_present, source
+#             geometry_present, source, poly_km2, poly_census_ratio
 #   data/processed/boundary_states_7755.gpkg
 #   data/processed/boundary_corridors_7755.gpkg        (the 59 corridors;
 #                                                       added Week 9, task 9.2a)
 #   data/interim/boundary_kml_unattributed_7755.gpkg   (the 156 duplicates)
 #   outputs/tables/tbl_02_reserve_build_report.csv     (per-reserve build log)
 #
-# RE-RUN GUARD (added Week 9): if boundary_reserves_all_7755.gpkg already exists,
-# STEP 6 compares the new reserve layer to it BEFORE writing and stops if any
-# attribute or polygon area differs. The Week-9 re-run exists only to add the
-# corridor layer; the reserve layer must come out identical.
+# RE-RUN GUARD (added Week 9; changed 2026-10-02, option G-a): if
+# boundary_reserves_all_7755.gpkg already exists, STEP 6 compares the new
+# reserve layer to it BEFORE writing, and stops with nothing overwritten if:
+#   - the layer on disk already has the state split: any attribute or polygon
+#     area differs (the Week-9 rule);
+#   - the layer on disk does not have the split yet (the first split run):
+#     any row OUTSIDE the split reserves differs in attributes or area; or, on
+#     the split reserves, any attribute other than geometry_present,
+#     match_status, n_parts, poly_km2 and poly_census_ratio differs; or the
+#     split parts are not all geometry_present with BOUNDARY_SPLIT_STATUS; or
+#     their total area differs from the area on disk (relative 1e-6).
 # =============================================================================
 
 suppressPackageStartupMessages({
@@ -78,11 +95,22 @@ reserves_out <- file.path(DIR_PROCESSED, "boundary_reserves_all_7755.gpkg")
 corridors_out <- file.path(DIR_PROCESSED, "boundary_corridors_7755.gpkg")
 states_out   <- file.path(DIR_PROCESSED, "boundary_states_7755.gpkg")
 unattr_out   <- file.path(DIR_INTERIM,   "boundary_kml_unattributed_7755.gpkg")
+states_src   <- file.path(DIR_RAW, "administrative", "boundary_states_ne_7755.gpkg")
 report_nn    <- 2L
 report_slug  <- "reserve_build_report"
 
 stopifnot(file.exists(kml_path))
 stopifnot(file.exists(xwalk_path))
+
+# The state split (STEP 4b) needs the state layer and its settings.
+for (nm in c("BOUNDARY_STATE_SPLITS", "BOUNDARY_SPLIT_STATUS")) {
+  if (!exists(nm)) stop(nm, " is missing from R/00_config.R (Decision 17, D1a).",
+                        call. = FALSE)
+}
+if (length(BOUNDARY_STATE_SPLITS) > 0 && !file.exists(states_src)) {
+  stop("State layer not found: ", states_src, " — the state split (STEP 4b) ",
+       "needs it.", call. = FALSE)
+}
 
 # ---- Small helpers ----------------------------------------------------------
 # Name standardiser for robust joins. Lower-case, drop the PA-type words and
@@ -102,6 +130,144 @@ std_name <- function(x) {
 
 # State standardiser (KML state_name is upper-case, crosswalk is title-case).
 std_state <- function(x) str_replace_all(str_to_lower(x %||% ""), "[^a-z]", "")
+
+# State split (STEP 4b; Decision 17 point 7, D1a). Replaces the parent's
+# dissolved polygon with one part per state in spec$parts. Each part keeps the
+# polygon parts of parent x state; collections are reduced to their polygons.
+# Stops if a name, state or unit_id does not resolve, if a part already has its
+# own KML polygon, if a part is empty, or if the parts do not cover the parent
+# (relative area difference > 1e-3). Returns the new dissolved layer, the new
+# n_parts table, the split unit_ids and a per-part report.
+apply_state_split <- function(dissolved, n_parts_tbl, spec, states_sf, xwalk) {
+  pid <- as.integer(spec$parent_unit_id)
+  xp  <- xwalk[xwalk$unit_id == pid, ]
+  if (nrow(xp) != 1L || xp$unit_name != spec$parent_name) {
+    stop("State split: parent unit_id ", pid, " does not resolve to '",
+         spec$parent_name, "' in the crosswalk.", call. = FALSE)
+  }
+  if (sum(dissolved$unit_id == pid) != 1L) {
+    stop("State split: parent '", spec$parent_name, "' has no dissolved ",
+         "polygon.", call. = FALSE)
+  }
+  geom_col <- attr(dissolved, "sf_column")
+  parent_g <- st_geometry(dissolved)[dissolved$unit_id == pid]
+  parent_a <- as.numeric(st_area(parent_g))
+  part_ids <- vapply(spec$parts, function(p) as.integer(p$unit_id), integer(1))
+  if (anyDuplicated(part_ids) || !pid %in% part_ids) {
+    stop("State split: part unit_ids must be unique and include the parent.",
+         call. = FALSE)
+  }
+  new_ids <- setdiff(part_ids, pid)
+  if (any(new_ids %in% dissolved$unit_id)) {
+    stop("State split: unit_id ", paste(new_ids[new_ids %in% dissolved$unit_id],
+         collapse = ", "), " already has its own KML polygon.", call. = FALSE)
+  }
+  parts_g <- vector("list", length(spec$parts))
+  report  <- vector("list", length(spec$parts))
+  for (i in seq_along(spec$parts)) {
+    p  <- spec$parts[[i]]
+    xr <- xwalk[xwalk$unit_id == p$unit_id, ]
+    if (nrow(xr) != 1L || xr$unit_name != p$unit_name ||
+        std_state(xr$state) != std_state(p$state)) {
+      stop("State split: part unit_id ", p$unit_id, " does not resolve to '",
+           p$unit_name, "' (", p$state, ") in the crosswalk.", call. = FALSE)
+    }
+    sg <- states_sf[states_sf$name == p$state, ]
+    if (nrow(sg) == 0L) {
+      stop("State split: state '", p$state, "' not in the state layer.",
+           call. = FALSE)
+    }
+    g <- st_make_valid(st_intersection(parent_g, st_union(st_geometry(sg))))
+    if (any(as.character(st_geometry_type(g)) == "GEOMETRYCOLLECTION")) {
+      g <- st_collection_extract(g, "POLYGON")
+    }
+    g <- st_cast(st_union(g), "MULTIPOLYGON")
+    a <- as.numeric(st_area(g))
+    if (length(g) != 1L || !is.finite(a) || a <= 0) {
+      stop("State split: part '", p$unit_name, "' is empty.", call. = FALSE)
+    }
+    parts_g[[i]] <- g
+    report[[i]] <- data.frame(unit_id = as.integer(p$unit_id),
+                              unit_name = p$unit_name, state = p$state,
+                              part_km2 = round(a / 1e6, 1),
+                              n_polygons = length(st_cast(g, "POLYGON")))
+  }
+  report <- do.call(rbind, report)
+  rel_gap <- abs(sum(report$part_km2) * 1e6 - parent_a) / parent_a
+  if (rel_gap > 1e-3) {
+    stop("State split: the parts cover ", round(sum(report$part_km2), 1),
+         " km2 of the parent's ", round(parent_a / 1e6, 1), " km2 — the parent ",
+         "reaches a state that is not in the split.", call. = FALSE)
+  }
+  new_rows <- st_sf(unit_id = part_ids, geometry = do.call(c, parts_g))
+  st_geometry(new_rows) <- geom_col
+  dissolved_out <- rbind(dissolved[dissolved$unit_id != pid, ], new_rows)
+  parent_n <- n_parts_tbl$n_parts[n_parts_tbl$unit_id == pid]
+  n_parts_out <- rbind(n_parts_tbl,
+                       data.frame(unit_id = new_ids,
+                                  n_parts = rep(parent_n, length(new_ids))))
+  list(dissolved = dissolved_out, n_parts = n_parts_out,
+       split_ids = part_ids, report = report, parent_km2 = parent_a / 1e6)
+}
+
+# Normalise attributes for the re-run guard: a GeoPackage round trip can return
+# logical fields as integer and change column classes.
+norm_attrs <- function(x) {
+  d <- as.data.frame(st_drop_geometry(x))
+  d[] <- lapply(d, function(col) {
+    if (is.logical(col)) as.integer(col)
+    else if (is.factor(col)) as.character(col)
+    else col
+  })
+  rownames(d) <- NULL
+  d
+}
+
+# Re-run guard (STEP 6; option G-a, 2026-10-02). Returns a character vector of
+# problems (empty = pass) and the mode used. See the header for the rule.
+guard_reserve_layer <- function(old_sf, new_sf, split_ids, split_status) {
+  old_sf <- old_sf[order(old_sf$unit_id), ]
+  new_sf <- new_sf[order(new_sf$unit_id), ]
+  old_df <- norm_attrs(old_sf); new_df <- norm_attrs(new_sf)
+  old_a  <- as.numeric(st_area(old_sf)); new_a <- as.numeric(st_area(new_sf))
+  if (!identical(names(old_df), names(new_df))) {
+    return(list(mode = "names", problems = "column names differ"))
+  }
+  if (!isTRUE(all.equal(old_df$unit_id, new_df$unit_id))) {
+    return(list(mode = "rows", problems = "unit_id sets differ"))
+  }
+  in_split  <- new_df$unit_id %in% split_ids
+  old_split <- length(split_ids) > 0 &&
+    all(old_df$match_status[in_split] == split_status)
+  if (length(split_ids) == 0 || old_split) {
+    probs <- c(
+      if (!isTRUE(all.equal(old_df, new_df, check.attributes = FALSE)))
+        "attributes differ",
+      if (!isTRUE(all.equal(old_a, new_a, tolerance = 1e-9)))
+        "polygon areas differ")
+    return(list(mode = "identical", problems = probs))
+  }
+  allowed <- c("geometry_present", "match_status", "n_parts", "poly_km2",
+               "poly_census_ratio")
+  fixed_cols <- setdiff(names(new_df), allowed)
+  probs <- c(
+    if (!isTRUE(all.equal(old_df[!in_split, ], new_df[!in_split, ],
+                          check.attributes = FALSE)))
+      "attributes differ outside the split reserves",
+    if (!isTRUE(all.equal(old_a[!in_split], new_a[!in_split], tolerance = 1e-9)))
+      "polygon areas differ outside the split reserves",
+    if (!isTRUE(all.equal(old_df[in_split, fixed_cols], new_df[in_split, fixed_cols],
+                          check.attributes = FALSE)))
+      "a fixed attribute changed on a split reserve",
+    if (!all(new_df$geometry_present[in_split] == 1L))
+      "a split part has no geometry",
+    if (!all(new_df$match_status[in_split] == split_status))
+      paste0("a split part lacks match_status '", split_status, "'"),
+    if (abs(sum(new_a[in_split]) - sum(old_a[in_split])) / sum(old_a[in_split]) > 1e-6)
+      "the split parts do not add up to the area on disk"
+  )
+  list(mode = "first split", problems = probs)
+}
 
 # ==============================================================================
 # STEP 1 — Read the KML via xml2 and split into the three groups
@@ -365,6 +531,31 @@ dissolved_sf <- pa_tagged |>
 cat(sprintf("reserves with dissolved geometry: %d\n", nrow(dissolved_sf)))
 
 # ==============================================================================
+# STEP 4b — State split (Decision 17 point 7, D1a; BOUNDARY_STATE_SPLITS)
+# ==============================================================================
+rule("STEP 4b — split parent polygon(s) at the state boundary (Decision 17, D1a)")
+
+split_ids <- integer(0)
+if (length(BOUNDARY_STATE_SPLITS) > 0) {
+  states_split_sf <- read_vec(states_src) |> st_make_valid()
+  if (!"name" %in% names(states_split_sf)) {
+    stop("State layer has no 'name' field: ", states_src, call. = FALSE)
+  }
+  for (spec in BOUNDARY_STATE_SPLITS) {
+    sp <- apply_state_split(dissolved_sf, n_parts_tbl, spec, states_split_sf, xwalk)
+    dissolved_sf <- sp$dissolved
+    n_parts_tbl  <- sp$n_parts
+    split_ids    <- c(split_ids, sp$split_ids)
+    cat(sprintf("split '%s' (%.1f km2) at the state boundary:\n",
+                spec$parent_name, sp$parent_km2))
+    print(sp$report, row.names = FALSE)
+  }
+  dissolved_sf <- dissolved_sf[order(dissolved_sf$unit_id), ]
+  rm(states_split_sf)
+}
+cat(sprintf("reserves with geometry after the split: %d\n", nrow(dissolved_sf)))
+
+# ==============================================================================
 # STEP 5 — Attach attributes, add geometry-absent reserves, finalise
 # ==============================================================================
 rule("STEP 5 — attach attributes, add geometry-absent reserves")
@@ -390,8 +581,9 @@ reserves_geom <- dissolved_sf |>
   left_join(n_parts_tbl, by = "unit_id") |>
   mutate(geometry_present = TRUE)
 
-# Reserves WITHOUT geometry (crosswalk has no PA name): build empty-geometry rows
-# so the census still has a home. These are the 3 known gaps.
+# Reserves WITHOUT geometry (crosswalk has no PA name and no split part): build
+# empty-geometry rows so the census still has a home. These are the 2 known
+# gaps (Pilibhit, Dholpur-Karauli; Decision 17, G1).
 ids_with_geom <- reserves_geom$unit_id
 empty_geom <- st_sfc(st_multipolygon(), crs = CRS_ANALYSIS)
 reserves_nogeom <- attrs |>
@@ -426,6 +618,10 @@ reserves_sf <- reserves_sf |>
   select(unit_id, unit_name, unit_name_std, state, landscape_complex,
          area_km2, area_provisional, area_source, n_parts, match_status,
          geometry_present, source)
+
+# Split parts (STEP 4b) carry BOUNDARY_SPLIT_STATUS, so later steps (scripts/07
+# STEP 9.2) can see that the layer has the split.
+reserves_sf$match_status[reserves_sf$unit_id %in% split_ids] <- BOUNDARY_SPLIT_STATUS
 
 cat(sprintf("reserves built: %d | with geometry: %d | geometry-absent: %d\n",
             nrow(reserves_sf), sum(reserves_sf$geometry_present),
@@ -472,39 +668,24 @@ rule("STEP 6 — write outputs")
 
 if (!dir.exists(DIR_PROCESSED)) dir.create(DIR_PROCESSED, recursive = TRUE)
 
-# ---- Re-run guard: the reserve layer must not change -------------------------
-# Compare against the layer on disk BEFORE overwriting it. Attributes are
-# normalised first (a GeoPackage round trip can return logical fields as
-# integer and change column classes), then compared value by value. Polygon
-# areas are compared as a geometry check. Any difference stops the script with
-# nothing overwritten.
-norm_attrs <- function(x) {
-  d <- as.data.frame(st_drop_geometry(x))
-  d[] <- lapply(d, function(col) {
-    if (is.logical(col)) as.integer(col)
-    else if (is.factor(col)) as.character(col)
-    else col
-  })
-  rownames(d) <- NULL
-  d
-}
+# ---- Re-run guard (option G-a): only the split reserves may change ----------
+# Compare against the layer on disk BEFORE overwriting it (rule in the header).
+# Any problem stops the script with nothing overwritten.
 if (file.exists(reserves_out)) {
   old_sf <- st_read(reserves_out, quiet = TRUE)
-  old_df <- norm_attrs(old_sf)
-  new_df <- norm_attrs(reserves_sf)
-  same_names <- identical(names(old_df), names(new_df))
-  same_attrs <- same_names && isTRUE(all.equal(old_df, new_df,
-                                               check.attributes = FALSE))
-  same_area  <- nrow(old_sf) == nrow(reserves_sf) &&
-    isTRUE(all.equal(as.numeric(st_area(old_sf)),
-                     as.numeric(st_area(reserves_sf)), tolerance = 1e-9))
-  if (!(same_attrs && same_area)) {
-    stop("Re-run guard: the new reserve layer differs from ", reserves_out,
-         " (names equal: ", same_names, "; attributes equal: ", same_attrs,
-         "; areas equal: ", same_area, "). Nothing was overwritten. ",
-         "Inspect the difference before you replace the layer.", call. = FALSE)
+  g <- guard_reserve_layer(old_sf, reserves_sf, split_ids, BOUNDARY_SPLIT_STATUS)
+  if (length(g$problems) > 0) {
+    stop("Re-run guard (", g$mode, "): ", paste(g$problems, collapse = "; "),
+         ". Nothing was overwritten. Inspect the difference before you replace ",
+         reserves_out, ".", call. = FALSE)
   }
-  cat("re-run guard: reserve layer identical to the one on disk (attributes + areas).\n")
+  cat("re-run guard (", g$mode, "): pass — ",
+      if (g$mode == "first split") {
+        paste0("only the split reserves (unit_id ",
+               paste(split_ids, collapse = ", "), ") changed, as allowed")
+      } else {
+        "reserve layer identical to the one on disk (attributes + areas)"
+      }, ".\n", sep = "")
 }
 
 # Reserve layer.
@@ -561,8 +742,8 @@ st_write(corridors_sf, corridors_out, delete_dsn = TRUE, quiet = TRUE)
 cat("wrote", corridors_out, "(", nrow(corridors_sf), "corridors;",
     sum(!is.na(corridors_sf$corridor_label)), "with a Corridor label )\n")
 
-# States layer (the other declared 02 output) — from the acquired admin layer.
-states_src <- file.path(DIR_RAW, "administrative", "boundary_states_ne_7755.gpkg")
+# States layer (the other declared 02 output) — from the acquired admin layer
+# (states_src, set in Paths).
 if (file.exists(states_src)) {
   states_sf <- read_vec(states_src) |> st_make_valid()
   st_write(states_sf, states_out, delete_dsn = TRUE, quiet = TRUE)

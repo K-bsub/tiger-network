@@ -34,7 +34,7 @@ Most datasets come from the two earlier tiger projects. **Run the audit
   per-reserve figures are **normalised bar charts** (0–120 index, captioned
   "Source: NTCA"), not counts, and its only hard numbers are landscape/national
   totals already in the NTCA reports. Useful for **trend direction only**, not
-  for values. See `docs/tbl_04_secondary_sources_2006_2010.md`.
+  for values. See `outputs/tables/tbl_04_secondary_sources_2006_2010.md`.
 - **Source:** *Am Research Thoughts*, Vol. 1, pp. 1796–1812.
 - **Licence:** Research paper. Context only, not a data source.
 
@@ -44,7 +44,8 @@ Most datasets come from the two earlier tiger projects. **Run the audit
   Panna 2006 **occupancy** (not a count); Jhala et al. (2011, *J. Appl. Ecol.*)
   is source-population scale; Harihar et al. (2017) documents 2006/2010 vs 2014+
   **non-comparability**. Full write-up in
-  `docs/tbl_04_secondary_sources_2006_2010.md`; citations in `references.md`.
+  `outputs/tables/tbl_04_secondary_sources_2006_2010.md`; citations in
+  `references.md`.
 
 ---
 
@@ -73,13 +74,17 @@ rejections are not re-litigated.
   required; research/education use.
 - **Currency:** July 2022.
 - **Basis and limits:** geometry is the **core protected-area polygon, not the
-  legal core-plus-buffer tiger-reserve extent** (as-built polygon/census ratio
-  median near 0.58; most polygons under-state the legal area). The KML holds
+  legal core-plus-buffer tiger-reserve extent** (polygon/census ratio median
+  0.515 as built 2026-10-02 — earlier text said ~0.58; most polygons
+  under-state the legal area). The KML holds
   national-park / sanctuary polygons, so each reserve is built from its
   constituent PA(s) via `data/raw/ntca/reserve_pa_crosswalk.csv` and dissolved
-  (see the Week-3 change log in `docs/methodology.md`). Covers 55 of 58 reserves;
-  3 have no KML polygon (Amrabad, Pilibhit, Dholpur-Karauli — each a 2014+
-  reserve, absent from the July-2022 KML) and are kept as geometry-absent rows.
+  (see the Week-3 change log in `docs/methodology.md`). Covers 55 of 58 reserves
+  by name. Amrabad has no polygon of its own, but its area lies inside the
+  undivided Nagarjunasagar-Srisailam polygon; `scripts/02` splits that polygon
+  at the state boundary (Decision 17, D1a), so 56 reserves have geometry.
+  Pilibhit and Dholpur-Karauli (2014+ reserves, absent from the July-2022 KML)
+  are kept as geometry-absent rows.
   Corridors are separate named polygons (`Corridor` field, some blank); the
   connectivity track re-extracts them. Infrastructure-clearance dataset, not
   peer-reviewed spatial data — authoritative for approximate extents only.
@@ -257,13 +262,17 @@ rejections are not re-litigated.
     Residential/track excluded. Output `osm_roads_major_7755.gpkg`.
   - **Settlements** (`place`): city (495), town (4,102), village (195,203) —
     **199,800 points total**. Output `osm_settlements_7755.gpkg`.
-- **Flag for Week 8–9 (KDE / resistance build):** the settlement layer is
+- **Settlements — flag for Week 13 (KDE):** the settlement layer is
   **village-dominated** (~195k of 199,800). A 15 km KDE over that many points
   will near-saturate across India and may not discriminate. Consider trimming to
   city/town (4,597 points) or a smaller radius when the density surface is built.
-  Similarly, tertiary roads dominate the road layer; dropping tertiary is a
-  one-line filter if the barrier surface is too dense. Both are pending Decisions
-  (see `docs/methodology.md`).
+  This is a pending Decision (see `docs/methodology.md`, "Decisions pending").
+  The resistance surfaces do not use this layer; human pressure enters them
+  through gHM (Decision 14).
+- **Tertiary roads — closed by Decision 15 (Week 9):** tertiary roads dominate
+  the road layer. They are **not** a barrier class in the resistance surfaces;
+  gHM carries their effect. The distance-to-road covariate (Week 8) keeps all
+  five classes.
 
 ### ISFR 2021 Chapter 4 — forest and corridors
 - **Role:** Per-reserve forest cover (VDF/MDF/OF) and documented corridors.

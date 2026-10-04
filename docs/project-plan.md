@@ -534,8 +534,8 @@ is complete and publishable on its own. Docs updated; Week 7 ticked.
 |---|---|---|---|
 | **8** | Covariate stack | `scripts/06` output: land cover, terrain, gHM, dist-to-road aligned to one 1 km grid | 3–4 h |
 | **9** ✅ | Resistance surface | **Decisions 11–16**; `scripts/07_connectivity.R` STEPs 9.2 + 9.5–9.8 → four resistance surfaces (`baseline`, `noghm`, `road15`, `road50`) + `tbl_11_resistance_qa.csv` | 2–3 h planned; ~4× as run |
-| **10** | Least-cost paths | `scripts/07_connectivity.R` LCP STEPs: LCPs between neighbouring reserve pairs; **plus the Decision-14/15 sensitivity comparison** (baseline vs `noghm`, `road15`, `road50`; metric fixed before any variant's paths are examined) | 3–4 h |
-| **11** | Reserve network graph | `scripts/07_connectivity.R` graph STEPs: `igraph` metrics — betweenness (linchpins), components (isolated reserves) | 3–4 h |
+| **10** ✅ | Least-cost paths | **Decisions 17–18**; `scripts/07_connectivity.R` STEPs 10.0–10.5 → 106 pairs, paths on four surfaces (`lcp_reserve_network_7755.gpkg`), validation, QA, Decision-18 comparison, NTCA overlap (`tbl_12_*`); `scripts/02` Amrabad split | 3–4 h planned; well over as run |
+| **11** | Reserve network graph | **Decision 19** (functional links) first; `scripts/07_connectivity.R` STEPs 11.1–11.4: link table, `igraph` metrics — betweenness (linchpins), components (isolated reserves) → `tbl_13_*` | 3–4 h |
 | **12** | Pinch points + visuals | `scripts/07_connectivity.R` pinch-point STEPs: road-crossing pinch points; `fig_04` network figure; `tbl_03` metrics | 3–4 h |
 
 **Script plan (fixed 2026-09-26):** all of Stage 2 from Week 9 on is **one
@@ -707,17 +707,23 @@ Week 10 least-cost paths. Docs updated; Week 9 ticked.
 
 ---
 
-### Week 10 — task breakdown
+### Week 10 — task breakdown *(complete)*
 
 Entry state (as of Week-9 close): four resistance surfaces on the 1 km EPSG:7755
 grid in `data/processed/` — `resist_tiger_baseline_7755.tif` and the variants
-`noghm` (k = 0), `road15`, `road50` (Decisions 14–16); values 1–100, `NA` only
-on the 98 cells outside the complete-case footprint. Reserve geometry for 55 of
+`noghm` (k = 0), `road15`, `road50` (Decisions 14–16); values 1–100 on the
+complete-case footprint, `NA` on every other cell — the 98 India cells that
+Decision 10 dropped and every cell outside India. Reserve geometry for 55 of
 58 reserves (`boundary_reserves_all_7755.gpkg`; Amrabad, Pilibhit and
 Dholpur-Karauli have none). The 59 NTCA corridor polygons
 (`boundary_corridors_7755.gpkg`). **Raised, not decided** (methodology →
 Decisions pending → "[Week 10] Least-cost-path set-up"): reserve pairs, path
 method and tool, geometry-absent reserves, variant comparison metric.
+*(2026-10-01: Decision 17 recorded — pairs, method, start and end, Amrabad
+split, network groups, NTCA comparison. After task 10.3b, 56 reserves have
+geometry. Decision 18 recorded — variant comparison metric. 2026-10-02:
+Decision 17 amended (contiguous = shared footprint cell); path engine
+written.)*
 
 Week 10 adds the least-cost-path (LCP) STEPs to `scripts/07_connectivity.R`: one
 least-cost path for each pair of neighbouring reserves on the baseline surface,
@@ -731,51 +737,135 @@ reserved for the Week-12 network metrics).
 
 | # | Task | Done when | Est. |
 |---|---|---|---|
-| 10.1 | **Set-up Decision (numbered — Decision 17), before any path.** Research, raise the forks, record the choices: (a) which reserve pairs are "neighbouring" (for example k nearest neighbours, a distance limit, or a Delaunay/Gabriel graph of reserve polygons); (b) path method and tool (`leastcostpath` or `gdistance`; 8 or 16 neighbours; cost = resistance × distance with diagonal correction); (c) where a path starts and ends (the polygon edge — nearest boundary cells — or a point); (d) the 3 geometry-absent reserves; (e) whether to compare baseline paths with the NTCA corridor polygons (descriptive only) | Decision 17 recorded in methodology; settings in `R/00_config.R` | 45–60 min |
-| 10.2 | **Comparison-metric Decision (numbered — Decision 18), before any variant path is examined.** How a variant's path differs from the baseline's for the same pair: for example the share of baseline path length within 1 km of the variant path, the change in cost-distance rank across pairs, and the pairs whose route changes corridor. Fix the metric and what counts as a "material" change | Decision 18 recorded; settings in config | 20–30 min |
-| 10.3 | Tool check: install and lock the chosen package (`renv::snapshot()`); smoke-test **one** baseline pair for runtime and memory on the national grid (and on a cropped window, if Decision 17 allows cropping) | Package locked; one path runs; runtime per pair known | 20–30 min |
-| 10.4 | STEP 10.1 in `scripts/07`: build the reserve pairs per Decision 17 → `tbl_12_reserve_pairs.csv` (pair id, from/to `unit_id` and name, straight-line gap between polygons in km) | Pair table written; every pair has two reserves with geometry | 20–30 min |
-| 10.5 | STEP 10.2: least-cost paths on the **baseline** for every pair → `lcp_reserve_network_7755.gpkg`, layer `baseline` (pair id, from/to, cost-distance, path length km, ratio path length / straight gap). Read the surface from disk; values from config | Baseline paths written; read back and checked | 45–60 min |
-| 10.6 | STEP 10.3: path QA → `tbl_12_lcp_qa.csv` — every pair has a path or a stated reason (for example blocked by `NA` cells or the grid edge); paths lie inside the footprint; no path starts or ends in the wrong reserve; if cropping is used, no path touches the crop edge (re-run wider if it does) | QA table written; every pair accounted for | 30 min |
-| 10.7 | STEP 10.4: the same pairs on `noghm`, `road15`, `road50` → layers in the same GeoPackage; apply the Decision-18 metric → `tbl_12_lcp_variant_comparison.csv` | Variant paths written; comparison table written by the pre-fixed metric | 40–60 min |
-| 10.8 | *(If Decision 17 includes it)* Descriptive overlap of baseline paths with the 59 NTCA corridor polygons → `tbl_12_lcp_ntca_overlap.csv`. Not a validation: the NTCA corridors come from a different method (Qureshi et al. 2014) | Overlap table written, or task marked not applicable | 20–30 min |
-| 10.9 | Update `data-dictionary.md` (paths layer, `tbl_12_*`), `methodology.md` (Decisions 17–18 + Week-10 change log), `README.md`/handoff (Week 10 status, entry point for Week 11) | Docs match as-built | 20 min |
-| 10.10 | Commit (`analysis:` for `07` + paths/QA tables; `docs:` separate) | Committed and pushed | 10 min |
+| 10.1 ✅ | **Set-up Decision (numbered — Decision 17), before any path.** Research, raise the forks, record the choices: (a) which reserve pairs are "neighbouring" (for example k nearest neighbours, a distance limit, or a Delaunay/Gabriel graph of reserve polygons); (b) path method and tool (`leastcostpath` or `gdistance`; 8 or 16 neighbours; cost = resistance × distance with diagonal correction); (c) where a path starts and ends (the polygon edge — nearest boundary cells — or a point); (d) the 3 geometry-absent reserves; (e) whether to compare baseline paths with the NTCA corridor polygons (descriptive only) | Decision 17 recorded in methodology; settings in `R/00_config.R` *(done 2026-10-01)* | 45–60 min |
+| 10.2 ✅ | **Comparison-metric Decision (numbered — Decision 18), before any variant path is examined.** How a variant's path differs from the baseline's for the same pair: for example the share of baseline path length within 1 km of the variant path, the change in cost-distance rank across pairs, and the pairs whose route changes corridor. Fix the metric and what counts as a "material" change | Decision 18 recorded; settings in config *(done 2026-10-01: symmetric 5 km buffer overlap < 0.5, or percentile-rank change ≥ 0.25; label "robust" if ≤ 20 % material and ρ ≥ 0.9)* | 20–30 min |
+| 10.3 ✅ | Tool check (Decision 17 points 3–5): add `gdistance` and `raster` (validation only) and lock them (`renv::snapshot()`); set the `required` list in `scripts/00a_setup_environment.R` — remove `leastcostpath` (listed from Week 0; doc fix pass 2026-09-27, F1-A). Build the 16-neighbour cell graph (crossed-cells knight rule) on the national baseline surface and smoke-test **one** baseline pair for runtime and peak memory | Packages locked; `00a` updated; one path runs; runtime per pair and peak memory known (the crop fallback applies only if memory fails) *(2026-10-02: engine `R/00_functions_lcp.R` written; checks (a)–(c) pass in a sandbox; a synthetic national-size graph — 3.06 M nodes, 16 neighbours — used 3.2 GB at peak, build 9 s, one search 11 s; `00a` list set from `renv::dependencies()`. Done on the project machine: `renv.lock` updated; STEP 10.0 — 3,067,467 nodes, 24,462,121 cell edges, build 8 s; Kanha → Pench one search 0.3 s, 422.6 resistance-km, 129.9 km; R heap 1.5 GB; no crop needed)* | 30–45 min |
+| 10.3b ✅ | **Amrabad split (Decision 17 point 7, D1a).** `scripts/02`: split the Nagarjunsagar-Srisailam polygon at the state boundary per `BOUNDARY_STATE_SPLITS`; Amrabad gets geometry (`geometry_present = TRUE`; new `match_status` value for a split part). Re-run `scripts/02` and every Stage-1 script that reads the reserve geometry; re-render the Stage-1 maps; confirm that census and area values do not change. Correct the Decision-4 limitation text (the Week-3 "coarse envelope" cause) and the boundary-layer entry in `data-dictionary.md` (also: `unit_id` is stored as real; `area_provisional` stays `TRUE` in this layer — the Week-5 overwrite is in the stats layer). The split does not change the resistance surfaces, so a Week-9 re-run is not needed; if one is made (`RUN_RESISTANCE <- TRUE`), STEP 9.2 writes the gap table with the `_split` label (RS1) | 56 reserves with geometry; split areas 2,372.7 / 2,701.2 km²; Stage-1 tables unchanged except geometry fields; maps re-rendered *(done 2026-10-02: re-run 02 → 05; before/after check PASS — only units 1 and 51 changed, in the allowed fields; `fig_02` re-rendered; docs corrected)* | 45–60 min |
+| 10.4 ✅ | STEP 10.1 in `scripts/07`: build the reserve pairs per Decision 17 points 1 and 8 → `tbl_12_reserve_pairs.csv` (pair id; from/to `unit_id`, name and `network_group`; `gap_km`; `contiguous`; `cross_group`). `contiguous` = the two reserves share a footprint cell (Decision 17 point 6, amended). Assert that `NETWORK_GROUPS` holds every `unit_id` once | Pair table written; every pair has two reserves with geometry; about 106 pairs expected (geometry check) — a large difference is investigated, not accepted *(done 2026-10-03: 106 pairs; 3 connected sets (34, 13, 9); 9 contiguous; 2 cross-group)* | 30–45 min |
+| 10.5 ✅ | STEP 10.2: least-cost paths on the **baseline** for every pair, edge to edge → `lcp_reserve_network_7755.gpkg`, layer `baseline` (pair id, from/to, cost-distance in resistance-km, path length km, ratio path length / gap, `via_unit_ids`, `in_network` per Decision 17 point 2). Read the surface from disk; values from config | Baseline paths written; read back and checked *(done 2026-10-03: 97 paths, 9 contiguous, 0 no path; 21 pairs out of the network under point 2)* | 45–60 min |
+| 10.5b ✅ | STEP 10.2b: validation per Decision 17 point 4 → `tbl_12_lcp_validation.csv` — (a) synthetic grid, hand-computed, 8 and 16 neighbours, with a one-cell barrier; (b) `terra::costDist` at 8 neighbours on 3 pairs (both runs with the source cells set to 0); (c) `gdistance` at 16 neighbours, end-cell mode, on the same 3 pairs | All checks pass (relative cost difference ≤ 1e-6) or the result is stated as not comparable with the reason; path overlap reported *(done 2026-10-03: 15 of 15 pass, largest difference 1.5e-15; V-add pair Bandhavgarh–Panna included)* | 45–60 min |
+| 10.6 ✅ | STEP 10.3: path QA → `tbl_12_lcp_qa.csv` — every pair has a path or a stated reason (for example blocked by `NA` cells); an empty path only for a contiguous pair; paths lie inside the footprint; no path starts or ends in the wrong reserve; if the crop fallback is used, no path touches the window edge (re-run wider if it does) | QA table written; every pair accounted for *(done 2026-10-03: 106 of 106 pass every check)* | 30 min |
+| 10.7 ✅ | STEP 10.4: the same pairs on `noghm`, `road15`, `road50` → layers in the same GeoPackage; apply the Decision-18 metric to every pair that is not contiguous → `tbl_12_lcp_variant_comparison.csv` (one row per pair and variant) and `tbl_12_lcp_variant_summary.csv` (one row per variant, with the label) | Variant paths written; both tables written by the pre-fixed metric; labels applied as fixed *(done 2026-10-03: QA 424 of 424 pass; gHM multiplier robust (0.186 material, ρ 0.985); road value robust (road15 0.113, road50 0.093))* | 40–60 min |
+| 10.8 ✅ | STEP 10.5: descriptive overlap of baseline paths with the 59 NTCA corridor polygons (Decision 17 point 9) → `tbl_12_lcp_ntca_overlap.csv` (per pair) and `tbl_12_lcp_ntca_corridors.csv` (per corridor). Not a validation: the NTCA corridors come from a different method (Qureshi et al. 2014) | Overlap table written *(done 2026-10-03: median share 0.064; 31 of 59 corridors crossed)* | 20–30 min |
+| 10.9 ✅ | Update `data-dictionary.md` (paths layer, `tbl_12_*`), `methodology.md` (Decision 18 + Week-10 change log), `naming-conventions.md` §6 (`tbl_12` group), `README.md`/handoff (Week 10 status, entry point for Week 11) | Docs match as-built *(done 2026-10-03)* | 20–30 min |
+| 10.10 ✅ | Commit (`analysis:` for `07` + paths/QA tables; `docs:` separate) | Committed and pushed *(done 2026-10-03)* | 10 min |
 
 **Week 10 pitfalls:**
 - **Decisions before the paths.** Decisions 17 and 18 are fixed before any
   path is examined; Decision 18 before any **variant** path is run. Do not look
   at variant paths and then choose the metric.
-- **Resistance vs conductance.** `gdistance` works in conductance (1 /
-  resistance) and needs a geographic correction for diagonal steps;
-  `leastcostpath` takes resistance and handles it internally. Check the units
-  of the cost-distance before comparing pairs.
-- **`NA` cells are walls.** The 98 `NA` cells (mostly water) cannot be crossed.
-  A pair with no path must be reported, not silently dropped.
-- **The grid ends 5 km outside India.** Paths cannot go through Nepal,
-  Bhutan, Bangladesh or Myanmar. Transboundary links (Valmiki–Chitwan,
-  Manas–Royal Manas, the Sundarbans) are under-represented — record it as a
-  limitation.
+- **Resistance vs conductance.** Our engine works in resistance
+  (resistance-km). `gdistance` works in conductance (1 / resistance) with a
+  geographic correction for step length. In the 10.5b check, convert before
+  comparing costs.
+- **Re-running `scripts/07` rewrites Week-9 outputs.** Decided (process
+  choice RS1, 2026-10-02; raised 2026-09-27): `RUN_RESISTANCE <- FALSE` skips
+  the Week-9 STEPs, and a guard checks the four surfaces on disk against
+  `tbl_11_resistance_qa.csv`. With split parts in the reserve layer, STEP 9.2
+  adds `_split` to its gap-table label, so no Week-9 table is overwritten.
+- **`NA` cells are walls.** The 98 `NA` cells inside India (mostly water)
+  cannot be crossed. A pair with no path must be reported, not silently dropped.
+- **Paths cannot leave India.** The grid has a 5 km collar outside India, but
+  the resistance surfaces are `NA` on every cell outside India, the collar
+  included. Paths cannot go through Nepal, Bhutan, Bangladesh or Myanmar.
+  Transboundary links (Valmiki–Chitwan, Manas–Royal Manas, the Sundarbans) are
+  under-represented — record it as a limitation.
 - **Cropping can cut off the true path.** If a pair is solved on a cropped
   window for speed, the window must be wide enough; a path that touches the
   crop edge must be re-run wider (task 10.6).
-- **Polygon edge vs point.** Starting from a centroid adds cost inside the
-  reserve and favours large reserves; starting from the polygon edge measures
-  the gap between reserves. Decision 17 fixes it.
+- **Polygon edge vs point.** Decided: edge to edge (Decision 17 point 6). The
+  search starts from all cells of the source reserve at once, not from one
+  point.
+- **Knight steps jump one-cell barriers** unless they cost the cells they
+  cross. The 10.5b synthetic test must include a one-cell road line.
 - **Busy farmland is already ≥ 30.** In the baseline, 41.4 % of cells are at or
   above the road value, so paths through farmland may not avoid roads. Read the
   `noghm` comparison before interpreting the baseline routes.
-- **Memory.** A transition matrix for 8.9 million cells with 16 neighbours is
-  large. The task-10.3 smoke test shows whether the national grid fits.
+- **Memory.** The graph has about 3.07 million nodes (footprint cells) and,
+  with 16 neighbours, about 24 million edges. A synthetic graph of that size
+  used 3.2 GB at peak in a sandbox (2026-10-02). On Windows, R reports only
+  its own heap; read the process peak in Task Manager during STEP 10.0.
 - **PROJ `proj.db` clash still applies** — fresh session.
 
 **Decisions due this week:** **17** (LCP set-up) and **18** (variant comparison
 metric), both numbered and both before the paths they govern.
 
 **Exit state:** `lcp_reserve_network_7755.gpkg` with one layer per surface;
-`tbl_12_reserve_pairs.csv`, `tbl_12_lcp_qa.csv`,
-`tbl_12_lcp_variant_comparison.csv` written; every pair accounted for. Ready for
+`tbl_12_reserve_pairs.csv`, `tbl_12_lcp_validation.csv`, `tbl_12_lcp_qa.csv`,
+`tbl_12_lcp_variant_comparison.csv`, `tbl_12_lcp_variant_summary.csv`,
+`tbl_12_lcp_ntca_overlap.csv` and `tbl_12_lcp_ntca_corridors.csv` written; every pair accounted for; 56 reserves with geometry. Ready for
 Week 11 (network graph). Docs updated; Week 10 ticked.
+
+### Week 11 — task breakdown
+
+Entry state (as of Week-10 close, 2026-10-03): `lcp_reserve_network_7755.gpkg`
+with layers `baseline`, `noghm`, `road15`, `road50` — 106 pairs each (97 paths,
+9 contiguous, 0 with no path). On the baseline, 21 pairs are not in the network
+(Decision 17 point 2, `in_network = FALSE`); on the variants 19 / 22 / 19. The
+pairs (`tbl_12_reserve_pairs.csv`) form 3 connected sets (34, 13, 9 reserves);
+56 reserves are network nodes (Pilibhit and Dholpur-Karauli have no geometry).
+`NETWORK_GROUPS` labels each reserve (`northeast`, `western_ghats`, `north`,
+`central`). Decision 18 labelled the gHM multiplier and the road value
+**robust** for the paths. **Raised, not decided** (methodology → Decisions
+pending → "[Week 11] Functional-link rule"): how a pair counts as a link, and
+whether the network metrics are repeated on the variants.
+
+Week 11 adds the network STEPs to `scripts/07_connectivity.R`: a link table
+from the baseline paths, an `igraph` graph of the 56 reserves, and per-reserve
+metrics — betweenness (linchpin reserves) and components (isolated reserves).
+Week 12 finds road pinch points on the paths and draws the network figure.
+
+Naming (naming-conventions §2/§6): link and metric tables `tbl_13_*` (a new
+group). `tbl_03` stays reserved for the Week-12 publishable network table. The
+graph object is not written to disk; it is rebuilt from the link table on each
+run.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 11.1 | **Functional-link Decision (numbered — Decision 19), before any network metric.** Research, raise the forks, record the choices: (a) which in-network pairs are links — all of them with the cost as the edge weight, or only those below a cost threshold (and from what evidence); (b) the edge weight (cost-distance, resistance-km) and the treatment of the 9 contiguous pairs (cost 0); (c) the metrics — degree, weighted betweenness (linchpins), components (isolated reserves) — and their normalisation across the 3 connected sets; (d) the definition of "isolated"; (e) whether the metrics are repeated on `noghm`, `road15`, `road50`, and if so the comparison metric, fixed now as Decision 18 did for the paths; (f) how the `network_group` labels enter (reporting only, Decision 17 point 8) | Decision 19 recorded in methodology; settings in `R/00_config.R` | 45–60 min |
+| 11.2 | STEP 11.1 in `scripts/07`: the link table from the `baseline` layer (`in_network == TRUE`; contiguous pairs per Decision 19) → `tbl_13_network_links.csv`; the `igraph` graph (56 nodes) | Link table written; 56 nodes; every edge traces to one `pair_id` | 30–45 min |
+| 11.3 | STEP 11.2: per-reserve metrics per Decision 19 → `tbl_13_network_metrics.csv` (`unit_id`, name, `network_group`, degree, betweenness raw and normalised, component id and size, isolated flag) | Metrics table written; one row per network reserve | 30–45 min |
+| 11.4 | STEP 11.3 — **only if Decision 19 point (e) says so**: the same metrics on the three variant surfaces, compared by the pre-fixed metric → `tbl_13_network_variant_comparison.csv` | Comparison written by the fixed metric; labels applied as fixed | 30–45 min |
+| 11.5 | STEP 11.4: network QA — no self-loops or duplicate edges; edge weights as Decision 19 says (none negative or `NA`); node set = the 56 network reserves; component sizes add up to 56; betweenness checked on a small hand-computed graph | QA passes; any failure stops the script | 20–30 min |
+| 11.6 | *(Optional, as done for the Week-10 extremes)* Literature check of the top-betweenness and the isolated reserves (descriptive) → `references.md` | Each named reserve has a source or a "no source found" note | 30–45 min |
+| 11.7 | Update `data-dictionary.md` (`tbl_13_*`), `methodology.md` (Decision 19 + Week-11 change log), `naming-conventions.md` §6 (`tbl_13` group), `README.md`/handoff (Week 11 status, entry point for Week 12) | Docs match as-built | 20–30 min |
+| 11.8 | Commit (`analysis:` for `07`, config, functions; outputs; `docs:` separate; `docs: update handoff after Week 11` with the plan) | Committed and pushed | 10 min |
+
+**Week 11 pitfalls:**
+- **Decision 19 before any metric — and the path costs are already seen.** The
+  Week-10 tables show the cost of every pair. A cost threshold chosen now is
+  chosen after seeing those costs. Prefer a rule tied to outside evidence, or
+  no threshold (cost as the weight), and state in Decision 19 that the cost
+  distribution was seen.
+- **Zero-cost links.** The 9 contiguous pairs have cost 0. `igraph` 1.6.0
+  stops on a zero weight in `betweenness()` ("Weight vector must be positive";
+  tested 2026-10-03 — check the project's version), and zero weights also make
+  ties. Decision 19 point (b) fixes the treatment — for example, one merged
+  node per contiguous pair, or a fixed small weight.
+- **Weights are distances in `igraph`.** In `betweenness()` and `distances()`,
+  a higher weight means a longer path. Use the cost-distance, not a
+  conductance.
+- **Three connected sets.** The pair rule gives sets of 34, 13 and 9 reserves.
+  Raw betweenness is not comparable between sets of different size; Decision 19
+  point (c) fixes the normalisation.
+- **P3 removed 21 baseline links.** Use `in_network == TRUE` only. A reserve
+  that lies between two others gains betweenness because of P3; say so when
+  you name linchpins.
+- **Missing nodes and borders.** Pilibhit and Dholpur-Karauli are not nodes
+  (G1); Pilibhit lies between Dudhwa and Corbett. Transboundary links are
+  absent, so a border reserve can look more isolated than it is (Limitations).
+- **Cross-group links.** Sariska–Rajaji is in the network; Sariska–Corbett is
+  not (P3). Whether `north` joins `central` depends on Decision 19 point (a).
+- **PROJ `proj.db` clash still applies** — fresh session.
+
+**Decision due this week:** **19** (functional links), numbered, before any
+network metric.
+
+**Exit state:** Decision 19 recorded; `tbl_13_network_links.csv` and
+`tbl_13_network_metrics.csv` written (and `tbl_13_network_variant_comparison.csv`
+if Decision 19 point (e) says so); network QA passes; linchpin and isolated
+reserves named; docs updated; Week 11 ticked. Ready for Week 12 (pinch points,
+`fig_04`, the publishable `tbl_03`).
 
 ---
 
@@ -853,7 +943,7 @@ deliverable exists.
 | 7 | Growth visuals + roll-up | ✅ Complete |
 | 8 | Covariate stack (Stage 2 start) | ✅ Complete |
 | 9 | Resistance surfaces (Decisions 11–16) | ✅ Complete |
-| 10 | Least-cost paths + variant comparison | ⚪ Not started |
+| 10 | Least-cost paths + variant comparison | ✅ Complete |
 | 11–12 | Network graph + pinch points | ⚪ Not started |
 | 13–16 | Suitability track | ⚪ Not started |
 | 17–20 | Site + close | ⚪ Not started |

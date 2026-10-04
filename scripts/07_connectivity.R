@@ -11,7 +11,30 @@
 #     STEP 9.7  asserts + write resist_tiger_<surface>_7755.tif (baseline,
 #               noghm, road15, road50)
 #     STEP 9.8  resistance QA -> tbl_11_resistance_qa.csv
-#   WEEK 10 — least-cost paths between neighbouring reserve pairs  TODO(Week 10)
+#   WEEK 10 — least-cost paths between neighbouring reserve pairs
+#             (Decisions 17 + 18; engine in R/00_functions_lcp.R)
+#     guard     the four resistance surfaces on disk must match
+#               tbl_11_resistance_qa.csv (cells, min, max, mean)
+#     STEP 10.0 tool check (task 10.3): synthetic self-test + one national
+#               baseline pair (runtime, memory); switch RUN_LCP_SMOKE
+#     STEP 10.1 reserve pairs (task 10.4; Decision 17 points 1, 6, 8):
+#               Euclidean-allocation zones on the footprint, rook adjacency,
+#               gap cap -> tbl_12_reserve_pairs.csv
+#     STEP 10.2 baseline least-cost paths for every pair (task 10.5;
+#               Decision 17 points 2-6) -> lcp_reserve_network_7755.gpkg,
+#               layer "baseline"
+#     STEP 10.2b validation (task 10.5b; Decision 17 point 4 + V-add):
+#               (a) synthetic, (b) terra::costDist, (c) gdistance
+#               -> tbl_12_lcp_validation.csv; switch LCP_VALIDATE (config)
+#     STEP 10.3 path QA, baseline (task 10.6) -> tbl_12_lcp_qa.csv
+#     STEP 10.4 variant paths (noghm, road15, road50), their QA, and the
+#               Decision-18 comparison (task 10.7) -> layers in
+#               lcp_reserve_network_7755.gpkg; tbl_12_lcp_qa.csv (all four
+#               surfaces); tbl_12_lcp_variant_comparison.csv;
+#               tbl_12_lcp_variant_summary.csv
+#     STEP 10.5 NTCA corridor overlap, baseline (task 10.8; Decision 17
+#               point 9; descriptive) -> tbl_12_lcp_ntca_overlap.csv,
+#               tbl_12_lcp_ntca_corridors.csv; switch LCP_NTCA_OVERLAP
 #   WEEK 11 — reserve network graph (igraph)                       TODO(Week 11)
 #   WEEK 12 — road pinch points + fig_04 / tbl_03                  TODO(Week 12)
 #
@@ -19,6 +42,13 @@
 # Decisions (14 and 15) recorded in docs/methodology.md BEFORE their STEPs are
 # written.
 # Their values are read from R/00_config.R, never hardcoded here.
+#
+# RUN SWITCHES (process choice RS1, 2026-10-02; set below "Prerequisites"):
+#   RUN_RESISTANCE  TRUE  -> the Week-9 STEPs (9.2, 9.5-9.8) run and rewrite
+#                            their outputs (a clean-clone run sets TRUE).
+#                   FALSE -> they are skipped; the Week-10+ STEPs read the four
+#                            surfaces from disk, after the surface guard.
+#   RUN_LCP_SMOKE   TRUE  -> STEP 10.0 runs (task 10.3).
 #
 # -----------------------------------------------------------------------------
 # STEP 9.2 — WHAT IT DOES
@@ -60,6 +90,11 @@
 #                                 Decision 13.
 #     - postfill_<tag> runs    -> same rule: clear closes Decision 10;
 #                                 triggered -> STOP and decide again.
+#   SPLIT SUFFIX (process choice RS1, 2026-10-02): when the reserve layer has
+#     parts with match_status == BOUNDARY_SPLIT_STATUS (the Decision-17 D1a
+#     split, scripts/02), the gap table label gets "_split", for example
+#     tbl_11_ghm_gap_relevance_postfill_d13f_split.csv. The dropped-cell layer
+#     does not depend on the reserves, so its name does not change.
 #
 # INPUTS:
 #   data/processed/cov_stack_1km_7755.tif              (scripts/06)
@@ -76,14 +111,31 @@
 #   data/processed/boundary_corridors_7755.gpkg        (scripts/02, task 9.2a)
 #   outputs/tables/tbl_10_covariate_stack_qa.csv       (scripts/06; cross-check)
 #
-# OUTPUTS (STEP 9.2; <state> = prefill | postfill, from tbl_10 n_filled):
-#   (<state> = prefill | postfill | postfill_d12 | postfill_<build_tag>)
+# OUTPUTS (STEP 9.2; <state> = prefill | postfill | postfill_d12 |
+#          postfill_<build_tag>, from tbl_10; the gap table adds "_split"):
 #   data/interim/cov_commonmask_dropped_<state>_1km_7755.tif
 #                                     dropped India cells, value = WorldCover
 #                                     class (0 = no class), else NA
-#   outputs/tables/tbl_11_ghm_gap_relevance_<state>.csv   one row per unit
-#     (tbl_11 is shared with the Week-9 resistance QA table under the
+#   outputs/tables/tbl_11_ghm_gap_relevance_<state>[_split].csv  one row per
+#     unit (tbl_11 is shared with the Week-9 resistance QA table under the
 #      naming-conventions §6 rule: numbers group, slugs identify.)
+# OUTPUTS (STEP 9.7-9.8): data/processed/resist_tiger_<surface>_7755.tif,
+#   outputs/tables/tbl_11_resistance_qa.csv
+# INPUTS (Week 10): the four resist_tiger_<surface>_7755.tif files,
+#   tbl_11_resistance_qa.csv, boundary_reserves_all_7755.gpkg
+# OUTPUTS (STEP 10.0): console report only (runtime, memory, one path).
+# OUTPUTS (STEP 10.1): outputs/tables/tbl_12_reserve_pairs.csv;
+#   data/interim/lcp_pair_zones_1km_7755.tif (allocation zones, QA only)
+# OUTPUTS (STEP 10.2): data/processed/lcp_reserve_network_7755.gpkg, layer
+#   "baseline" (one LINESTRING per pair; empty for contiguous pairs)
+# OUTPUTS (STEP 10.2b): outputs/tables/tbl_12_lcp_validation.csv
+# OUTPUTS (STEP 10.3): outputs/tables/tbl_12_lcp_qa.csv (baseline rows; STEP
+#   10.4 rewrites it with all four surfaces)
+# OUTPUTS (STEP 10.4): layers noghm, road15, road50 in
+#   lcp_reserve_network_7755.gpkg; tbl_12_lcp_variant_comparison.csv;
+#   tbl_12_lcp_variant_summary.csv
+# OUTPUTS (STEP 10.5): outputs/tables/tbl_12_lcp_ntca_overlap.csv (per pair),
+#   outputs/tables/tbl_12_lcp_ntca_corridors.csv (per corridor)
 #
 # MACHINE TRAP: same PROJ / PostGIS proj.db clash as scripts/06. Run in a FRESH
 # session; the guard below stops if EPSG:7755 does not resolve.
@@ -103,6 +155,11 @@ source(here("R", "00_functions_io.R"))  # read_vec, write_processed_rast, write_
 rule <- function(txt) cat("\n", strrep("=", 78), "\n", txt, "\n",
                           strrep("=", 78), "\n", sep = "")
 
+# ---- Run switches (process choice RS1, 2026-10-02) ---------------------------
+RUN_RESISTANCE <- FALSE   # TRUE: re-run the Week-9 STEPs (clean clone)
+RUN_LCP_SMOKE  <- FALSE   # TRUE: STEP 10.0 tool check (task 10.3; done
+                          # 2026-10-02 — set TRUE to repeat it)
+
 # ---- Paths ------------------------------------------------------------------
 stack_in     <- file.path(DIR_PROCESSED, "cov_stack_1km_7755.tif")
 distroad_in  <- file.path(DIR_INTERIM,   "cov_distroad_1km_7755.tif")
@@ -118,12 +175,15 @@ tbl10_in     <- file.path(DIR_TABLES,    "tbl_10_covariate_stack_qa.csv")
 # read (dropped_out, gap_slug).
 
 # ---- Guards (fail early) ----------------------------------------------------
-# 1) Decision-11 parameters must come from config.
+# 1) Decision-11 parameters must come from config (Week-9 STEPs only).
 gap_params <- c("GAP_BUFFER_M", "GAP_MIN_PCT", "GAP_MIN_CELLS",
                 "GAP_WATER_CLASS", "GAP_FILL_WINDOW", "GAP_FILL_MAX_ITER",
-                "GHM_GAP_FILL")
+                "GHM_GAP_FILL", "BOUNDARY_SPLIT_STATUS")
+if (!is.logical(RUN_RESISTANCE) || !is.logical(RUN_LCP_SMOKE)) {
+  stop("RUN_RESISTANCE and RUN_LCP_SMOKE must be TRUE or FALSE.", call. = FALSE)
+}
 missing_params <- gap_params[!vapply(gap_params, exists, logical(1))]
-if (length(missing_params) > 0) {
+if (isTRUE(RUN_RESISTANCE) && length(missing_params) > 0) {
   stop("Decision-11 parameter(s) missing from R/00_config.R: ",
        paste(missing_params, collapse = ", "), call. = FALSE)
 }
@@ -136,9 +196,12 @@ if (!nzchar(crs_wkt) || !grepl("India", crs_wkt)) {
        call. = FALSE)
 }
 
-# 3) Every input must exist.
-inputs <- c(stack_in, distroad_in, lc_in, india_in, reserves_in, corridors_in,
-            tbl10_in)
+# 3) Every input must exist (the Week-9 inputs only when RUN_RESISTANCE).
+inputs <- if (isTRUE(RUN_RESISTANCE)) {
+  c(stack_in, distroad_in, lc_in, india_in, reserves_in, corridors_in, tbl10_in)
+} else {
+  reserves_in
+}
 missing_inputs <- inputs[!file.exists(inputs)]
 if (length(missing_inputs) > 0) {
   stop("Missing required input(s):\n  ", paste(missing_inputs, collapse = "\n  "),
@@ -146,7 +209,16 @@ if (length(missing_inputs) > 0) {
        "scripts/02 (task 9.2a).", call. = FALSE)
 }
 
-rule("07_connectivity.R — inputs found; CRS OK; Decision-11 parameters loaded")
+rule(paste0("07_connectivity.R — inputs found; CRS OK | RUN_RESISTANCE = ",
+            RUN_RESISTANCE, " | RUN_LCP_SMOKE = ", RUN_LCP_SMOKE))
+
+# =============================================================================
+# WEEK 9 — resistance surfaces. Runs only when RUN_RESISTANCE is TRUE.
+# The block ends at "end if (RUN_RESISTANCE)" after STEP 9.8. The code inside
+# is not indented, so its lines match the Week-9 record.
+# =============================================================================
+if (isTRUE(RUN_RESISTANCE)) {
+
 cat(sprintf(paste0("Decision 11: buffer %d m | material if >= %s%% or >= %d ",
                    "dropped land cells | water class %d not counted\n"),
             GAP_BUFFER_M, format(GAP_MIN_PCT), GAP_MIN_CELLS, GAP_WATER_CLASS))
@@ -298,6 +370,17 @@ rule("STEP 9.2b — footprint units (reserves, corridors, buffer rings)")
 reserves_sf <- read_vec(reserves_in)
 res_geo     <- reserves_sf[reserves_sf$geometry_present, ]
 res_absent  <- reserves_sf[!reserves_sf$geometry_present, ]
+
+# Split suffix (process choice RS1): a reserve layer with D1a split parts gets
+# its own gap-table label, so the recorded Week-9 tables are not overwritten.
+has_split <- "match_status" %in% names(reserves_sf) &&
+  any(reserves_sf$match_status == BOUNDARY_SPLIT_STATUS, na.rm = TRUE)
+if (has_split) gap_slug <- paste0(gap_slug, "_split")
+cat("reserve layer:", if (has_split) {
+  paste0("split parts present -> gap table label '", gap_slug, "'")
+} else {
+  "no split parts"
+}, "\n")
 
 # One column set for every unit type, so the three sets bind cleanly.
 as_units <- function(x, unit_type, unit_id, unit_name, state,
@@ -732,3 +815,594 @@ print(class_view, row.names = FALSE)
 rule(paste0("Week-9 resistance surfaces written: ",
             paste(names(resist_list), collapse = ", "),
             ". Next: Week 10 least-cost paths."))
+
+}  # end if (RUN_RESISTANCE)
+
+# =============================================================================
+# WEEK 10 — least-cost paths (Decisions 17 + 18)
+# =============================================================================
+# Engine: R/00_functions_lcp.R (own 16-neighbour cell graph, crossed-cells
+# knight rule, igraph Dijkstra from all cells of the source reserve).
+# Every Decision-17/18 value is read from R/00_config.R.
+source(here("R", "00_functions_lcp.R"))
+
+# ---- Guard: settings --------------------------------------------------------
+lcp_params <- c("LCP_PAIR_ADJACENCY", "LCP_PAIR_MAX_GAP_KM",
+                "LCP_THROUGH_RESERVE_RULE", "LCP_NEIGHBOURS", "LCP_KNIGHT_RULE",
+                "LCP_VALIDATE", "LCP_VALIDATE_PAIRS", "LCP_VALIDATE_TOL_REL",
+                "LCP_VALIDATE_WINDOW_KM", "LCP_CROP",
+                "LCP_CROP_FALLBACK_MIN_BUFFER_KM",
+                "LCP_CROP_FALLBACK_BUFFER_FRAC", "LCP_RESERVE_TOUCHES",
+                "LCP_EXCLUDED_UNIT_IDS", "LCP_EXCLUDED_UNIT_NAMES",
+                "NETWORK_GROUPS", "LCP_NTCA_OVERLAP", "LCP_COMPARE_VARIANTS",
+                "LCP_COMPARE_ROUTE_D_KM", "LCP_COMPARE_ROUTE_D_DESCR_KM",
+                "LCP_COMPARE_ROUTE_MATERIAL", "LCP_COMPARE_RANK_MATERIAL",
+                "LCP_COMPARE_ROBUST_MAX_SHARE", "LCP_COMPARE_ROBUST_MIN_RHO",
+                "RESIST_VARIANTS")
+missing_lcp <- lcp_params[!vapply(lcp_params, exists, logical(1))]
+if (length(missing_lcp) > 0) {
+  stop("Decision-17/18 setting(s) missing from R/00_config.R: ",
+       paste(missing_lcp, collapse = ", "), call. = FALSE)
+}
+if (!requireNamespace("igraph", quietly = TRUE)) {
+  stop("Package igraph is needed for the path engine (scripts/00a).",
+       call. = FALSE)
+}
+
+# ---- Guard: the four surfaces on disk match the Week-9 QA -------------------
+# Cells exact; min, max and mean within 0.001 (tbl_11 rounds to 3 decimals,
+# and the files are 32-bit float).
+rule("WEEK 10 — surface guard (files vs tbl_11_resistance_qa)")
+resqa_in      <- file.path(DIR_TABLES, "tbl_11_resistance_qa.csv")
+surface_names <- c("baseline", names(RESIST_VARIANTS))
+resist_in     <- stats::setNames(
+  file.path(DIR_PROCESSED, paste0("resist_tiger_", surface_names, "_7755.tif")),
+  surface_names)
+need_w10 <- c(resqa_in, resist_in)
+if (any(!file.exists(need_w10))) {
+  stop("Missing Week-10 input(s):\n  ",
+       paste(need_w10[!file.exists(need_w10)], collapse = "\n  "),
+       "\nSet RUN_RESISTANCE <- TRUE to build the surfaces.", call. = FALSE)
+}
+resqa_disk <- utils::read.csv(resqa_in, stringsAsFactors = FALSE)
+r_ref <- NULL
+for (nm in surface_names) {
+  q <- resqa_disk[resqa_disk$surface == nm, ]
+  if (nrow(q) != 1L) {
+    stop("tbl_11_resistance_qa.csv has ", nrow(q), " row(s) for surface '",
+         nm, "' (expected 1).", call. = FALSE)
+  }
+  r_nm <- terra::rast(resist_in[[nm]])
+  if (is.null(r_ref)) r_ref <- r_nm
+  if (!isTRUE(terra::compareGeom(r_nm, r_ref, stopOnError = FALSE, crs = TRUE,
+                                 ext = TRUE, rowcol = TRUE, res = TRUE))) {
+    stop(nm, ": grid differs from the baseline grid.", call. = FALSE)
+  }
+  n_nm    <- terra::global(!is.na(r_nm), "sum")[[1]]
+  mm      <- as.numeric(terra::minmax(r_nm, compute = TRUE))
+  mean_nm <- terra::global(r_nm, "mean", na.rm = TRUE)[[1]]
+  bad <- c(
+    if (n_nm != q$n_cells) paste0("cells ", n_nm, " vs QA ", q$n_cells),
+    if (abs(mm[1] - q$min) > 1e-3) paste0("min ", mm[1], " vs QA ", q$min),
+    if (abs(mm[2] - q$max) > 1e-3) paste0("max ", mm[2], " vs QA ", q$max),
+    if (abs(mean_nm - q$mean) > 1e-3) paste0("mean ", round(mean_nm, 4),
+                                             " vs QA ", q$mean)
+  )
+  if (length(bad) > 0) {
+    stop(nm, ": the file on disk does not match tbl_11_resistance_qa.csv (",
+         paste(bad, collapse = "; "), "). Re-run with RUN_RESISTANCE <- TRUE.",
+         call. = FALSE)
+  }
+  cat(sprintf("%-8s OK: %s cells, min %.3f, max %.3f, mean %.3f\n", nm,
+              format(n_nm, big.mark = ","), mm[1], mm[2], mean_nm))
+}
+rm(r_nm, r_ref)
+
+# ---- Shared Week-10 inputs ----------------------------------------------------
+# The baseline surface defines the footprint (its non-NA cells are the
+# complete-case cells, Decision 10). The reserve layer gives the reserves.
+lcp_base <- terra::rast(resist_in[["baseline"]])
+reserves_lcp <- read_vec(reserves_in)
+reserves_lcp$unit_id <- as.integer(reserves_lcp$unit_id)
+
+# =============================================================================
+# STEP 10.0 — tool check (task 10.3): self-test + one national baseline pair
+# =============================================================================
+# Smoke test only: it writes no file. The pair set is built in STEP 10.1.
+# Pair: Kanha (22) - Pench (23), gap about 106 km (near the median gap of the
+# 2026-10-01 geometry check). Record the runtime and memory in the handoff.
+if (isTRUE(RUN_LCP_SMOKE)) {
+  rule("STEP 10.0 — tool check: synthetic self-test, then one national pair")
+
+  st <- lcp_selftest_synthetic()
+  print(st[, c("case", "expected", "engine", "pass")], row.names = FALSE)
+  if (!all(st$pass)) {
+    stop("Synthetic self-test failed — the engine is wrong. Nothing further ",
+         "runs.", call. = FALSE)
+  }
+
+  SMOKE_IDS   <- c(22L, 23L)
+  SMOKE_NAMES <- c("Kanha", "Pench")
+  smoke_sf <- reserves_lcp[match(SMOKE_IDS, reserves_lcp$unit_id), ]
+  if (anyNA(smoke_sf$unit_id) || !identical(smoke_sf$unit_name, SMOKE_NAMES) ||
+      !all(smoke_sf$geometry_present)) {
+    stop("Smoke pair does not resolve: unit_id ",
+         paste(SMOKE_IDS, collapse = ", "), " gave '",
+         paste(smoke_sf$unit_name, collapse = ", "), "' (expected '",
+         paste(SMOKE_NAMES, collapse = ", "), "', with geometry).",
+         call. = FALSE)
+  }
+
+  t0 <- Sys.time()
+  smoke_cells <- lcp_reserve_cells(lcp_base, smoke_sf,
+                                   touches = LCP_RESERVE_TOUCHES)
+  t1 <- Sys.time()
+  G <- lcp_build_graph(lcp_base, smoke_cells, neighbours = LCP_NEIGHBOURS,
+                       knight_rule = LCP_KNIGHT_RULE)
+  t2 <- Sys.time()
+  sm <- lcp_search(G, from = 1L, to = 2L)
+  t3 <- Sys.time()
+
+  sm_line <- lcp_path_line(sm$cells[[1]], lcp_base)
+  sm_len  <- as.numeric(sf::st_length(sf::st_sfc(sm_line, crs = CRS_ANALYSIS))) / 1000
+  sm_gap  <- as.numeric(sf::st_distance(smoke_sf[1, ], smoke_sf[2, ])) / 1000
+  mem     <- lcp_mem_report()
+  secs    <- function(a, b) round(as.numeric(difftime(b, a, units = "secs")), 1)
+
+  cat(sprintf("reserve cells: %s %s, %s %s | contiguous: %s\n",
+              SMOKE_NAMES[1], format(length(smoke_cells[[1]]), big.mark = ","),
+              SMOKE_NAMES[2], format(length(smoke_cells[[2]]), big.mark = ","),
+              lcp_contiguous(smoke_cells[[1]], smoke_cells[[2]])))
+  cat(sprintf("graph: %s nodes, %s cell edges, %d neighbours, knight rule %s\n",
+              format(G$n_nodes, big.mark = ","),
+              format(G$n_cell_edges, big.mark = ","), G$neighbours,
+              G$knight_rule))
+  cat(sprintf("time (s): reserve cells %s | graph build %s | one search %s\n",
+              secs(t0, t1), secs(t1, t2), secs(t2, t3)))
+  cat(sprintf(paste0("path %s -> %s: cost %.1f resistance-km | %d cells | ",
+                     "length %.1f km | gap %.1f km | length / gap %.2f\n"),
+              SMOKE_NAMES[1], SMOKE_NAMES[2], sm$cost, sm$n_cells, sm_len,
+              sm_gap, sm_len / sm_gap))
+  cat(sprintf("memory: %s MB (%s)\n", format(mem$peak_mb, big.mark = ","),
+              mem$source))
+  rm(G); invisible(gc())
+  rule("STEP 10.0 done — record runtime and memory. Next: task 10.3b, then STEP 10.1.")
+}
+
+# =============================================================================
+# STEP 10.1 — reserve pairs (task 10.4; Decision 17 points 1, 6 and 8)
+# =============================================================================
+# 1. Every footprint cell goes to the nearest reserve polygon (straight line);
+#    the cells of each reserve take their own reserve first.
+# 2. Two reserves are a candidate pair if their zones share >= 1 cell edge.
+# 3. A candidate is kept if the polygon gap is <= LCP_PAIR_MAX_GAP_KM.
+# 4. contiguous = the two reserves share a footprint cell (amended 2026-10-02);
+#    cross_group = the two reserves are in different NETWORK_GROUPS.
+# One pair set for all four surfaces: no resistance value is used here.
+rule("STEP 10.1 — reserve pairs (Decision 17) -> tbl_12_reserve_pairs.csv")
+
+# QA expectation from the Decision-17 geometry check (2026-10-01): about 106
+# pairs with the split. A count outside +/- 10 % stops the script: a large
+# difference is investigated, not accepted (task 10.4).
+PAIRS_EXPECTED     <- 106L
+PAIRS_EXPECTED_TOL <- 0.10
+
+# Guard: NETWORK_GROUPS holds every unit_id of the reserve layer exactly once.
+grp_ids <- unlist(NETWORK_GROUPS, use.names = FALSE)
+if (anyDuplicated(grp_ids) || !setequal(grp_ids, reserves_lcp$unit_id)) {
+  stop("NETWORK_GROUPS must hold every unit_id of the reserve layer exactly ",
+       "once. Duplicated: ", paste(grp_ids[duplicated(grp_ids)], collapse = ", "),
+       " | missing: ", paste(setdiff(reserves_lcp$unit_id, grp_ids), collapse = ", "),
+       " | not in the layer: ", paste(setdiff(grp_ids, reserves_lcp$unit_id),
+                                      collapse = ", "), call. = FALSE)
+}
+
+# Guard: the geometry-absent reserves are exactly LCP_EXCLUDED_UNIT_IDS (G1),
+# and the names match.
+absent_ids <- sort(reserves_lcp$unit_id[!as.logical(reserves_lcp$geometry_present)])
+if (!identical(absent_ids, sort(LCP_EXCLUDED_UNIT_IDS)) ||
+    !identical(reserves_lcp$unit_name[match(LCP_EXCLUDED_UNIT_IDS,
+                                            reserves_lcp$unit_id)],
+               LCP_EXCLUDED_UNIT_NAMES)) {
+  stop("Geometry-absent reserves (", paste(absent_ids, collapse = ", "),
+       ") do not match LCP_EXCLUDED_UNIT_IDS / _NAMES (",
+       paste(LCP_EXCLUDED_UNIT_IDS, collapse = ", "), "). Run task 10.3b ",
+       "(scripts/02 state split) first, or check the config.", call. = FALSE)
+}
+res_net <- reserves_lcp[!reserves_lcp$unit_id %in% LCP_EXCLUDED_UNIT_IDS, ]
+res_net <- res_net[order(res_net$unit_id), ]
+cat(sprintf("reserves in the network: %d (excluded, no geometry: %s)\n",
+            nrow(res_net), paste(LCP_EXCLUDED_UNIT_NAMES, collapse = ", ")))
+
+# Reserve cells (Decision 17 point 6; touches = TRUE, footprint cells only).
+res_cells <- lcp_reserve_cells(lcp_base, res_net, touches = LCP_RESERVE_TOUCHES)
+if (any(lengths(res_cells) == 0L)) {
+  stop("Reserve(s) with no footprint cell: ",
+       paste(res_net$unit_name[lengths(res_cells) == 0L], collapse = ", "),
+       call. = FALSE)
+}
+cat(sprintf("reserve cells: min %d (%s), median %d, max %d (%s)\n",
+            min(lengths(res_cells)), res_net$unit_name[which.min(lengths(res_cells))],
+            as.integer(stats::median(lengths(res_cells))),
+            max(lengths(res_cells)), res_net$unit_name[which.max(lengths(res_cells))]))
+
+t_alloc <- Sys.time()
+zones <- lcp_alloc_zones(lcp_base, res_net, res_cells)
+cat(sprintf("allocation zones: %s footprint cells allocated in %.0f s\n",
+            format(sum(!is.na(zones)), big.mark = ","),
+            as.numeric(difftime(Sys.time(), t_alloc, units = "secs"))))
+if (sum(!is.na(zones)) != sum(!is.na(terra::values(lcp_base, mat = FALSE)))) {
+  stop("Allocation does not cover every footprint cell.", call. = FALSE)
+}
+
+adj <- lcp_zone_adjacency(zones, terra::nrow(lcp_base), terra::ncol(lcp_base))
+bp  <- lcp_build_pairs(adj, res_net, res_cells, NETWORK_GROUPS,
+                       LCP_PAIR_MAX_GAP_KM)
+pairs <- bp$pairs
+cat(sprintf(paste0("candidate pairs (zones share an edge): %d | dropped by the ",
+                   "%s km cap: %d | kept: %d\n"),
+            nrow(adj), format(LCP_PAIR_MAX_GAP_KM), nrow(bp$dropped), nrow(pairs)))
+
+# Checks
+if (abs(nrow(pairs) - PAIRS_EXPECTED) > PAIRS_EXPECTED_TOL * PAIRS_EXPECTED) {
+  stop("Pair count ", nrow(pairs), " is outside ", PAIRS_EXPECTED, " +/- ",
+       PAIRS_EXPECTED_TOL * 100, " % (Decision-17 geometry check). Investigate ",
+       "before you accept it.", call. = FALSE)
+}
+if (anyDuplicated(paste(pairs$from_unit_id, pairs$to_unit_id)) ||
+    any(pairs$from_unit_id >= pairs$to_unit_id)) {
+  stop("Pair table has a duplicate or an unordered pair.", call. = FALSE)
+}
+if (any(pairs$contiguous & pairs$gap_km > 1.5)) {
+  stop("A contiguous pair has a gap above 1.5 km (the cell diagonal is ",
+       "1.41 km): check the reserve cells.", call. = FALSE)
+}
+if (any(!pairs$contiguous & pairs$gap_km == 0)) {
+  stop("A gap-0 pair is not contiguous: check the reserve cells.", call. = FALSE)
+}
+
+g_pairs <- igraph::graph_from_data_frame(
+  pairs[, c("from_unit_id", "to_unit_id")], directed = FALSE,
+  vertices = data.frame(name = res_net$unit_id))
+cc <- igraph::components(g_pairs)
+cat(sprintf("connected sets: %d (sizes %s) | reserves with no pair: %s\n", cc$no,
+            paste(sort(cc$csize, decreasing = TRUE), collapse = ", "),
+            if (any(cc$csize == 1L)) paste(res_net$unit_name[cc$membership %in%
+                                             which(cc$csize == 1L)], collapse = ", ")
+            else "none"))
+cat(sprintf("gap km: median %.1f, max %.1f | contiguous: %d | cross-group: %d\n",
+            stats::median(pairs$gap_km), max(pairs$gap_km), sum(pairs$contiguous),
+            sum(pairs$cross_group)))
+cat("contiguous pairs (cost 0, empty path):\n")
+print(pairs[pairs$contiguous, c("pair_id", "from_name", "to_name", "gap_km")],
+      row.names = FALSE)
+cat("cross-group pairs (kept; Decision 17 point 8):\n")
+print(pairs[pairs$cross_group, c("pair_id", "from_name", "to_name", "from_group",
+                                 "to_group", "gap_km")], row.names = FALSE)
+cat("pairs per network group (both ends in the group):\n")
+print(table(pairs$from_group[!pairs$cross_group]))
+
+# Outputs
+zones_r <- terra::setValues(terra::rast(lcp_base), zones)
+names(zones_r) <- "unit_id"
+zones_out <- file.path(DIR_INTERIM, "lcp_pair_zones_1km_7755.tif")
+terra::writeRaster(zones_r, zones_out, overwrite = TRUE, datatype = "INT2U",
+                   gdal = c("COMPRESS=DEFLATE"))
+zr <- terra::rast(zones_out)
+if (terra::global(!is.na(zr), "sum")[[1]] != sum(!is.na(zones))) {
+  stop("Zone raster read-back: cell count differs.", call. = FALSE)
+}
+cat("wrote", zones_out, "(QA only)\n")
+write_table(pairs, 12, "reserve_pairs")
+rule(sprintf("STEP 10.1 done — %d pairs. Next: STEP 10.2 baseline paths (task 10.5).",
+             nrow(pairs)))
+
+# =============================================================================
+# STEP 10.2 — baseline least-cost paths (task 10.5; Decision 17 points 2-6)
+# =============================================================================
+# Graph: 16 neighbours, crossed-cells knight rule (Decision 17 point 3); one
+# Dijkstra search per source reserve from all of its cells (edge to edge,
+# point 6). Contiguous pairs: cost 0, empty path. Point 2 (P3) then sets
+# via_unit_ids and in_network. Fields: data-dictionary.md.
+rule("STEP 10.2 — baseline least-cost paths -> lcp_reserve_network_7755.gpkg")
+paths_out <- file.path(DIR_PROCESSED, "lcp_reserve_network_7755.gpkg")
+
+t_b <- Sys.time()
+G_base <- lcp_build_graph(lcp_base, res_cells, neighbours = LCP_NEIGHBOURS,
+                          knight_rule = LCP_KNIGHT_RULE)
+t_s <- Sys.time()
+paths_base <- lcp_paths_for_pairs(G_base, lcp_base, res_net, res_cells, pairs,
+                                  surface = "baseline")
+paths_base <- lcp_apply_through_rule(paths_base, pairs, res_net, res_cells)
+t_e <- Sys.time()
+cat(sprintf(paste0("graph: %s nodes, %s cell edges (%.0f s) | searches: %d ",
+                   "source reserves (%.0f s)\n"),
+            format(G_base$n_nodes, big.mark = ","),
+            format(G_base$n_cell_edges, big.mark = ","),
+            as.numeric(difftime(t_s, t_b, units = "secs")),
+            length(unique(pairs$from_unit_id[!pairs$contiguous])),
+            as.numeric(difftime(t_e, t_s, units = "secs"))))
+rm(G_base); invisible(gc())
+
+st_tab <- table(factor(paths_base$path_status,
+                       levels = c("path", "contiguous", "no_path")))
+cat(sprintf("pairs: %d | path %d | contiguous %d | no path %d\n",
+            nrow(paths_base), st_tab[["path"]], st_tab[["contiguous"]],
+            st_tab[["no_path"]]))
+if (st_tab[["no_path"]] > 0) {
+  cat("pairs with NO path (reported, not dropped; Decision 17):\n")
+  print(sf::st_drop_geometry(paths_base)[paths_base$path_status == "no_path",
+        c("pair_id", "from_name", "to_name", "gap_km")], row.names = FALSE)
+}
+pb <- sf::st_drop_geometry(paths_base)[paths_base$path_status == "path", ]
+cat(sprintf(paste0("paths: cost median %.1f, max %.1f resistance-km | length ",
+                   "median %.1f, max %.1f km | length/gap median %.2f, ",
+                   "range %.2f-%.2f\n"),
+            stats::median(pb$cost_rkm), max(pb$cost_rkm),
+            stats::median(pb$path_km), max(pb$path_km),
+            stats::median(pb$path_gap_ratio), min(pb$path_gap_ratio),
+            max(pb$path_gap_ratio)))
+cat(sprintf(paste0("Decision 17 point 2 (P3): paths that cross another ",
+                   "reserve %d | not in the network %d\n"),
+            sum(paths_base$via_unit_ids != ""), sum(!paths_base$in_network)))
+if (any(!paths_base$in_network)) {
+  print(sf::st_drop_geometry(paths_base)[!paths_base$in_network,
+        c("pair_id", "from_name", "to_name", "via_unit_ids",
+          "redundant_via_unit_ids", "path_status")], row.names = FALSE)
+}
+
+lcp_write_layer(paths_base, paths_out, "baseline")
+rule(sprintf(paste0("STEP 10.2 done — %d baseline paths written. Next: STEP ",
+                    "10.2b validation (task 10.5b)."), st_tab[["path"]]))
+
+# =============================================================================
+# STEP 10.2b — validation (task 10.5b; Decision 17 point 4; V-add)
+# =============================================================================
+# (a) synthetic grids with hand-computed costs (8 and 16 neighbours, a
+#     one-cell road line and a one-cell NA line);
+# (b) terra::costDist, 8 neighbours, edge to edge (source cells set to 0 in
+#     both runs), on a window around the pair;
+# (c) gdistance, 16 neighbours, end-cell knight rule, point to point between
+#     the exit and entry cells of the baseline path, on the same window.
+# Pairs: the shortest gap, the gap nearest the median and the longest gap of
+# the pairs with a path (contiguous pairs have none — Decision 17 point 4 as
+# read under the C1 amendment), plus the highest length/gap ratio (V-add,
+# 2026-10-03). Window = bounding box of the path and both reserves +
+# LCP_VALIDATE_WINDOW_KM. Pass: relative cost difference <= LCP_VALIDATE_TOL_REL.
+# The table is written first; then any failure stops the script.
+if (isTRUE(LCP_VALIDATE)) {
+  rule("STEP 10.2b — validation: (a) synthetic, (b) terra::costDist, (c) gdistance")
+
+  st <- lcp_selftest_synthetic()
+  val_rows <- list(data.frame(
+    check = st$check, rule = "synthetic", case = st$case, pair_id = NA_integer_,
+    from_name = NA_character_, to_name = NA_character_, gap_km = NA_real_,
+    neighbours = st$neighbours, knight_rule = st$knight_rule,
+    window_cells = 49L, engine = st$engine, reference = st$reference,
+    rel_diff = ifelse(is.infinite(st$engine) & is.infinite(st$reference), 0,
+                      abs(st$engine - st$reference) / pmax(1, abs(st$reference))),
+    path_overlap = NA_real_, pass = st$pass, note = "", stringsAsFactors = FALSE))
+  cat(sprintf("(a) synthetic: %d of %d cases pass\n", sum(st$pass), nrow(st)))
+
+  vp <- lcp_validation_pairs(paths_base, LCP_VALIDATE_PAIRS, add_max_ratio = TRUE)
+  for (i in seq_len(nrow(vp))) {
+    pid <- vp$pair_id[i]
+    pr  <- paths_base[paths_base$pair_id == pid, ]
+    ka  <- match(pr$from_unit_id, res_net$unit_id)
+    kb  <- match(pr$to_unit_id, res_net$unit_id)
+    win <- lcp_validation_window(
+      lcp_base, c(sf::st_geometry(pr), sf::st_geometry(res_net)[c(ka, kb)]),
+      LCP_VALIDATE_WINDOW_KM)
+    to_win <- function(cc) terra::cellFromXY(win, terra::xyFromCell(lcp_base, cc))
+    A_w <- to_win(res_cells[[ka]]); B_w <- to_win(res_cells[[kb]])
+    if (anyNA(A_w) || anyNA(B_w)) {
+      stop("Validation window for pair ", pid, " does not hold every reserve ",
+           "cell.", call. = FALSE)
+    }
+    t_v <- Sys.time()
+    rb <- lcp_check_terra(win, A_w, B_w)
+    rc <- lcp_check_gdistance(win, to_win(pr$exit_cell), to_win(pr$entry_cell))
+    for (rr in list(rb, rc)) {
+      val_rows[[length(val_rows) + 1L]] <- data.frame(
+        check = rr$check, rule = vp$rule[i], case = NA_character_, pair_id = pid,
+        from_name = pr$from_name, to_name = pr$to_name, gap_km = pr$gap_km,
+        neighbours = rr$neighbours,
+        knight_rule = if (rr$check == "c_gdistance") "end_cells" else NA_character_,
+        window_cells = terra::ncell(win), engine = rr$engine,
+        reference = rr$reference, rel_diff = rr$rel_diff,
+        path_overlap = if ("path_overlap" %in% names(rr)) rr$path_overlap else NA_real_,
+        pass = is.finite(rr$rel_diff) && rr$rel_diff <= LCP_VALIDATE_TOL_REL,
+        note = rr$note, stringsAsFactors = FALSE)
+    }
+    cat(sprintf(paste0("pair %d %s - %s [%s]: window %s cells | (b) rel diff %.1e",
+                       " | (c) rel diff %.1e, path overlap %.3f | %.0f s\n"),
+                pid, pr$from_name, pr$to_name, vp$rule[i],
+                format(terra::ncell(win), big.mark = ","), rb$rel_diff,
+                rc$rel_diff, rc$path_overlap,
+                as.numeric(difftime(Sys.time(), t_v, units = "secs"))))
+    if (nzchar(rb$note)) cat("   note (b):", rb$note, "\n")
+  }
+  val <- do.call(rbind, val_rows)
+  write_table(val, 12, "lcp_validation")
+  if (!all(val$pass)) {
+    stop("Validation FAILED (", sum(!val$pass), " row(s)); see ",
+         "tbl_12_lcp_validation.csv. The engine result is not accepted.",
+         call. = FALSE)
+  }
+  rule(sprintf(paste0("STEP 10.2b done — all %d checks pass. Next: STEP 10.3 ",
+                      "path QA (task 10.6)."), nrow(val)))
+}
+
+# =============================================================================
+# STEP 10.3 — path QA, baseline (task 10.6)
+# =============================================================================
+# One row per pair (lcp_qa_paths()): accounted for (path / contiguous /
+# no_path), empty line only for contiguous or no_path, path cells on the
+# footprint, start in the source reserve and end in the target reserve, valid
+# 16-neighbour steps, cost and length recomputed from the raster equal the
+# stored values, in_network consistent with Decision 17 point 2. The crop
+# fallback is not used (LCP_CROP = FALSE), so no window-edge check applies.
+# The table is written first; then any failed pair stops the script.
+rule("STEP 10.3 — path QA (baseline) -> tbl_12_lcp_qa.csv")
+if (isTRUE(LCP_CROP)) {
+  stop("LCP_CROP is TRUE, but the crop fallback is not built (Decision 17 ",
+       "point 5: only if memory fails).", call. = FALSE)
+}
+qa_base <- lcp_qa_paths(paths_base, lcp_base, res_net, res_cells, pairs)
+chk_cols <- c("in_pair_table", "status_ok", "empty_ok", "footprint_ok",
+              "start_ok", "end_ok", "steps_ok", "cost_ok", "length_ok",
+              "network_ok")
+cat(sprintf("pairs accounted for: %d of %d (path %d, contiguous %d, no path %d)\n",
+            sum(qa_base$path_status %in% c("path", "contiguous", "no_path")),
+            nrow(pairs), sum(qa_base$path_status == "path"),
+            sum(qa_base$path_status == "contiguous"),
+            sum(qa_base$path_status == "no_path")))
+cat("checks failed per column:",
+    paste(sprintf("%s %d", chk_cols, colSums(qa_base[, chk_cols] == FALSE,
+                                             na.rm = TRUE)), collapse = " | "),
+    "\n")
+qp <- qa_base[qa_base$path_status == "path", ]
+cat("lowest length/gap ratios:\n")
+print(utils::head(qp[order(qp$path_gap_ratio), c("pair_id", "from_name", "to_name",
+      "gap_km", "path_km", "path_gap_ratio")], 5), row.names = FALSE, digits = 3)
+cat("highest length/gap ratios:\n")
+print(utils::head(qp[order(-qp$path_gap_ratio), c("pair_id", "from_name", "to_name",
+      "gap_km", "path_km", "path_gap_ratio")], 5), row.names = FALSE, digits = 3)
+cat("highest costs:\n")
+print(utils::head(qp[order(-qp$cost_rkm), c("pair_id", "from_name", "to_name",
+      "gap_km", "path_km", "cost_rkm")], 5), row.names = FALSE, digits = 4)
+write_table(qa_base, 12, "lcp_qa")
+if (!all(qa_base$qa_pass)) {
+  print(qa_base[!qa_base$qa_pass, c("pair_id", "from_name", "to_name",
+                                    "path_status", chk_cols)], row.names = FALSE)
+  stop("Path QA FAILED for ", sum(!qa_base$qa_pass), " pair(s); see ",
+       "tbl_12_lcp_qa.csv.", call. = FALSE)
+}
+rule(sprintf(paste0("STEP 10.3 done — all %d pairs pass QA. Next: STEP 10.4 ",
+                    "variant paths (task 10.7)."), nrow(qa_base)))
+
+# =============================================================================
+# STEP 10.4 — variant paths, their QA, and the Decision-18 comparison
+# =============================================================================
+# The same pairs and reserve cells on each variant surface (Decision 17 point
+# 1), the same engine settings, the same QA as STEP 10.3. Then Decision 18:
+# each variant against the baseline, on every pair that is not contiguous.
+# Labels are applied by the rule fixed in Decision 18, before any variant
+# path was examined.
+rule("STEP 10.4 — variant paths + QA + Decision-18 comparison")
+base_na <- is.na(terra::values(lcp_base, mat = FALSE))
+paths_var <- list()
+qa_all <- list(baseline = qa_base)
+for (v in LCP_COMPARE_VARIANTS) {
+  r_v <- terra::rast(resist_in[[v]])
+  if (!identical(is.na(terra::values(r_v, mat = FALSE)), base_na)) {
+    stop("Surface '", v, "' has a different NA footprint from the baseline; ",
+         "the reserve cells and pairs would not carry over.", call. = FALSE)
+  }
+  t_v <- Sys.time()
+  G_v <- lcp_build_graph(r_v, res_cells, neighbours = LCP_NEIGHBOURS,
+                         knight_rule = LCP_KNIGHT_RULE)
+  pv <- lcp_paths_for_pairs(G_v, r_v, res_net, res_cells, pairs, surface = v)
+  pv <- lcp_apply_through_rule(pv, pairs, res_net, res_cells)
+  rm(G_v); invisible(gc())
+  qa_v <- lcp_qa_paths(pv, r_v, res_net, res_cells, pairs)
+  cat(sprintf(paste0("%-7s paths %d, contiguous %d, no path %d | not in ",
+                     "network %d | QA failures %d | %.0f s\n"),
+              v, sum(pv$path_status == "path"),
+              sum(pv$path_status == "contiguous"),
+              sum(pv$path_status == "no_path"), sum(!pv$in_network),
+              sum(!qa_v$qa_pass),
+              as.numeric(difftime(Sys.time(), t_v, units = "secs"))))
+  lcp_write_layer(pv, paths_out, v)
+  paths_var[[v]] <- pv
+  qa_all[[v]] <- qa_v
+}
+qa_all <- do.call(rbind, qa_all)
+rownames(qa_all) <- NULL
+write_table(qa_all, 12, "lcp_qa")
+if (!all(qa_all$qa_pass)) {
+  print(qa_all[!qa_all$qa_pass, c("surface", "pair_id", "from_name", "to_name",
+                                  "path_status", chk_cols)], row.names = FALSE)
+  stop("Path QA FAILED on ", sum(!qa_all$qa_pass), " row(s); see ",
+       "tbl_12_lcp_qa.csv.", call. = FALSE)
+}
+
+cmp <- lapply(LCP_COMPARE_VARIANTS, function(v) {
+  lcp_compare_variant(paths_base, paths_var[[v]],
+                      d_km = LCP_COMPARE_ROUTE_D_KM,
+                      descr_km = LCP_COMPARE_ROUTE_D_DESCR_KM,
+                      route_material = LCP_COMPARE_ROUTE_MATERIAL,
+                      rank_material = LCP_COMPARE_RANK_MATERIAL)
+})
+names(cmp) <- LCP_COMPARE_VARIANTS
+cmp_summary <- lcp_compare_summary(cmp, n_contiguous = sum(pairs$contiguous),
+                                   max_share = LCP_COMPARE_ROBUST_MAX_SHARE,
+                                   min_rho = LCP_COMPARE_ROBUST_MIN_RHO)
+cmp_all <- do.call(rbind, cmp)
+rownames(cmp_all) <- NULL
+write_table(cmp_all, 12, "lcp_variant_comparison")
+write_table(cmp_summary, 12, "lcp_variant_summary")
+
+cat(sprintf(paste0("Decision 18: d = %s km; material route < %s; material ",
+                   "rank change >= %s; robust if material share <= %s and ",
+                   "rho >= %s\n"),
+            format(LCP_COMPARE_ROUTE_D_KM), format(LCP_COMPARE_ROUTE_MATERIAL),
+            format(LCP_COMPARE_RANK_MATERIAL),
+            format(LCP_COMPARE_ROBUST_MAX_SHARE),
+            format(LCP_COMPARE_ROBUST_MIN_RHO)))
+print(cmp_summary, row.names = FALSE, digits = 3)
+for (v in LCP_COMPARE_VARIANTS) {
+  m <- cmp[[v]][cmp[[v]]$material_pair, ]
+  if (nrow(m) > 0) {
+    cat(sprintf("material pairs, %s (%d):\n", v, nrow(m)))
+    print(m[order(m$route_overlap), c("pair_id", "from_name", "to_name",
+            "route_overlap", "rank_change", "material_route", "material_rank")],
+          row.names = FALSE, digits = 3)
+  }
+}
+rule(sprintf(paste0("STEP 10.4 done — labels: gHM multiplier %s; road value %s. ",
+                    "Next: STEP 10.5 NTCA overlap (task 10.8)."),
+             cmp_summary$choice_label[cmp_summary$variant == "noghm"],
+             cmp_summary$choice_label[cmp_summary$variant == "road15"]))
+
+# =============================================================================
+# STEP 10.5 — NTCA corridor overlap, baseline (task 10.8; Decision 17 point 9)
+# =============================================================================
+# Descriptive only, NOT a validation: the NTCA corridors (Qureshi et al. 2014)
+# come from a different method. (i) per pair: path length inside any corridor
+# polygon and its share; (ii) per corridor: whether at least one baseline path
+# crosses it. No buffer (Decision 17 fixes none), so a path that runs 1 km
+# beside a corridor counts as outside it.
+if (isTRUE(LCP_NTCA_OVERLAP)) {
+  rule("STEP 10.5 — NTCA corridor overlap (baseline; descriptive, not a validation)")
+  if (!file.exists(corridors_in)) {
+    stop("Corridor layer not found: ", corridors_in, call. = FALSE)
+  }
+  corr_sf <- read_vec(corridors_in)
+  if (nrow(corr_sf) != 59L) {
+    warning("Expected 59 NTCA corridor polygons, found ", nrow(corr_sf), ".")
+  }
+  ov <- lcp_ntca_overlap(paths_base, corr_sf)
+  op <- ov$per_path[ov$per_path$path_status == "path", ]
+  oc <- ov$per_corridor
+  cat(sprintf(paste0("paths: %d | share inside corridors: median %.3f, mean %.3f",
+                     " | paths with share 0: %d | paths crossing >= 1 ",
+                     "corridor: %d\n"),
+              nrow(op), stats::median(op$share_in_corridor),
+              mean(op$share_in_corridor), sum(op$share_in_corridor == 0),
+              sum(op$n_corridors_crossed > 0)))
+  cat(sprintf("corridors crossed by >= 1 baseline path: %d of %d\n",
+              sum(oc$crossed), nrow(oc)))
+  cat("paths with the highest share inside corridors:\n")
+  print(utils::head(op[order(-op$share_in_corridor),
+        c("pair_id", "from_name", "to_name", "path_km", "km_in_corridor",
+          "share_in_corridor", "corridor_ids")], 5), row.names = FALSE, digits = 3)
+  if (any(!oc$crossed)) {
+    cat("corridors crossed by no baseline path:\n")
+    print(oc[!oc$crossed, c("corridor_id", "corridor_label", "state",
+                            "area_km2")], row.names = FALSE)
+  }
+  write_table(ov$per_path, 12, "lcp_ntca_overlap")
+  write_table(ov$per_corridor, 12, "lcp_ntca_corridors")
+  rule("STEP 10.5 done — NTCA overlap written (descriptive). Week-10 STEPs complete.")
+}

@@ -1,0 +1,107 @@
+"pair_id","from_unit_id","from_name","from_group","to_unit_id","to_name","to_group","gap_km","contiguous","cross_group","zone_shared_edges"
+1,1,"Nagarjunsagar-Srisailam","central",10,"Indravati","central",269.15,FALSE,FALSE,134
+2,1,"Nagarjunsagar-Srisailam","central",51,"Amrabad","central",0,TRUE,FALSE,717
+3,2,"Namdapha","northeast",3,"Pakke","northeast",310.84,FALSE,FALSE,24
+4,2,"Namdapha","northeast",4,"Kamlang","northeast",0.3,TRUE,FALSE,367
+5,2,"Namdapha","northeast",7,"Kaziranga","northeast",276.15,FALSE,FALSE,211
+6,3,"Pakke","northeast",5,"Manas","northeast",82.81,FALSE,FALSE,64
+7,3,"Pakke","northeast",6,"Nameri","northeast",0,TRUE,FALSE,163
+8,3,"Pakke","northeast",7,"Kaziranga","northeast",36.9,FALSE,FALSE,230
+9,5,"Manas","northeast",6,"Nameri","northeast",70.67,FALSE,FALSE,60
+10,5,"Manas","northeast",8,"Orang","northeast",43.95,FALSE,FALSE,265
+11,5,"Manas","northeast",58,"Buxa","northeast",0,TRUE,FALSE,193
+12,6,"Nameri","northeast",7,"Kaziranga","northeast",24.67,FALSE,FALSE,107
+13,6,"Nameri","northeast",8,"Orang","northeast",50.01,FALSE,FALSE,90
+14,7,"Kaziranga","northeast",8,"Orang","northeast",70.4,FALSE,FALSE,173
+15,8,"Orang","northeast",37,"Dampa","northeast",305.24,FALSE,FALSE,71
+16,9,"Valmiki","north",52,"Dudhwa","north",300.31,FALSE,FALSE,148
+17,10,"Indravati","central",11,"Udanti-Sitanadi","central",147.31,FALSE,FALSE,520
+18,10,"Indravati","central",32,"Tadoba-Andhari","central",128.01,FALSE,FALSE,139
+19,10,"Indravati","central",35,"Nawegaon-Nagzira","central",168.35,FALSE,FALSE,59
+20,10,"Indravati","central",50,"Kawal","central",118.66,FALSE,FALSE,185
+21,10,"Indravati","central",51,"Amrabad","central",268.14,FALSE,FALSE,280
+22,11,"Udanti-Sitanadi","central",12,"Achanakmar","central",221.82,FALSE,FALSE,178
+23,11,"Udanti-Sitanadi","central",22,"Kanha","central",213.47,FALSE,FALSE,69
+24,11,"Udanti-Sitanadi","central",35,"Nawegaon-Nagzira","central",176.32,FALSE,FALSE,138
+25,11,"Udanti-Sitanadi","central",39,"Satkosia","central",236.73,FALSE,FALSE,437
+26,12,"Achanakmar","central",13,"Guru Ghasidas-Tamor Pingla","central",119.45,FALSE,FALSE,326
+27,12,"Achanakmar","central",22,"Kanha","central",60.73,FALSE,FALSE,242
+28,12,"Achanakmar","central",24,"Bandhavgarh","central",115.32,FALSE,FALSE,92
+29,13,"Guru Ghasidas-Tamor Pingla","central",14,"Palamau","central",71.93,FALSE,FALSE,429
+30,13,"Guru Ghasidas-Tamor Pingla","central",24,"Bandhavgarh","central",68.26,FALSE,FALSE,54
+31,13,"Guru Ghasidas-Tamor Pingla","central",27,"Sanjay Dubri","central",1.59,FALSE,FALSE,391
+32,14,"Palamau","central",38,"Similipal","central",243.81,FALSE,FALSE,541
+33,14,"Palamau","central",39,"Satkosia","central",291.05,FALSE,FALSE,117
+34,15,"Bandipur","western_ghats",18,"Nagarhole","western_ghats",0,TRUE,FALSE,162
+35,15,"Bandipur","western_ghats",19,"Biligiri Ranganatha Temple","western_ghats",18.71,FALSE,FALSE,58
+36,15,"Bandipur","western_ghats",47,"Mudumalai","western_ghats",0,TRUE,FALSE,112
+37,15,"Bandipur","western_ghats",48,"Sathyamangalam","western_ghats",0,TRUE,FALSE,70
+38,16,"Bhadra","western_ghats",17,"Kali","western_ghats",167.26,FALSE,FALSE,369
+39,16,"Bhadra","western_ghats",18,"Nagarhole","western_ghats",134.14,FALSE,FALSE,278
+40,16,"Bhadra","western_ghats",19,"Biligiri Ranganatha Temple","western_ghats",213.13,FALSE,FALSE,193
+41,17,"Kali","western_ghats",34,"Sahyadri","western_ghats",220.65,FALSE,FALSE,368
+42,18,"Nagarhole","western_ghats",19,"Biligiri Ranganatha Temple","western_ghats",81.06,FALSE,FALSE,106
+43,18,"Nagarhole","western_ghats",47,"Mudumalai","western_ghats",32.92,FALSE,FALSE,66
+44,19,"Biligiri Ranganatha Temple","western_ghats",48,"Sathyamangalam","western_ghats",10.12,FALSE,FALSE,542
+45,20,"Periyar","western_ghats",21,"Parambikulam","western_ghats",89.47,FALSE,FALSE,32
+46,20,"Periyar","western_ghats",45,"Kalakad-Mundanthurai","western_ghats",52.95,FALSE,FALSE,143
+47,20,"Periyar","western_ghats",46,"Anamalai","western_ghats",69.07,FALSE,FALSE,59
+48,20,"Periyar","western_ghats",49,"Srivilliputhur-Megamalai","western_ghats",0,TRUE,FALSE,202
+49,21,"Parambikulam","western_ghats",46,"Anamalai","western_ghats",0,TRUE,FALSE,211
+50,21,"Parambikulam","western_ghats",47,"Mudumalai","western_ghats",112.2,FALSE,FALSE,77
+51,22,"Kanha","central",23,"Pench","central",106.18,FALSE,FALSE,131
+52,22,"Kanha","central",24,"Bandhavgarh","central",124.88,FALSE,FALSE,90
+53,22,"Kanha","central",28,"Veerangana Durgavati","central",138.97,FALSE,FALSE,111
+54,22,"Kanha","central",35,"Nawegaon-Nagzira","central",104.62,FALSE,FALSE,205
+55,23,"Pench","central",26,"Satpura","central",107.33,FALSE,FALSE,120
+56,23,"Pench","central",28,"Veerangana Durgavati","central",177.41,FALSE,FALSE,40
+57,23,"Pench","central",33,"Pench (MH)","central",8.98,FALSE,FALSE,143
+58,23,"Pench","central",35,"Nawegaon-Nagzira","central",72.43,FALSE,FALSE,70
+59,24,"Bandhavgarh","central",25,"Panna","central",119,FALSE,FALSE,85
+60,24,"Bandhavgarh","central",27,"Sanjay Dubri","central",49.58,FALSE,FALSE,147
+61,24,"Bandhavgarh","central",28,"Veerangana Durgavati","central",97.36,FALSE,FALSE,112
+62,24,"Bandhavgarh","central",54,"Ranipur","central",123.9,FALSE,FALSE,26
+63,25,"Panna","central",28,"Veerangana Durgavati","central",97.4,FALSE,FALSE,179
+64,25,"Panna","central",29,"Ratapani","central",236.37,FALSE,FALSE,30
+65,25,"Panna","central",30,"Madhav","central",198.6,FALSE,FALSE,379
+66,25,"Panna","central",54,"Ranipur","central",69.02,FALSE,FALSE,333
+67,26,"Satpura","central",28,"Veerangana Durgavati","central",168.58,FALSE,FALSE,94
+68,26,"Satpura","central",29,"Ratapani","central",41.82,FALSE,FALSE,257
+69,26,"Satpura","central",31,"Melghat","central",104.84,FALSE,FALSE,150
+70,26,"Satpura","central",33,"Pench (MH)","central",102.84,FALSE,FALSE,109
+71,26,"Satpura","central",36,"Bor","central",148.53,FALSE,FALSE,2
+72,27,"Sanjay Dubri","central",54,"Ranipur","central",97.67,FALSE,FALSE,349
+73,28,"Veerangana Durgavati","central",29,"Ratapani","central",174.1,FALSE,FALSE,128
+74,29,"Ratapani","central",30,"Madhav","central",243.04,FALSE,FALSE,111
+75,29,"Ratapani","central",31,"Melghat","central",122.57,FALSE,FALSE,300
+76,29,"Ratapani","central",42,"Mukundara Hills","central",204.9,FALSE,FALSE,416
+77,30,"Madhav","central",40,"Ranthambore","central",112.75,FALSE,FALSE,250
+78,30,"Madhav","central",41,"Sariska","central",203.59,FALSE,FALSE,171
+79,30,"Madhav","central",42,"Mukundara Hills","central",160.53,FALSE,FALSE,156
+80,31,"Melghat","central",36,"Bor","central",138.41,FALSE,FALSE,219
+81,31,"Melghat","central",50,"Kawal","central",260.76,FALSE,FALSE,305
+82,32,"Tadoba-Andhari","central",33,"Pench (MH)","central",116.1,FALSE,FALSE,11
+83,32,"Tadoba-Andhari","central",35,"Nawegaon-Nagzira","central",89.74,FALSE,FALSE,183
+84,32,"Tadoba-Andhari","central",36,"Bor","central",78.1,FALSE,FALSE,194
+85,32,"Tadoba-Andhari","central",50,"Kawal","central",94.91,FALSE,FALSE,219
+86,33,"Pench (MH)","central",35,"Nawegaon-Nagzira","central",66.82,FALSE,FALSE,93
+87,33,"Pench (MH)","central",36,"Bor","central",62.84,FALSE,FALSE,188
+88,36,"Bor","central",50,"Kawal","central",175.01,FALSE,FALSE,69
+89,38,"Similipal","central",39,"Satkosia","central",149.44,FALSE,FALSE,404
+90,38,"Similipal","central",57,"Sundarbans","central",207.7,FALSE,FALSE,344
+91,40,"Ranthambore","central",41,"Sariska","central",104.81,FALSE,FALSE,238
+92,40,"Ranthambore","central",42,"Mukundara Hills","central",105.78,FALSE,FALSE,44
+93,40,"Ranthambore","central",43,"Ramgarh Vishdhari","central",41.03,FALSE,FALSE,232
+94,41,"Sariska","central",43,"Ramgarh Vishdhari","central",159.94,FALSE,FALSE,654
+95,41,"Sariska","central",55,"Corbett","north",292.7,FALSE,TRUE,251
+96,41,"Sariska","central",56,"Rajaji","north",290.82,FALSE,TRUE,521
+97,42,"Mukundara Hills","central",43,"Ramgarh Vishdhari","central",43.97,FALSE,FALSE,597
+98,45,"Kalakad-Mundanthurai","western_ghats",49,"Srivilliputhur-Megamalai","western_ghats",68.54,FALSE,FALSE,76
+99,46,"Anamalai","western_ghats",47,"Mudumalai","western_ghats",110.71,FALSE,FALSE,39
+100,46,"Anamalai","western_ghats",48,"Sathyamangalam","western_ghats",105.32,FALSE,FALSE,199
+101,46,"Anamalai","western_ghats",49,"Srivilliputhur-Megamalai","western_ghats",44.61,FALSE,FALSE,266
+102,47,"Mudumalai","western_ghats",48,"Sathyamangalam","western_ghats",8.45,FALSE,FALSE,61
+103,48,"Sathyamangalam","western_ghats",49,"Srivilliputhur-Megamalai","western_ghats",177.59,FALSE,FALSE,183
+104,50,"Kawal","central",51,"Amrabad","central",261.17,FALSE,FALSE,358
+105,52,"Dudhwa","north",55,"Corbett","north",157.81,FALSE,FALSE,507
+106,55,"Corbett","north",56,"Rajaji","north",28.95,FALSE,FALSE,473

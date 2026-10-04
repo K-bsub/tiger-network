@@ -1,5 +1,5 @@
 "unit_id","unit_name","state","landscape_complex","area_km2","area_provisional","poly_km2","poly_census_ratio","n_parts","match_status","geometry_present"
-1,"Nagarjunsagar-Srisailam","Andhra Pradesh","central_india_eastern",3296.31,TRUE,5073.9,1.54,1,"matched",TRUE
+1,"Nagarjunsagar-Srisailam","Andhra Pradesh","central_india_eastern",3296.31,TRUE,2372.7,0.72,1,"state_split",TRUE
 2,"Namdapha","Arunachal Pradesh","northeast_hills",2052.82,TRUE,1809.1,0.88,1,"matched",TRUE
 3,"Pakke","Arunachal Pradesh","northeast_hills",1198.45,TRUE,622,0.52,1,"matched",TRUE
 4,"Kamlang","Arunachal Pradesh","northeast_hills",783,TRUE,678.7,0.87,1,"review",TRUE
@@ -49,7 +49,7 @@
 48,"Sathyamangalam","Tamil Nadu","western_ghats",1408.4,TRUE,577.7,0.41,1,"matched",TRUE
 49,"Srivilliputhur-Megamalai","Tamil Nadu","western_ghats",1016.57,TRUE,827.2,0.81,2,"multi",TRUE
 50,"Kawal","Telangana","central_india_eastern",2015.44,TRUE,943.4,0.47,1,"matched",TRUE
-51,"Amrabad","Telangana","central_india_eastern",2611.39,TRUE,NA,NA,0,"gap",FALSE
+51,"Amrabad","Telangana","central_india_eastern",2611.39,TRUE,2701.2,1.03,1,"state_split",TRUE
 52,"Dudhwa","Uttar Pradesh","shivalik_gangetic",2201.77,TRUE,746.8,0.34,1,"matched",TRUE
 53,"Pilibhit","Uttar Pradesh","shivalik_gangetic",730.25,TRUE,NA,NA,0,"gap",FALSE
 54,"Ranipur","Uttar Pradesh","shivalik_gangetic",529.36,TRUE,236.4,0.45,1,"matched",TRUE

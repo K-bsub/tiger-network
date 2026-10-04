@@ -2,16 +2,13 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** Week 9 complete — **Stage 2 (Connectivity) resistance surfaces
-built.** `scripts/07_connectivity.R` (one script for all of Stage 2) wrote four
-1 km resistance surfaces — `resist_tiger_baseline_7755.tif` and the variants
-`noghm`, `road15`, `road50` — with `tbl_11_resistance_qa.csv`. **Decision 10 is
-closed** through Decisions 11–13 (gHM gap-fill; land cover and terrain rebuilt
-at source); the final stack (`build_tag` d13f, written as `FLT4S` and verified on
-read-back) has 3,067,467 complete-case cells. **Decisions 14–16** set the
-resistance rules (class values, gHM multiplier, Sundarban water, road barrier,
-water exempt from gHM). Next: Week 10 — least-cost paths and the variant
-comparison. Prior: Week 8 — covariate stack; Week 7 — Stage 1 (Growth) done.
+**Status:** Week 10 complete — **Stage 2 (Connectivity) least-cost paths
+built.** 106 reserve pairs and their edge-to-edge least-cost paths on four
+surfaces (`lcp_reserve_network_7755.gpkg`; Decisions 17–18); validation, QA,
+the Decision-18 variant comparison (gHM multiplier and road value both robust)
+and a descriptive NTCA-corridor overlap (`tbl_12_*`). Next: Week 11 — the
+functional-link Decision, then the network graph. Prior: Week 9 —
+resistance surfaces (Decisions 11–16).
 
 This document is the processing log and the decision record. Every significant
 choice becomes a **numbered Decision** with a date and a justification, recorded
@@ -41,8 +38,11 @@ three census rounds (3 frames).
 
 ### 5.3 Connectivity (priority 2)
 
-Resistance surface from land cover (ESA WorldCover) and roads as barriers.
-Least-cost paths between neighbouring reserve pairs (`leastcostpath`). Reserve
+Resistance surfaces from land cover (ESA WorldCover), a human-pressure (gHM)
+multiplier and major roads as barriers (Decisions 14–16), with three
+sensitivity variants. Least-cost paths between neighbouring reserve pairs; the
+pair rule, the path method and the tool (`leastcostpath` or `gdistance`) are
+fixed in Decision 17 (Week 10). Reserve
 network as a graph (`igraph`): betweenness identifies linchpin reserves,
 components identify isolated reserves. Road crossings give pinch points.
 All Stage-2 steps (Weeks 9–12: resistance, least-cost paths, network graph,
@@ -1047,28 +1047,329 @@ snow 100 → 100, water 50 → 49.58, wetland 3 → 5.76, mangrove 1 → 2.48, m
 50 → 51.39. Barriers score high (built-up, snow, water, road cells) and tree
 cover and mangroves score low — the task-9.8 sanity check holds.
 
+### Decision 17 — Least-cost-path set-up: pairs, path method, start and end, geometry-absent reserves, network groups, NTCA comparison
+**Date:** 2026-10-01 (fixed **before** any path is built; the first record
+gave 2026-09-27 by mistake)
+**Amended:** 2026-10-02, before any path is built — point 6 (definition of a
+contiguous pair, option C1), point 4 check (b) (how it is run), and the
+evidence count of gap-0 pairs (7 → 8).
+**Choice:** Settings in `R/00_config.R` (`LCP_*`, `NETWORK_GROUPS`,
+`BOUNDARY_STATE_SPLITS`). The Week-10 STEPs of `scripts/07_connectivity.R`
+apply points 1–6 and 8–9; `scripts/02_prepare_boundaries.R` applies point 7.
+
+1. **Reserve pairs — Euclidean-allocation adjacency with a gap cap (fork a).**
+   - Every complete-case footprint cell (Decision 10) is allocated to the
+     nearest reserve polygon by straight-line distance. Two reserves are a
+     **candidate pair** if their allocation zones share at least one cell edge.
+   - A candidate pair is **kept** if the straight-line gap between the two
+     polygons is **≤ 315 km** (`LCP_PAIR_MAX_GAP_KM`).
+   - The pair set comes from geometry only, so it is **the same for all four
+     surfaces**. No pair is added or removed after a path is seen. Point 2
+     changes network membership only.
+2. **A path that crosses a third reserve (sub-fork P3).** If the A–B path
+   crosses cells of reserve C (cells shared with A or B do not count), and A–C
+   and C–B are both pairs, A–B is **not** in the Week-11 network
+   (`in_network = FALSE`). Otherwise A–B stays in the network and C is recorded
+   (`via_unit_ids`). The rule is applied per surface, after the paths are
+   built. The path tables keep every pair; the Decision-18 comparison uses
+   every pair.
+3. **Graph and step cost (forks b1, b2).**
+   - Nodes: complete-case footprint cells. `NA` cells are not nodes.
+   - **16 neighbours:** 4 orthogonal (1 km), 4 diagonal (√2 km) and 8 knight
+     moves (√5 km).
+   - **Step cost = step length (km) × the length-weighted mean resistance of
+     the cells that the straight line between the two cell centres crosses.**
+     Orthogonal and diagonal steps: the two end cells, ½ each. Knight steps:
+     the four cells crossed (start, two middle cells, end), ¼ each. A knight
+     step is not allowed if any of the four cells is `NA`.
+   - Cost-distance unit: **resistance-km**. Path length (km) is also recorded.
+4. **Implementation (fork b3) — own graph, checked against existing tools.**
+   The graph is built in R from the surface (`terra`) and searched with
+   Dijkstra's algorithm in `igraph`, from all cells of the source reserve at
+   once: one search per source reserve, to all of its paired targets. No
+   least-cost-path package is a pipeline dependency. Validation
+   (`tbl_12_lcp_validation.csv`) runs before the baseline paths are used:
+   - (a) **Synthetic grid.** A small grid with hand-computed costs, at 8 and 16
+      neighbours, with a one-cell barrier that a knight step must not jump.
+      Exact agreement is required.
+   - (b) **`terra::costDist`** (8 directions). Our engine at 8 neighbours against
+      the `terra` accumulated cost from the source reserve's cells, read at the
+      target reserve. *(Amended 2026-10-02:)* a test on a small grid showed
+      that `terra` uses the mean of the two cells × the step length, the same
+      as point 3. `terra` marks its targets by value, and a target cell's own
+      value enters its first step, so both runs use a copy of the surface with
+      the source cells set to 0. The source is free in the engine anyway.
+   - (c) **`gdistance`** (16 directions; its documented cost uses the mean of the
+      two end cells). Point to point between the start and end cells of our
+      path, on a window that contains the path. Our engine runs in end-cell
+      mode for knight steps (`LCP_KNIGHT_RULE = "end_cells"`, validation
+      only). This checks the mechanics; check (a) checks the knight rule.
+   - Pairs for (b) and (c), from the baseline pair set: the shortest non-zero
+     gap, the gap nearest the median, and the longest gap (ties: lowest pair
+     id).
+   - Pass: relative cost difference ≤ 1e-6. A failure is a hard stop. Path
+     overlap (share of cells in common) is reported, not a stop, because tied
+     paths can differ.
+5. **No crop (fork b4).** One national graph. Fallback only if the task-10.3
+   smoke test shows that the graph does not fit in memory: a window per pair =
+   the pair's bounding box + max(100 km, 50 % of the gap). A path that touches
+   the window edge is re-run on a wider window.
+6. **Start and end — edge to edge (fork c).**
+   - Reserve cells = the footprint cells that the polygon touches
+     (`touches = TRUE`). Cells outside India are `NA`, so 6 reserves use their
+     India part only (share outside India in the geometry check: Sundarbans
+     25 %, Buxa 18 %, Dudhwa 14 %, Valmiki 13 %, Namdapha 7 %, Manas 6 %).
+   - Movement inside the source and target reserves costs nothing. Movement
+     inside any other reserve costs that reserve's resistance.
+   - *(Amended 2026-10-02, option C1:)* a pair is **contiguous** if the two
+     reserves share at least one footprint cell. Every gap-0 pair is
+     contiguous. A pair less than about 1.4 km apart (the cell diagonal) can
+     be too, for example Namdapha–Kamlang (gap 0.3 km). A contiguous pair
+     gets cost 0 and an empty path (`contiguous = TRUE`). QA accepts an empty
+     path for a contiguous pair only. The pair table keeps `gap_km`.
+7. **Geometry-absent reserves (fork d).**
+   - **Amrabad (D1a).** `scripts/02` splits the Nagarjunsagar-Srisailam KML
+     polygon at the Andhra Pradesh–Telangana boundary
+     (`boundary_states_7755.gpkg`). The Andhra Pradesh part stays `unit_id` 1;
+     the Telangana part becomes Amrabad (`unit_id` 51). Maps and network then
+     use the same geometry. Evidence below.
+   - **Pilibhit and Dholpur-Karauli (G1).** No geometry; not in the network.
+     **Limitation.**
+8. **Network groups (W2, H1).** A new field, `network_group`, set from a hand
+   list (`NETWORK_GROUPS`) on geography: `northeast` (9 reserves),
+   `western_ghats` (13), `north` (the Terai: Rajaji, Corbett, Dudhwa, Valmiki;
+   Pilibhit is listed but has no geometry) and `central` (all other reserves,
+   with the Rajasthan reserves, Ranipur and the Sundarbans). The groups are
+   **labels only**: they remove no pair. A pair across two groups is kept and
+   marked `cross_group = TRUE`. Whether the groups are separate in the network
+   comes from the path costs in Week 11 (pending Decision below).
+   `landscape_complex` does not change (see the note under Reason).
+9. **NTCA corridor comparison (fork e) — descriptive.** For the baseline paths
+   only: (i) for each path, the share of its length inside any NTCA corridor
+   polygon; (ii) for each NTCA corridor, whether at least one baseline path
+   crosses it. Not a validation: the corridors come from a different method
+   (Qureshi et al. 2014).
+
+**Reason and sources:**
+- **Pairs.** This follows Linkage Mapper practice: candidate pairs come from
+  adjacency in Euclidean or cost-weighted space, are limited by a maximum
+  Euclidean distance, and cost is measured from each polygon edge (WHCWG 2010;
+  McRae & Kavanagh 2011). Euclidean adjacency is used, not cost-weighted,
+  because the pair set must not change with the surface: Decision 18 compares
+  the same pairs. The cap is the longest straight-line dispersal recorded in
+  India, 315 km by a GPS-collared sub-adult male from Tipeshwar (Hussain et al.
+  2022). That distance is from a natal area to a settled area; the gaps here
+  are edge to edge between core polygons, so the comparison is approximate.
+  Valmiki (nearest gap 300.3 km) and Dampa (305.2 km) are just under the cap;
+  with a 300 km cap both would be isolated by the rule.
+- **Path through a third reserve.** Linkage Mapper can drop corridors that
+  cross a core area. P3 drops one only where no connection is lost.
+- **16 neighbours and the crossed-cells rule.** The largest length error is
+  about 2.7 % with 16 neighbours against 8.2 % with 8 (1/cos 13.3° and
+  1/cos 22.5°). The usual 16-neighbour cost uses only the two end cells, so a
+  knight step can jump a barrier one cell wide: a road line (Decision 15,
+  point 4) or an `NA` cell. The crossed-cells rule in point 3 stops this.
+- **Own graph.** An edge-to-edge path needs a search from all source cells at
+  once. `leastcostpath::create_lcp` uses only the first origin row, and
+  `gdistance::shortestPath` only the first origin cell. The
+  `leastcostpath::create_cs` documentation does not state how it reads the
+  cell values or how it combines two cells. With our own graph the step cost
+  is explicit in the code; `igraph` and `terra` are already in the stack.
+  Existing tools check the result (point 4).
+- **Edge to edge.** A centroid start adds cost inside the reserve and favours
+  large reserves.
+- **Amrabad.** The KML polygon's extent (78.34–79.47° E, 15.87–16.68° N) agrees
+  with the published extent of the undivided reserve (78°30′–79°28′ E,
+  15°53′–16°43′ N; Wikipedia, citing archived Project Tiger pages). 2,701.2 km²
+  of its 5,073.9 km² lies in Telangana (`boundary_states_7755.gpkg`); Amrabad's
+  census area is 2,611.4 km². The crosswalk notes that Amrabad sits within the
+  Nagarjunasagar-Srisailam parcel historically. Polygon/census ratios after the
+  split: Nagarjunsagar-Srisailam 0.72, Amrabad 1.03. The Telangana part has
+  2 parts (2,698.9 and 2.3 km²). The Week-3 limitation says Amrabad's centre
+  falls outside the polygon. A published Amrabad point (16.383° N, 78.833° E)
+  does lie 2.2 km outside it, but that point is the Amrabad village, a
+  settlement, not the reserve centre. The Week-3 cause for the 1.54 ratio
+  ("coarse envelope of a fragmented hill sanctuary") is therefore replaced:
+  the polygon holds both reserves. The limitation text changes with the
+  `scripts/02` change.
+- **Landscape complex (note).** `landscape_complex` places Ranthambore,
+  Sariska, Mukundara Hills, Ramgarh Vishdhari and Dholpur-Karauli in
+  `shivalik_gangetic`. The AITE reports place Rajasthan in the Central Indian
+  and Eastern Ghats landscape, and add Ranipur to the Shivalik landscape for
+  convenience (Jhala et al. 2023). The field stays as it is (author decision,
+  2026-10-01). `network_group` is separate, so the network does not depend on
+  it.
+
+**Evidence (geometry check, 2026-10-01).** Made outside the pipeline with the
+55 polygons and the Natural Earth 1:10 m India outline, with no resistance
+values and no paths. The counts are approximate; the definitive pair set is
+`tbl_12_reserve_pairs.csv`.
+
+| Rule (55 reserves, before the split) | Pairs | Connected sets | Isolated | Longest gap (km) |
+|---|---|---|---|---|
+| Voronoi adjacency in India, no cap | 129 | 1 | 0 | 791 |
+| **Voronoi adjacency + gap ≤ 315 km (chosen)** | **104** | **3** | **0** | **311** |
+| Voronoi adjacency + gap ≤ 300 km | 101 | 5 | 2 | 300 |
+| Voronoi adjacency + gap ≤ 200 km | 83 | 11 | 5 | 199 |
+| Gap ≤ 200 km only | 118 | 11 | 5 | 199 |
+| 3 nearest neighbours | 109 | 2 | 0 | 481 |
+
+With the Amrabad split (56 reserves), the chosen rule gives about **106 pairs**
+in **3 connected sets** (9, 13 and 34 reserves). **8 pairs** have gap 0:
+Nagarjunsagar-Srisailam–Amrabad (the split line), Pakke–Nameri, Manas–Buxa,
+Bandipur–Nagarhole, Bandipur–Mudumalai, Bandipur–Sathyamangalam, Periyar–
+Srivilliputhur-Megamalai and Parambikulam–Anamalai. *(Corrected 2026-10-02:
+the first record said 7 and left out the split pair.)* Namdapha–Kamlang
+(0.3 km) can also be contiguous under point 6.
+**2 pairs** cross network groups: Sariska–Corbett (292.7 km) and Sariska–
+Rajaji (290.8 km). In 8 pairs the straight line between the nearest edges
+crosses a third reserve (all in the Western Ghats and the Northeast).
+
+**Rejected:**
+- *Gap threshold only*, *k nearest neighbours*, *Voronoi adjacency with no
+  cap* — redundant long pairs, forced links up to 481 km, or links of
+  400–791 km.
+- *Cost-weighted adjacency* — the pair set would change with the surface.
+- *A 300 km cap* — isolates Valmiki and Dampa by the rule, not by cost.
+- *Keep every path through a third reserve* (P1); *drop every such path* (P2).
+- *8 neighbours* (K2) — up to 8.2 % length error. *16 neighbours with the
+  end-cell cost* — jumps one-cell barriers.
+- *`leastcostpath` or `gdistance` as the engine*, *point to point between the
+  nearest edge points* — see Reason.
+- *A crop by default* — a crop can cut off the true path.
+- *A centroid start.*
+- *Contiguous by polygon gap only* — with `touches = TRUE`, a pair 0.3 km
+  apart can share a cell, so its path is empty although its gap is above 0.
+  *Cell-centre membership* (`touches = FALSE`, option C2) — small polygons
+  lose their edge cells. (Both rejected 2026-10-02.)
+- *Amrabad split in `scripts/07` only* (D1b), *a joint node* (D2), *no change*
+  (D3) — maps and network would disagree, or Nagarjunsagar-Srisailam would
+  keep paths that start from Amrabad's area.
+- *Geometry for Pilibhit and Dholpur-Karauli from OSM* (G2) — a new boundary
+  source with a hand check; not now.
+- *Pairs only inside a network group* (W1) — would assume, not measure, that
+  the Terai is separate. *Groups from `landscape_complex`* (H2).
+- *No NTCA comparison in Week 10* (E2).
+
+**Consequences:**
+- `scripts/02`: the state split (task 10.3b). `boundary_reserves_all_7755.gpkg`
+  then has 56 reserves with geometry. Every Stage-1 output that uses the
+  geometry is rebuilt, and the Stage-1 maps are re-rendered. The resistance
+  surfaces do not use these polygons (the Sundarban water region uses
+  `unit_id` 57 only), so they do not change.
+- `scripts/07`: STEP 10.1 builds the pairs → `tbl_12_reserve_pairs.csv` (with
+  `gap_km`, `contiguous` (shared footprint cell), `network_group` of each
+  reserve, `cross_group`);
+  STEP 10.2 builds the baseline paths → `lcp_reserve_network_7755.gpkg`;
+  STEP 10.2b validates → `tbl_12_lcp_validation.csv`; STEP 10.3 QA; STEP 10.4
+  builds the variant paths; STEP 10.5 writes the NTCA overlap →
+  `tbl_12_lcp_ntca_overlap.csv`.
+- `scripts/00a` (task 10.3): add `gdistance` (with `raster`) for validation;
+  remove `leastcostpath`.
+- Week 11 decides the functional-link rule (pending Decision below).
+
+### Decision 18 — Variant comparison metric for the least-cost paths
+**Date:** 2026-10-01 (fixed **before** any variant path is run; the first
+record gave 2026-09-27 by mistake)
+**Amended:** 2026-10-02 — point 1 uses the Decision-17 definition of a
+contiguous pair (amended the same day).
+**Choice:** Settings in `R/00_config.R` (`LCP_COMPARE_*`). `scripts/07` STEP
+10.4 applies them. Each variant (`noghm`, `road15`, `road50`) is compared with
+the baseline only, for the same pairs.
+
+1. **Pairs compared:** every pair that is not contiguous (Decision 17 point 6).
+   Contiguous pairs have no path and cost 0 on every surface; they are
+   excluded and their count is reported.
+2. **Route measure — symmetric buffer overlap.** For each pair:
+   - share A = the length of the baseline path within *d* of the variant path
+     ÷ the length of the baseline path;
+   - share B = the length of the variant path within *d* of the baseline path
+     ÷ the length of the variant path;
+   - **route overlap = min(share A, share B).**
+   - *d* = **5 km** (`LCP_COMPARE_ROUTE_D_KM`). Paths are the lines through the
+     cell centres, in EPSG:7755.
+3. **Material route change:** route overlap **< 0.5**
+   (`LCP_COMPARE_ROUTE_MATERIAL`): most of the route is somewhere else.
+4. **Cost measure — rank, not value.**
+   - Per pair: the percentile rank of the cost-distance among the compared
+     pairs, (rank − 1) / (n − 1), with tied costs given their average rank
+     (0 = lowest cost, 1 = highest). Rank change = variant − baseline.
+   - **Material rank change:** |rank change| **≥ 0.25**
+     (`LCP_COMPARE_RANK_MATERIAL`), one quartile.
+   - For the set: the **Spearman rank correlation** (ρ) between the baseline
+     and variant cost-distances of the compared pairs.
+5. **Material pair:** a material route change **or** a material rank change.
+6. **Label for each variant (fixed now):** **robust** if the share of material
+   pairs is **≤ 20 %** (`LCP_COMPARE_ROBUST_MAX_SHARE`) **and** ρ **≥ 0.9**
+   (`LCP_COMPARE_ROBUST_MIN_RHO`); otherwise **sensitive**. `noghm` gives the
+   label for the gHM multiplier (Decision 14). The road value (Decision 15) is
+   called robust only if **both** `road15` and `road50` are robust.
+   **The 20 % and 0.9 limits are judgement values.**
+7. **Descriptive columns (no limits):** route overlap at 1, 2, 5 and 10 km;
+   the path-length ratio (variant / baseline); whether the pair's
+   `in_network` status changes (Decision 17 point 2); whether the third
+   reserves that the path crosses change.
+
+**Reason and sources:**
+- **Route and cost separately.** In a sensitivity study across France, path
+  overlap changed more with the cost scenario than cost distance did, and very
+  different cost scenarios could still give highly correlated cost-distance
+  matrices (Savary et al. 2022). A high ρ alone therefore does not show that
+  the routes stay the same; point 5 counts a pair as material on either.
+- **Per pair, not only one national figure.** How sensitive the route
+  position is grows with habitat fragmentation and falls as the matrix becomes
+  easier to cross (Rayfield et al. 2010), so the result varies by place.
+- **Buffer overlap.** The buffer method is a standard measure of how close
+  two lines are (Goodchild & Hunter 1997). The symmetric form (point 2) does
+  not depend on where the paths end, which matters because edge-to-edge paths
+  (Decision 17 point 6) can start and end at different edge cells.
+- **5 km.** About one resident female home-range radius: 4.2 km from 56.4 km²
+  (Naha et al. 2016) and 4.8 km from 73.6 km² (Sarkar et al. 2016). Within
+  this distance, a tiger that uses one route meets the other.
+- **Ranks, not values.** The variants change the cost scale by design (mean
+  resistance 12.97 for `noghm` against 22.46 for the baseline). A raw cost
+  ratio would mostly show that scale change.
+
+**Rejected:**
+- *Normalised Path Deviation Index* (Jan et al. 1999) — needs common path
+  ends; `leastcostpath` moves the ends of one path to those of the other when
+  they differ (Lewis 2025).
+- *Hausdorff distance* — one local detour sets the value.
+- *Share of path cells in common* — a one-cell shift at 1 km counts as a
+  change.
+- *d = 1.5 km* (the minimal corridor buffer of Yumnam et al. 2014; also
+  rejected in Decision 11) and *d = 10 km* (the Decision-11 approach zone).
+- *A material limit of 0.8* — stricter than "most of the route".
+- *A raw cost ratio* — see Reason.
+- *No label, interpretation in the write-up* — the reading would be chosen
+  after the results.
+
+**Consequences:**
+- `scripts/07` STEP 10.4 writes `tbl_12_lcp_variant_comparison.csv` (one row
+  per pair and variant) and `tbl_12_lcp_variant_summary.csv` (one row per
+  variant: pairs compared, contiguous pairs excluded, shares of material route,
+  rank and pair changes, ρ, label).
+- The Week-10 write-up reports the labels as fixed here.
+- Week 11 decides whether the network metrics are repeated on the variants
+  (added to the Week-11 pending item).
+
 ### Decisions pending (raised, not yet made)
 
 These forks are open. Each is decided in the week noted in the project plan,
 before the relevant code is written.
 
-- **[Week 8–9] Settlement layer for the KDE.** The OSM settlement pull is
+- **[Week 8–9 → Week 13] Settlement layer for the KDE.** The OSM settlement pull is
   village-dominated (~195k of 199,800 points: city 495, town 4,102, village
   195,203). A 15 km KDE over all points will near-saturate nationally. Decide
   whether to use all city/town/village, trim to city/town (4,597), or change the
   KDE radius, when the density surface is built.
-- **[Week 10] Least-cost-path set-up → Decision 17 (raised 2026-09-26; decide
-  before any path is built).** (a) Which reserve pairs are "neighbouring" (for
-  example k nearest neighbours, a distance limit, or a Delaunay/Gabriel graph of
-  reserve polygons); (b) the path method and tool (`leastcostpath` or
-  `gdistance`; 8 or 16 neighbours; cost = resistance × distance with a diagonal
-  correction); (c) where a path starts and ends (the polygon edge or a point);
-  (d) how the 3 geometry-absent reserves are handled; (e) whether to compare the
-  baseline paths with the 59 NTCA corridor polygons (descriptive only).
-- **[Week 10] Variant comparison metric → Decision 18 (raised 2026-09-26;
-  decide before any variant path is run).** How a variant's path differs from
-  the baseline's for the same pair (Decisions 14/15 variants `noghm`, `road15`,
-  `road50`), and what counts as a material change.
+- **[Week 11] Functional-link rule (raised 2026-10-01, Decision 17 point 8;
+  decide before the network metrics are computed).** How the Week-11 graph
+  treats a pair as a functional link (for example a cost-distance threshold,
+  or cost as an edge weight with no threshold), and therefore whether the four
+  network groups are separate and which reserves are isolated. Also decide
+  whether the network metrics are repeated on the variant surfaces (raised
+  2026-10-01 with Decision 18).
 - **[After Stage 3] SDM-based resistance + circuit-theory check.** Raised
   2026-09-26 (Decision 14, F1). After the SDM exists, build a resistance
   surface from 1 − suitability and run circuit theory between reserves, to
@@ -1097,6 +1398,266 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-10-03 — Week 10 complete: tasks 10.4–10.9 (pairs, baseline paths, validation, QA, variants, NTCA overlap, docs)
+
+- **`R/00_functions_lcp.R`:** new `lcp_alloc_zones()`, `lcp_zone_adjacency()`
+  and `lcp_build_pairs()`. Allocation (Decision 17 point 1): each footprint
+  cell goes to the nearest reserve polygon edge, densified to 250 m (exact to
+  within 125 m), with `sf::st_nearest_feature()` in chunks of 250,000 cells.
+  The cells of each reserve take their own reserve; a shared cell goes to the
+  lower `unit_id`.
+- **`scripts/07` STEP 10.1** → `tbl_12_reserve_pairs.csv` and
+  `data/interim/lcp_pair_zones_1km_7755.tif` (QA only). Guards: every
+  `unit_id` once in `NETWORK_GROUPS`; the geometry-absent reserves are exactly
+  `LCP_EXCLUDED_UNIT_IDS`; no reserve without footprint cells; the allocation
+  covers the footprint; the pair count within 106 ± 10 %; no duplicate pair;
+  `contiguous` agrees with `gap_km`. The Week-10 inputs are now read once;
+  `RUN_LCP_SMOKE` is now `FALSE`.
+- **Result on the project machine:** 132 candidate pairs, 26 above the 315 km
+  cap, **106 kept** — the count of the Decision-17 geometry check. 3 connected
+  sets (34, 13 and 9 reserves); no reserve without a pair. Gap median
+  106.8 km, maximum 310.8 km. 9 contiguous pairs: the 8 gap-0 pairs and
+  Namdapha–Kamlang (0.3 km). 2 cross-group pairs: Sariska–Corbett (292.7 km)
+  and Sariska–Rajaji (290.8 km). Pairs inside one group: central 65,
+  western_ghats 23, northeast 13, north 3. Reserve cells: minimum 45
+  (Veerangana Durgavati), median 740, maximum 3,054 (Manas). Allocation 24 s.
+- **Found in testing (fixed before delivery):** `terra::nearest()` is a
+  brute-force search (about 5 hours for the footprint), so the code uses
+  `sf::st_nearest_feature()`. In `sf` 1.0-15, `st_cast()` of the whole
+  boundary set to POINT gave the points the wrong reserve ids (the first test
+  gave 36 pairs and 22 isolated reserves; the check against the expected 106
+  found it). The points are now built per reserve from its own coordinates,
+  and a guard checks that each reserve's points lie on its own edge.
+- **Task 10.5 — baseline paths.** New `lcp_paths_for_pairs()`,
+  `lcp_apply_through_rule()` and `lcp_write_layer()`; `scripts/07` STEP 10.2 →
+  `lcp_reserve_network_7755.gpkg`, layer `baseline` (read back and checked).
+  Code rule not stated in Decision 17: a pair with no path gets
+  `in_network = FALSE` (no route, so no link). No such pair occurred.
+- **Result on the project machine:** graph built in 6 s; 44 source searches
+  in 27 s. 97 paths, 9 contiguous, 0 with no path. Cost median 577.3, maximum
+  5,814.2 resistance-km. Length median 163.3 km, maximum 619.4 km. Length/gap
+  median 1.34, range 0.63–4.18 (the console does not name the pairs at the
+  extremes; a ratio below 1 is possible for a very short gap, because the line
+  joins cell centres). 26 paths cross another reserve; **21 pairs are not in
+  the network** under point 2, for example Sariska–Corbett (crosses Rajaji,
+  with Sariska–Rajaji and Rajaji–Corbett both pairs) and Indravati–Amrabad
+  (crosses Nagarjunsagar-Srisailam). Some paths cross several reserves, for
+  example Bandhavgarh–Panna (gap 119 km; crosses Guru Ghasidas-Tamor Pingla,
+  Sanjay Dubri and Ranipur) and Kaziranga–Orang (gap 70 km; crosses Pakke and
+  Nameri). Task 10.6 QA names the pairs at the extremes.
+- **Task 10.5b — validation (Decision 17 point 4).** `scripts/07` STEP 10.2b
+  → `tbl_12_lcp_validation.csv`. Two process points: (1) the three fixed pairs
+  are taken from the pairs with a path — under C1 the pair with the shortest
+  non-zero gap (Namdapha–Kamlang, 0.3 km) is contiguous and has no path to
+  check; (2) **V-add** (author choice, 2026-10-03): the pair with the highest
+  `path_gap_ratio` is checked as well. It is an extra check; the fixed three
+  stay. Found in testing: at its default of 50 iterations,
+  `terra::costDist()` did not converge on a long window; the check now uses
+  `maxiter = 1000` and records any warning.
+- **Result on the project machine:** (a) 7 of 7; (b) and (c) pass on pair 31
+  Guru Ghasidas-Tamor Pingla – Sanjay Dubri (shortest gap), 28 Achanakmar –
+  Bandhavgarh (median), 3 Namdapha – Pakke (longest) and 59 Bandhavgarh – Panna
+  (highest ratio, 4.18). Largest relative difference 1.5e-15; path overlap
+  1.000 on every pair; no terra warning. The Bandhavgarh – Panna detour
+  (through Guru Ghasidas-Tamor Pingla, Sanjay Dubri and Ranipur) is therefore
+  a true least-cost path on the baseline surface, not an engine fault.
+- **Task 10.6 — path QA.** New `lcp_path_cost()` (cost and length recomputed
+  from the raster, without the graph) and `lcp_qa_paths()`; `scripts/07`
+  STEP 10.3 → `tbl_12_lcp_qa.csv`. In testing, the QA failed each planted
+  fault (a changed cost, removed path cells, a start in the wrong reserve).
+- **Result on the project machine:** 106 of 106 pairs accounted for; every
+  check passes on every pair. Lowest length/gap ratio: Guru Ghasidas-Tamor
+  Pingla – Sanjay Dubri, 0.629 (path 1.00 km, gap 1.59 km — the line joins
+  cell centres); the next lowest is 1.003. Highest ratios: Bandhavgarh – Panna
+  4.18 (gap 119.0 km, path 496.9 km), Tadoba-Andhari – Pench (MH) 3.58,
+  Bandhavgarh – Ranipur 3.00, Nameri – Kaziranga 2.75, Sanjay Dubri – Ranipur
+  2.41. Highest costs: Sariska – Corbett 5,814 and Sariska – Rajaji 5,637
+  resistance-km (the two cross-group pairs), then Valmiki – Dudhwa 4,186.
+- **Literature check of the extremes (author request, 2026-10-03; sources in
+  `references.md`, "Week-10 path extremes").** A check of each extreme against
+  published evidence. It changes no value and no Decision.
+  - *Agrees:* the highest costs. Sariska–Corbett and Sariska–Rajaji: mtDNA
+    shows the western (Sariska, Ranthambore) and the northern (Terai)
+    populations as genetically distinct (Sharma et al. 2009, 2011).
+    Valmiki–Dudhwa: the Indian Terai is fragmented into nine habitat blocks
+    (Johnsingh et al. 2004); Valmiki connects with Chitwan, and Pilibhit with
+    Shuklaphanta, through Nepal — a route that the India-only surface cannot
+    show (Limitations, "Paths stay inside India").
+  - *Partly agrees:* Tadoba-Andhari – Pench (MH) (ratio 3.58) — tigers from
+    Tadoba move north-east to Umred-Karhandla, Nagzira and Navegaon, and
+    Nagzira–Pench is a high-flow link (news reports only; the route of the path
+    was not inspected). The Panna–Ranipur part of the Bandhavgarh routes
+    agrees with a documented dispersal corridor (Sarkar et al. 2021).
+  - *Does not agree:* Bandhavgarh–Panna (ratio 4.18) — NTCA records a direct
+    Panna–Bandhavgarh corridor with a ~30 km gap along the Ken and Midhassan
+    that needs restoration; the path goes round it. Nameri–Kaziranga (2.75) and
+    Kaziranga–Orang (via Pakke and Nameri) — NTCA records connectivity through
+    the Brahmaputra river islands, and genetic work groups Kaziranga with
+    Nameri (preprint); the paths avoid the river, which follows from the water
+    value (Decision 14). Validation (task 10.5b) shows these are true
+    least-cost paths on the baseline surface; the disagreement is with the
+    surface's values, not with the engine. *Author choice (L1):* recorded as a
+    limitation (Limitations, "Least-cost routes can differ from documented
+    corridors"); no Decision changes.
+- **Task 10.7 — variant paths and Decision 18.** New `lcp_route_share()`,
+  `lcp_compare_variant()` and `lcp_compare_summary()`; `scripts/07` STEP 10.4
+  → layers `noghm`, `road15`, `road50` in `lcp_reserve_network_7755.gpkg`;
+  `tbl_12_lcp_qa.csv` now holds all four surfaces (424 rows, author choice);
+  `tbl_12_lcp_variant_comparison.csv` (291 rows) and
+  `tbl_12_lcp_variant_summary.csv`. Each variant must have the baseline's NA
+  footprint (guard).
+- **Result on the project machine:** each variant 97 paths, 9 contiguous, 0
+  with no path; QA 0 failures on all 424 rows. Pairs not in the network:
+  baseline 21, `noghm` 19, `road15` 22, `road50` 19. Decision 18, 97 compared
+  pairs per variant (9 contiguous excluded):
+
+  | Variant (tests) | Material route | Material rank | Material pair | ρ | Median route overlap | `in_network` changed | Label |
+  |---|---|---|---|---|---|---|---|
+  | `noghm` (gHM multiplier) | 18 (0.186) | 0 | 0.186 | 0.985 | 0.844 | 4 | robust |
+  | `road15` (road value) | 11 (0.113) | 0 | 0.113 | 0.995 | 1.000 | 1 | robust |
+  | `road50` (road value) | 9 (0.093) | 0 | 0.093 | 0.997 | 1.000 | 4 | robust |
+
+  By the rule fixed in Decision 18: **gHM multiplier — robust; road value —
+  robust** (both road variants robust). `noghm` is 1 pair inside the limit: the
+  20 % limit allows 19 of 97 material pairs, and 18 are material. No pair has a
+  material rank change in any variant; every material pair is a route change.
+  Among the material route changes are pairs from the literature check:
+  Bandhavgarh – Panna (route overlap 0 under `noghm` and `road50`) and
+  Nameri – Kaziranga (0.375 under `road15` and `road50`).
+- **Task 10.8 — NTCA corridor overlap (Decision 17 point 9; descriptive, not
+  a validation).** New `lcp_ntca_overlap()`; `scripts/07` STEP 10.5. The two
+  measures have different units, so they go in two tables (implementation
+  choice): `tbl_12_lcp_ntca_overlap.csv` (per pair) and
+  `tbl_12_lcp_ntca_corridors.csv` (per corridor). No buffer is used, as
+  Decision 17 fixes none.
+- **Result on the project machine:** 97 baseline paths — share inside
+  corridors median 0.064, mean 0.128; 42 paths with share 0; 55 cross at
+  least one corridor. 31 of 59 corridors are crossed by at least one path.
+  Of the 28 corridors that no path crosses, many have a label that names a
+  place outside the reserve network (for example `dhudwa_nepal1`,
+  `kat_khata_corri`, `buxa-jaldapara`, `Dibru Saikhowa-`,
+  `kaziranga-karbianlong2`, `kaziranga-itanagar`, `cauveri-bannerghata`,
+  `kuderemukh_bhadra`, `NSTR-Tirupati`). `kaziranga-orang` and
+  `kaziranga-nameri2` are not crossed (see the L1 limitation);
+  `manas-manas-buxa` is not crossed because Manas–Buxa is a contiguous pair
+  with no path. Highest shares: Anamalai – Srivilliputhur-Megamalai 0.728,
+  Periyar – Anamalai 0.709 (both through corridors 43 and 47).
+- **Task 10.9 — end-of-week docs.** `naming-conventions.md` §6: `tbl_12` row
+  (7 tables, checked against a listing of `outputs/tables/`). `README.md` and
+  this Status: Week 10. `handoff.md`: current state, Week-10 log, new gotchas,
+  Week-11 entry point; two stale current-state lines corrected (the "~0.58"
+  median, now 0.515; the `area_provisional = FALSE` gotcha, which holds only
+  in the stats layer). `project-plan.md`: Week 10 ticked.
+
+### 2026-10-02 — Week 10 (in progress): tasks 10.1–10.3b
+
+- **Decisions 17 and 18** recorded on 2026-10-01 (the first record gave
+  2026-09-27 by mistake; corrected). Decision 17 amended 2026-10-02, before any
+  path: a contiguous pair shares a footprint cell (C1); how check (b) runs; the
+  gap-0 count after the split is 8, not 7. Decision 18 point 1 follows C1.
+- **Task 10.3 — path engine and tool check.**
+  - `R/00_functions_lcp.R` (new): own 16-neighbour cell graph with the
+    crossed-cells knight rule, searched with `igraph` Dijkstra from all cells
+    of the source reserve; validation checks (a)–(c); `lcp_contiguous()`,
+    `lcp_mem_report()`. Checks (a)–(c) passed in a sandbox (terra 1.7-65,
+    igraph 1.6.0, gdistance 1.6.5): 7 of 7 hand-computed cases;
+    `terra::costDist` and `gdistance` agree to a relative 1.2e-15.
+  - `scripts/00a`: package list set from `renv::dependencies()` — added
+    `gdistance`, `raster` (validation), `gifski`, `osmextract`,
+    `rnaturalearth`, `tibble`, `xml2`; `rnaturalearthhires` from the rOpenSci
+    R-universe (not on CRAN); removed `leastcostpath`, `osmdata`, `readxl`,
+    `exactextractr` (no script uses them). `renv.lock` updated.
+  - `scripts/07`: run switches (process choice RS1): `RUN_RESISTANCE <- FALSE`
+    skips the Week-9 STEPs; a guard checks the four surfaces on disk against
+    `tbl_11_resistance_qa.csv`; STEP 9.2 adds `_split` to its gap-table label
+    when the reserve layer has split parts. New STEP 10.0 (tool check).
+  - **STEP 10.0 on the project machine:** surface guard OK for all 4 surfaces
+    (3,067,467 cells each); self-test 7 of 7; graph 3,067,467 nodes and
+    24,462,121 cell edges, built in 8 s; Kanha → Pench in one search of 0.3 s:
+    422.6 resistance-km, 90 cells, 129.9 km, gap 106.2 km (length/gap 1.22).
+    R heap 1.5 GB; the process peak was not measured (3.2 GB in a sandbox test
+    of the same graph size). No crop is needed.
+- **Task 10.3b — Amrabad split (Decision 17, D1a).** `scripts/02`: new STEP 4b
+  (state split per `BOUNDARY_STATE_SPLITS`) and the re-run guard G-a (only the
+  split reserves may change, in `geometry_present`, `match_status`, `n_parts`,
+  `poly_km2`, `poly_census_ratio`; the parts must add up to the area on disk).
+  Re-run 02 → 03 → 04 → 05:
+  - 02: Nagarjunsagar-Srisailam 2,372.7 km², Amrabad 2,701.2 km² (2 polygons);
+    56 reserves with geometry, 2 absent; guard "first split" passed.
+  - A before/after check reported PASS: `tbl_01`, `tbl_02_regional_rollup`,
+    `tbl_06`, `tbl_09` and `fig_01` identical; `tbl_02_reserve_build_report`,
+    `tbl_07`, `tbl_08` and both layers changed only on units 1 and 51, in the
+    allowed fields; `fig_02` re-rendered (Amrabad drawn). Census, area,
+    density and growth values did not change.
+  - `scripts/03` and `05`: comments only (they named Amrabad as
+    geometry-absent).
+  - `scripts/07` was not re-run: the split does not change the resistance
+    surfaces. The recorded Week-9 `tbl_11` gap tables keep the pre-split
+    polygons and stay the Week-9 record.
+- **Corrected:** the polygon/census ratio median. Docs said "near 0.58"; the
+  data give 0.51 for the 55 reserves before the split (mean 0.546) and 0.515
+  for the 56 after it. Corrected in `data-dictionary.md`, `data-sources.md` and
+  the Limitations; historical entries below keep the old text.
+- **Found, not changed:** `scripts/03` line 101 passes literal text to
+  `readr::read_csv()`, which `readr` 2.2.0 deprecates (lifecycle warning). A
+  later `readr` can stop the script. Fix: wrap the text in `I()`; no output
+  changes.
+
+### 2026-09-27 — Documentation fix pass (before Week 10)
+
+A consistency check after Week 9 found stale or inconsistent statements. No
+analytical rule, data layer or script changed. Historical change-log entries
+are left as written; this entry records the corrections.
+
+- **§5.3 Connectivity.** It named `leastcostpath` as the path tool, but
+  Decision 17(b) keeps the tool open. It now says the tool is fixed in
+  Decision 17. It also gave the resistance basis as land cover and roads and
+  omitted the gHM multiplier; it now names the multiplier and the variants
+  (Decisions 14–16). The `README.md` Stack row changed the same way for the
+  tool.
+- **`scripts/00a` package list (process choice F1-A).** `00a` still lists
+  `leastcostpath`. It is not changed now: task 10.3 sets the list to the
+  Decision-17 tool, so the code change occurs in the week that makes the
+  choice.
+- **Settlement pending item** relabelled "[Week 8–9 → Week 13]" (as in the
+  handoff). The KDE that needs it is built in Week 13.
+- **`data-dictionary.md`.** The `dist_road_m` band, the `cov_distroad` note
+  and the `tbl_10` section carried Week-8 figures (3,010,738 cells; 98.15 %;
+  max 278.9 km; mean 2,019 m). Updated from the `d13f` `tbl_10`: 3,067,467
+  cells; `pct_of_india` 100 after rounding; `dist_road_m` max 279,692.7 m,
+  mean 2,044.3 m. Also corrected: `WORLDCOVER_RESISTANCE` was called "a
+  starting set, not a Decision" (it is Decision 14); the `tbl_10` header said
+  2 columns were added on 2026-09-26 (6 were), and its note said they "appear
+  after `scripts/06` is re-run" (they exist); the `source_stat` note gave the
+  Week-8 trim as the only cause of a gap; the last line listed `resist` as not
+  yet documented.
+- **`naming-conventions.md` §6.** `tbl_11` holds 7 tables and was missing from
+  the "As built" list. Added; the names were checked against a listing of
+  `outputs/tables/` (2026-09-27). The handoff gotcha on table numbers now
+  names `tbl_11` too.
+- **`data-sources.md`, OSM.** The tertiary-road question was still listed as
+  pending; Decision 15 closed it. The settlement flag now points to Week 13.
+- **`project-plan.md`, Week 10.** The entry state said resistance is `NA`
+  "only on the 98 cells", and a pitfall said "the grid ends 5 km outside
+  India". The surfaces are `NA` on every cell outside the complete-case
+  footprint: the 98 India cells and every cell outside India, the 5 km collar
+  included. No path can leave India. Both corrected; the handoff Week-10 note
+  and its `resist_*` gotcha (which also repeated two sentences) now say the
+  same.
+- **`README.md`.** The Growth row in the track table said "2006–2022"; the
+  series is 2014/2018/2022 with 3 frames (Decision 6). Corrected.
+- **Location of `tbl_04_secondary_sources_2006_2010.md`.** Docs cited it in
+  `docs/`; the file is only in `outputs/tables/` (confirmed 2026-09-27).
+  Corrected in `data-sources.md` (2 places), `references.md` and
+  `naming-conventions.md` §6. Two historical records keep the old path, as
+  written: the 2026-09-12 change-log entry below and the Week-4 outcome in
+  `project-plan.md`. The correct path is
+  `outputs/tables/tbl_04_secondary_sources_2006_2010.md`.
+- **`proposal.md` §8.** New deviation entry: the resistance surface adds human
+  pressure to land cover and roads (Decisions 14–16); the land-cover + roads
+  form is the `noghm` variant. §5 (connectivity) points to it, as the growth
+  item already points to the Decision-6 entry.
 
 ### 2026-09-26 — Week 9 (in progress): task 9.2 rule fixed; corridor layer
 
@@ -1595,23 +2156,28 @@ refine, but do not change, Decision 4.
 - **Boundary basis (see Decision 4).** No open source holds legal
   tiger-reserve (core + buffer) extents. The chosen source (NTCA DSS KML) stores
   core national-park / sanctuary polygons, which in general under-state reserve
-  area (as-built polygon/census ratio median near 0.58). Geometry is therefore
-  used for mapping and connectivity only. All area and density metrics use the
-  official NTCA census total area, not the polygon geometry. Coverage is 55 of
-  58 reserves; each reserve is built from its constituent PA(s) via a hand-
-  reviewed crosswalk and dissolved to one polygon (10 reserves are multi-part).
-  The 3 reserves with no KML polygon (Amrabad, Pilibhit, Dholpur-Karauli) are
-  kept as geometry-absent rows.
-- **One reserve polygon over-extends its census area.**
-  Nagarjunsagar-Srisailam (`unit_id` 1) has a KML polygon of ~5,074 km² against
-  a census total of 3,296 km² (`poly_census_ratio` 1.54). The geometry is valid
-  (single ring, no self-intersection). The cause is coarse source geometry: the
-  KML stores a single-ring envelope of a fragmented hill sanctuary, and the
-  sanctuary itself (~3,568 km²) is larger than the notified tiger-reserve total.
-  It is **not** an overlap with the adjacent Amrabad gap reserve (Amrabad's
-  centre falls outside the polygon). No metric is affected — area and density
-  are census-sourced — so the polygon is kept as-is for mapping. Flag for the
-  connectivity track: this reserve's mapped footprint is over-large.
+  area (as-built polygon/census ratio median 0.515, 56 reserves; *corrected
+  2026-10-02 — earlier text said "near 0.58", but the data give 0.51 for the 55
+  reserves before the split*). Geometry is therefore used for mapping and
+  connectivity only. All area and density metrics use the official NTCA census
+  total area, not the polygon geometry. 55 of 58 reserves match a KML polygon by
+  name; each is built from its constituent PA(s) via a hand-reviewed crosswalk
+  and dissolved to one polygon (10 reserves are multi-part). Amrabad gets its
+  geometry from the state split (Decision 17, D1a), so 56 have geometry.
+  Pilibhit and Dholpur-Karauli are kept as geometry-absent rows.
+- **One KML polygon held two reserves (corrected 2026-10-02).** The KML
+  polygon matched to Nagarjunsagar-Srisailam (`unit_id` 1; ~5,074 km² against a
+  census total of 3,296 km², `poly_census_ratio` 1.54) is the undivided reserve:
+  2,701 km² of it lies in Telangana, where Amrabad (`unit_id` 51) now is. The
+  Week-3 text gave the cause as a coarse envelope of a fragmented sanctuary,
+  and said the polygon did not overlap Amrabad because Amrabad's centre fell
+  outside it. A published Amrabad point is the Amrabad village, which lies
+  2.2 km outside the polygon; it is not the reserve centre (Decision 17). Since
+  Decision 17 (D1a), `scripts/02` splits the polygon at the state boundary:
+  Nagarjunsagar-Srisailam 2,372.7 km² (ratio 0.72), Amrabad 2,701.2 km² in 2
+  polygons (ratio 1.03). Both parts keep the KML's coarse outline, and the
+  state line (Natural Earth 1:10 m) is approximate. No census metric is
+  affected: area and density are census-sourced.
 - **Reserve area is the notified core+buffer total, not a GIS polygon
   (Decision 8).** No census report tabulates area, and ISFR-2021 Ch.4 carries a
   WII digitized-boundary area (a polygon area, 52 reserves) that diverges from the
@@ -1623,3 +2189,23 @@ refine, but do not change, Decision 4.
   cross-checks but carry that provenance caveat.
 - **Resistance parameters are judgement calls.** Documented and justified, not
   ground-truthed against telemetry (which is not public).
+- **Two reserves are not in the Stage-2 network (Decision 17, G1).** Pilibhit
+  and Dholpur-Karauli have no geometry, so they have no paths and no network
+  metrics. Pilibhit lies between Dudhwa and Corbett; Dholpur-Karauli is next to
+  Ranthambore.
+- **Least-cost routes can differ from documented corridors (author choice
+  L1, 2026-10-03).** A least-cost path follows the resistance values, which
+  are judgement calls (Decisions 14–16). Where the surface gives a high cost
+  to river islands or to a narrow degraded link, the path can take a longer
+  route than the corridor that tigers are documented to use. Two baseline
+  cases: Nameri–Kaziranga and Kaziranga–Orang avoid the Brahmaputra islands,
+  through which NTCA records connectivity (water value, Decision 14); and
+  Bandhavgarh–Panna goes round the direct corridor that NTCA records (a
+  ~30 km gap along the Ken and Midhassan). The validation shows these are true
+  least-cost paths on the baseline surface. Sources: `references.md`,
+  "Week-10 path extremes".
+- **Paths stay inside India.** The resistance surfaces are `NA` on every cell
+  outside India, so no least-cost path can cross Nepal, Bhutan, Bangladesh or
+  Myanmar. Transboundary links (for example Valmiki–Chitwan, Manas–Royal Manas,
+  the Sundarbans) are not represented, and a reserve on the border can appear
+  more isolated than it is.

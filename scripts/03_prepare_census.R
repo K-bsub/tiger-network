@@ -16,7 +16,9 @@
 #                      (pop_2014, pop_2018, pop_2022). Verify row count + unit_id.
 #   [5.3]              left-join census_wide onto boundary_reserves_all_7755.gpkg
 #                      by unit_id; carry census_status; confirm all 58 present
-#                      (53 measured + 5 flagged); 3 geometry-absent keep census.
+#                      (53 measured + 5 flagged); the geometry-absent reserves
+#                      keep their census (2 since the Decision-17 split,
+#                      2026-10-02; 3 before).
 #   [5.4]              overwrite area_km2 from tbl_05_area_source_map.csv
 #                      (Decision 8): area_km2 <- area_total_km2, area_source <-
 #                      the census source, area_provisional <- FALSE per row that
@@ -344,7 +346,9 @@ reserves_path <- file.path(DIR_PROCESSED, "boundary_reserves_all_7755.gpkg")
 stopifnot(file.exists(reserves_path))
 
 # read_vec() reprojects to CRS_ANALYSIS (7755). The boundary layer holds all 58
-# reserves (55 with geometry + 3 geometry-absent empty rows).
+# reserves: 56 with geometry + 2 geometry-absent empty rows (Pilibhit,
+# Dholpur-Karauli) since the Decision-17 state split (scripts/02 STEP 4b,
+# 2026-10-02); 55 + 3 before it.
 reserves_sf <- read_vec(reserves_path)
 cat("boundary reserves read:", nrow(reserves_sf),
     "| with geometry_present==TRUE:",
@@ -471,9 +475,10 @@ if (length(flag_has_pop) > 0) {
 }
 cat("population presence matches census_status (measured have data; flagged all NA)\n")
 
-# 7d. The 3 geometry-absent reserves must still carry their census row.
-#   Amrabad, Pilibhit are measured (have pop); Dholpur-Karauli is flagged (NA pop).
-#   All three must be present with a resolved census_status.
+# 7d. The geometry-absent reserves must still carry their census row.
+#   Since the Decision-17 split (2026-10-02): Pilibhit is measured (has pop);
+#   Dholpur-Karauli is flagged (NA pop). Amrabad has geometry now. Each must
+#   be present with a resolved census_status.
 absent <- stats_tbl |> filter(!geometry_present)
 cat("\ngeometry-absent reserves (must still carry census):", nrow(absent), "\n")
 absent |>

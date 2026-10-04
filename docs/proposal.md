@@ -70,7 +70,8 @@ Summarised in `docs/methodology.md` §5.
   density); regional roll-up; animated choropleth across the census years with a
   per-reserve table (2014/2018/2022 — see §8 and Decision 6; 2006/2010 have no
   per-reserve table).
-- **Connectivity:** land-cover + road resistance surface; least-cost paths
+- **Connectivity:** land-cover + road resistance surface (as built: land cover
+  × human pressure, plus roads — see §8 and Decisions 14–16); least-cost paths
   between reserve pairs; reserve network as a graph (`igraph`) for linchpin and
   isolation metrics; road pinch points.
 - **Habitat suitability:** `maxnet` SDM with a target-group background for
@@ -120,3 +121,21 @@ open are documented as numbered Decisions in `docs/methodology.md`, not here.*
   the 7-reserve Phase-1 comparison, not the all-reserve series. Missing
   (reserve, round) cells are `NA` with no imputation (**Decision 7**). See
   `docs/methodology.md` (Decisions 6 + 7).
+- **Resistance surface adds human pressure (§5 connectivity).** §5 states a
+  "land-cover + road resistance surface". The Week-9 literature review found
+  that the shared signal in the tiger movement and genetics studies is human
+  settlement and pressure, not cropland as such. Land cover and roads alone
+  cannot separate a busy village belt from remote farmland. The as-built
+  surface is therefore land cover × human pressure, plus roads:
+  - **Decision 14:** the land-cover class value is multiplied by
+    (1 + 4 × gHM) and capped at 100. Water in the Sundarban region takes a
+    lower value (10, against 50 elsewhere).
+  - **Decision 16:** water is exempt from the gHM multiplier (gHM has no data
+    over water).
+  - **Decision 15:** major roads (motorway–secondary) are a barrier at value
+    30, by the maximum rule.
+
+  The land-cover + roads form stays in the analysis as the `noghm`
+  sensitivity variant (k = 0, with the Decision-14 class values). Week 10
+  compares it with the baseline. Two further variants (`road15`, `road50`)
+  test the road value. See `docs/methodology.md` (Decisions 14–16).

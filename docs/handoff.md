@@ -39,7 +39,14 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
   class values × (1 + 4 × gHM), cap 100, Sundarban water 10 (50 elsewhere),
   variant `noghm`**; **D15 road barrier motorway–secondary, value 30, maximum
   rule, `touches = TRUE`, variants `road15`/`road50`**; **D16 water exempt from
-  the gHM multiplier** (post-result).
+  the gHM multiplier** (post-result); **D17 least-cost-path set-up: pairs by
+  Euclidean-allocation adjacency + gap ≤ 315 km; P3 through-reserve rule; 16
+  neighbours, crossed-cells knight rule; own engine, validated; no crop; edge
+  to edge, contiguous = shared footprint cell (amended); Amrabad split (D1a);
+  Pilibhit, Dholpur-Karauli out (G1); `network_group` labels; NTCA overlap
+  descriptive**; **D18 variant comparison: symmetric 5 km route overlap < 0.5
+  or percentile-rank change ≥ 0.25 = material; "robust" if ≤ 20 % material and
+  ρ ≥ 0.9; road value robust only if both road variants are**.
 
 ## Ways of working (apply every chat)
 
@@ -57,71 +64,90 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
 
 ---
 
-## Current state  ·  updated after **Week 9** (Stage 2 resistance surfaces) · 2026-09-26
+## Current state  ·  updated after **Week 10** (Stage 2 least-cost paths) · 2026-10-03; Week-11 plan added 2026-10-03
 
-- **Week 9 complete** (tasks 9.1–9.10, committed).
-  `scripts/07_connectivity.R` is the one Stage-2 script: header for Weeks
-  9–12, STEP 9.2 (Decision-10 relevance check, labelled by `build_tag`) and
-  STEPs 9.5–9.8 (resistance). It refuses to build resistance if STEP 9.2 is
-  triggered on the stack.
-- **Decision 10 closed** through Decisions 11–13: pre-fill check triggered (27
-  units) → gHM fill (`scripts/06` STEP 8.4b) → still triggered (land-cover edge
-  shift) → Decision 12 (land cover from the unmasked tile cache) → still
-  triggered (terrain edge shift) → Decision 13 (terrain from the raw DEM) →
-  CLEAR (`postfill_d13`, confirmed `postfill_d13f`).
-- **Stack** `data/processed/cov_stack_1km_7755.tif`: `build_tag` **d13f**,
-  `FLT4S`, verified on read-back. 3,067,467 complete-case cells of 3,067,565
-  India-grid cells; 98 dropped (91 water > 5 km from gHM data + 7 no-class cells
-  at 3° WorldCover tile corners). gHM filled: 56,729 cells. Elevation reaches
-  −434.2 m on water/edge cells (probably sea-floor depth) — Week-14 decision.
-- **Resistance** (Decisions 14–16; all values in `R/00_config.R`):
-  class value → Sundarban water override (10 inside the reserve + 10 km ring;
-  50 elsewhere) → × (1 + k × gHM) on land only (water exempt) → cap 100 → on
-  barrier-road cells max(value, road value). Four surfaces in
-  `data/processed/`: `resist_tiger_{baseline,noghm,road15,road50}_7755.tif`
-  (k / road: 4/30, 0/30, 4/15, 4/50). QA `tbl_11_resistance_qa.csv`: means
-  22.46 / 12.97 / 21.58 / 25.45; share at or above the road value 41.4 % /
-  20.3 % / 65.1 % / 20.3 %. Barrier-road cells: 535,592 (17.5 %).
-- **Read before Week 10:** in the baseline ~41 % of cells are ≥ 30, because
-  busy cropland × gHM reaches 30 (cropland mean 30.3). In busy farmland the road
-  barrier adds nothing (only 255,502 of 535,592 road cells raised). This follows
-  from Decision 14; the `noghm` comparison tests it. Changing k now would be a
-  post-result choice.
-- **Week-10 entry point** (`project-plan.md` → Week 10, tasks 10.1–10.10).
-  Before any path is built, **Decision 17** (set-up): (a) which reserve pairs
-  are "neighbouring"; (b) path method and tool (`leastcostpath` or `gdistance`;
-  8 or 16 neighbours; diagonal correction); (c) start and end at the polygon
-  edge or a point; (d) the 3 geometry-absent reserves; (e) whether to compare
-  baseline paths with the NTCA corridors (descriptive). Before any variant path
-  is run, **Decision 18** (the variant comparison metric). Inputs: the
-  four resistance surfaces, `boundary_reserves_all_7755.gpkg` (55 with
-  geometry), `boundary_corridors_7755.gpkg` (59 NTCA corridors, for comparison).
-  Remember: the 98 `NA` cells block paths; assert "no `NA` in the footprint",
-  not "no `NA` in India".
-- **References still to verify** (entries say "et al."): Sarkar et al. 2016,
-  Jhala et al. 2021, Habib et al. 2020.
+- **Week 10 complete, committed and pushed** (tasks 10.1–10.10).
+  **Decision 17** (path set-up; amended 2026-10-02) and **Decision 18** (variant
+  metric) were recorded on 2026-10-01, before the paths they govern.
+- **Engine** `R/00_functions_lcp.R`: our own 16-neighbour cell graph (`terra`
+  + `igraph`), crossed-cells knight rule, edge-to-edge Dijkstra from all cells
+  of the source reserve. No least-cost-path package in the pipeline;
+  `gdistance` + `raster` are for validation only.
+- **`scripts/07` switches:** `RUN_RESISTANCE <- FALSE` (the Week-9 STEPs are
+  skipped; a guard checks the four surfaces against
+  `tbl_11_resistance_qa.csv`); `RUN_LCP_SMOKE <- FALSE`. The Week-10 STEPs
+  (10.1–10.5) run each time the script is sourced. The reported STEP times add
+  up to about 3.5 minutes; with the unreported parts, a full run is about 4–5
+  minutes (estimate).
+- **Reserve layer:** 56 with geometry — Amrabad from the state split of the
+  Nagarjunsagar-Srisailam polygon (`scripts/02` STEP 4b; D1a). Pilibhit and
+  Dholpur-Karauli have no geometry and are not in the network (G1).
+- **Pairs** (`tbl_12_reserve_pairs.csv`): 106 (132 candidates; 26 above
+  315 km); 3 connected sets (34, 13, 9 reserves); 9 contiguous; 2 cross-group
+  (Sariska–Corbett, Sariska–Rajaji).
+- **Baseline paths:** 97 paths + 9 contiguous, 0 with no path. Cost median
+  577.3 resistance-km; length/gap median 1.34 (range 0.63–4.18; highest
+  Bandhavgarh–Panna). 21 pairs are not in the network (P3). Validation 15 of
+  15 (largest difference 1.5e-15); QA 424 of 424 on all four surfaces.
+- **Variants (Decision 18):** gHM multiplier **robust** (`noghm` 18 of 97
+  material — 1 pair inside the limit; ρ 0.985); road value **robust**
+  (`road15` 11, `road50` 9 material). No material rank change in any variant.
+- **Literature check:** the highest costs agree with the genetic and Terai
+  literature; the Bandhavgarh–Panna and Brahmaputra (Nameri/Orang–Kaziranga)
+  detours do not match documented corridors → limitation L1 (no Decision
+  change).
+- **NTCA overlap** (descriptive, no buffer): share inside corridors median
+  0.064; 31 of 59 corridors crossed.
+- **Week-11 entry point** (`project-plan.md` → "Week 11 — task breakdown",
+  tasks 11.1–11.8, written 2026-10-03). First task 11.1, the
+  **functional-link Decision 19** (pending item in `methodology.md`), before
+  any network metric: (a) which in-network pairs are links (all, with cost as
+  the weight, or a cost threshold — and from what evidence); (b) the edge
+  weight and the 9 contiguous cost-0 pairs; (c) the metrics and their
+  normalisation across the 3 connected sets; (d) "isolated"; (e) whether to
+  repeat on the variants, with a pre-fixed comparison; (f) the
+  `network_group` labels (reporting only). Then STEPs 11.1–11.4 in
+  `scripts/07` → `tbl_13_network_links.csv`, `tbl_13_network_metrics.csv`
+  (and `tbl_13_network_variant_comparison.csv` if (e)). `tbl_03` stays
+  reserved for Week 12. Inputs: `lcp_reserve_network_7755.gpkg` (use
+  `in_network == TRUE`), `tbl_12_reserve_pairs.csv`, `NETWORK_GROUPS`.
+- **Read before Week 11:** (1) the path costs are already seen (Week-10
+  tables), so a cost threshold chosen now is post-result — prefer outside
+  evidence or no threshold, and say so in Decision 19; (2) `igraph` 1.6.0
+  stops on a zero weight in `betweenness()` ("Weight vector must be
+  positive"), so the contiguous pairs need a fixed treatment; (3) in `igraph`,
+  a weight is a distance — use cost, not conductance.
+- **Open items:** `scripts/03` line 101 — wrap the literal text in `I()` for
+  `readr` ≥ 2.2 (no output change; not done). The NTCA overlap has no buffer
+  (Decision 17). Transboundary links are absent (India-only surface).
+- **References still to verify** (entries marked in `references.md`): Sarkar
+  et al. 2016, Jhala et al. 2021, Habib et al. 2020, Hussain et al. 2022,
+  WHCWG 2010, McRae & Kavanagh 2011, Jan et al. 1999, Savary et al. 2022,
+  Sharma et al. 2009 and 2011, Johnsingh et al. 2004, the transboundary TAL
+  report, Sarkar et al. 2021, the 2026 bioRxiv preprint.
 - **Pending, not scheduled:** SDM-based resistance (1 − suitability) and a
   circuit-theory check after Stage 3.
 
-### Output files this week (Week 9)
+### Output files this week (Week 10)
 
-- `data/processed/boundary_corridors_7755.gpkg` — 59 NTCA corridor polygons
-  (`scripts/02`, task 9.2a). Gitignored.
-- `data/processed/cov_stack_1km_7755.tif` — rebuilt (`build_tag` d13f).
+- `data/processed/lcp_reserve_network_7755.gpkg` — layers `baseline`,
+  `noghm`, `road15`, `road50` (106 lines each). Gitignored.
+- `data/processed/boundary_reserves_all_7755.gpkg` and
+  `stats_reserve_census_7755.gpkg` — rebuilt with the Amrabad split (only units
+  1 and 51 changed). Gitignored.
+- `data/interim/lcp_pair_zones_1km_7755.tif` — allocation zones (QA only).
   Gitignored.
-- `data/interim/cov_landcover_worldcover2021_aligned_1km_7755.tif` — aligned
-  land cover (`scripts/06`; read by `07`). Gitignored.
-- `data/interim/cov_commonmask_dropped_<state>_1km_7755.tif` — dropped-cell
-  layers (`prefill`, `postfill`, `postfill_d12`, `postfill_d13`,
-  `postfill_d13f`). Gitignored.
-- `data/processed/resist_tiger_{baseline,noghm,road15,road50}_7755.tif` — the
-  resistance surfaces. Gitignored.
-- `outputs/tables/`: `tbl_10_covariate_stack_qa.csv` (rebuilt);
-  `tbl_11_ghm_gap_relevance_{prefill,postfill,postfill_d12,postfill_d13,postfill_d13f}.csv`;
-  `tbl_11_resistance_qa.csv`; `tbl_11_resistance_qa_pred16.csv`;
-  `tbl_02_reserve_build_report.csv` (rewritten, identical). Committed.
-- Code: `R/00_config.R`, `R/00_functions_io.R` (explicit datatype + read-back
-  check), `scripts/02`, `scripts/06`, `scripts/07`.
+- `outputs/tables/`: `tbl_12_reserve_pairs.csv`, `tbl_12_lcp_validation.csv`,
+  `tbl_12_lcp_qa.csv`, `tbl_12_lcp_variant_comparison.csv`,
+  `tbl_12_lcp_variant_summary.csv`, `tbl_12_lcp_ntca_overlap.csv`,
+  `tbl_12_lcp_ntca_corridors.csv`; Stage-1 tables rewritten by the split
+  re-run (`tbl_02_reserve_build_report`, `tbl_07`, `tbl_08` changed on units 1
+  and 51 only; the rest identical). `outputs/figures/fig_02_growth_animation.gif`
+  re-rendered (Amrabad drawn).
+- Code: `R/00_config.R` (Decision 17/18 settings, `BOUNDARY_STATE_SPLITS`),
+  `R/00_functions_lcp.R` (new), `scripts/00a` (package list), `scripts/02`
+  (STEP 4b, guard G-a), `scripts/03` and `05` (comments only), `scripts/07`
+  (switches, STEPs 10.0–10.5). `renv.lock` updated.
 
 ### Data on disk (from Week 2, via `scripts/01` — unchanged)
 
@@ -143,21 +169,22 @@ All on the 1 km EPSG:7755 grid where raster.
 
 - **Chosen:** NTCA DSS `PA_TR_Corridor_Final` KML as the single geometry source.
   Reserve **area/density come from the NTCA notified total, not the KML polygon**
-  (the polygon under-states the legal total; as-built poly/census ratio ~0.58).
+  (the polygon under-states the legal total; poly/census ratio median 0.515
+  as built 2026-10-02 — earlier "~0.58" was not supported by the data).
 - **As-built refinements (Week 3):** the "2 false matches" (Bor, Kamlang) were
   name-lookup artefacts — both have correct in-state polygons and are matched.
-  Real gaps are the 3 geometry-absent reserves (Amrabad, Pilibhit,
-  Dholpur-Karauli). Corridors are **named polygons**, not unnamed centrelines.
+  Real gaps were 3 reserves without a KML polygon. Since 2026-10-02, Amrabad
+  gets its geometry from the state split (Decision 17, D1a); Pilibhit and
+  Dholpur-Karauli stay geometry-absent. Corridors are **named polygons**, not
+  unnamed centrelines.
 - **Raw:** `data/raw/ntca/PA_TR_Corridor_Final/`.
 
 ### Open pending Decisions (decide in the week noted)
 
 Full text in `methodology.md` → "Decisions pending".
-- **[Week 10] Decision 17** — least-cost-path set-up: reserve pairs, path
-  method/tool, start and end points, geometry-absent reserves, NTCA-corridor
-  comparison — before any path.
-- **[Week 10] Decision 18** — variant comparison metric — before any variant
-  path is run.
+- **[Week 11] Functional-link rule** (raised with Decisions 17–18) — how a
+  pair counts as a network link; whether the groups are separate; whether the
+  network metrics are repeated on the variants — before any network metric.
 - **[Week 8–9 → Week 13]** Settlement layer for the KDE — village-dominated
   (~195k); trim to city/town (4,597) or change radius?
 - **[Week 13–14]** Target-group scope — all Mammalia vs large-bodied guild.
@@ -169,7 +196,9 @@ _Resolved: [Week 4] missing-year handling → Decision 7; [Week 5] area source �
 Decision 8; [Week 6] zero-baseline handling → Decision 9; [Week 8] covariate-stack
 NA policy → Decision 10; [Week 9] gHM gap-fill relevance → Decisions 11–13
 (Decision 10 closed); [Week 9] resistance values → Decision 14; [Week 9] barrier
-road classes → Decision 15; [Week 9] water and gHM → Decision 16._
+road classes → Decision 15; [Week 9] water and gHM → Decision 16; [Week 10]
+least-cost-path set-up → Decision 17; [Week 10] variant comparison metric →
+Decision 18._
 
 ### Known gotchas (do not relearn)
 
@@ -190,9 +219,10 @@ road classes → Decision 15; [Week 9] water and gHM → Decision 16._
 - **`unit_name` is not a unique key.** Two `Pench` (MP + MH) and two
   `Rajiv Gandhi` (Karnataka + AP) exist in the KML. Any KML→reserve match must
   use **name + state**, never name alone. `scripts/02` does; keep it that way.
-- **`area_km2` is the notified total from Week 5 on (`area_provisional = FALSE`).**
-  Resolved: `scripts/03` overwrote it from `tbl_05_area_source_map.csv`
-  (Decision 8). The overwrite changed zero values — the Week-3 placeholder already
+- **`area_km2` is the notified total from Week 5 on — in the stats layer.**
+  `scripts/03` overwrote it from `tbl_05_area_source_map.csv` (Decision 8) in
+  `stats_reserve_census_7755.gpkg` (`area_provisional = FALSE` there). The
+  boundary layer keeps the Week-3 placeholder (`area_provisional = TRUE`). The overwrite changed zero values — the Week-3 placeholder already
   matched. Never derive area/density from `poly_km2` (the KML polygon).
 - **`BASELINE_YEAR` in `R/00_config.R` is the GBIF download bound, NOT the census
   baseline.** It doubles as `scripts/01`'s YR_MIN (2006). Decision 6's census
@@ -340,20 +370,103 @@ road classes → Decision 15; [Week 9] water and gHM → Decision 16._
   −434.2 m in the `d13` build (water and edge cells now have terrain); India's
   lowest land is about −2 m. Decide the treatment in Week 14 (SDM terrain), before terrain enters any
   model.
-- **`resist_*` will have `NA` inside India under Decision 10.** The 98
-  common-mask cells of the final (`d13`) stack stay `NA` (91 water + 7 tile-
-  corner cells). An assert of "no `NA` inside India" cannot pass; assert "no
-  `NA` inside the complete-case footprint". `NA` cells block least-cost paths
-  in Week 10. An assert of
-  "no `NA` inside India" (old task 9.7 wording) cannot pass; assert "no `NA`
-  inside the complete-case footprint" instead. `NA` cells also block least-cost
-  paths in Week 10.
-- **Table numbers are not unique keys.** `tbl_00`, `tbl_02`, and `tbl_04` each
-  hold more than one table (naming §6). Refer to a table by its full filename.
+- **`resist_*` has `NA` inside India under Decision 10.** The 98
+  common-mask cells of the final (`d13f`) stack stay `NA` (91 water + 7 tile-
+  corner cells), and every cell outside India (the 5 km collar too) is `NA`.
+  An assert of "no `NA` inside India" (old task 9.7 wording) cannot pass;
+  assert "no `NA` inside the complete-case footprint". `NA` cells block
+  least-cost paths in Week 10, so no path can leave India.
+- **Table numbers are not unique keys.** `tbl_00`, `tbl_02`, `tbl_04`,
+  `tbl_11` and `tbl_12` each hold more than one table (naming §6). Refer to a
+  table by its full filename.
+- **Least-cost-path packages take one origin point.** `leastcostpath::create_lcp`
+  uses only the first origin row; `gdistance::shortestPath` only the first
+  origin cell. Edge-to-edge paths need a search from all source cells, which
+  is why the engine is our own (`R/00_functions_lcp.R`).
+- **16-neighbour knight steps jump one-cell barriers** under the usual
+  end-cell cost. The engine's crossed-cells rule prevents it. Do not swap in a
+  package's 16-neighbour cost for production paths.
+- **`terra::nearest()` is a brute-force search** (about 5 hours for the
+  footprint). Use `sf::st_nearest_feature()` in chunks (`lcp_alloc_zones()`).
+- **`sf` 1.0-15: `st_cast()` of a whole boundary set to POINT gave the wrong
+  feature ids.** Build points per feature from its own coordinates
+  (`st_coordinates()`), and check that each feature's points lie on its own
+  edge. The first test gave 36 pairs instead of 106.
+- **`terra::costDist()` default `maxiter` (50) may not converge** on a long
+  window. Use a higher value (the validation uses 1000) and capture the
+  warning.
+- **`write_processed_vec()` deletes the whole GeoPackage.** For a file with
+  one layer per surface, use `lcp_write_layer()` (replaces one layer, reads it
+  back).
+- **Contiguous means a shared footprint cell, not gap 0** (Decision 17 point
+  6, amended). With `touches = TRUE`, Namdapha–Kamlang (0.3 km) shares a cell;
+  Nagarjunsagar-Srisailam–Amrabad touch along the split line.
+- **`scripts/02` re-run guard (G-a).** On the first split run only units 1 and
+  51 may change; afterwards the layer must be identical. Any other change
+  stops `02` with nothing overwritten.
+- **On Windows, R reports only its own heap.** `lcp_mem_report()` gives the
+  process peak on Linux only; read Task Manager on Windows.
 
 ---
 
 ## Weekly log (newest first)
+
+### Week 10 — Least-cost paths (Stage 2) · 2026-10-01 to 2026-10-03
+- Entry state: Week 9 complete; four resistance surfaces; Decisions 17–18
+  pending.
+- Did: Decision 17 (path set-up; amended 2026-10-02: contiguous = shared
+  cell) and Decision 18 (variant metric), both before the paths; own path
+  engine `R/00_functions_lcp.R` (sandbox checks (a)–(c) passed); `00a` package
+  list from `renv::dependencies()`; `scripts/07` switches (RS1), surface guard,
+  STEP 10.0 smoke test (Kanha–Pench, 0.3 s); Amrabad split in `scripts/02`
+  (STEP 4b, guard G-a) with a Stage-1 re-run 02 → 05 (before/after check
+  PASS); STEP 10.1 pairs (106); STEP 10.2 baseline paths; STEP 10.2b
+  validation (15 of 15; V-add pair Bandhavgarh–Panna); STEP 10.3 QA; STEP
+  10.4 variants + Decision 18 (both choices robust); literature check of the
+  extremes (L1 limitation); STEP 10.5 NTCA overlap (descriptive).
+- Decisions made: **17**, **18** (numbered); process choices F1-A (tool named
+  in Decision 17), RS1 (run switches + `_split` label), G-a (02 guard), V-add,
+  QA in one table, NTCA overlap in two tables, L1.
+- Outputs: see "Output files this week (Week 10)".
+- Gotchas found: see the new entries under "Known gotchas" (one-origin
+  packages, knight jumps, `terra::nearest`, the `sf` id fault, `costDist`
+  convergence, `write_processed_vec`, contiguous by cell, G-a, Windows memory).
+- Corrections of the record: Decision 17/18 dates (2026-10-01, not
+  2026-09-27); the gap-0 count after the split (8, not 7); the poly/census
+  median (0.515, not ~0.58); the Week-3 Amrabad limitation.
+- Carried forward / next week: **Week 11** — the task breakdown was written
+  after the push (2026-10-03, `project-plan.md`); start with task 11.1, the
+  functional-link Decision 19, before any network metric. Open: the
+  `scripts/03` `I()` fix.
+
+### Doc fix pass (before Week 10) · 2026-09-27
+- Entry state: Week 9 complete; a consistency check found stale or
+  inconsistent statements in the docs.
+- Did: corrected `methodology.md` (§5.3 tool and resistance basis; settlement
+  label; change-log entry), `data-dictionary.md` (`dist_road_m`, `cov_distroad`
+  and `tbl_10` figures from the `d13f` `tbl_10`; `WORLDCOVER_RESISTANCE` is
+  Decision 14; `tbl_10` column note; `source_stat`; last line),
+  `naming-conventions.md` (§6 `tbl_11` row, checked against a listing of
+  `outputs/tables/`), `data-sources.md` (OSM: tertiary closed by Decision 15;
+  settlement flag → Week 13), `project-plan.md` (Week-10 entry state and
+  pitfall: resistance is `NA` outside India, the collar included; task 10.3
+  sets the `00a` list), `README.md` (Stack row; Growth row 2014/2018/2022),
+  this handoff (`resist_*` gotcha merged; Week-10 note; table-number gotcha).
+  Corrected the path of `tbl_04_secondary_sources_2006_2010.md` (it is only in
+  `outputs/tables/`, not `docs/`) in `data-sources.md`, `references.md` and
+  naming §6. Added a `proposal.md` §8 deviation entry: the resistance surface
+  adds human pressure (Decisions 14–16), with a §5 pointer.
+  No script, data layer or rule changed; no re-run.
+- Decisions made (not numbered — process/doc choices): **F1-A** — docs say the
+  path tool is fixed in Decision 17; `scripts/00a` keeps `leastcostpath` until
+  task 10.3 sets it to the chosen tool; **F2** — record the pass in the
+  methodology change log and here.
+- Outputs: the nine docs above.
+- Gotchas found: none new. The resistance `NA` footprint (every cell outside
+  India) is now stated where Week 10 reads it.
+- Carried forward / next week: **Week 10** — Decisions 17 and 18 first. At the
+  Week-10 header edit of `scripts/07`, remove the repeated `OUTPUTS` line in
+  the STEP-9.2 header block.
 
 ### Week 9 — Resistance surfaces (Stage 2) · 2026-09-26
 - Entry state: Week 8 stack (3,010,738 complete-case cells; gHM gap-fill

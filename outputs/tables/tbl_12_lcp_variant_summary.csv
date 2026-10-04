@@ -1,0 +1,4 @@
+"variant","tests","pairs_compared","contiguous_excluded","share_material_route","share_material_rank","share_material_pair","spearman_rho","median_route_overlap","in_network_changed","via_changed","label","choice_label"
+"noghm","gHM multiplier (Decision 14)",97,9,0.185567010309278,0,0.185567010309278,0.984509783294761,0.844214277859344,4,6,"robust","robust"
+"road15","road value (Decision 15)",97,9,0.11340206185567,0,0.11340206185567,0.995121502209131,1,1,2,"robust","robust"
+"road50","road value (Decision 15)",97,9,0.0927835051546392,0,0.0927835051546392,0.996857248053861,1,4,4,"robust","robust"

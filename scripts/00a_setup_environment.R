@@ -6,21 +6,23 @@
 # =============================================================================
 
 # ---- 1. Required packages --------------------------------------------------
+# Checked against renv::dependencies(c("R", "scripts")) on 2026-10-02.
 required <- c(
   # Core spatial
   "sf", "terra", "here",
-  # Point pattern / spatial statistics
-  "spatstat.explore", "spatstat.geom", "sfdep",
-  # Connectivity
-  "leastcostpath", "igraph",
-  # Habitat suitability (SDM)
-  "maxnet", "predicts",
+  # Connectivity. The path engine is our own (R/00_functions_lcp.R, terra +
+  # igraph; Decision 17). gdistance + raster are for validation check (c) only.
+  "igraph", "gdistance", "raster",
   # Data handling
-  "dplyr", "tidyr", "readr", "stringr", "readxl", "exactextractr",
-  # Acquisition
-  "rgbif", "elevatr", "osmdata",
-  # Visualisation / site
-  "ggplot2", "leaflet", "htmlwidgets", "gganimate"
+  "dplyr", "tidyr", "readr", "stringr", "tibble", "xml2",
+  # Acquisition (scripts/01)
+  "rgbif", "elevatr", "osmextract", "rnaturalearth",
+  # Figures (Stage 1 animation)
+  "ggplot2", "gganimate", "gifski",
+  # Planned, not used yet — listed so a fresh setup has them
+  "spatstat.explore", "spatstat.geom", "sfdep",   # KDE / Gi* (Weeks 13+)
+  "maxnet", "predicts",                            # SDM (Weeks 14+)
+  "leaflet", "htmlwidgets"                         # story site
 )
 
 installed <- rownames(installed.packages())
@@ -31,6 +33,16 @@ if (length(missing) > 0) {
   install.packages(missing)
 } else {
   message("All required packages already installed.")
+}
+
+# rnaturalearthhires is not on CRAN. rnaturalearth needs it for
+# scale = "large" and for ne_states() (scripts/01). renv::dependencies() does
+# not find it, because no script calls it by name.
+if (!requireNamespace("rnaturalearthhires", quietly = TRUE)) {
+  message("Installing rnaturalearthhires from the rOpenSci R-universe.")
+  install.packages("rnaturalearthhires",
+                   repos = c("https://ropensci.r-universe.dev",
+                             getOption("repos")))
 }
 
 # ---- 2. Verify the spatial toolchain ---------------------------------------

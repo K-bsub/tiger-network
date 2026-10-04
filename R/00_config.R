@@ -165,5 +165,133 @@ RESIST_VARIANTS <- list(
   road50 = list(ghm_k = RESIST_GHM_K, road_value = 50)
 )
 
+# ---- Boundaries: state split (Decision 17, point 7 — D1a; 2026-10-01) --------
+# The NTCA KML polygon matched to Nagarjunsagar-Srisailam is the undivided
+# reserve: about 2,701 km2 of it lies in Telangana, where Amrabad now is.
+# scripts/02 splits the parent polygon at the state boundary
+# (boundary_states_7755.gpkg, field `name`) and gives each part to the
+# reserve named here. unit_id is the join key (naming §5); scripts/02 asserts
+# that each unit_id resolves to the named reserve and state.
+BOUNDARY_STATE_SPLITS <- list(
+  list(
+    parent_unit_id = 1L,
+    parent_name    = "Nagarjunsagar-Srisailam",
+    parts = list(
+      list(unit_id = 1L,  unit_name = "Nagarjunsagar-Srisailam",
+           state = "Andhra Pradesh"),
+      list(unit_id = 51L, unit_name = "Amrabad",
+           state = "Telangana")
+    )
+  )
+)
+# match_status that scripts/02 writes on each split part. scripts/07 STEP 9.2
+# reads it: a reserve layer with split parts adds "_split" to the gap-table
+# label, so the Week-9 tables are not overwritten (process choice RS1,
+# 2026-10-02).
+BOUNDARY_SPLIT_STATUS <- "state_split"
+
+# ---- Connectivity: least-cost paths (Decision 17, 2026-10-01) ---------------
+# Fixed BEFORE any path is built. See docs/methodology.md, Decision 17, for the
+# sources and reasons. scripts/07_connectivity.R (Week-10 STEPs) reads these;
+# do not repeat the values as literals in any script.
+
+# (1) Reserve pairs: every complete-case footprint cell is allocated to the
+# nearest reserve polygon (straight line); two reserves are a candidate pair
+# if their zones share >= 1 cell edge; a candidate is kept if the polygon gap
+# is <= LCP_PAIR_MAX_GAP_KM. One pair set for every surface.
+LCP_PAIR_ADJACENCY   <- "rook"  # zones share at least one cell edge
+LCP_PAIR_MAX_GAP_KM  <- 315     # longest recorded straight-line tiger
+                                # dispersal in India (Hussain et al. 2022)
+
+# (2) A path that crosses a third reserve C: A-B leaves the network only if
+# A-C and C-B are both pairs; otherwise it stays and C is recorded.
+LCP_THROUGH_RESERVE_RULE <- "drop_if_redundant"
+
+# (3) Graph: footprint cells are nodes; NA cells are not.
+# Step cost = step length (km) x length-weighted mean resistance of the cells
+# that the straight line between the two cell centres crosses:
+#   orthogonal (1 km), diagonal (sqrt 2 km): the 2 end cells, 1/2 each
+#   knight (sqrt 5 km): the 4 crossed cells, 1/4 each; not allowed if any NA
+# Cost-distance unit: resistance-km.
+LCP_NEIGHBOURS  <- 16L
+LCP_KNIGHT_RULE <- "crossed_cells"  # "end_cells" is used ONLY by the
+                                    # gdistance validation check (point 4c)
+
+# (4) Validation (scripts/07 STEP 10.2b -> tbl_12_lcp_validation.csv).
+# Pairs from the baseline pair set: shortest non-zero gap, gap nearest the
+# median, longest gap (ties: lowest pair id). A cost difference above the
+# tolerance is a hard stop; path overlap is reported, not a stop.
+LCP_VALIDATE           <- TRUE
+LCP_VALIDATE_PAIRS     <- c("min_nonzero_gap", "median_gap", "max_gap")
+LCP_VALIDATE_TOL_REL   <- 1e-6
+LCP_VALIDATE_WINDOW_KM <- 100   # gdistance window: path bounding box + this
+
+# (5) No crop: one national graph. The fallback applies ONLY if the task-10.3
+# smoke test shows the national graph does not fit in memory:
+# window = pair bounding box + max(MIN_BUFFER_KM, BUFFER_FRAC x gap); a path
+# that touches the window edge is re-run on a wider window.
+LCP_CROP                        <- FALSE
+LCP_CROP_FALLBACK_MIN_BUFFER_KM <- 100
+LCP_CROP_FALLBACK_BUFFER_FRAC   <- 0.5
+
+# (6) Start and end: edge to edge. Reserve cells = footprint cells the polygon
+# touches. Travel inside the source and target reserves costs nothing; other
+# reserves cost their resistance. Contiguous pairs (amended 2026-10-02: the
+# two reserves share >= 1 footprint cell; every gap-0 pair is one) get cost 0
+# and an empty path.
+LCP_RESERVE_TOUCHES <- TRUE
+
+# (7) Reserves with no geometry stay out of the network (G1). Guard names must
+# match unit_id.
+LCP_EXCLUDED_UNIT_IDS   <- c(44L, 53L)
+LCP_EXCLUDED_UNIT_NAMES <- c("Dholpur-Karauli", "Pilibhit")
+
+# (8) Network groups: labels on geography (W2, H1). They remove no pair; a
+# pair across two groups is marked cross_group = TRUE. Separate from
+# landscape_complex (which does not change). Every unit_id 1-58 must appear
+# exactly once; scripts/07 asserts it. Pilibhit (53) and Dholpur-Karauli (44)
+# are listed but have no geometry.
+NETWORK_GROUPS <- list(
+  northeast     = c(2L, 3L, 4L, 5L, 6L, 7L, 8L, 37L, 58L),
+  # Namdapha, Pakke, Kamlang, Manas, Nameri, Kaziranga, Orang, Dampa, Buxa
+  western_ghats = c(15L, 16L, 17L, 18L, 19L, 20L, 21L, 34L,
+                    45L, 46L, 47L, 48L, 49L),
+  # Bandipur, Bhadra, Kali, Nagarhole, BRT, Periyar, Parambikulam, Sahyadri,
+  # Kalakad-Mundanthurai, Anamalai, Mudumalai, Sathyamangalam,
+  # Srivilliputhur-Megamalai
+  north         = c(9L, 52L, 53L, 55L, 56L),
+  # Valmiki, Dudhwa, Pilibhit, Corbett, Rajaji (the Terai)
+  central       = c(1L, 10L, 11L, 12L, 13L, 14L, 22L, 23L, 24L, 25L, 26L,
+                    27L, 28L, 29L, 30L, 31L, 32L, 33L, 35L, 36L, 38L, 39L,
+                    40L, 41L, 42L, 43L, 44L, 50L, 51L, 54L, 57L)
+  # Central India and Eastern Ghats, the Rajasthan reserves (40-44), Ranipur
+  # (54) and the Sundarbans (57)
+)
+
+# (9) NTCA corridor comparison (descriptive, baseline paths only):
+# per path, share of length inside any corridor polygon; per corridor,
+# whether >= 1 baseline path crosses it. Not a validation.
+LCP_NTCA_OVERLAP <- TRUE
+
+# ---- Connectivity: variant comparison (Decision 18, 2026-10-01) ------------
+# Fixed BEFORE any variant path is run. See docs/methodology.md, Decision 18.
+# scripts/07_connectivity.R STEP 10.4 reads these. Each variant is compared
+# with the baseline only, on every pair that is not contiguous (Decision 17
+# point 6, amended 2026-10-02).
+#   route overlap = min(share of baseline length within d of the variant path,
+#                       share of variant length within d of the baseline path)
+#   rank          = (rank - 1) / (n - 1) of cost-distance, ties = average rank
+#   material pair = route overlap < ROUTE_MATERIAL  OR  |rank change| >= RANK_MATERIAL
+#   label         = "robust" if share of material pairs <= ROBUST_MAX_SHARE
+#                   AND Spearman rho >= ROBUST_MIN_RHO, else "sensitive".
+#   The road value is robust only if BOTH road15 and road50 are robust.
+LCP_COMPARE_VARIANTS          <- names(RESIST_VARIANTS)  # noghm, road15, road50
+LCP_COMPARE_ROUTE_D_KM        <- 5     # ~ one resident female home-range radius
+LCP_COMPARE_ROUTE_D_DESCR_KM  <- c(1, 2, 5, 10)  # descriptive overlap columns
+LCP_COMPARE_ROUTE_MATERIAL    <- 0.5   # route overlap below this = material
+LCP_COMPARE_RANK_MATERIAL     <- 0.25  # |percentile-rank change| >= this
+LCP_COMPARE_ROBUST_MAX_SHARE  <- 0.20  # judgement value
+LCP_COMPARE_ROBUST_MIN_RHO    <- 0.9   # judgement value
+
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a

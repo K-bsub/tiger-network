@@ -422,7 +422,8 @@ rule("STEP 6 (7.5) - fig_02 animated choropleth: per-round population level")
 #   the 3 frames reads its growth; that is the "growth category across rounds".
 #
 # THE THREE FAILURE MODES, KEPT VISUALLY DISTINCT (task 7.5 core requirement):
-#   1. GEOMETRY-ABSENT (Amrabad, Pilibhit, Dholpur-Karauli): geometry_present is
+#   1. GEOMETRY-ABSENT (Pilibhit, Dholpur-Karauli; Amrabad too before the
+#      Decision-17 split, 2026-10-02): geometry_present is
 #      FALSE and the geometry is empty. They CANNOT be a polygon, so they are
 #      dropped from the drawn layer and named in a fixed on-figure note. They are
 #      NEVER shown as 0 or as a coloured shape.
