@@ -35,7 +35,28 @@
 #     STEP 10.5 NTCA corridor overlap, baseline (task 10.8; Decision 17
 #               point 9; descriptive) -> tbl_12_lcp_ntca_overlap.csv,
 #               tbl_12_lcp_ntca_corridors.csv; switch LCP_NTCA_OVERLAP
-#   WEEK 11 — reserve network graph (igraph)                       TODO(Week 11)
+#   WEEK 11 — reserve network graph (Decision 19; functions in
+#             R/00_functions_network.R)
+#     STEP 11.1 nodes (blocks of contiguous reserves), link table and igraph
+#               graph from the "baseline" layer; construction checks; bridge
+#               and spanning-forest flags (task 11.2; Decision 19 points 1-4,
+#               8 and 11) -> tbl_13_network_links.csv
+#     STEP 11.2 self-test of the metric functions on a hand-computed graph;
+#               node metrics (sets, degree, betweenness, linchpin, cut_node,
+#               isolated, pendant, cheapest link); second baseline run
+#               without cross-group links; threshold scan (task 11.3;
+#               Decision 19 points 4-9 and 11) -> tbl_13_network_metrics.csv,
+#               tbl_13_network_threshold_scan.csv
+#     STEP 11.3 the graph and the metrics on noghm, road15 and road50, each
+#               compared with the baseline by the fixed rule (task 11.4;
+#               Decision 19 point 10) -> tbl_13_network_variant_comparison.csv;
+#               tbl_13_network_metrics.csv written again with the variant
+#               columns and stable_linchpin
+#     STEP 11.4 network QA: the construction checks of the four surfaces
+#               and the self-test, collected; result checks (flags, the
+#               betweenness identity, edge weights, second run, scan, tables
+#               on disk). Any failure stops the script (task 11.5;
+#               Decision 19 point 11) -> tbl_13_network_qa.csv
 #   WEEK 12 — road pinch points + fig_04 / tbl_03                  TODO(Week 12)
 #
 # Tasks 9.3 and 9.4 (resistance values, barrier road classes) are numbered
@@ -136,6 +157,22 @@
 #   tbl_12_lcp_variant_summary.csv
 # OUTPUTS (STEP 10.5): outputs/tables/tbl_12_lcp_ntca_overlap.csv (per pair),
 #   outputs/tables/tbl_12_lcp_ntca_corridors.csv (per corridor)
+# INPUTS (Week 11): data/processed/lcp_reserve_network_7755.gpkg (the layers
+#   that STEPs 10.2 and 10.4 write in this run), the pair table and the
+#   reserve list of STEP 10.1 (in memory)
+# OUTPUTS (STEP 11.1): outputs/tables/tbl_13_network_links.csv (one row per
+#   baseline in-network pair). The graph is not written; it is rebuilt from
+#   the paths layer on each run.
+# OUTPUTS (STEP 11.2): outputs/tables/tbl_13_network_metrics.csv (one row per
+#   network reserve; the reserves of one block share the values of their
+#   node; STEP 11.3 writes it again with 7 more columns);
+#   outputs/tables/tbl_13_network_threshold_scan.csv (one row per baseline
+#   edge, in cost order)
+# OUTPUTS (STEP 11.3): outputs/tables/tbl_13_network_variant_comparison.csv
+#   (one row per variant); tbl_13_network_metrics.csv (written again:
+#   betweenness_norm_<variant>, linchpin_<variant>, stable_linchpin)
+# OUTPUTS (STEP 11.4): outputs/tables/tbl_13_network_qa.csv (one row per
+#   check: surface, check, value, pass)
 #
 # MACHINE TRAP: same PROJ / PostGIS proj.db clash as scripts/06. Run in a FRESH
 # session; the guard below stops if EPSG:7755 does not resolve.
@@ -1406,3 +1443,666 @@ if (isTRUE(LCP_NTCA_OVERLAP)) {
   write_table(ov$per_corridor, 12, "lcp_ntca_corridors")
   rule("STEP 10.5 done — NTCA overlap written (descriptive). Week-10 STEPs complete.")
 }
+
+# =============================================================================
+# WEEK 11 — reserve network graph (Decision 19)
+# =============================================================================
+# Functions: R/00_functions_network.R. Every Decision-19 value is read from
+# R/00_config.R (NET_*). The Week-11 STEPs read the path layers from disk (the
+# file that STEPs 10.2 and 10.4 wrote in this run); `pairs` and `res_net` come
+# from STEP 10.1.
+source(here("R", "00_functions_network.R"))
+
+# ---- Guard: settings --------------------------------------------------------
+net_params <- c("NET_LINK_RULE", "NET_EDGE_WEIGHT_FIELD", "NET_CONTIGUOUS_RULE",
+                "NET_PARALLEL_RULE", "NET_EXPECTED_RESERVES",
+                "NET_EXPECTED_NODES", "NET_NORM_RULE", "NET_NORM_MIN_SET_NODES",
+                "NET_LINCHPIN_TOP_N", "NET_THRESHOLD_SCAN",
+                "NET_THRESHOLD_SCAN_SURF", "NET_NOCROSS_RERUN",
+                "NET_NOCROSS_SURF", "NET_COMPARE_VARIANTS",
+                "NET_COMPARE_ROBUST_MIN_RHO",
+                "NET_COMPARE_ROBUST_MIN_RETENTION")
+missing_net <- net_params[!vapply(net_params, exists, logical(1))]
+if (length(missing_net) > 0) {
+  stop("Decision-19 setting(s) missing from R/00_config.R: ",
+       paste(missing_net, collapse = ", "), call. = FALSE)
+}
+# The functions build one rule set only (Decision 19 points 1-3). A different
+# value in the config needs a new Decision and new code, not a silent run.
+if (!identical(NET_LINK_RULE, "all_in_network") ||
+    !identical(NET_CONTIGUOUS_RULE, "merge_block") ||
+    !identical(NET_PARALLEL_RULE, "min_cost")) {
+  stop("R/00_functions_network.R builds only NET_LINK_RULE = 'all_in_network', ",
+       "NET_CONTIGUOUS_RULE = 'merge_block', NET_PARALLEL_RULE = 'min_cost' ",
+       "(Decision 19). The config has: ", NET_LINK_RULE, ", ",
+       NET_CONTIGUOUS_RULE, ", ", NET_PARALLEL_RULE, ".", call. = FALSE)
+}
+
+# =============================================================================
+# STEP 11.1 — nodes, link table and graph (task 11.2; Decision 19 points 1-4)
+# =============================================================================
+# 1. Nodes: the contiguous pairs join their reserves into blocks; one block or
+#    one reserve = one node. Geometry only: the same on every surface.
+# 2. Links: every baseline pair with in_network == TRUE. No cost threshold.
+# 3. Edges: between two nodes, the pair with the lowest cost (a tie: the
+#    lowest pair_id). The other in-network pairs stay in the table with their
+#    link_role (block, within_block, parallel).
+# 4. Construction checks (Decision 19 point 11): any failure stops the script.
+# 5. Edge flags: is_bridge, in_mst (the spanning forest of the threshold scan,
+#    point 8). No node metric is computed here (STEP 11.2).
+rule("STEP 11.1 — nodes, links, graph (Decision 19) -> tbl_13_network_links.csv")
+
+NET_BASE_SURFACE <- "baseline"   # the layer name that STEP 10.2 writes
+
+# ---- 11.1a Nodes --------------------------------------------------------------
+net_nodes <- net_build_nodes(res_net$unit_id, res_net$unit_name, pairs,
+                             NETWORK_GROUPS)
+net_blocks <- unique(net_nodes[net_nodes$block_size > 1,
+                               c("node_id", "node_name", "block_size")])
+cat(sprintf("nodes: %d from %d reserves | blocks with more than one reserve: %d\n",
+            length(unique(net_nodes$node_id)), nrow(net_nodes), nrow(net_blocks)))
+if (nrow(net_blocks) > 0) print(net_blocks, row.names = FALSE)
+
+# ---- 11.1b Links and graph ----------------------------------------------------
+paths_net_base <- net_read_paths(paths_out, NET_BASE_SURFACE)
+if (nrow(paths_net_base) != nrow(pairs) ||
+    !setequal(paths_net_base$pair_id, pairs$pair_id)) {
+  stop("The baseline layer on disk (", nrow(paths_net_base), " pairs) does not ",
+       "hold the pairs of STEP 10.1 (", nrow(pairs), ").", call. = FALSE)
+}
+net_links <- net_build_links(paths_net_base, net_nodes, NET_EDGE_WEIGHT_FIELD)
+net_g     <- net_build_graph(net_links, net_nodes, NET_EDGE_WEIGHT_FIELD)
+
+cat(sprintf("pairs: %d | in the network (links): %d | not in the network: %d\n",
+            nrow(paths_net_base), nrow(net_links),
+            nrow(paths_net_base) - nrow(net_links)))
+cat("link roles:\n")
+print(table(link_role = factor(net_links$link_role,
+                               levels = c("block", "within_block", "edge",
+                                          "parallel"))))
+cat(sprintf("graph: %d nodes, %d edges | nodes with no edge: %d\n",
+            igraph::vcount(net_g), igraph::ecount(net_g),
+            sum(igraph::degree(net_g) == 0)))
+if (any(net_links$link_role == "parallel")) {
+  cat("parallel links (in the network, not the lowest cost between two nodes):\n")
+  print(net_links[net_links$link_role == "parallel",
+                  c("pair_id", "from_name", "to_name", NET_EDGE_WEIGHT_FIELD)],
+        row.names = FALSE, digits = 6)
+}
+
+# ---- 11.1c Construction checks (stop on any failure) --------------------------
+net_chk <- net_check_graph(net_g, net_nodes, net_links, NET_EXPECTED_RESERVES,
+                           NET_EXPECTED_NODES)
+for (i in seq_len(nrow(net_chk))) {
+  cat(sprintf("  %-4s %s (%s)\n", if (net_chk$pass[i]) "ok" else "FAIL",
+              net_chk$check[i], net_chk$value[i]))
+}
+if (!all(net_chk$pass)) {
+  stop("Network construction check(s) failed: ",
+       paste(net_chk$check[!net_chk$pass], collapse = "; "), call. = FALSE)
+}
+
+# ---- 11.1d Sets (report) -------------------------------------------------------
+net_set_tbl <- net_sets(net_g)
+net_nodes$set_id <- net_set_tbl$set_id[match(net_nodes$node_id,
+                                             net_set_tbl$node_id)]
+set_report <- do.call(rbind, lapply(sort(unique(net_nodes$set_id)), function(k) {
+  x <- net_nodes[net_nodes$set_id == k, ]
+  data.frame(set_id = k, nodes = length(unique(x$node_id)), reserves = nrow(x),
+             network_groups = paste(sort(unique(x$network_group)),
+                                    collapse = ", "))
+}))
+cat("sets (connected components of the in-network graph):\n")
+print(set_report, row.names = FALSE)
+
+# Report only (Decision 19 point 11): are these the sets that ALL pairs give?
+# If not, the through-reserve rule (P3) divided a set.
+all_as_links <- paths_net_base
+all_as_links$in_network <- TRUE
+net_g_all <- net_build_graph(
+  net_build_links(all_as_links, net_nodes, NET_EDGE_WEIGHT_FIELD),
+  net_nodes, NET_EDGE_WEIGHT_FIELD)
+sets_all  <- net_sets(net_g_all)
+sets_same <- net_same_partition(net_set_tbl$set_id, sets_all$set_id)
+cat(sprintf(paste0("sets of all %d pairs: sizes %s (nodes) | the in-network ",
+                   "graph has the same sets: %s\n"),
+            nrow(pairs),
+            paste(sort(unique(sets_all[, c("set_id", "set_size")])$set_size,
+                       decreasing = TRUE), collapse = ", "),
+            if (sets_same) "yes" else "NO — P3 divided a set (report it)"))
+rm(all_as_links, net_g_all, sets_all)
+
+# ---- 11.1e Edge flags ----------------------------------------------------------
+net_flags <- net_edge_flags(net_g)
+k_flag <- match(net_links$pair_id, net_flags$pair_id)   # NA for non-edges
+net_links$is_bridge <- net_flags$is_bridge[k_flag]
+net_links$in_mst    <- net_flags$in_mst[k_flag]
+cat(sprintf(paste0("edges: %d | bridges (the set divides without the edge): %d",
+                   " | in the minimum spanning forest: %d\n"),
+            nrow(net_flags), sum(net_flags$is_bridge), sum(net_flags$in_mst)))
+if (anyDuplicated(net_links[[NET_EDGE_WEIGHT_FIELD]][net_links$link_role == "edge"])) {
+  cat("NOTE: two edges have the same weight — the spanning forest is not ",
+      "unique (in_mst).\n", sep = "")
+}
+if (any(net_flags$is_bridge)) {
+  cat("bridges:\n")
+  print(net_links[which(net_links$is_bridge),
+                  c("pair_id", "from_name", "to_name", "cross_group",
+                    NET_EDGE_WEIGHT_FIELD)], row.names = FALSE, digits = 6)
+}
+
+# ---- 11.1f Output ---------------------------------------------------------------
+links_out <- net_links[, c("pair_id", "surface", "from_unit_id", "from_name",
+                           "to_unit_id", "to_name", "from_group", "to_group",
+                           "cross_group", "contiguous", "gap_km",
+                           NET_EDGE_WEIGHT_FIELD, "path_km", "from_node_id",
+                           "to_node_id", "link_role", "is_bridge", "in_mst")]
+write_table(links_out, 13, "network_links")
+rule(sprintf(paste0("STEP 11.1 done — %d nodes, %d edges, %d sets. Next: STEP ",
+                    "11.2 metrics (task 11.3)."),
+             igraph::vcount(net_g), igraph::ecount(net_g),
+             nrow(set_report)))
+
+# =============================================================================
+# STEP 11.2 — node metrics, second run, threshold scan (task 11.3;
+#             Decision 19 points 4-9)
+# =============================================================================
+# 1. Self-test: the metric and scan functions run on a hand-computed graph
+#    first (Decision 19 point 11). A failure stops the script.
+# 2. Metrics for each node of the baseline graph (points 4-7). Betweenness is
+#    normalised by the node's own set.
+# 3. Second run, baseline only (point 9): the same graph without the pairs
+#    with cross_group == TRUE. cross_group_dependent = a linchpin of the main
+#    graph that is not a linchpin in the second run.
+# 4. Threshold scan, baseline only (point 8). Descriptive: no threshold is
+#    chosen and no link is removed.
+# 5. One row per reserve: the reserves of one block share the node values.
+rule(paste0("STEP 11.2 — metrics, second run, threshold scan -> ",
+            "tbl_13_network_metrics.csv, tbl_13_network_threshold_scan.csv"))
+
+# ---- Guard: settings that this STEP builds -------------------------------------
+if (!identical(NET_NORM_RULE, "own_set")) {
+  stop("STEP 11.2 builds only NET_NORM_RULE = 'own_set' (Decision 19 point 5). ",
+       "The config has: ", NET_NORM_RULE, ".", call. = FALSE)
+}
+if (!identical(NET_NOCROSS_SURF, NET_BASE_SURFACE) ||
+    !identical(NET_THRESHOLD_SCAN_SURF, NET_BASE_SURFACE)) {
+  stop("The second run and the threshold scan are for the '", NET_BASE_SURFACE,
+       "' surface only (Decision 19 points 8 and 9). The config has: ",
+       NET_NOCROSS_SURF, ", ", NET_THRESHOLD_SCAN_SURF, ".", call. = FALSE)
+}
+
+# ---- 11.2a Self-test (hand-computed graph) --------------------------------------
+net_st <- net_selftest_metrics()
+cat(sprintf("self-test on the hand-computed graph: %d of %d cases pass\n",
+            sum(net_st$pass), nrow(net_st)))
+if (!all(net_st$pass)) {
+  print(net_st[!net_st$pass, ], row.names = FALSE, right = FALSE)
+  stop("The metric self-test failed — the functions are wrong. No metric is ",
+       "computed.", call. = FALSE)
+}
+
+# ---- 11.2b Node metrics, baseline ------------------------------------------------
+net_met <- net_node_metrics(net_g, NET_NORM_MIN_SET_NODES, NET_LINCHPIN_TOP_N)
+net_node_names <- unique(net_nodes[, c("node_id", "node_name", "network_group")])
+net_node_names <- stats::aggregate(
+  network_group ~ node_id + node_name, data = net_node_names,
+  FUN = function(x) paste(sort(unique(x)), collapse = ", "))
+met_show <- merge(net_node_names, net_met, by = "node_id")
+
+cat(sprintf(paste0("nodes: %d | sets: %d | betweenness_norm is NA (set below ",
+                   "%d nodes): %d\n"),
+            nrow(net_met), length(unique(net_met$set_id)),
+            NET_NORM_MIN_SET_NODES, sum(is.na(net_met$betweenness_norm))))
+cat(sprintf("linchpins (rank <= %d in the set, value > 0): %d | cut nodes: %d\n",
+            NET_LINCHPIN_TOP_N, sum(net_met$linchpin), sum(net_met$cut_node)))
+cat("linchpins, by set:\n")
+print(met_show[met_show$linchpin,
+               c("set_id", "set_size", "node_name", "betweenness_raw",
+                 "betweenness_norm", "betweenness_rank", "cut_node", "degree")
+               ][order(met_show$set_id[met_show$linchpin],
+                       met_show$betweenness_rank[met_show$linchpin]), ],
+      row.names = FALSE, digits = 4)
+if (any(net_met$cut_node & !net_met$linchpin)) {
+  cat("cut nodes that are not linchpins:\n")
+  print(met_show[met_show$cut_node & !met_show$linchpin,
+                 c("set_id", "node_name", "betweenness_norm",
+                   "betweenness_rank", "degree")], row.names = FALSE, digits = 4)
+}
+if (any(net_met$isolated)) {
+  cat("isolated nodes (degree 0):\n")
+  print(met_show[met_show$isolated, c("node_id", "node_name")], row.names = FALSE)
+} else {
+  cat("isolated nodes (degree 0): none — no reserve is isolated by this rule\n")
+}
+cat(sprintf("pendant nodes (degree 1): %d\n", sum(net_met$pendant)))
+if (any(net_met$pendant)) {
+  print(met_show[met_show$pendant,
+                 c("set_id", "node_name", "cheapest_link_rkm",
+                   "cheapest_link_rank")][order(
+                     met_show$cheapest_link_rank[met_show$pendant]), ],
+        row.names = FALSE, digits = 6)
+}
+cat("highest cheapest-link cost (the nodes hardest to reach from a neighbour):\n")
+print(utils::head(met_show[order(met_show$cheapest_link_rank),
+                           c("node_name", "degree", "cheapest_link_rkm",
+                             "cheapest_link_rank")], 5),
+      row.names = FALSE, digits = 6)
+
+# ---- 11.2c Second run without cross-group links (baseline) ----------------------
+nocross_cols <- c("set_id_nocross", "set_size_nocross",
+                  "betweenness_norm_nocross", "betweenness_rank_nocross",
+                  "linchpin_nocross", "cross_group_dependent")
+if (isTRUE(NET_NOCROSS_RERUN)) {
+  net_links_nc <- net_build_links(paths_net_base, net_nodes,
+                                  NET_EDGE_WEIGHT_FIELD,
+                                  exclude_cross_group = TRUE)
+  net_g_nc   <- net_build_graph(net_links_nc, net_nodes, NET_EDGE_WEIGHT_FIELD)
+  net_met_nc <- net_node_metrics(net_g_nc, NET_NORM_MIN_SET_NODES,
+                                 NET_LINCHPIN_TOP_N)
+  if (!identical(net_met_nc$node_id, net_met$node_id)) {
+    stop("The second run does not have the nodes of the main graph.",
+         call. = FALSE)
+  }
+  net_met$set_id_nocross           <- net_met_nc$set_id
+  net_met$set_size_nocross         <- net_met_nc$set_size
+  net_met$betweenness_norm_nocross <- net_met_nc$betweenness_norm
+  net_met$betweenness_rank_nocross <- net_met_nc$betweenness_rank
+  net_met$linchpin_nocross         <- net_met_nc$linchpin
+  net_met$cross_group_dependent    <- net_met$linchpin & !net_met_nc$linchpin
+
+  n_cross_links <- sum(paths_net_base$in_network & paths_net_base$cross_group)
+  cat(sprintf(paste0("second run: %d cross-group link(s) removed | edges %d -> ",
+                     "%d | sets %d -> %d (sizes %s)\n"),
+              n_cross_links, igraph::ecount(net_g), igraph::ecount(net_g_nc),
+              length(unique(net_met$set_id)), length(unique(net_met_nc$set_id)),
+              paste(sort(net_met_nc$set_size[!duplicated(net_met_nc$set_id)],
+                         decreasing = TRUE), collapse = ", ")))
+  nc_show <- merge(net_node_names,
+                   net_met[, c("node_id", "set_id", "betweenness_norm",
+                               "betweenness_rank", "linchpin", nocross_cols)],
+                   by = "node_id")
+  cat("linchpins in the second run, by set:\n")
+  print(nc_show[nc_show$linchpin_nocross,
+                c("set_id_nocross", "set_size_nocross", "node_name",
+                  "betweenness_norm_nocross", "betweenness_rank_nocross")
+                ][order(nc_show$set_id_nocross[nc_show$linchpin_nocross],
+                        nc_show$betweenness_rank_nocross[nc_show$linchpin_nocross]), ],
+        row.names = FALSE, digits = 4)
+  if (any(net_met$cross_group_dependent)) {
+    cat("cross_group_dependent (linchpin in the main graph, not in the second run):\n")
+    print(nc_show[nc_show$cross_group_dependent,
+                  c("node_name", "betweenness_norm", "betweenness_rank",
+                    "betweenness_norm_nocross", "betweenness_rank_nocross")],
+          row.names = FALSE, digits = 4)
+  } else {
+    cat("cross_group_dependent: none\n")
+  }
+} else {
+  cat("NET_NOCROSS_RERUN is FALSE: the second run is skipped; its columns are NA.\n")
+  net_met[nocross_cols] <- NA
+}
+
+# ---- 11.2d Threshold scan (baseline; descriptive) --------------------------------
+if (isTRUE(NET_THRESHOLD_SCAN)) {
+  net_scan <- net_threshold_scan(net_g)
+  # The joining edges of the scan are the spanning-forest edges of STEP 11.1.
+  if (!setequal(net_scan$pair_id[net_scan$joins_sets],
+                net_flags$pair_id[net_flags$in_mst])) {
+    stop("Threshold scan: the joining edges are not the spanning-forest edges ",
+         "of STEP 11.1 (in_mst).", call. = FALSE)
+  }
+  k_scan <- match(net_scan$pair_id, net_links$pair_id)
+  scan_out <- data.frame(
+    step              = net_scan$step,
+    pair_id           = net_scan$pair_id,
+    from_name         = net_links$from_name[k_scan],
+    to_name           = net_links$to_name[k_scan],
+    threshold_rkm     = net_scan$threshold_rkm,
+    n_sets            = net_scan$n_sets,
+    largest_set_nodes = net_scan$largest_set_nodes,
+    joins_sets        = net_scan$joins_sets)
+  cat(sprintf(paste0("threshold scan: %d edges | joining edges: %d | sets at ",
+                     "the end: %d | no threshold chosen\n"),
+              nrow(scan_out), sum(scan_out$joins_sets),
+              scan_out$n_sets[nrow(scan_out)]))
+  cat("the last joining edges (the highest cost at which two sets join):\n")
+  print(utils::tail(scan_out[scan_out$joins_sets, ], 5), row.names = FALSE,
+        digits = 6)
+  write_table(scan_out, 13, "network_threshold_scan")
+} else {
+  cat("NET_THRESHOLD_SCAN is FALSE: the threshold scan is skipped.\n")
+}
+
+# ---- 11.2e Output: one row per reserve --------------------------------------------
+k_met <- match(net_nodes$node_id, net_met$node_id)
+if (anyNA(k_met)) stop("A reserve has no node metrics.", call. = FALSE)
+metrics_out <- cbind(
+  net_nodes[, c("unit_id", "unit_name", "network_group", "node_id", "node_name",
+                "block_size")],
+  net_met[k_met, setdiff(names(net_met), "node_id")])
+metrics_out <- metrics_out[order(metrics_out$unit_id), ]
+rownames(metrics_out) <- NULL
+if (nrow(metrics_out) != NET_EXPECTED_RESERVES ||
+    anyDuplicated(metrics_out$unit_id)) {
+  stop("Metrics table: ", nrow(metrics_out), " rows, expected one row for ",
+       "each of the ", NET_EXPECTED_RESERVES, " network reserves.",
+       call. = FALSE)
+}
+write_table(metrics_out, 13, "network_metrics")
+rule(sprintf(paste0("STEP 11.2 done — %d linchpin nodes, %d cut nodes, %d ",
+                    "isolated, %d pendant. Next: STEP 11.3 variants (task 11.4)."),
+             sum(net_met$linchpin), sum(net_met$cut_node),
+             sum(net_met$isolated), sum(net_met$pendant)))
+
+# =============================================================================
+# STEP 11.3 — variants and the Decision-19 comparison (task 11.4; point 10)
+# =============================================================================
+# 1. For noghm, road15 and road50: the links, the graph and the node metrics,
+#    by the same rules and the same functions as the baseline. The nodes are
+#    the same (blocks come from geometry). Each variant graph gets the
+#    construction checks of STEP 11.1; a failure stops the script.
+# 2. Each variant is compared with the baseline only. The label rule was
+#    fixed in Decision 19 before any metric: "robust" if the sets are the
+#    same AND Spearman rho of betweenness_norm >= NET_COMPARE_ROBUST_MIN_RHO
+#    AND linchpin retention >= NET_COMPARE_ROBUST_MIN_RETENTION.
+# 3. A choice tested by two variants (the road value) is robust only if both
+#    are robust.
+# 4. stable_linchpin = a linchpin on the baseline and on every variant.
+# The second run (point 9) and the threshold scan (point 8) are for the
+# baseline only; they are not repeated here.
+rule(paste0("STEP 11.3 — variants (", paste(NET_COMPARE_VARIANTS, collapse = ", "),
+            ") -> tbl_13_network_variant_comparison.csv"))
+
+if (!all(NET_COMPARE_VARIANTS %in% names(RESIST_VARIANTS)) ||
+    NET_BASE_SURFACE %in% NET_COMPARE_VARIANTS ||
+    anyDuplicated(NET_COMPARE_VARIANTS) || length(NET_COMPARE_VARIANTS) == 0) {
+  stop("NET_COMPARE_VARIANTS must name one or more of RESIST_VARIANTS (",
+       paste(names(RESIST_VARIANTS), collapse = ", "), "), each one time.",
+       call. = FALSE)
+}
+
+# Which choice does a variant test? From RESIST_VARIANTS: the setting that
+# differs from the baseline.
+net_variant_tests <- vapply(NET_COMPARE_VARIANTS, function(v) {
+  d <- c(if (!isTRUE(all.equal(RESIST_VARIANTS[[v]]$ghm_k, RESIST_GHM_K)))
+           "gHM multiplier (Decision 14)",
+         if (!isTRUE(all.equal(RESIST_VARIANTS[[v]]$road_value,
+                               ROAD_BARRIER_VALUE)))
+           "road value (Decision 15)")
+  if (length(d) != 1L) {
+    stop("Variant '", v, "' must differ from the baseline in exactly one ",
+         "choice (found ", length(d), ").", call. = FALSE)
+  }
+  d
+}, character(1))
+
+net_var_met   <- list()
+net_var_chk   <- list()   # kept for STEP 11.4
+net_var_g     <- list()
+net_var_paths <- list()
+net_cmp_rows  <- list()
+for (v in NET_COMPARE_VARIANTS) {
+  paths_v <- net_read_paths(paths_out, v)
+  if (nrow(paths_v) != nrow(pairs) ||
+      !setequal(paths_v$pair_id, pairs$pair_id)) {
+    stop("Layer '", v, "' on disk (", nrow(paths_v), " pairs) does not hold ",
+         "the pairs of STEP 10.1 (", nrow(pairs), ").", call. = FALSE)
+  }
+  links_v <- net_build_links(paths_v, net_nodes, NET_EDGE_WEIGHT_FIELD)
+  g_v     <- net_build_graph(links_v, net_nodes, NET_EDGE_WEIGHT_FIELD)
+  chk_v   <- net_check_graph(g_v, net_nodes, links_v, NET_EXPECTED_RESERVES,
+                             NET_EXPECTED_NODES)
+  if (!all(chk_v$pass)) {
+    stop("Network construction check(s) failed on '", v, "': ",
+         paste(chk_v$check[!chk_v$pass], collapse = "; "), call. = FALSE)
+  }
+  met_v <- net_node_metrics(g_v, NET_NORM_MIN_SET_NODES, NET_LINCHPIN_TOP_N)
+  # The baseline metrics without the second-run columns of STEP 11.2c.
+  cmp_v <- net_compare_variant(net_links, net_met, links_v, met_v,
+                               net_node_names, NET_COMPARE_ROBUST_MIN_RHO,
+                               NET_COMPARE_ROBUST_MIN_RETENTION)
+  net_var_met[[v]]   <- met_v
+  net_var_chk[[v]]   <- chk_v
+  net_var_g[[v]]     <- g_v
+  net_var_paths[[v]] <- paths_v
+  net_cmp_rows[[v]] <- cbind(
+    data.frame(variant = v, tests = unname(net_variant_tests[v]),
+               stringsAsFactors = FALSE), cmp_v)
+  cat(sprintf(paste0("%-7s links %d | edges %d (changed %d) | checks %d of %d ",
+                     "| sets same: %s | rho %.3f | linchpins retained %d of %d ",
+                     "| %s\n"),
+              v, nrow(links_v), igraph::ecount(g_v), cmp_v$n_edges_changed,
+              sum(chk_v$pass), nrow(chk_v), cmp_v$sets_same, cmp_v$rho,
+              cmp_v$n_linchpins_retained, cmp_v$n_linchpins_baseline,
+              cmp_v$label))
+  if (nzchar(cmp_v$linchpins_lost)) {
+    cat("          linchpins lost:   ", cmp_v$linchpins_lost, "\n", sep = "")
+  }
+  if (nzchar(cmp_v$linchpins_gained)) {
+    cat("          linchpins gained: ", cmp_v$linchpins_gained, "\n", sep = "")
+  }
+}
+net_cmp <- do.call(rbind, net_cmp_rows)
+rownames(net_cmp) <- NULL
+
+# ---- Labels by choice (fixed in Decision 19 point 10) ---------------------------
+net_choice <- tapply(net_cmp$label == "robust", net_cmp$tests, all)
+net_choice_label <- ifelse(net_choice, "robust", "sensitive")
+cat(sprintf(paste0("limits: rho >= %s, linchpin retention >= %.3f (judgement ",
+                   "values, Decision 19)\n"),
+            format(NET_COMPARE_ROBUST_MIN_RHO), NET_COMPARE_ROBUST_MIN_RETENTION))
+for (ch in names(net_choice_label)) {
+  cat(sprintf("label — %s: %s (variants: %s)\n", ch, net_choice_label[[ch]],
+              paste(net_cmp$variant[net_cmp$tests == ch], collapse = ", ")))
+}
+write_table(net_cmp, 13, "network_variant_comparison")
+
+# ---- Variant columns and stable_linchpin in the metrics table --------------------
+stable <- net_met$linchpin
+for (v in NET_COMPARE_VARIANTS) {
+  if (!identical(net_var_met[[v]]$node_id, net_met$node_id)) {
+    stop("Variant '", v, "' does not have the nodes of the baseline.",
+         call. = FALSE)
+  }
+  net_met[[paste0("betweenness_norm_", v)]] <- net_var_met[[v]]$betweenness_norm
+  stable <- stable & net_var_met[[v]]$linchpin
+}
+for (v in NET_COMPARE_VARIANTS) {
+  net_met[[paste0("linchpin_", v)]] <- net_var_met[[v]]$linchpin
+}
+net_met$stable_linchpin <- stable
+
+stab_show <- merge(net_node_names,
+                   net_met[, c("node_id", "set_id", "betweenness_rank",
+                               "linchpin",
+                               paste0("linchpin_", NET_COMPARE_VARIANTS),
+                               "stable_linchpin")], by = "node_id")
+any_lp <- rowSums(stab_show[, c("linchpin",
+                                paste0("linchpin_", NET_COMPARE_VARIANTS))]) > 0
+cat(sprintf("stable linchpins (on all %d surfaces): %d of %d baseline linchpins\n",
+            length(NET_COMPARE_VARIANTS) + 1L, sum(net_met$stable_linchpin),
+            sum(net_met$linchpin)))
+cat("nodes that are a linchpin on one surface or more:\n")
+print(stab_show[any_lp, c("set_id", "node_name", "linchpin",
+                          paste0("linchpin_", NET_COMPARE_VARIANTS),
+                          "stable_linchpin")][order(
+                            stab_show$set_id[any_lp],
+                            stab_show$betweenness_rank[any_lp]), ],
+      row.names = FALSE)
+
+metrics_out <- cbind(
+  net_nodes[, c("unit_id", "unit_name", "network_group", "node_id", "node_name",
+                "block_size")],
+  net_met[k_met, setdiff(names(net_met), "node_id")])
+metrics_out <- metrics_out[order(metrics_out$unit_id), ]
+rownames(metrics_out) <- NULL
+if (nrow(metrics_out) != NET_EXPECTED_RESERVES ||
+    anyDuplicated(metrics_out$unit_id)) {
+  stop("Metrics table: ", nrow(metrics_out), " rows, expected one row for ",
+       "each of the ", NET_EXPECTED_RESERVES, " network reserves.",
+       call. = FALSE)
+}
+write_table(metrics_out, 13, "network_metrics")
+rule(sprintf("STEP 11.3 done — labels: %s. Next: STEP 11.4 network QA (task 11.5).",
+             paste(sprintf("%s %s", sub(" \\(Decision.*$", "",
+                                        names(net_choice_label)),
+                           net_choice_label), collapse = "; ")))
+
+# =============================================================================
+# STEP 11.4 — network QA (task 11.5; Decision 19 point 11)
+# =============================================================================
+# 1. Collected: the construction checks of the four surfaces (STEPs 11.1 and
+#    11.3) and the self-test on the hand-computed graph (STEP 11.2).
+# 2. On each surface: result checks on the metrics; the betweenness identity
+#    (the sum of betweenness in a set against the shortest paths of the graph,
+#    without betweenness()); each edge weight against the layer.
+# 3. Baseline: block members share the node values; the second run; the
+#    threshold scan; bridges; the variant flags.
+# 4. The tables on disk have the rows that this run wrote.
+# The table is written first; then any failure stops the script.
+rule("STEP 11.4 — network QA -> tbl_13_network_qa.csv")
+
+qa_row <- function(surface, check, value, pass) {
+  data.frame(surface = surface, check = check, value = as.character(value),
+             pass = isTRUE(pass), stringsAsFactors = FALSE)
+}
+qa_tag <- function(surface, tbl) {
+  data.frame(surface = surface, tbl[, c("check", "value", "pass")],
+             stringsAsFactors = FALSE)
+}
+net_base_cols <- c("node_id", "set_id", "set_size", "set_reserves", "degree",
+                   "betweenness_raw", "betweenness_norm", "betweenness_rank",
+                   "linchpin", "cut_node", "isolated", "pendant",
+                   "cheapest_link_rkm", "cheapest_link_rank")
+qa_surfaces <- c(
+  stats::setNames(list(list(chk = net_chk, g = net_g, paths = paths_net_base,
+                            met = net_met[, net_base_cols])), NET_BASE_SURFACE),
+  lapply(stats::setNames(NET_COMPARE_VARIANTS, NET_COMPARE_VARIANTS),
+         function(v) list(chk = net_var_chk[[v]], g = net_var_g[[v]],
+                          paths = net_var_paths[[v]], met = net_var_met[[v]])))
+
+# ---- 11.4a Self-test (collected) --------------------------------------------------
+net_qa <- qa_row("test graph", "hand-computed self-test of the metric and scan functions",
+                 sprintf("%d of %d cases", sum(net_st$pass), nrow(net_st)),
+                 all(net_st$pass))
+
+# ---- 11.4b Each surface ------------------------------------------------------------
+for (sf_name in names(qa_surfaces)) {
+  q   <- qa_surfaces[[sf_name]]
+  idn <- net_betweenness_identity(q$g, q$met)
+  net_qa <- rbind(
+    net_qa,
+    qa_tag(sf_name, q$chk),
+    qa_tag(sf_name, net_check_metrics(q$met, NET_NORM_MIN_SET_NODES,
+                                      NET_LINCHPIN_TOP_N)),
+    qa_row(sf_name,
+           "sum of betweenness = nodes between the ends of the shortest paths, by set",
+           paste(sprintf("set %d: %s = %s", idn$set_id,
+                         trimws(format(round(idn$sum_betweenness, 6))),
+                         trimws(format(round(idn$sum_path_nodes, 6)))),
+                 collapse = "; "),
+           all(idn$pass)),
+    qa_tag(sf_name, net_check_weights(q$g, q$paths, NET_EDGE_WEIGHT_FIELD)))
+}
+
+# ---- 11.4c Baseline results ---------------------------------------------------------
+n_nodes_net <- length(unique(net_nodes$node_id))
+n_sets_net  <- length(unique(net_met$set_id))
+node_rows   <- unique(metrics_out[, setdiff(names(metrics_out),
+                                            c("unit_id", "unit_name"))])
+net_qa <- rbind(
+  net_qa,
+  qa_row(NET_BASE_SURFACE, "metrics table: one row for each network reserve",
+         nrow(metrics_out),
+         nrow(metrics_out) == NET_EXPECTED_RESERVES &&
+           !anyDuplicated(metrics_out$unit_id)),
+  qa_row(NET_BASE_SURFACE, "the reserves of one block have the same node values",
+         sprintf("%d different rows, %d nodes", nrow(node_rows), n_nodes_net),
+         nrow(node_rows) == n_nodes_net),
+  qa_row(NET_BASE_SURFACE, "each bridge is in the minimum spanning forest",
+         sprintf("%d bridges", sum(net_flags$is_bridge)),
+         all(net_flags$in_mst[net_flags$is_bridge])),
+  qa_row(NET_BASE_SURFACE, "spanning-forest edges = nodes - sets",
+         sprintf("%d = %d - %d", sum(net_flags$in_mst), n_nodes_net, n_sets_net),
+         sum(net_flags$in_mst) == n_nodes_net - n_sets_net))
+
+if (isTRUE(NET_NOCROSS_RERUN)) {
+  # Without some links, a set can only divide: each second-run set must be
+  # inside one set of the main graph.
+  nc_in_main <- tapply(net_met$set_id, net_met$set_id_nocross,
+                       function(x) length(unique(x)))
+  net_qa <- rbind(
+    net_qa,
+    qa_row(NET_BASE_SURFACE, "second run: each set is inside one set of the main graph",
+           sprintf("%d sets", length(nc_in_main)), all(nc_in_main == 1L)),
+    qa_row(NET_BASE_SURFACE, "cross_group_dependent only on a baseline linchpin",
+           sum(net_met$cross_group_dependent),
+           identical(net_met$cross_group_dependent,
+                     net_met$linchpin & !net_met$linchpin_nocross)))
+}
+if (isTRUE(NET_THRESHOLD_SCAN)) {
+  net_qa <- rbind(
+    net_qa,
+    qa_row(NET_BASE_SURFACE, "scan: one row per edge, cost does not decrease",
+           nrow(scan_out),
+           nrow(scan_out) == igraph::ecount(net_g) &&
+             !is.unsorted(scan_out$threshold_rkm)),
+    qa_row(NET_BASE_SURFACE, "scan: joining edges = nodes - sets; the last n_sets = the sets",
+           sprintf("%d joining, %d sets at the end", sum(scan_out$joins_sets),
+                   scan_out$n_sets[nrow(scan_out)]),
+           sum(scan_out$joins_sets) == n_nodes_net - n_sets_net &&
+             scan_out$n_sets[nrow(scan_out)] == n_sets_net))
+}
+lp_all <- Reduce(`&`, c(list(net_met$linchpin),
+                        lapply(NET_COMPARE_VARIANTS,
+                               function(v) net_var_met[[v]]$linchpin)))
+net_qa <- rbind(
+  net_qa,
+  qa_row("all", "stable_linchpin = a linchpin on the baseline and each variant",
+         sum(net_met$stable_linchpin),
+         identical(net_met$stable_linchpin, lp_all)),
+  qa_row("all", "variant labels are robust or sensitive; one row per variant",
+         paste(net_cmp$variant, net_cmp$label, collapse = "; "),
+         all(net_cmp$label %in% c("robust", "sensitive")) &&
+           identical(net_cmp$variant, NET_COMPARE_VARIANTS)))
+
+# ---- 11.4d Tables on disk -------------------------------------------------------------
+qa_disk <- list(network_links = nrow(links_out),
+                network_metrics = nrow(metrics_out),
+                network_variant_comparison = nrow(net_cmp))
+if (isTRUE(NET_THRESHOLD_SCAN)) {
+  qa_disk$network_threshold_scan <- nrow(scan_out)
+}
+for (slug in names(qa_disk)) {
+  f <- file.path(DIR_TABLES, sprintf("tbl_13_%s.csv", slug))
+  n_disk <- if (file.exists(f)) nrow(utils::read.csv(f)) else NA_integer_
+  net_qa <- rbind(net_qa,
+                  qa_row("all", sprintf("on disk: %s", basename(f)),
+                         sprintf("%s rows, %d expected", n_disk, qa_disk[[slug]]),
+                         !is.na(n_disk) && n_disk == qa_disk[[slug]]))
+}
+rownames(net_qa) <- NULL
+
+# ---- 11.4e Report, write, stop on failure -----------------------------------------------
+qa_sum <- stats::aggregate(pass ~ surface, data = net_qa,
+                           FUN = function(x) sprintf("%d of %d", sum(x), length(x)))
+qa_sum <- qa_sum[match(unique(net_qa$surface), qa_sum$surface), ]
+names(qa_sum)[2] <- "checks_passed"
+print(qa_sum, row.names = FALSE)
+idn_rows <- grepl("^sum of betweenness", net_qa$check)
+cat("betweenness identity (sum of betweenness = nodes between the ends of the",
+    "shortest paths):\n")
+for (i in which(idn_rows)) {
+  cat(sprintf("  %-9s %s\n", net_qa$surface[i], net_qa$value[i]))
+}
+write_table(net_qa, 13, "network_qa")
+if (!all(net_qa$pass)) {
+  cat("FAILED checks:\n")
+  print(net_qa[!net_qa$pass, ], row.names = FALSE, right = FALSE)
+  stop("Network QA failed: ", sum(!net_qa$pass), " check(s). See ",
+       "tbl_13_network_qa.csv.", call. = FALSE)
+}
+rule(sprintf(paste0("STEP 11.4 done — network QA: %d of %d checks pass. ",
+                    "Week-11 STEPs complete."),
+             sum(net_qa$pass), nrow(net_qa)))

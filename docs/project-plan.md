@@ -535,8 +535,8 @@ is complete and publishable on its own. Docs updated; Week 7 ticked.
 | **8** | Covariate stack | `scripts/06` output: land cover, terrain, gHM, dist-to-road aligned to one 1 km grid | 3–4 h |
 | **9** ✅ | Resistance surface | **Decisions 11–16**; `scripts/07_connectivity.R` STEPs 9.2 + 9.5–9.8 → four resistance surfaces (`baseline`, `noghm`, `road15`, `road50`) + `tbl_11_resistance_qa.csv` | 2–3 h planned; ~4× as run |
 | **10** ✅ | Least-cost paths | **Decisions 17–18**; `scripts/07_connectivity.R` STEPs 10.0–10.5 → 106 pairs, paths on four surfaces (`lcp_reserve_network_7755.gpkg`), validation, QA, Decision-18 comparison, NTCA overlap (`tbl_12_*`); `scripts/02` Amrabad split | 3–4 h planned; well over as run |
-| **11** | Reserve network graph | **Decision 19** (functional links) first; `scripts/07_connectivity.R` STEPs 11.1–11.4: link table, `igraph` metrics — betweenness (linchpins), components (isolated reserves) → `tbl_13_*` | 3–4 h |
-| **12** | Pinch points + visuals | `scripts/07_connectivity.R` pinch-point STEPs: road-crossing pinch points; `fig_04` network figure; `tbl_03` metrics | 3–4 h |
+| **11** ✅ | Reserve network graph | **Decision 19**; `scripts/07_connectivity.R` STEPs 11.1–11.4 with `R/00_functions_network.R` → 47 nodes (56 reserves), 73 edges, 3 sets; node metrics, second run without cross-group links, threshold scan, Decision-19 variant comparison, network QA (`tbl_13_*`); literature check | 3–4 h planned; as-run time not recorded |
+| **12** | Pinch points + visuals | **Decision 20** (pinch-point rule) first; `scripts/07_connectivity.R` pinch-point STEPs: road crossings of the paths, pinch points, QA (`tbl_14_*`); the publishable `tbl_03`; the network figure `fig_04` | 3–4 h planned; the task estimates add up to 5.5–7.7 h (split point after task 12.6) |
 
 **Script plan (fixed 2026-09-26):** all of Stage 2 from Week 9 on is **one
 script, `scripts/07_connectivity.R`**, with one STEP block per task (STEP 9.x,
@@ -796,7 +796,7 @@ metric), both numbered and both before the paths they govern.
 `tbl_12_lcp_ntca_overlap.csv` and `tbl_12_lcp_ntca_corridors.csv` written; every pair accounted for; 56 reserves with geometry. Ready for
 Week 11 (network graph). Docs updated; Week 10 ticked.
 
-### Week 11 — task breakdown
+### Week 11 — task breakdown *(complete)*
 
 Entry state (as of Week-10 close, 2026-10-03): `lcp_reserve_network_7755.gpkg`
 with layers `baseline`, `noghm`, `road15`, `road50` — 106 pairs each (97 paths,
@@ -811,25 +811,26 @@ pending → "[Week 11] Functional-link rule"): how a pair counts as a link, and
 whether the network metrics are repeated on the variants.
 
 Week 11 adds the network STEPs to `scripts/07_connectivity.R`: a link table
-from the baseline paths, an `igraph` graph of the 56 reserves, and per-reserve
+from the baseline paths, an `igraph` graph of 47 nodes (the 56 reserves, with
+contiguous reserves merged into blocks — Decision 19 point 2), and per-reserve
 metrics — betweenness (linchpin reserves) and components (isolated reserves).
 Week 12 finds road pinch points on the paths and draws the network figure.
 
 Naming (naming-conventions §2/§6): link and metric tables `tbl_13_*` (a new
 group). `tbl_03` stays reserved for the Week-12 publishable network table. The
-graph object is not written to disk; it is rebuilt from the link table on each
+graph object is not written to disk; it is rebuilt from the paths layer on each
 run.
 
 | # | Task | Done when | Est. |
 |---|---|---|---|
-| 11.1 | **Functional-link Decision (numbered — Decision 19), before any network metric.** Research, raise the forks, record the choices: (a) which in-network pairs are links — all of them with the cost as the edge weight, or only those below a cost threshold (and from what evidence); (b) the edge weight (cost-distance, resistance-km) and the treatment of the 9 contiguous pairs (cost 0); (c) the metrics — degree, weighted betweenness (linchpins), components (isolated reserves) — and their normalisation across the 3 connected sets; (d) the definition of "isolated"; (e) whether the metrics are repeated on `noghm`, `road15`, `road50`, and if so the comparison metric, fixed now as Decision 18 did for the paths; (f) how the `network_group` labels enter (reporting only, Decision 17 point 8) | Decision 19 recorded in methodology; settings in `R/00_config.R` | 45–60 min |
-| 11.2 | STEP 11.1 in `scripts/07`: the link table from the `baseline` layer (`in_network == TRUE`; contiguous pairs per Decision 19) → `tbl_13_network_links.csv`; the `igraph` graph (56 nodes) | Link table written; 56 nodes; every edge traces to one `pair_id` | 30–45 min |
-| 11.3 | STEP 11.2: per-reserve metrics per Decision 19 → `tbl_13_network_metrics.csv` (`unit_id`, name, `network_group`, degree, betweenness raw and normalised, component id and size, isolated flag) | Metrics table written; one row per network reserve | 30–45 min |
-| 11.4 | STEP 11.3 — **only if Decision 19 point (e) says so**: the same metrics on the three variant surfaces, compared by the pre-fixed metric → `tbl_13_network_variant_comparison.csv` | Comparison written by the fixed metric; labels applied as fixed | 30–45 min |
-| 11.5 | STEP 11.4: network QA — no self-loops or duplicate edges; edge weights as Decision 19 says (none negative or `NA`); node set = the 56 network reserves; component sizes add up to 56; betweenness checked on a small hand-computed graph | QA passes; any failure stops the script | 20–30 min |
-| 11.6 | *(Optional, as done for the Week-10 extremes)* Literature check of the top-betweenness and the isolated reserves (descriptive) → `references.md` | Each named reserve has a source or a "no source found" note | 30–45 min |
-| 11.7 | Update `data-dictionary.md` (`tbl_13_*`), `methodology.md` (Decision 19 + Week-11 change log), `naming-conventions.md` §6 (`tbl_13` group), `README.md`/handoff (Week 11 status, entry point for Week 12) | Docs match as-built | 20–30 min |
-| 11.8 | Commit (`analysis:` for `07`, config, functions; outputs; `docs:` separate; `docs: update handoff after Week 11` with the plan) | Committed and pushed | 10 min |
+| 11.1 ✅ | **Functional-link Decision (numbered — Decision 19), before any network metric.** Research, raise the forks, record the choices: (a) which in-network pairs are links — all of them with the cost as the edge weight, or only those below a cost threshold (and from what evidence); (b) the edge weight (cost-distance, resistance-km) and the treatment of the 9 contiguous pairs (cost 0); (c) the metrics — degree, weighted betweenness (linchpins), components (isolated reserves) — and their normalisation across the 3 connected sets; (d) the definition of "isolated"; (e) whether the metrics are repeated on `noghm`, `road15`, `road50`, and if so the comparison metric, fixed now as Decision 18 did for the paths; (f) how the `network_group` labels enter (reporting only, Decision 17 point 8) | Decision 19 recorded in methodology; settings in `R/00_config.R` *(done 2026-10-03: a1 + a4, b1, c1 + k3, d2, e2, f2 — all in-network pairs are links, cost as the weight, no threshold; contiguous reserves merge, 56 reserves → 47 nodes; betweenness normalised by the node's own set; `linchpin` = top 3 in the set, `cut_node` next to it; `isolated` = degree 0, with `pendant` and the cheapest-link cost; a descriptive threshold scan; a second baseline run without cross-group links; variants repeated — "robust" if the sets are the same, ρ ≥ 0.9 and linchpin retention ≥ 2/3)* | 45–60 min |
+| 11.2 ✅ | STEP 11.1 in `scripts/07`: the nodes (blocks of contiguous reserves, Decision 19 point 2); the link table from the `baseline` layer (`in_network == TRUE`, each pair with its `link_role` — Decision 19 point 3) → `tbl_13_network_links.csv`; the `igraph` graph (47 nodes from 56 reserves) | Link table written; 47 nodes, 56 reserves; every edge traces to one `pair_id` *(done 2026-10-04: new `R/00_functions_network.R`; 85 in-network pairs — 9 `block`, 0 `within_block`, 73 `edge`, 3 `parallel`; 47 nodes, 73 edges, no node without an edge; 3 sets of 33, 8 and 6 nodes, the same sets as all 106 pairs; 13 bridges; 44 edges in the minimum spanning forest; 10 of 10 construction checks pass)* | 30–45 min |
+| 11.3 ✅ | STEP 11.2: per-reserve metrics per Decision 19 points 4–7 → `tbl_13_network_metrics.csv` (`unit_id`, name, `network_group`, node id and name, set id and size, degree, betweenness raw, normalised and rank, `linchpin`, `cut_node`, `isolated`, `pendant`, cheapest-link cost and rank); the second run without cross-group links (point 9; `_nocross` columns, `cross_group_dependent`); the threshold scan (point 8) → `tbl_13_network_threshold_scan.csv` | Metrics table written, one row per network reserve (56); scan table written, one row per baseline edge *(done 2026-10-04: the hand-computed self-test of Decision 19 point 11 runs at the start of this STEP, 17 of 17 cases; 8 linchpin nodes — set 1: Madhav, Guru Ghasidas-Tamor Pingla, Sanjay Dubri; set 2: the Bandipur block, Bhadra, Parambikulam + Anamalai; set 3: Pakke + Nameri, Orang; 12 cut nodes; no isolated node; 6 pendant nodes; second run: 1 cross-group link removed, sets of 29, 8, 6 and 4 nodes, Madhav is `cross_group_dependent`; Sariska has `betweenness_norm` 0.2258, the value from the pair layout; scan: 73 rows, 44 joining edges)* | 30–45 min |
+| 11.4 ✅ | STEP 11.3 — **required (Decision 19 point 10)**: the same metrics on the three variant surfaces, compared by the pre-fixed metric (sets the same; Spearman ρ of normalised betweenness; linchpin retention) → `tbl_13_network_variant_comparison.csv`; `stable_linchpin` added to the metrics table | Comparison written by the fixed metric; labels applied as fixed *(done 2026-10-04: `noghm` — sets the same, ρ 0.941, 7 of 8 linchpins retained, robust; `road15` — sets the same, ρ 0.979, 8 of 8, robust; `road50` — sets the same, ρ 0.995, 7 of 8, robust. By the Decision-19 rule: gHM multiplier robust; road value robust. 7 stable linchpins; Sanjay Dubri is not stable — Pench (MH) is a linchpin in its place on `noghm` and `road50`. The metrics table has 7 more columns, 32 in all)* | 30–45 min |
+| 11.5 ✅ | STEP 11.4: network QA (Decision 19 point 11) — no self-loops or duplicate edges; edge weights all above zero (none `NA`); each of the 56 network reserves in one node only; 47 nodes; set sizes add up to 47 nodes and 56 reserves; betweenness and the per-set normalisation checked on a small hand-computed graph | QA passes; any failure stops the script *(done 2026-10-04: the construction checks run in STEP 11.1 and, for each variant, in STEP 11.3; the hand-computed self-test runs in STEP 11.2; STEP 11.4 collects them and adds result checks — the flags, the betweenness identity from the shortest paths, the edge weights, the second run, the scan, the tables on disk — and writes `tbl_13_network_qa.csv` (process choice q1); 91 of 91 checks pass)* | 20–30 min |
+| 11.6 ✅ | *(Optional, as done for the Week-10 extremes)* Literature check of the top-betweenness and the isolated reserves (descriptive) → `references.md` | Each named reserve has a source or a "no source found" note *(done 2026-10-04: 19 named nodes in a table, 11 new entries; three "no source found" notes — Madhav centrality, Orang–Dampa, a northern link of Nagarjunsagar-Srisailam + Amrabad; two data items kept as limitations, author choice g1 — Guru Ghasidas-Tamor Pingla and Sanjay Dubri are 1.59 km apart in the KML, BRT is 10.1 km from Sathyamangalam)* | 30–45 min |
+| 11.7 ✅ | Update `data-dictionary.md` (`tbl_13_*`), `methodology.md` (Decision 19 + Week-11 change log), `naming-conventions.md` §6 (`tbl_13` group), `README.md`/handoff (Week 11 status, entry point for Week 12) | Docs match as-built *(done 2026-10-04: also the Limitations, a new pending item "[Week 12] Pinch-point rule", and `references.md`)* | 20–30 min |
+| 11.8 ✅ | Commit (`analysis:` for `07`, config, functions; outputs; `docs:` separate; `docs: update handoff after Week 11` with the plan) | Committed and pushed *(done 2026-10-04)* | 10 min |
 
 **Week 11 pitfalls:**
 - **Decision 19 before any metric — and the path costs are already seen.** The
@@ -859,13 +860,110 @@ run.
 - **PROJ `proj.db` clash still applies** — fresh session.
 
 **Decision due this week:** **19** (functional links), numbered, before any
-network metric.
+network metric. *(Recorded 2026-10-03.)*
 
-**Exit state:** Decision 19 recorded; `tbl_13_network_links.csv` and
-`tbl_13_network_metrics.csv` written (and `tbl_13_network_variant_comparison.csv`
-if Decision 19 point (e) says so); network QA passes; linchpin and isolated
-reserves named; docs updated; Week 11 ticked. Ready for Week 12 (pinch points,
+**Exit state:** Decision 19 recorded; `tbl_13_network_links.csv`,
+`tbl_13_network_metrics.csv`, `tbl_13_network_threshold_scan.csv`,
+`tbl_13_network_variant_comparison.csv` and `tbl_13_network_qa.csv` written; network QA passes; linchpin
+and isolated reserves named (or "no reserve is isolated by the rule", with the
+pendant nodes); docs updated; Week 11 ticked. Ready for Week 12 (pinch points,
 `fig_04`, the publishable `tbl_03`).
+
+### Week 12 — task breakdown
+
+Entry state (as of Week-11 close, 2026-10-04): the reserve network of Decision
+19 — 47 nodes (56 reserves), 73 edges, 3 sets, 13 bridges
+(`tbl_13_network_links.csv`); node metrics with the linchpin, cut-node, pendant
+and cheapest-link columns, the second-run and variant flags
+(`tbl_13_network_metrics.csv`); network QA 91 of 91. The paths are in
+`lcp_reserve_network_7755.gpkg` (four layers, 106 pairs each; on the baseline
+85 pairs are in the network, 76 of them with a path and 9 contiguous). The
+road input of Decision 15 is `data/raw/osm/osm_roads_major_7755.gpkg`
+(885,669 features; the barrier classes are motorway to secondary, with
+`_link` merged into the parent class). **No road crossing is computed yet:**
+the paths layer and the `tbl_12_*` / `tbl_13_*` tables hold no road field.
+**Raised, not decided** (methodology → Decisions pending → "[Week 12]
+Pinch-point rule").
+
+Week 12 adds the pinch-point STEPs to `scripts/07_connectivity.R`: the places
+where the least-cost paths cross barrier roads, a rule that names pinch points
+among them, the publishable network table and the network figure. Week 12
+closes Stage 2 (proposal question 2).
+
+Naming (naming-conventions §2/§6): working tables `tbl_14_*` (a new group, the
+next free number); the publishable table `tbl_03_<slug>.csv` (number reserved
+since Week 10); the figure `fig_04_<slug>.png`. `fig_03` is not in use — see
+the pitfalls.
+
+**Size.** The estimates add up to about 5.5–7.7 hours (4.4–6.2 without the
+two optional tasks, 12.5 and 12.9), above one week of 2–4 hours. A split point
+is marked after task 12.6: crossings, pinch points and QA
+first; the publishable table, the figure and the Stage-2 close second.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 12.1 | **Pinch-point Decision (numbered — Decision 20), before any road crossing is computed.** Research, raise the forks, record the choices: (a) the roads — the four barrier classes of Decision 15 or a subset, and the `_link` rule; (b) the paths — all 76 in-network baseline paths (73 `edge` + 3 `parallel`), the 73 edges only, or the 13 bridges; what to do with `parallel` links and with links that have no literature support; (c) what one crossing is — path cells that are barrier-road cells (the form the engine used) or a line-on-line intersection; how crossings of the same road that are close together are merged; (d) what a pinch point is and how it is ranked — for example a crossing on a bridge, a road section that more than one path crosses, the road class — with no traffic data; (e) whether the crossings are repeated on the variant surfaces, with a comparison fixed in advance; (f) what the publishable `tbl_03` and `fig_04` hold, and the position precision of a published crossing (sensitive-data policy §3); (g) a statement of what was seen before the Decision (the network results are seen; no crossing is) | Decision 20 recorded in methodology; settings in `R/00_config.R` | 45–60 min |
+| 12.2 | Process choices before code (not numbered): how the road layer is read (each run, or one interim barrier-road layer and a run switch); where the functions go; the `tbl_14_*` slugs. Then STEP 12.1 in `scripts/07`: the barrier roads for the crossing step, by the same class rule as STEP 9.6 and Decision 20 point (a), with a guard against `tbl_11_resistance_qa.csv` (`n_road_cells`) | Road input ready; the cell count agrees with the Week-9 surfaces | 20–30 min |
+| 12.3 | STEP 12.2: the crossings of the baseline paths per Decision 20 points (b)–(c) → `tbl_14_road_crossings.csv` (one row per crossing: `pair_id`, the two nodes, `link_role`, `is_bridge`, road class, road reference or name if the layer has one, position at the fixed precision) | Table written; each crossing traces to one `pair_id` and one road | 45–60 min |
+| 12.4 | STEP 12.3: the pinch-point rule of Decision 20 point (d) applied to the crossings; summaries per link and per node → `tbl_14_pinch_points.csv` | Table written; labels applied as fixed | 30–45 min |
+| 12.5 | STEP 12.4 — **only if Decision 20 point (e) says so**: the same on the variant surfaces, compared by the pre-fixed metric → `tbl_14_pinch_variant_comparison.csv` | Comparison written by the fixed metric | 30–45 min |
+| 12.6 | STEP 12.5: QA — the crossing and pinch-point functions on a hand-made case first (a known path, a known road, a known count); then each crossing lies on a path and on a barrier road; no crossing for a contiguous pair; counts per link add up to the table total → `tbl_14_pinch_qa.csv`; any failure stops the script | QA passes | 20–30 min |
+| — | **Split point** (if the week is over 4 hours): commit tasks 12.1–12.6; continue with 12.7 in the next session | — | — |
+| 12.7 | STEP 12.6: the publishable table `tbl_03_<slug>.csv` per Decision 20 point (f) — network results per reserve from `tbl_13_network_metrics.csv` (node, set, linchpin with its flags, cut node, pendant, cheapest link) and the pinch-point summary; publish checks of the sensitive-data policy §3 | `tbl_03` written; publish checks pass; no precise coordinate | 20–30 min |
+| 12.8 | STEP 12.7: the network figure `fig_04_<slug>.png` per Decision 20 point (f) — nodes, edges, linchpins with their flags, bridges, pinch points. The caption states that the paths are modelled and not observed movement, that the surface is India-only, and the limits of the linchpin labels | Figure written; caption has the caveats; publish checks pass | 45–60 min |
+| 12.9 | *(Optional, as done in Weeks 10 and 11)* Literature check of the named pinch points (documented road and corridor conflicts, mitigation structures) → `references.md` | Each named pinch point has a source or a "no source found" note | 30–45 min |
+| 12.10 | Update `data-dictionary.md` (`tbl_14_*`, `tbl_03`, `fig_04`), `methodology.md` (Decision 20, Week-12 change log, Limitations, a Stage-2 summary against proposal question 2), `proposal.md` §8 if a stated choice changed, `naming-conventions.md` §6, `README.md`/handoff (Stage 2 complete; entry point for Week 13) | Docs match as-built | 30–45 min |
+| 12.11 | Commit (`analysis:` for `07`, config, functions, outputs; `docs:` separate; `docs: update handoff after Week 12` with the plan) | Committed and pushed | 10 min |
+
+**Week 12 pitfalls:**
+- **Decision 20 before any crossing — and the network results are already
+  seen.** The linchpins, the bridges and the path routes are known. No road
+  crossing is. Fix the roads, the crossing rule and the pinch-point rule
+  first, and say in the Decision what was seen.
+- **A path is a line through 1 km cell centres.** A line-on-line intersection
+  with an OSM road has an error of about 1 km, and a path that runs along a
+  road can cross it many times. The engine saw the roads as cells
+  (`touches = TRUE`). Define a crossing in the terms of the surface, or give
+  the reason for a different rule.
+- **Knight steps cross cells between two path vertices.** The cells that a
+  16-neighbour step crosses are not all path vertices. Use the crossed-cells
+  rule of the engine (`R/00_functions_lcp.R`) to list the cells of a path.
+- **The road layer is large and STEP 9.6 does not run** (`RUN_RESISTANCE <-
+  FALSE`). The crossing step needs its own road read; plan it (task 12.2).
+- **No traffic data.** The Bay Area project had traffic counts; this project
+  has the OSM road class only. Do not call a class a traffic volume.
+- **Which paths.** 85 baseline pairs are in the network: 9 `block` (no path),
+  73 `edge`, 3 `parallel`. The 21 pairs that P3 removed have paths too.
+  Decision 20 point (b) fixes the set.
+- **Links without literature support give crossings too** (Orang–Dampa,
+  Anamalai–Srivilliputhur-Megamalai, Sariska–Rajaji; Limitations). Flag them
+  in the tables; do not drop them without a rule.
+- **Roads inside a reserve or a block are not counted.** The paths are edge
+  to edge, and a contiguous pair has no path. Say so where pinch points are
+  named.
+- **Road variants.** `road15` and `road50` change the road value. Decision 18
+  found the routes robust, but a crossing can move. Decision 20 point (e)
+  fixes whether to test it.
+- **Rows against nodes.** `tbl_13_network_metrics.csv` has 56 rows and 47
+  nodes. Count and draw by `node_id`.
+- **Publication.** The sensitive-data policy §3 allows no precise coordinate
+  in a figure, table or caption. A crossing is a modelled path on a public
+  road, not a tiger location; fix its published precision in Decision 20
+  point (f) before `tbl_03` and `fig_04` are built.
+- **Numbers.** `tbl_03` is reserved for the publishable table. `fig_03` is
+  not in use and the plan names `fig_04` — confirm the figure number before
+  the file is written (naming §6).
+- **PROJ `proj.db` clash still applies** — fresh session.
+
+**Decision due this week:** **20** (pinch-point rule), numbered, before any
+road crossing is computed.
+
+**Exit state:** Decision 20 recorded; `tbl_14_road_crossings.csv`,
+`tbl_14_pinch_points.csv` and `tbl_14_pinch_qa.csv` written (and
+`tbl_14_pinch_variant_comparison.csv` if Decision 20 point (e) says so);
+`tbl_03_<slug>.csv` and `fig_04_<slug>.png` written and through the publish
+checks; docs updated; Week 12 ticked; Stage 2 complete. Ready for Week 13
+(Stage 3, habitat suitability).
 
 ---
 
@@ -944,6 +1042,7 @@ deliverable exists.
 | 8 | Covariate stack (Stage 2 start) | ✅ Complete |
 | 9 | Resistance surfaces (Decisions 11–16) | ✅ Complete |
 | 10 | Least-cost paths + variant comparison | ✅ Complete |
-| 11–12 | Network graph + pinch points | ⚪ Not started |
+| 11 | Reserve network graph (Decision 19) | ✅ Complete |
+| 12 | Pinch points + network figure | ⚪ Not started |
 | 13–16 | Suitability track | ⚪ Not started |
 | 17–20 | Site + close | ⚪ Not started |

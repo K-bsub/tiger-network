@@ -670,6 +670,119 @@ path.
 | `n_paths` | integer | Baseline paths that intersect it |
 | `pair_ids` | character | Their `pair_id`s, `;`-separated |
 
+## tbl_13_network_links.csv  *(Week 11 — built, task 11.2)*
+
+Written by `scripts/07_connectivity.R` STEP 11.1 (Decision 19 points 1–3;
+`R/00_functions_network.R`). One row per **baseline** pair with
+`in_network == TRUE` (85 as built). Pairs that are not in the network are not
+in this table (see `tbl_12_lcp_qa.csv`).
+
+**As built (2026-10-04):** 85 rows — 9 `block`, 0 `within_block`, 73 `edge`,
+3 `parallel`; 13 bridges; 44 edges in the minimum spanning forest.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `pair_id`, `surface`, `from_unit_id`, `from_name`, `to_unit_id`, `to_name`, `from_group`, `to_group`, `cross_group`, `contiguous`, `gap_km`, `path_km` | — | From the `baseline` layer of `lcp_reserve_network_7755.gpkg` |
+| `cost_rkm` | numeric | Cost-distance, resistance-km. The edge weight (a distance: a higher value is a longer path). 0 for a contiguous pair |
+| `from_node_id`, `to_node_id` | integer | The nodes of the two reserves. A node is a block of contiguous reserves or one reserve; `node_id` = the lowest `unit_id` in the node (Decision 19 point 2) |
+| `link_role` | character | `block` — contiguous pair, makes a block, not an edge; `within_block` — not contiguous, both reserves in one block, not an edge; `edge` — the lowest-cost pair between two nodes (a tie: the lowest `pair_id`); `parallel` — another pair between the same two nodes, not an edge (Decision 19 point 3) |
+| `is_bridge` | logical | Without this edge, its set divides (`igraph::bridges()`). `NA` if the row is not an edge |
+| `in_mst` | logical | The edge is in the minimum spanning forest by cost; these are the joining edges of the threshold scan. `NA` if the row is not an edge |
+
+## tbl_13_network_metrics.csv  *(Week 11 — built, tasks 11.3–11.4)*
+
+Written by `scripts/07_connectivity.R` STEP 11.2 and written again by STEP
+11.3 with the variant columns (Decision 19 points 4–7, 9, 10). **One row per
+network reserve (56), but the values are per node (47):** the reserves of one
+block share the values of their node. Count nodes by `node_id`, not by rows.
+All metric columns without a suffix are for the baseline surface.
+
+**As built (2026-10-04):** 8 linchpin nodes (13 reserve rows); 12 cut nodes;
+no isolated node; 6 pendant nodes; 1 `cross_group_dependent` node (Madhav); 7
+stable linchpin nodes.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `unit_id`, `unit_name`, `network_group` | — | The reserve and its reporting group (`NETWORK_GROUPS`) |
+| `node_id`, `node_name`, `block_size` | integer / character / integer | The node of the reserve; the reserve names of the node joined with " + "; the number of reserves in the node |
+| `set_id`, `set_size`, `set_reserves` | integer | The connected set of the node (1 = the largest), its size in nodes, and in reserves |
+| `degree` | integer | Number of edges of the node |
+| `betweenness_raw` | numeric | Weighted shortest-path betweenness, undirected, end points not counted (`igraph::betweenness()`, weight = `cost_rkm`) |
+| `betweenness_norm` | numeric | `betweenness_raw` ÷ ((n − 1)(n − 2) / 2), n = nodes in the node's own set. 0 to 1. `NA` if the set has fewer than 3 nodes |
+| `betweenness_rank` | integer | Rank of `betweenness_norm` in the set; 1 = highest; tied values take the lowest rank number |
+| `linchpin` | logical | `betweenness_rank` ≤ 3 and `betweenness_norm` > 0 (Decision 19 point 6; 3 is a judgement value) |
+| `cut_node` | logical | Articulation point: without the node, its set divides. Not a condition for `linchpin` |
+| `isolated` | logical | `degree` 0 |
+| `pendant` | logical | `degree` 1 |
+| `cheapest_link_rkm` | numeric | Lowest edge weight of the node, resistance-km. `NA` at degree 0 |
+| `cheapest_link_rank` | integer | Rank over all nodes; 1 = the highest `cheapest_link_rkm` |
+| `set_id_nocross`, `set_size_nocross` | integer | The set of the node in the second run, without the pairs that have `cross_group == TRUE` (Decision 19 point 9; baseline only) |
+| `betweenness_norm_nocross`, `betweenness_rank_nocross`, `linchpin_nocross` | numeric / integer / logical | The same metrics in the second run |
+| `cross_group_dependent` | logical | `linchpin` and not `linchpin_nocross` |
+| `betweenness_norm_noghm`, `_road15`, `_road50` | numeric | `betweenness_norm` on each variant surface (Decision 19 point 10) |
+| `linchpin_noghm`, `_road15`, `_road50` | logical | `linchpin` on each variant surface |
+| `stable_linchpin` | logical | A linchpin on the baseline and on all three variants |
+
+## tbl_13_network_threshold_scan.csv  *(Week 11 — built, task 11.3)*
+
+Written by `scripts/07_connectivity.R` STEP 11.2 (Decision 19 point 8). One
+row per baseline edge (73), in cost order (a tie: the lowest `pair_id`).
+**Descriptive: no threshold is chosen and no link is removed.**
+
+**As built (2026-10-04):** 44 joining edges; 3 sets at the end. The last
+joins are Similipal–Sundarbans (2,691), Valmiki–Dudhwa (4,186) and
+Sariska–Rajaji (5,637 resistance-km).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `step` | integer | Position in cost order |
+| `pair_id`, `from_name`, `to_name` | — | The pair that the edge traces to |
+| `threshold_rkm` | numeric | The cost of this edge, resistance-km |
+| `n_sets` | integer | Number of sets when only the edges up to this one are in the graph (47 with no edge) |
+| `largest_set_nodes` | integer | Size of the largest set at this step, nodes |
+| `joins_sets` | logical | The edge joins two sets at this step (= `in_mst` in the link table) |
+
+## tbl_13_network_variant_comparison.csv  *(Week 11 — built, task 11.4)*
+
+Written by `scripts/07_connectivity.R` STEP 11.3 (Decision 19 point 10). One
+row per variant. Each variant graph is built by the same rules as the
+baseline and is compared with the baseline only.
+
+**As built (2026-10-04):** `noghm` ρ 0.941, 7 of 8 retained — robust;
+`road15` ρ 0.979, 8 of 8 — robust; `road50` ρ 0.995, 7 of 8 — robust. The
+sets are the same on all three. Labels by choice (console; no column): gHM
+multiplier robust; road value robust.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `variant` | character | `noghm`, `road15` or `road50` |
+| `tests` | character | The choice that the variant tests: gHM multiplier (Decision 14) or road value (Decision 15) |
+| `n_edges_baseline`, `n_edges_variant` | integer | Edges of the two graphs |
+| `n_edges_changed` | integer | Node pairs with an edge on one surface only, or an edge from a different `pair_id` (descriptive) |
+| `sets_same` | logical | The nodes divide into the same sets |
+| `n_nodes_compared` | integer | Nodes with `betweenness_norm` on both surfaces |
+| `rho` | numeric | Spearman rank correlation of `betweenness_norm`, baseline against variant (tied values take their average rank) |
+| `n_linchpins_baseline`, `n_linchpins_retained`, `linchpin_retention` | integer / integer / numeric | Baseline linchpins; those that are linchpins on the variant; their ratio |
+| `cut_nodes_same` | logical | The cut-node set is the same (descriptive) |
+| `linchpins_lost`, `linchpins_gained` | character | Node names, `;`-separated (descriptive) |
+| `label` | character | `robust` if `sets_same` and `rho` ≥ 0.9 and `linchpin_retention` ≥ 2/3, else `sensitive` (fixed in Decision 19; 0.9 and 2/3 are judgement values) |
+
+## tbl_13_network_qa.csv  *(Week 11 — built, task 11.5)*
+
+Written by `scripts/07_connectivity.R` STEP 11.4 (Decision 19 point 11;
+process choice q1). One row per check (91 as built). The table is written
+first; then any failed check stops the script.
+
+**As built (2026-10-04):** 91 of 91 pass — test graph 1; `baseline` 27;
+`noghm`, `road15`, `road50` 19 each; all 6.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `surface` | character | `test graph` (the hand-computed self-test), `baseline`, `noghm`, `road15`, `road50`, or `all` |
+| `check` | character | What was checked: the 10 construction checks of a surface; 7 result checks on its metrics; the betweenness identity (the sum of betweenness in a set = the nodes between the ends of the shortest paths, from `igraph::all_shortest_paths()`); the edge weights against the layer; for the baseline, the blocks, bridges, second run and scan; for `all`, `stable_linchpin`, the labels and the row counts of the tables on disk |
+| `value` | character | The value that the check found |
+| `pass` | logical | Result of the check |
+
 ## lcp_pair_zones_1km_7755.tif  *(data/interim; Week 10, task 10.4 — QA only)*
 
 The allocation zones of STEP 10.1 on the 1 km EPSG:7755 grid. Value =
@@ -686,4 +799,4 @@ analysis output; kept to check the pairs by eye.
 | `obscured` | logical | Whether the source obscured the coordinate |
 | `source` | character | `gbif` |
 
-*(Further layers — lcp, sdm — documented as they are built.)*
+*(Further layers — sdm — documented as they are built.)*

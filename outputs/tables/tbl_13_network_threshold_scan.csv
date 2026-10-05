@@ -1,0 +1,74 @@
+"step","pair_id","from_name","to_name","threshold_rkm","n_sets","largest_set_nodes","joins_sets"
+1,31,"Guru Ghasidas-Tamor Pingla","Sanjay Dubri",1.52312672138214,46,2,TRUE
+2,57,"Pench","Pench (MH)",14.7168976595355,45,2,TRUE
+3,44,"Biligiri Ranganatha Temple","Sathyamangalam",30.1557131924264,44,2,TRUE
+4,106,"Corbett","Rajaji",70.6933385840452,43,2,TRUE
+5,46,"Periyar","Kalakad-Mundanthurai",98.8246098113007,42,2,TRUE
+6,27,"Achanakmar","Kanha",118.705806633831,41,2,TRUE
+7,9,"Manas","Nameri",140.371807632678,40,2,TRUE
+8,29,"Guru Ghasidas-Tamor Pingla","Palamau",181.466567609614,39,3,TRUE
+9,101,"Anamalai","Srivilliputhur-Megamalai",187.330518130225,38,3,TRUE
+10,60,"Bandhavgarh","Sanjay Dubri",239.463768917291,37,4,TRUE
+11,30,"Guru Ghasidas-Tamor Pingla","Bandhavgarh",245.749317803523,37,4,FALSE
+12,8,"Pakke","Kaziranga",275.090992994739,36,4,TRUE
+13,17,"Indravati","Udanti-Sitanadi",276.266247407646,35,4,TRUE
+14,93,"Ranthambore","Ramgarh Vishdhari",279.609210416649,34,4,TRUE
+15,69,"Satpura","Melghat",301.682635562036,33,4,TRUE
+16,66,"Panna","Ranipur",312.991638129827,32,4,TRUE
+17,13,"Nameri","Orang",326.946158009399,31,4,TRUE
+18,20,"Indravati","Kawal",330.15288726455,30,4,TRUE
+19,19,"Indravati","Nawegaon-Nagzira",375.945711752714,29,4,TRUE
+20,54,"Kanha","Nawegaon-Nagzira",379.314921527601,28,6,TRUE
+21,70,"Satpura","Pench (MH)",394.381743644426,27,6,TRUE
+22,97,"Mukundara Hills","Ramgarh Vishdhari",408.29618847447,26,6,TRUE
+23,99,"Anamalai","Mudumalai",413.03600857081,25,6,TRUE
+24,10,"Manas","Orang",422.593066471945,25,6,FALSE
+25,51,"Kanha","Pench",422.605468601758,24,10,TRUE
+26,24,"Udanti-Sitanadi","Nawegaon-Nagzira",423.867719486543,24,10,FALSE
+27,85,"Tadoba-Andhari","Kawal",438.592065956638,23,11,TRUE
+28,18,"Indravati","Tadoba-Andhari",449.753793158461,23,11,FALSE
+29,39,"Bhadra","Nagarhole",455.605928036197,22,11,TRUE
+30,26,"Achanakmar","Guru Ghasidas-Tamor Pingla",457.069120302504,21,15,TRUE
+31,28,"Achanakmar","Bandhavgarh",458.823908201543,21,15,FALSE
+32,89,"Similipal","Satkosia",494.527939395549,20,15,TRUE
+33,52,"Kanha","Bandhavgarh",510.785521504706,20,15,FALSE
+34,80,"Melghat","Bor",546.022550271975,19,16,TRUE
+35,41,"Kali","Sahyadri",560.160469539145,18,16,TRUE
+36,83,"Tadoba-Andhari","Nawegaon-Nagzira",561.860858341721,18,16,FALSE
+37,3,"Namdapha","Pakke",577.332227683717,17,16,TRUE
+38,87,"Pench (MH)","Bor",639.539064931469,17,16,FALSE
+39,38,"Bhadra","Kali",643.778127590729,16,16,TRUE
+40,86,"Pench (MH)","Nawegaon-Nagzira",666.820922308193,16,16,FALSE
+41,5,"Namdapha","Kaziranga",685.932167040966,16,16,FALSE
+42,58,"Pench","Nawegaon-Nagzira",686.917424456276,16,16,FALSE
+43,25,"Udanti-Sitanadi","Satkosia",718.129096333879,15,18,TRUE
+44,23,"Udanti-Sitanadi","Kanha",748.241934477284,15,18,FALSE
+45,105,"Dudhwa","Corbett",763.289946444612,14,18,TRUE
+46,73,"Veerangana Durgavati","Ratapani",771.222416262156,13,18,TRUE
+47,68,"Satpura","Ratapani",776.036148646104,12,20,TRUE
+48,84,"Tadoba-Andhari","Bor",777.981697906254,12,20,FALSE
+49,77,"Madhav","Ranthambore",785.523439049266,11,20,TRUE
+50,32,"Palamau","Similipal",796.97892395468,11,20,FALSE
+51,33,"Palamau","Satkosia",860.604575017126,11,20,FALSE
+52,71,"Satpura","Bor",861.986007529722,11,20,FALSE
+53,72,"Sanjay Dubri","Ranipur",904.32035949571,10,22,TRUE
+54,22,"Udanti-Sitanadi","Achanakmar",920.857578959492,10,22,FALSE
+55,61,"Bandhavgarh","Veerangana Durgavati",1042.46316083056,10,22,FALSE
+56,75,"Ratapani","Melghat",1047.91368589057,10,22,FALSE
+57,63,"Panna","Veerangana Durgavati",1132.44375260956,10,22,FALSE
+58,64,"Panna","Ratapani",1207.84589814662,10,22,FALSE
+59,67,"Satpura","Veerangana Durgavati",1212.84053932653,10,22,FALSE
+60,82,"Tadoba-Andhari","Pench (MH)",1279.87037070474,10,22,FALSE
+61,15,"Orang","Dampa",1310.83886311829,9,22,TRUE
+62,53,"Kanha","Veerangana Durgavati",1313.3043995517,9,22,FALSE
+63,65,"Panna","Madhav",1380.47508143202,8,26,TRUE
+64,56,"Pench","Veerangana Durgavati",1672.68317812522,8,26,FALSE
+65,74,"Ratapani","Madhav",1711.85212231063,8,26,FALSE
+66,91,"Ranthambore","Sariska",1899.97754756969,7,27,TRUE
+67,1,"Nagarjunsagar-Srisailam","Indravati",2073.55797793283,6,28,TRUE
+68,104,"Kawal","Amrabad",2442.84530084331,6,28,FALSE
+69,78,"Madhav","Sariska",2499.23890885418,6,28,FALSE
+70,76,"Ratapani","Mukundara Hills",2639.53693377212,6,28,FALSE
+71,90,"Similipal","Sundarbans",2690.8788997412,5,29,TRUE
+72,16,"Valmiki","Dudhwa",4186.07248062532,4,29,TRUE
+73,96,"Sariska","Rajaji",5636.84334898897,3,33,TRUE

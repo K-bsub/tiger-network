@@ -149,8 +149,12 @@ RESIST_WATER_REGION_VALUE     <- 10
 # NOT a barrier class; its effect is left to gHM ("minor roads").
 ROAD_BARRIER_CLASSES <- c("motorway", "trunk", "primary", "secondary")
 ROAD_BARRIER_VALUE   <- 30     # one value for every barrier class (judgement)
-ROAD_BARRIER_TOUCHES <- TRUE   # rasterise every cell a road touches (no
-                               # diagonal leaks for an 8-neighbour path)
+ROAD_BARRIER_TOUCHES <- TRUE   # rasterise every cell a road touches, so a
+                               # diagonal road leaves no corner gap for a
+                               # diagonal step (Decision 15 point 4). The
+                               # engine has 16 neighbours: a knight step
+                               # cannot jump the road line (crossed-cells
+                               # rule, Decision 17 point 3).
 
 # ---- Connectivity: sensitivity variants (Decisions 14 + 15) ------------------
 # Each variant changes ONE choice against the baseline (k = RESIST_GHM_K, road
@@ -292,6 +296,51 @@ LCP_COMPARE_ROUTE_MATERIAL    <- 0.5   # route overlap below this = material
 LCP_COMPARE_RANK_MATERIAL     <- 0.25  # |percentile-rank change| >= this
 LCP_COMPARE_ROBUST_MAX_SHARE  <- 0.20  # judgement value
 LCP_COMPARE_ROBUST_MIN_RHO    <- 0.9   # judgement value
+
+# ---- Connectivity: reserve network (Decision 19, 2026-10-03) ----------------
+# Fixed BEFORE any network metric is computed. See docs/methodology.md,
+# Decision 19. The Week-11 STEPs of scripts/07_connectivity.R read these.
+# The path costs were seen in Week 10; no rule here uses a cost value.
+#   link    = every pair with in_network == TRUE on the surface (no threshold)
+#   node    = a block of contiguous reserves, or one reserve
+#             (56 reserves -> 47 nodes; the same on every surface)
+#   edge    = the lowest-cost in-network pair between two nodes
+#             (tie: lowest pair_id); weight = cost_rkm, a distance
+#   betweenness_norm = raw / ((n - 1)(n - 2) / 2), n = nodes in the node's
+#                      own set; NA if n < NET_NORM_MIN_SET_NODES
+#   linchpin = rank in the set <= NET_LINCHPIN_TOP_N AND betweenness_norm > 0
+#              (ties at the last rank are all linchpins)
+#   isolated = degree 0;  pendant = degree 1
+NET_LINK_RULE          <- "all_in_network"  # a1: no cost threshold
+NET_EDGE_WEIGHT_FIELD  <- "cost_rkm"        # resistance-km; a distance
+NET_CONTIGUOUS_RULE    <- "merge_block"     # b1: contiguous reserves = 1 node
+NET_PARALLEL_RULE      <- "min_cost"        # one edge per node pair
+NET_EXPECTED_RESERVES  <- 56L               # QA: stop if different
+NET_EXPECTED_NODES     <- 47L               # QA: stop if different
+NET_NORM_RULE          <- "own_set"         # c1
+NET_NORM_MIN_SET_NODES <- 3L                # below this, betweenness_norm = NA
+NET_LINCHPIN_TOP_N     <- 3L                # judgement value (k3)
+
+# Descriptive threshold scan (a4): baseline only. It chooses no threshold and
+# removes no link.
+NET_THRESHOLD_SCAN      <- TRUE
+NET_THRESHOLD_SCAN_SURF <- "baseline"
+
+# Second run without the cross-group links (f2): baseline only. A linchpin of
+# the main graph that is not a linchpin here gets cross_group_dependent = TRUE.
+NET_NOCROSS_RERUN       <- TRUE
+NET_NOCROSS_SURF        <- "baseline"
+
+# Variant repeat (e2). Each variant is compared with the baseline only.
+#   label = "robust" if the sets are the same
+#           AND Spearman rho of betweenness_norm >= NET_COMPARE_ROBUST_MIN_RHO
+#           AND linchpin retention >= NET_COMPARE_ROBUST_MIN_RETENTION,
+#           else "sensitive".
+#   The road value is robust only if BOTH road15 and road50 are robust.
+#   A linchpin on all four surfaces is a stable linchpin.
+NET_COMPARE_VARIANTS             <- names(RESIST_VARIANTS)  # noghm, road15, road50
+NET_COMPARE_ROBUST_MIN_RHO       <- 0.9    # judgement value
+NET_COMPARE_ROBUST_MIN_RETENTION <- 2 / 3  # judgement value
 
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a

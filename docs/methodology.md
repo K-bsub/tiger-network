@@ -2,13 +2,14 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** Week 10 complete — **Stage 2 (Connectivity) least-cost paths
-built.** 106 reserve pairs and their edge-to-edge least-cost paths on four
-surfaces (`lcp_reserve_network_7755.gpkg`; Decisions 17–18); validation, QA,
-the Decision-18 variant comparison (gHM multiplier and road value both robust)
-and a descriptive NTCA-corridor overlap (`tbl_12_*`). Next: Week 11 — the
-functional-link Decision, then the network graph. Prior: Week 9 —
-resistance surfaces (Decisions 11–16).
+**Status:** Week 11 complete — **Stage 2 (Connectivity) reserve network
+built.** The network of Decision 19 from the Week-10 paths: 47 nodes (56
+reserves, contiguous reserves merged), 73 edges, 3 sets; node metrics, a
+second run without cross-group links, a threshold scan, the Decision-19
+variant comparison (gHM multiplier and road value both robust) and network QA
+(`tbl_13_*`). A literature check is descriptive. Next: Week 12 — road pinch
+points, the network figure, the publishable table. Prior: Week 10 —
+least-cost paths (Decisions 17–18).
 
 This document is the processing log and the decision record. Every significant
 choice becomes a **numbered Decision** with a date and a justification, recorded
@@ -40,11 +41,15 @@ three census rounds (3 frames).
 
 Resistance surfaces from land cover (ESA WorldCover), a human-pressure (gHM)
 multiplier and major roads as barriers (Decisions 14–16), with three
-sensitivity variants. Least-cost paths between neighbouring reserve pairs; the
-pair rule, the path method and the tool (`leastcostpath` or `gdistance`) are
-fixed in Decision 17 (Week 10). Reserve
-network as a graph (`igraph`): betweenness identifies linchpin reserves,
-components identify isolated reserves. Road crossings give pinch points.
+sensitivity variants. Least-cost paths between neighbouring reserve pairs,
+edge to edge, on our own 16-neighbour cell graph (`terra` + `igraph`,
+`R/00_functions_lcp.R`). Decision 17 fixes the pair rule, the path method and
+the engine; Decision 18 fixes the variant comparison. No least-cost-path
+package is in the pipeline; `gdistance` is for validation only. Reserve
+network as a graph (`igraph`; rules in Decision 19 — no cost threshold,
+contiguous reserves merged into one node): betweenness identifies linchpin
+reserves, components identify isolated reserves. Road crossings give pinch
+points.
 All Stage-2 steps (Weeks 9–12: resistance, least-cost paths, network graph,
 pinch points) are built in **one script, `scripts/07_connectivity.R`**, with one
 STEP block per task.
@@ -1353,23 +1358,246 @@ the baseline only, for the same pairs.
 - Week 11 decides whether the network metrics are repeated on the variants
   (added to the Week-11 pending item).
 
+### Decision 19 — Reserve network: links, nodes, edge weight, metrics, linchpin and isolated rules, variant comparison
+**Date:** 2026-10-03 (fixed **before** any network metric is computed — see
+"What was seen before this Decision")
+**Choice:** Settings in `R/00_config.R` (`NET_*`). The Week-11 STEPs of
+`scripts/07_connectivity.R` apply them. Fork codes as raised on 2026-10-03:
+a1 + a4, b1, c1 + k3, d2, e2, f2.
+
+1. **Links — all in-network pairs, no cost threshold (a1).** On each surface,
+   every pair with `in_network == TRUE` (Decision 17 point 2) is a link. No
+   pair is removed because of its cost. The cost-distance (`cost_rkm`,
+   resistance-km) is the edge weight. In `igraph` a weight is a distance: a
+   higher weight is a longer path.
+2. **Nodes — contiguous reserves merge into one node (b1).** The contiguous
+   pairs (Decision 17 point 6; cost 0) join their reserves into one **block**.
+   A block is a connected set of reserves in the graph of the contiguous
+   pairs. Each block is one node; each other reserve is its own node.
+   - From `tbl_12_reserve_pairs.csv` (geometry only): **56 reserves → 47
+     nodes.** Seven blocks have more than one reserve: Bandipur + Nagarhole +
+     Mudumalai + Sathyamangalam; Nagarjunsagar-Srisailam + Amrabad; Namdapha +
+     Kamlang; Pakke + Nameri; Manas + Buxa; Periyar + Srivilliputhur-Megamalai;
+     Parambikulam + Anamalai.
+   - The blocks come from geometry, so they are the same on all four
+     surfaces.
+   - `node_id` = the lowest `unit_id` in the node. `node_name` = the reserve
+     names in `unit_id` order, joined with " + ".
+3. **Edges — one per node pair, the lowest cost.** Between two nodes, the edge
+   is the in-network pair with the lowest `cost_rkm` on that surface (a tie:
+   the lowest `pair_id`). Each edge therefore traces to one `pair_id`. The
+   graph is undirected and simple (no loop, no duplicate edge). Each
+   in-network pair gets a `link_role`:
+   - `block` — a contiguous pair (it makes a block; it is not an edge);
+   - `within_block` — a pair that is not contiguous, with both reserves in one
+     block (not an edge);
+   - `edge` — the lowest-cost pair between two nodes;
+   - `parallel` — another pair between the same two nodes (not an edge).
+4. **Sets.** A set is a connected component of the graph. `set_size` counts
+   nodes; the reserve count is given also.
+5. **Metrics for each node (c1).** The reserves of one block share the values
+   of their node.
+   - `degree` — the number of edges.
+   - `betweenness_raw` — weighted shortest-path betweenness (Freeman 1977;
+     Brandes 2001): `igraph::betweenness()`, undirected, weights = `cost_rkm`,
+     end points not counted, no cutoff. Equal-cost shortest paths share the
+     count, as `igraph` does.
+   - `betweenness_norm` — the raw value ÷ ((n − 1)(n − 2) / 2), where n is the
+     number of nodes **in the node's own set**. This is the share of the node
+     pairs of the set whose shortest path goes through the node (0 to 1).
+     `NA` if n < 3 (`NET_NORM_MIN_SET_NODES`).
+   - `betweenness_rank` — rank of `betweenness_norm` in the set (1 = highest;
+     tied values take the lowest rank number).
+   - `cut_node` — the node is an articulation point: without it, its set
+     divides (`igraph::articulation_points()`).
+   - `cheapest_link_rkm` — the lowest edge weight of the node (`NA` at degree
+     0), and `cheapest_link_rank` over all nodes (1 = the highest value, the
+     node that is hardest to reach from its nearest neighbour).
+   For each edge: `is_bridge` — without the edge, its set divides
+   (`igraph::bridges()`).
+6. **Linchpin (k3).** Two columns, both fixed now:
+   - `linchpin` = `betweenness_rank` ≤ **3** (`NET_LINCHPIN_TOP_N`) **and**
+     `betweenness_norm` > 0. Nodes tied at rank 3 are all linchpins. A set
+     with fewer than 3 nodes has no linchpin.
+   - `cut_node` (point 5) is reported next to it. It is not a condition for
+     the linchpin label.
+   - **The number 3 is a judgement value.** In a small set, three nodes are a
+     large share of the set (the smallest set has 6 nodes if all pairs are
+     links); read the label with `set_size`.
+7. **Isolated (d2).**
+   - `isolated` = `degree` 0 (a set of one node).
+   - `pendant` = `degree` 1 (one edge only).
+   - `cheapest_link_rkm` and its rank (point 5) are the graded measure. No
+     cost limit makes a reserve "isolated".
+   - If no node has degree 0, the result is "no reserve is isolated by this
+     rule", and the write-up names the pendant nodes and the highest
+     `cheapest_link_rkm` values.
+8. **Threshold scan (a4) — descriptive, baseline only.** The edges are put in
+   cost order. For each edge: the number of sets and the size of the largest
+   set (nodes) when only the edges up to that cost are in the graph, and
+   `joins_sets` — the edge joins two sets at that step, which makes it an edge
+   of the minimum spanning forest (`in_mst`). **No threshold is chosen and no
+   link is removed.** The scan shows at what cost each part of the network
+   joins.
+9. **Network groups and the cross-group links (f2).** `network_group`
+   (Decision 17 point 8) stays a label: cross-group pairs stay links in the
+   main graph, and each set lists the groups in it. In addition, **one second
+   run on the baseline only**: the same graph without the pairs that have
+   `cross_group == TRUE`, with the same metrics (columns with the suffix
+   `_nocross`). `cross_group_dependent` = the node is a linchpin in the main
+   graph and is **not** a linchpin in the second run.
+10. **Variant repeat and comparison (e2).** The graph and the metrics of
+    points 1–7 are built on `noghm`, `road15` and `road50` by the same rules.
+    Each variant is compared with the baseline only:
+    - `sets_same` — the nodes divide into the same sets.
+    - `rho` — the Spearman rank correlation of `betweenness_norm` between the
+      baseline and the variant, over the nodes with a value on both surfaces
+      (tied values take their average rank).
+    - `linchpin_retention` — the number of baseline linchpins that are
+      linchpins on the variant ÷ the number of baseline linchpins.
+    - **Label (fixed now): robust** if `sets_same` is true **and** `rho`
+      **≥ 0.9** (`NET_COMPARE_ROBUST_MIN_RHO`) **and** `linchpin_retention`
+      **≥ 2/3** (`NET_COMPARE_ROBUST_MIN_RETENTION`); otherwise **sensitive**.
+      `noghm` gives the label for the gHM multiplier (Decision 14). The road
+      value (Decision 15) is robust only if **both** `road15` and `road50`
+      are robust. **The 0.9 and 2/3 limits are judgement values.**
+    - Descriptive columns (no limits): the number of edges; the number of
+      edges that trace to a different `pair_id` or are absent; whether the
+      `cut_node` set is the same; the linchpins lost and gained, by name.
+    - `stable_linchpin` (per node) = a linchpin on all four surfaces.
+11. **Validation and QA, before the metrics are used.** The betweenness call
+    is first run on a small graph with hand-computed values (a 5-node path:
+    0, 3, 4, 3, 0; with a second set, to test the per-set normalisation). The
+    script stops if: a reserve is in no node or in two nodes; the node count
+    is not 47 or the reserve count is not 56; an edge weight is `NA`, zero or
+    negative; the graph has a loop or a duplicate edge; an edge does not
+    trace to one `pair_id`; the set sizes do not add up to the node count.
+    It reports (no stop) whether the sets of the in-network graph are the
+    sets that all 106 pairs give (33, 8 and 6 nodes).
+
+**What was seen before this Decision (pre-registration, stated plainly):**
+- **The path costs were seen.** The Week-10 tables hold the cost of every
+  pair on every surface, and the Week-10 record names the median (577.3), the
+  maximum (5,814.2) and the three highest pairs. The chat that drafted this
+  Decision read those summary figures only; it did not open
+  `tbl_12_lcp_qa.csv` or the paths layer (field names only).
+- For that reason **no rule here uses a cost value**: no cost threshold
+  (point 1), no cost limit for "isolated" (point 7), and the scan chooses
+  nothing (point 8).
+- **Known from geometry before any metric:** the 47 nodes; the sets that all
+  106 pairs give (33, 8, 6 nodes); and that `north` (4 reserves) joins
+  `central` only through Sariska. On the baseline, Sariska–Rajaji is in the
+  network and Sariska–Corbett is not (P3), so Sariska–Rajaji is the only
+  north–central link and Sariska has `betweenness_norm` of **at least 0.22**
+  (4 × 28 = 112 of 496 node pairs) from the layout of the pairs alone. Point 9
+  exists because of this.
+- No network metric was computed before this Decision.
+
+**Reason and sources:**
+- **No threshold.** In a genetic study of six central-Indian protected areas,
+  connectivity was affected by human settlements, road density and
+  host-population tiger density, but not by the distance between populations;
+  assignment tests indicated dispersal on the order of 650 km (Joshi et al.
+  2013). Outside evidence gives no cost value above which movement stops, and
+  a value chosen now is chosen after the costs were seen.
+- **Merge, not a small weight.** Cost 0 means the two reserves are one
+  habitat block. A weight must be positive in `igraph::betweenness()`, and
+  zero weights can give an unlimited number of equal-length paths. A small
+  fixed weight is arbitrary, and it gives betweenness to the reserve in the
+  middle of a block from the polygon layout only.
+- **Shortest-path betweenness.** It goes with least-cost paths: it identifies
+  a minimal network like the one that least-cost-path mapping gives, while
+  current-flow betweenness identifies a diffuse network with alternative
+  linkages (Carroll et al. 2012).
+- **Normalise by the set.** `igraph`'s `normalized = TRUE` divides by the
+  pairs of the whole graph, so nodes in a small set get low values for the
+  set size alone. The set-level divisor is the maximum that a node can have
+  in its set (the centre of a star).
+- **Threshold scan and spanning tree.** As the link threshold goes up, more
+  nodes connect and the components become fewer, until the graph is connected
+  (Brooks 2003, as used in the `grainscape` package). The minimum spanning
+  tree is a guide to the relative importance of patches for connectivity
+  (Urban & Keitt 2001).
+- **Second run without cross-group links.** The mtDNA studies show the
+  northern populations as distinct (Sharma et al. 2009, 2011), and the one
+  north–central link comes from the 315 km gap cap (Decision 17 point 1). The
+  `cross_group` flag was fixed in Decision 17, before the paths.
+- **Repeat on the variants.** `in_network` changed for 4, 1 and 4 pairs on
+  `noghm`, `road15` and `road50` (Week-10 record), and one changed link can
+  move many shortest paths. The path-level label of Decision 18 does not show
+  that the node ranks stay the same.
+
+**Rejected:**
+- *a2 — a threshold of 315 km × a reference resistance.* The reference
+  resistance is a free value; at 1 the threshold (315 resistance-km) is below
+  the median cost.
+- *a3 — a threshold from pairs with documented movement.* Documented movement
+  gives a lower limit only; few pairs; post-result.
+- *b2 — 56 nodes with a small fixed weight; b3 — betweenness without
+  weights.* See Reason; b3 ignores the cost.
+- *c2 — `igraph` `normalized = TRUE`; c3 — raw value and rank only.*
+- *k1 or k2 alone.* Top-3 alone hides whether the set divides without the
+  node; articulation points alone give no order.
+- *d1 alone* — probably names no reserve and gives no grade. *d3 — a cost
+  limit for "isolated"* — the same problem as a2.
+- *e1 — no repeat on the variants.*
+- *f1 — labels only, with a caveat; f3 — a cross-group link is functional
+  only if its cost is not above the highest within-group link cost.* The
+  outcome of f3 was known (5,637 against 4,186 resistance-km).
+- *Current-flow centrality* (Carroll et al. 2012; used for central India by
+  Dutta et al. 2016) — not built (scope). **Limitation.**
+
+**Limitations:**
+- Shortest-path betweenness uses one route for each node pair; a small cost
+  change can move it. Point 10 measures this for the three variants only.
+- All node pairs of a set count the same, at any distance. Two reserves at
+  opposite ends of a set add to the betweenness of the nodes between them,
+  although a tiger is not likely to make that journey.
+- The through-reserve rule (P3) gives betweenness to a reserve that lies
+  between two others.
+- Pilibhit and Dholpur-Karauli are not nodes (G1). Links through Nepal,
+  Bhutan and Bangladesh are absent, so a border reserve can look more weakly
+  connected than it is.
+- Block members share one value: the metrics do not show which reserve of a
+  block carries a link (`tbl_13_network_links.csv` does).
+- The numbers 3, 0.9 and 2/3 are judgement values.
+
+**Consequences:**
+- `scripts/07`: STEP 11.1 builds the nodes, the link table and the graph →
+  `tbl_13_network_links.csv` (every baseline in-network pair, with
+  `link_role`, the two `node_id`s, `is_bridge`, `in_mst`); STEP 11.2 computes
+  the metrics, the second run of point 9 and the scan of point 8 →
+  `tbl_13_network_metrics.csv` (one row per reserve, 56) and
+  `tbl_13_network_threshold_scan.csv` (one row per baseline edge); STEP 11.3
+  repeats on the variants → `tbl_13_network_variant_comparison.csv` (one row
+  per variant); STEP 11.4 is the QA of point 11.
+- `R/00_config.R`: new `NET_*` settings.
+- The plan's "56 nodes" becomes "47 nodes from 56 reserves"
+  (`docs/project-plan.md`, Week 11).
+- The Week-11 write-up reports the labels as fixed here, and compares the
+  linchpins with Dutta et al. (2016) as description only (task 11.6).
+
+This closes the **[Week 11] Functional-link rule** pending item (both parts:
+the link rule and the variant repeat).
+
 ### Decisions pending (raised, not yet made)
 
 These forks are open. Each is decided in the week noted in the project plan,
 before the relevant code is written.
 
+- **[Week 12] Pinch-point rule (raised 2026-10-04; decide before any road
+  crossing is computed).** What a road pinch point is: which roads (the
+  barrier classes of Decision 15, or a subset); which paths (all in-network
+  pairs, the 73 edges, or the 13 bridges); how a crossing is counted and
+  ranked; whether it is repeated on the variant surfaces; and what the
+  publishable `tbl_03` and `fig_04` hold (sensitive-data policy §3). The
+  network results are already seen (Week 11), so say in the Decision what was
+  seen.
 - **[Week 8–9 → Week 13] Settlement layer for the KDE.** The OSM settlement pull is
   village-dominated (~195k of 199,800 points: city 495, town 4,102, village
   195,203). A 15 km KDE over all points will near-saturate nationally. Decide
   whether to use all city/town/village, trim to city/town (4,597), or change the
   KDE radius, when the density surface is built.
-- **[Week 11] Functional-link rule (raised 2026-10-01, Decision 17 point 8;
-  decide before the network metrics are computed).** How the Week-11 graph
-  treats a pair as a functional link (for example a cost-distance threshold,
-  or cost as an edge weight with no threshold), and therefore whether the four
-  network groups are separate and which reserves are isolated. Also decide
-  whether the network metrics are repeated on the variant surfaces (raised
-  2026-10-01 with Decision 18).
 - **[After Stage 3] SDM-based resistance + circuit-theory check.** Raised
   2026-09-26 (Decision 14, F1). After the SDM exists, build a resistance
   surface from 1 − suitability and run circuit theory between reserves, to
@@ -1398,6 +1626,156 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-10-04 — Week 11 complete: tasks 11.2–11.7 (network graph, metrics, variants, QA, literature check, docs)
+
+- **Code.** New `R/00_functions_network.R` (nodes, links, graph, edge flags,
+  sets, metrics, threshold scan, self-test, variant comparison, checks).
+  `scripts/07_connectivity.R`: STEPs 11.1–11.4 after the Week-10 STEPs; the
+  code of Weeks 9 and 10 is not changed. The Week-11 STEPs read the path
+  layers from `lcp_reserve_network_7755.gpkg`; `pairs` and the reserve list
+  come from STEP 10.1. No new run switch: the Week-10 STEPs run each time.
+- **Run and verification.** Each STEP ran on the project machine after a
+  Week-10 run. Each `tbl_13_*` table is identical to a separate build of the
+  same STEPs on the same paths file (R 4.3.3, `igraph` 1.6.0). An independent
+  check with Python (`networkx`, `scipy`) gave the same edges, bridges,
+  spanning forest, betweenness, normalisation, cut nodes, linchpins, ρ and
+  retention (largest difference 5e-16).
+- **STEP 11.1 — nodes, links, graph (`tbl_13_network_links.csv`).** 56
+  reserves → 47 nodes (7 blocks). 85 in-network pairs: 9 `block`, 0
+  `within_block` (Nagarhole–Mudumalai and Mudumalai–Sathyamangalam are not in
+  the network, P3), 73 `edge`, 3 `parallel` (Pakke–Manas, Nameri–Kaziranga,
+  Anamalai–Sathyamangalam). No node without an edge. 3 sets: 33 nodes (34
+  reserves; `central` + `north`), 8 (13; `western_ghats`), 6 (9;
+  `northeast`) — the same sets that all 106 pairs give, so P3 divided no set.
+  13 bridges; 44 edges in the minimum spanning forest. 10 of 10 construction
+  checks.
+- **STEP 11.2 — metrics, second run, scan (`tbl_13_network_metrics.csv`,
+  `tbl_13_network_threshold_scan.csv`).** The self-test on the hand-computed
+  graph runs first (17 of 17 cases).
+  - **Linchpins (8 nodes):** set 1 — Madhav (0.357), Guru Ghasidas-Tamor
+    Pingla (0.292), Sanjay Dubri (0.252); set 2 — Bandipur + Nagarhole +
+    Mudumalai + Sathyamangalam (0.714), Bhadra (0.476), Parambikulam +
+    Anamalai (0.476, tied at rank 2); set 3 — Pakke + Nameri (0.600), Orang
+    (0.400). In set 3 only two nodes have a value above 0.
+  - **Cut nodes: 12.** Seven are not linchpins: Kali, Periyar +
+    Srivilliputhur-Megamalai, Similipal, Sariska, Dudhwa, Corbett, Rajaji.
+  - **Isolated: none** — no reserve is isolated by the rule. **Pendant: 6** —
+    Valmiki, Sundarbans, Dampa, Sahyadri, Kalakad-Mundanthurai, Biligiri
+    Ranganatha Temple. Highest cheapest-link cost: Valmiki 4,186; Sundarbans
+    2,691; Nagarjunsagar-Srisailam + Amrabad 2,074; Sariska 1,900; Dampa
+    1,311 resistance-km.
+  - **Sariska: `betweenness_norm` 0.2258 = 112 / 496,** exactly the value that
+    Decision 19 gave from the pair layout. Sariska is on no other shortest
+    path; rank 4, not a linchpin.
+  - **Second run (point 9):** 1 cross-group link removed (Sariska–Rajaji); 72
+    edges; 4 sets (29, 8, 6, 4 nodes). **Madhav is `cross_group_dependent`**:
+    rank 1 (0.357) in the main graph, rank 5 (0.214) without the link; Kanha
+    becomes a linchpin (rank 2, 0.251). In the `north` set of 4 nodes, Dudhwa
+    and Corbett are both rank 1 (0.667).
+  - **Scan:** 73 rows, 44 joining edges. The last joins: Ranthambore–Sariska
+    1,900; Nagarjunsagar-Srisailam–Indravati 2,074; Similipal–Sundarbans
+    2,691; Valmiki–Dudhwa 4,186; Sariska–Rajaji 5,637 resistance-km. No
+    threshold chosen.
+- **STEP 11.3 — variants (`tbl_13_network_variant_comparison.csv`).** Rule
+  fixed in Decision 19 point 10.
+
+  | Variant (tests) | Links | Edges (changed) | Sets same | ρ | Linchpins retained | Cut nodes same | Label |
+  |---|---|---|---|---|---|---|---|
+  | `noghm` (gHM multiplier) | 87 | 75 (5) | yes | 0.941 | 7 of 8 (0.875) | no | robust |
+  | `road15` (road value) | 84 | 72 (2) | yes | 0.979 | 8 of 8 | yes | robust |
+  | `road50` (road value) | 87 | 75 (5) | yes | 0.995 | 7 of 8 (0.875) | no | robust |
+
+  By the rule: **gHM multiplier — robust; road value — robust** (both road
+  variants). **7 stable linchpins.** Sanjay Dubri is not stable: on `noghm`
+  and `road50`, Pench (MH) is a linchpin in its place. The metrics table was
+  written again with 7 more columns (32 in all).
+- **STEP 11.4 — network QA (`tbl_13_network_qa.csv`).** 91 of 91 checks: the
+  self-test; on each surface the 10 construction checks, 7 result checks, the
+  betweenness identity and the edge weights; baseline checks of the blocks,
+  bridges, second run and scan; the tables on disk. The identity (the sum of
+  betweenness in a set = the nodes between the ends of the shortest paths,
+  from `igraph::all_shortest_paths()`, not from `betweenness()`) holds on
+  each surface (baseline set 1: 1862 = 1862).
+- **As built against the Decision-19 "Consequences" text** (the Decision text
+  is a dated record and is not changed):
+  - The hand-computed self-test runs at the start of STEP 11.2, so that it
+    is before any metric (point 11). STEP 11.4 collects it.
+  - A fifth table, `tbl_13_network_qa.csv` (process choice **q1**).
+  - The graph is rebuilt from the paths layer on each run; it is not written.
+- **Details fixed at the build** (not in Decision 19; each was put to the
+  author before the code): the second-run columns are the sets, the
+  normalised betweenness, its rank, the linchpin flag and
+  `cross_group_dependent` only; the scan has one row per edge and no row for
+  the empty graph; `cheapest_link_rank` ties take the lowest rank number;
+  the metrics table carries `betweenness_norm_<variant>` and
+  `linchpin_<variant>`; `n_edges_changed` counts node pairs with an edge on
+  one surface only or an edge from a different `pair_id`; the 2/3 limit has
+  a tolerance of 1e-9; ranks use values rounded to 10 decimal places; a
+  variant with no ρ or no baseline linchpin is "sensitive". The comparison
+  table has no `choice_label` column (the Week-10 summary table has one);
+  the labels by choice go to the console.
+- **Judgement values.** 3, 0.9 and 2/3 were recorded on 2026-10-03 as
+  proposed; the author went on to the code with no change.
+- **Literature check (task 11.6; `references.md`, "Week-11 network").**
+  Descriptive; from abstracts, web pages and extracts. Agrees: Guru
+  Ghasidas-Tamor Pingla between Bandhavgarh and Palamau; Kanha and Pench with
+  the highest centrality in Dutta et al. (2016); the Bandipur block as the
+  largest population, with the Bhadra–Kali connection at risk; Sundarbans,
+  Dampa and Sahyadri weakly connected. Does not agree or no source: Madhav
+  (no source for a high centrality); Anamalai–Periyar (described as not
+  connected along Kerala); Orang–Dampa (no source; a 305 km gap);
+  Periyar–Kalakad-Mundanthurai (the Shencottah gap is a barrier; the cost is
+  low); Nagarjunsagar-Srisailam + Amrabad (no source for a northern link).
+- **Two data items, author choice g1.** Sources call Guru Ghasidas-Tamor
+  Pingla and Sanjay Dubri contiguous; the pair table has a 1.59 km gap, so
+  they are two nodes (both baseline linchpins). Sources name BRT in the
+  Bandipur block; it is 10.1 km from Sathyamangalam, so it is a separate,
+  pendant node. **g1: Decision 17 stays as it is; both are recorded as
+  limitations.** A merge rule now would be post-result.
+- **Process choices (not numbered):** q1 (QA table); g1 (above); the new
+  function file `R/00_functions_network.R`.
+- **Pending item added:** "[Week 12] Pinch-point rule".
+- **Docs:** `data-dictionary.md` (five `tbl_13_*` entries),
+  `naming-conventions.md` §6 (`tbl_13` row), `references.md` (two new
+  sections), `README.md`, `project-plan.md`, `handoff.md`; Limitations below.
+
+### 2026-10-03 — Week 11, task 11.1: Decision 19 recorded (no code, no metric)
+
+- **Decision 19** fixes the reserve network rules before any network metric:
+  all in-network pairs are links with the cost as the weight (no threshold);
+  contiguous reserves merge into blocks (56 reserves → 47 nodes); betweenness
+  normalised by the node's own set; `linchpin` = top 3 in the set, with
+  `cut_node` next to it; `isolated` = degree 0, with `pendant` and the
+  cheapest-link cost as graded columns; a threshold scan (descriptive); a
+  second baseline run without cross-group links; the metrics repeated on the
+  three variants with a fixed comparison (sets the same, ρ ≥ 0.9, linchpin
+  retention ≥ 2/3).
+- **`R/00_config.R`:** new `NET_*` settings. No script reads them yet.
+- **Pending item closed:** "[Week 11] Functional-link rule".
+- **`docs/project-plan.md`:** task 11.1 ticked; Week-11 text changed from "56
+  nodes" to "47 nodes from 56 reserves"; a fourth table,
+  `tbl_13_network_threshold_scan.csv`, added.
+- **`docs/references.md`:** new section "Reserve network (Decision 19)".
+- The path costs were seen before this Decision (Week 10). The Decision
+  states this and uses no cost value in any rule.
+
+### 2026-10-03 — Text fix before Week 11 (two stale statements)
+
+Found when the Week-11 chat read the files. No rule, value, data layer or
+script logic changed; no re-run.
+
+- **§5.3 Connectivity.** It still named the tool as "`leastcostpath` or
+  `gdistance`", fixed in Decision 17 (the wording of process choice F1-A,
+  2026-09-27, from before Decision 17). As built, the engine is our own
+  16-neighbour cell graph (`R/00_functions_lcp.R`, `terra` + `igraph`), and
+  `gdistance` is for validation only. §5.3 now says so.
+- **`R/00_config.R`, `ROAD_BARRIER_TOUCHES` comment.** It gave the reason only
+  for an 8-neighbour path (the wording of Decision 15 point 4, from before
+  Decision 17). The comment now also names the 16-neighbour engine: knight
+  steps are stopped by the crossed-cells rule (Decision 17 point 3). The value
+  (`TRUE`) does not change. The text of Decision 15 (point 4 and the
+  "Rejected" line) is a dated record and is not changed.
 
 ### 2026-10-03 — Week 10 complete: tasks 10.4–10.9 (pairs, baseline paths, validation, QA, variants, NTCA overlap, docs)
 
@@ -2209,3 +2587,37 @@ refine, but do not change, Decision 4.
   Myanmar. Transboundary links (for example Valmiki–Chitwan, Manas–Royal Manas,
   the Sundarbans) are not represented, and a reserve on the border can appear
   more isolated than it is.
+- **The network comes from geometry rules, with no cost threshold (Decisions
+  17 and 19).** A pair is a link if it passes the adjacency and 315 km rules
+  and P3; its cost is only the weight. Some links have no support in the
+  literature, or the literature describes a barrier there: Orang–Dampa (a
+  305 km gap, the only link of Dampa; no source found); Anamalai–
+  Srivilliputhur-Megamalai (connection along Kerala is described as
+  non-existent); Periyar–Kalakad-Mundanthurai (the Shencottah gap; the cost
+  is low, 98.8 resistance-km); Sariska–Rajaji (the only north–central link;
+  the populations are genetically distinct). By the rule no reserve is
+  "isolated": each reserve has a pair inside 315 km. The graded columns
+  (`pendant`, `cheapest_link_rkm`) and the threshold scan carry that
+  information. Sources: `references.md`, "Week-11 network".
+- **Linchpin labels are from shortest-path betweenness (Decision 19).** One
+  route for each node pair; all node pairs of a set count the same at any
+  distance; P3 gives betweenness to a reserve that lies between two others;
+  the numbers 3, 0.9 and 2/3 are judgement values. Two labels depend on a
+  choice: **Madhav** is rank 1 only with the cross-group link Sariska–Rajaji
+  in the graph (`cross_group_dependent`; rank 5 without it), and no source
+  was found that gives Madhav a high centrality; **Sanjay Dubri** is not a
+  linchpin on `noghm` and `road50` (not stable). Current-flow centrality, the
+  measure of Dutta et al. (2016), was not built.
+- **Nodes follow the contiguity rule of Decision 17 (author choice g1,
+  2026-10-04).** Contiguous means a shared footprint cell. Guru Ghasidas-Tamor
+  Pingla and Sanjay Dubri are described as contiguous in the sources, but the
+  KML polygons are 1.59 km apart, so they are two nodes — and both are
+  baseline linchpins (ranks 2 and 3 of set 1). Biligiri Ranganatha Temple is
+  named in the sources as part of the Bandipur block, but it is 10.1 km from
+  Sathyamangalam, so it is a separate, pendant node. The KML polygons are
+  national-park and sanctuary outlines (see "Boundary basis"), so a gap
+  between two polygons does not show a gap between two notified reserves. The rule was fixed
+  before the paths and was not changed after the results.
+- **Block members share one value.** The metrics table has one row per
+  reserve (56) but the values are per node (47). The 8 linchpin nodes are 13
+  reserve rows. Count by `node_id`.

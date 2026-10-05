@@ -1,0 +1,4 @@
+"variant","tests","n_edges_baseline","n_edges_variant","n_edges_changed","sets_same","n_nodes_compared","rho","n_linchpins_baseline","n_linchpins_retained","linchpin_retention","cut_nodes_same","linchpins_lost","linchpins_gained","label"
+"noghm","gHM multiplier (Decision 14)",73,75,5,TRUE,47,0.941188582484295,8,7,0.875,FALSE,"Sanjay Dubri","Pench (MH)","robust"
+"road15","road value (Decision 15)",73,72,2,TRUE,47,0.979240789626181,8,8,1,TRUE,"","","robust"
+"road50","road value (Decision 15)",73,75,5,TRUE,47,0.994707751925543,8,7,0.875,FALSE,"Sanjay Dubri","Pench (MH)","robust"

@@ -143,6 +143,7 @@ suffix marks a companion table to a numbered one (`tbl_05b_…`). As built:
 | `tbl_05` / `tbl_05b` | `area_source_map` / `isfr_area_crosscheck` |
 | `tbl_11` | `ghm_gap_relevance_<state>` × 5 (`prefill`, `postfill`, `postfill_d12`, `postfill_d13`, `postfill_d13f`; `scripts/07` STEP 9.2), `resistance_qa`, `resistance_qa_pred16` (`scripts/07` STEP 9.8) |
 | `tbl_12` | `reserve_pairs` (STEP 10.1), `lcp_validation` (STEP 10.2b), `lcp_qa` (STEPs 10.3–10.4), `lcp_variant_comparison`, `lcp_variant_summary` (STEP 10.4), `lcp_ntca_overlap`, `lcp_ntca_corridors` (STEP 10.5) — all `scripts/07` |
+| `tbl_13` | `network_links` (STEP 11.1), `network_metrics` (STEP 11.2; written again by STEP 11.3), `network_threshold_scan` (STEP 11.2), `network_variant_comparison` (STEP 11.3), `network_qa` (STEP 11.4) — all `scripts/07` |
 
 Before a new table is written, check that its full filename is not already in
 use. A new, unrelated table takes the next free number.

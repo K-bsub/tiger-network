@@ -46,7 +46,15 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
   Pilibhit, Dholpur-Karauli out (G1); `network_group` labels; NTCA overlap
   descriptive**; **D18 variant comparison: symmetric 5 km route overlap < 0.5
   or percentile-rank change ≥ 0.25 = material; "robust" if ≤ 20 % material and
-  ρ ≥ 0.9; road value robust only if both road variants are**.
+  ρ ≥ 0.9; road value robust only if both road variants are**; **D19 reserve
+  network: each in-network pair is a link, cost = weight, no cost threshold;
+  contiguous reserves merge (56 reserves → 47 nodes), lowest-cost pair = the
+  edge; betweenness normalised by the node's own set; `linchpin` = top 3 in
+  the set and value > 0, `cut_node` next to it; `isolated` = degree 0,
+  `pendant` = degree 1, cheapest-link cost graded; descriptive threshold
+  scan; second baseline run without cross-group links; variants "robust" if
+  the sets are the same, ρ ≥ 0.9 and linchpin retention ≥ 2/3** (the path
+  costs were seen before D19; no rule uses a cost value).
 
 ## Ways of working (apply every chat)
 
@@ -64,11 +72,48 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
 
 ---
 
-## Current state  ·  updated after **Week 10** (Stage 2 least-cost paths) · 2026-10-03; Week-11 plan added 2026-10-03
+## Current state  ·  updated after **Week 11** (Stage 2 reserve network) · 2026-10-04; Week-12 plan added 2026-10-04
 
-- **Week 10 complete, committed and pushed** (tasks 10.1–10.10).
-  **Decision 17** (path set-up; amended 2026-10-02) and **Decision 18** (variant
-  metric) were recorded on 2026-10-01, before the paths they govern.
+- **Week 11 complete, committed and pushed** (tasks 11.1–11.8).
+  **Decision 19** (reserve network) was recorded on 2026-10-03,
+  before any network metric. The path costs were seen before it (Week 10);
+  the Decision says so and no rule uses a cost value.
+- **Network code:** `R/00_functions_network.R` (new) and STEPs 11.1–11.4 at
+  the end of `scripts/07`. They read the path layers from
+  `lcp_reserve_network_7755.gpkg`; `pairs` and `res_net` come from STEP 10.1.
+  No new switch. The graph is not written; it is rebuilt on each run.
+- **Network (baseline):** 85 in-network pairs → 9 `block`, 0 `within_block`,
+  73 `edge`, 3 `parallel`. **47 nodes** from 56 reserves (7 blocks: Bandipur +
+  Nagarhole + Mudumalai + Sathyamangalam; Nagarjunsagar-Srisailam + Amrabad;
+  Namdapha + Kamlang; Pakke + Nameri; Manas + Buxa; Periyar +
+  Srivilliputhur-Megamalai; Parambikulam + Anamalai). 3 sets: 33 nodes
+  (`central` + `north`), 8 (`western_ghats`), 6 (`northeast`). 13 bridges.
+- **Metrics (`tbl_13_network_metrics.csv`, 56 rows, values per node):**
+  8 linchpin nodes — set 1: Madhav, Guru Ghasidas-Tamor Pingla, Sanjay Dubri;
+  set 2: the Bandipur block, Bhadra, Parambikulam + Anamalai; set 3: Pakke +
+  Nameri, Orang. 12 cut nodes. No isolated node. 6 pendant nodes (Valmiki,
+  Sundarbans, Dampa, Sahyadri, Kalakad-Mundanthurai, BRT).
+- **Flags on the linchpins:** Madhav is `cross_group_dependent` (rank 1 with
+  the Sariska–Rajaji link, rank 5 without it; Kanha then becomes a linchpin).
+  Sanjay Dubri is not stable (Pench (MH) takes its place on `noghm` and
+  `road50`). 7 stable linchpins. Sariska has `betweenness_norm` 0.2258, all
+  of it from the north–central pairs.
+- **Network variants (Decision 19 point 10):** gHM multiplier **robust** (`noghm`
+  ρ 0.941, 7 of 8 linchpins retained); road value **robust** (`road15` ρ
+  0.979, 8 of 8; `road50` ρ 0.995, 7 of 8). The sets are the same on all.
+- **Network QA:** 91 of 91 (`tbl_13_network_qa.csv`); the self-test on the
+  hand-computed graph (17 cases) runs at the start of STEP 11.2.
+- **Literature check (descriptive; `references.md`, "Week-11 network"):**
+  agrees for Guru Ghasidas-Tamor Pingla, Kanha/Pench, the Bandipur block,
+  Bhadra, Sundarbans, Dampa, Sahyadri. No source found for a high Madhav
+  centrality, for Orang–Dampa, or for a northern link of
+  Nagarjunsagar-Srisailam + Amrabad. Sources describe no Anamalai–Periyar
+  connection along Kerala and a barrier at the Shencottah gap.
+- **Two data items kept as limitations (author choice g1):** Guru
+  Ghasidas-Tamor Pingla and Sanjay Dubri are 1.59 km apart in the KML (two
+  nodes, both linchpins) although sources call them contiguous; BRT is
+  10.1 km from Sathyamangalam (a separate pendant node) although sources name
+  it in the Bandipur block. Decision 17 was not changed.
 - **Engine** `R/00_functions_lcp.R`: our own 16-neighbour cell graph (`terra`
   + `igraph`), crossed-cells knight rule, edge-to-edge Dijkstra from all cells
   of the source reserve. No least-cost-path package in the pipeline;
@@ -89,46 +134,79 @@ the "Log", tick the week off in `project-plan.md`, then commit both together
   577.3 resistance-km; length/gap median 1.34 (range 0.63–4.18; highest
   Bandhavgarh–Panna). 21 pairs are not in the network (P3). Validation 15 of
   15 (largest difference 1.5e-15); QA 424 of 424 on all four surfaces.
-- **Variants (Decision 18):** gHM multiplier **robust** (`noghm` 18 of 97
+- **Path variants (Decision 18):** gHM multiplier **robust** (`noghm` 18 of 97
   material — 1 pair inside the limit; ρ 0.985); road value **robust**
   (`road15` 11, `road50` 9 material). No material rank change in any variant.
-- **Literature check:** the highest costs agree with the genetic and Terai
+- **Week-10 literature check (paths):** the highest costs agree with the genetic and Terai
   literature; the Bandhavgarh–Panna and Brahmaputra (Nameri/Orang–Kaziranga)
   detours do not match documented corridors → limitation L1 (no Decision
   change).
 - **NTCA overlap** (descriptive, no buffer): share inside corridors median
   0.064; 31 of 59 corridors crossed.
-- **Week-11 entry point** (`project-plan.md` → "Week 11 — task breakdown",
-  tasks 11.1–11.8, written 2026-10-03). First task 11.1, the
-  **functional-link Decision 19** (pending item in `methodology.md`), before
-  any network metric: (a) which in-network pairs are links (all, with cost as
-  the weight, or a cost threshold — and from what evidence); (b) the edge
-  weight and the 9 contiguous cost-0 pairs; (c) the metrics and their
-  normalisation across the 3 connected sets; (d) "isolated"; (e) whether to
-  repeat on the variants, with a pre-fixed comparison; (f) the
-  `network_group` labels (reporting only). Then STEPs 11.1–11.4 in
-  `scripts/07` → `tbl_13_network_links.csv`, `tbl_13_network_metrics.csv`
-  (and `tbl_13_network_variant_comparison.csv` if (e)). `tbl_03` stays
-  reserved for Week 12. Inputs: `lcp_reserve_network_7755.gpkg` (use
-  `in_network == TRUE`), `tbl_12_reserve_pairs.csv`, `NETWORK_GROUPS`.
-- **Read before Week 11:** (1) the path costs are already seen (Week-10
-  tables), so a cost threshold chosen now is post-result — prefer outside
-  evidence or no threshold, and say so in Decision 19; (2) `igraph` 1.6.0
-  stops on a zero weight in `betweenness()` ("Weight vector must be
-  positive"), so the contiguous pairs need a fixed treatment; (3) in `igraph`,
-  a weight is a distance — use cost, not conductance.
-- **Open items:** `scripts/03` line 101 — wrap the literal text in `I()` for
-  `readr` ≥ 2.2 (no output change; not done). The NTCA overlap has no buffer
-  (Decision 17). Transboundary links are absent (India-only surface).
+- **Week-12 entry point** (`project-plan.md` → "Week 12 — task breakdown",
+  tasks 12.1–12.11, written 2026-10-04). First task 12.1, the **pinch-point
+  Decision 20** (pending item in `methodology.md`), before any road crossing
+  is computed: (a) the roads; (b) the paths; (c) what one crossing is; (d)
+  what a pinch point is and its rank; (e) the variants; (f) what `tbl_03`
+  and `fig_04` hold and the published precision; (g) what was seen. Then the
+  pinch-point STEPs in `scripts/07` → `tbl_14_road_crossings.csv`,
+  `tbl_14_pinch_points.csv`, `tbl_14_pinch_qa.csv` (and a variant comparison
+  if (e)), the publishable `tbl_03_<slug>.csv` and `fig_04_<slug>.png`. The
+  estimates add up to 5.5–7.7 hours (4.4–6.2 without the two optional
+  tasks); a split point is after task 12.6.
+  Inputs: `lcp_reserve_network_7755.gpkg`, `tbl_13_network_links.csv`
+  (`link_role`, `is_bridge`), `tbl_13_network_metrics.csv`,
+  `data/raw/osm/osm_roads_major_7755.gpkg` (barrier classes of Decision 15).
+- **Read before Week 12:** (1) the network results are already seen, so a
+  pinch-point rule chosen now is post-result for them — say so in the
+  Decision; (2) the metrics table has 56 rows but 47 nodes — count by
+  `node_id` (the 8 linchpin nodes are 13 rows); (3) name a linchpin with its
+  flags (`cross_group_dependent`, `stable_linchpin`, `cut_node`); (4) check
+  the sensitive-data policy §3 before `tbl_03` and `fig_04` are designed —
+  reserve-level results are public; a path is a modelled line, not a tiger
+  location; (5) no road crossing is computed or seen yet (no road field in
+  the paths layer or in `tbl_12_*` / `tbl_13_*`), so Decision 20 can still be
+  fixed before those results; (6) a path is a line through 1 km cell centres
+  and a knight step crosses cells that are not vertices — define a crossing
+  in the terms of the surface; (7) STEP 9.6 does not run (`RUN_RESISTANCE <-
+  FALSE`), so the crossing step needs its own road read; (8) the plan's
+  "PROJ `proj.db` clash" note still applies — fresh session.
+- **Open items:** `scripts/03` line 101 — wrap
+  the literal text in `I()` for `readr` ≥ 2.2 (no output change; not done).
+  The NTCA overlap has no buffer (Decision 17). Transboundary links are
+  absent (India-only surface). `README.md` Stack row still says "least-cost-
+  path tool fixed in Decision 17" (correct, but it does not name the engine).
+  The AI-word list is an image-only PDF (75 words and phrases read from the
+  page images; rows at the page breaks can be missing) — a text file would
+  make the check exact.
 - **References still to verify** (entries marked in `references.md`): Sarkar
   et al. 2016, Jhala et al. 2021, Habib et al. 2020, Hussain et al. 2022,
   WHCWG 2010, McRae & Kavanagh 2011, Jan et al. 1999, Savary et al. 2022,
   Sharma et al. 2009 and 2011, Johnsingh et al. 2004, the transboundary TAL
-  report, Sarkar et al. 2021, the 2026 bioRxiv preprint.
+  report, Sarkar et al. 2021, the 2026 bioRxiv preprint. **New in Week 11:**
+  Brandes 2001, Brooks 2003, Carroll et al. 2012, Freeman 1977 (volume and
+  pages); Jhala et al. 2015 (report number); Johnsingh et al. 2009 (authors,
+  proceedings); Singh et al. 2015 (authors, article number); the two
+  Qureshi et al. 2014 chapters (read in fragments); which Pench unit Dutta et
+  al. 2016 mean.
 - **Pending, not scheduled:** SDM-based resistance (1 − suitability) and a
   circuit-theory check after Stage 3.
 
-### Output files this week (Week 10)
+### Output files this week (Week 11)
+
+- `outputs/tables/`: `tbl_13_network_links.csv` (85 rows),
+  `tbl_13_network_metrics.csv` (56 rows, 32 columns),
+  `tbl_13_network_threshold_scan.csv` (73 rows),
+  `tbl_13_network_variant_comparison.csv` (3 rows),
+  `tbl_13_network_qa.csv` (91 rows).
+- Code: `R/00_functions_network.R` (new), `R/00_config.R` (`NET_*` settings;
+  one comment), `scripts/07` (header, STEPs 11.1–11.4). No data layer
+  changed. No new package.
+- Docs: `methodology.md` (Decision 19, change log, Limitations, pending
+  item, §5.3), `references.md` (two new sections), `data-dictionary.md`,
+  `naming-conventions.md` §6, `project-plan.md`, `README.md`, this handoff.
+
+### Output files from Week 10 (unchanged)
 
 - `data/processed/lcp_reserve_network_7755.gpkg` — layers `baseline`,
   `noghm`, `road15`, `road50` (106 lines each). Gitignored.
@@ -182,9 +260,10 @@ All on the 1 km EPSG:7755 grid where raster.
 ### Open pending Decisions (decide in the week noted)
 
 Full text in `methodology.md` → "Decisions pending".
-- **[Week 11] Functional-link rule** (raised with Decisions 17–18) — how a
-  pair counts as a network link; whether the groups are separate; whether the
-  network metrics are repeated on the variants — before any network metric.
+- **[Week 12] Pinch-point rule** (raised 2026-10-04) — which roads, which
+  paths (all in-network pairs, the 73 edges, or the 13 bridges), how a
+  crossing is counted and ranked, whether repeated on the variants, and what
+  `tbl_03` and `fig_04` hold — before any road crossing is computed.
 - **[Week 8–9 → Week 13]** Settlement layer for the KDE — village-dominated
   (~195k); trim to city/town (4,597) or change radius?
 - **[Week 13–14]** Target-group scope — all Mammalia vs large-bodied guild.
@@ -198,7 +277,7 @@ NA policy → Decision 10; [Week 9] gHM gap-fill relevance → Decisions 11–13
 (Decision 10 closed); [Week 9] resistance values → Decision 14; [Week 9] barrier
 road classes → Decision 15; [Week 9] water and gHM → Decision 16; [Week 10]
 least-cost-path set-up → Decision 17; [Week 10] variant comparison metric →
-Decision 18._
+Decision 18; [Week 11] functional-link rule → Decision 19._
 
 ### Known gotchas (do not relearn)
 
@@ -406,10 +485,59 @@ Decision 18._
   stops `02` with nothing overwritten.
 - **On Windows, R reports only its own heap.** `lcp_mem_report()` gives the
   process peak on Linux only; read Task Manager on Windows.
+- **`igraph` weights must be above zero, and a weight is a distance.**
+  `betweenness()` stops on a zero weight (`igraph` 1.6.0: "Weight vector must
+  be positive"). The contiguous pairs (cost 0) are therefore merged into
+  blocks (Decision 19), not given a small weight.
+- **`igraph` `normalized = TRUE` divides by the pairs of the whole graph.**
+  With three sets of different size it is wrong for this project.
+  `net_node_metrics()` divides by the pairs of the node's own set.
+- **The metrics table is per reserve, the values are per node.** 56 rows, 47
+  nodes; block members share the node values. Count linchpins, cut nodes and
+  ranks by `node_id`, never by rows.
+- **`igraph::all_shortest_paths()` names its result differently by version**
+  (`res` in 1.x, `vpaths` in 2.x). `net_betweenness_identity()` reads both.
+- **A geometry rule can make a link that the literature does not know.** The
+  network has no cost threshold (Decision 19), so each pair inside 315 km
+  that passes P3 is a link — Orang–Dampa (305 km) is one. Check a named link
+  against the literature section before it goes into the story.
+- **Contiguous by the KML is not contiguous by notification.** The KML
+  polygons are national-park and sanctuary outlines. Guru Ghasidas-Tamor
+  Pingla and Sanjay Dubri are 1.59 km apart there (author choice g1: kept as
+  a limitation).
 
 ---
 
 ## Weekly log (newest first)
+
+### Week 11 — Reserve network graph (Stage 2) · 2026-10-03 to 2026-10-04
+- Entry state: Week 10 complete; paths on four surfaces; the functional-link
+  rule pending. Two stale statements found when the files were read
+  (`methodology.md` §5.3 tool; a config comment) — corrected first.
+- Did: Decision 19 (research, six forks a–f, recorded before any metric);
+  `NET_*` settings; new `R/00_functions_network.R`; STEP 11.1 (nodes, links,
+  graph), STEP 11.2 (self-test, metrics, second run, threshold scan), STEP
+  11.3 (variants, Decision-19 comparison), STEP 11.4 (network QA, 91 of 91).
+  Each STEP ran on the project machine; each table is identical to a
+  separate sandbox build and to an independent Python check. Literature check
+  of the linchpin and weakly connected nodes. Docs.
+- Decisions made: **19** (numbered; forks a1 + a4, b1, c1 + k3, d2, e2, f2;
+  judgement values 3, 0.9, 2/3). Process choices: q1 (QA table
+  `tbl_13_network_qa.csv`); g1 (Decision 17 contiguity kept; two data items
+  recorded as limitations); table details confirmed before tasks 11.3–11.5.
+- Outputs: see "Output files this week (Week 11)".
+- Gotchas found: see the new entries under "Known gotchas" (zero weights,
+  `normalized = TRUE`, rows against nodes, `all_shortest_paths` by version,
+  links without literature support, KML contiguity).
+- Corrections of the record: `methodology.md` §5.3 named "`leastcostpath` or
+  `gdistance`" as the tool; the `ROAD_BARRIER_TOUCHES` comment gave the
+  8-neighbour reason only. As built against the Decision-19 "Consequences"
+  text: the self-test is in STEP 11.2, a fifth table exists, the graph is
+  rebuilt from the paths layer.
+- Carried forward / next week: **Week 12** — the task breakdown was written
+  after the push (2026-10-04, `project-plan.md`); start with task 12.1, the
+  pinch-point Decision 20, before any road crossing is computed. `fig_03` is
+  not in use; confirm the figure number. Open: the `scripts/03` `I()` fix.
 
 ### Week 10 — Least-cost paths (Stage 2) · 2026-10-01 to 2026-10-03
 - Entry state: Week 9 complete; four resistance surfaces; Decisions 17–18
@@ -427,7 +555,7 @@ Decision 18._
 - Decisions made: **17**, **18** (numbered); process choices F1-A (tool named
   in Decision 17), RS1 (run switches + `_split` label), G-a (02 guard), V-add,
   QA in one table, NTCA overlap in two tables, L1.
-- Outputs: see "Output files this week (Week 10)".
+- Outputs: see "Output files from Week 10 (unchanged)".
 - Gotchas found: see the new entries under "Known gotchas" (one-origin
   packages, knight jumps, `terra::nearest`, the `sf` id fault, `costDist`
   convergence, `write_processed_vec`, contiguous by cell, G-a, Windows memory).

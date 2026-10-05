@@ -1,0 +1,86 @@
+"pair_id","surface","from_unit_id","from_name","to_unit_id","to_name","from_group","to_group","cross_group","contiguous","gap_km","cost_rkm","path_km","from_node_id","to_node_id","link_role","is_bridge","in_mst"
+1,"baseline",1,"Nagarjunsagar-Srisailam",10,"Indravati","central","central",FALSE,FALSE,269.15,2073.55797793283,470.178766541477,1,10,"edge",FALSE,TRUE
+2,"baseline",1,"Nagarjunsagar-Srisailam",51,"Amrabad","central","central",FALSE,TRUE,0,0,0,1,1,"block",NA,NA
+3,"baseline",2,"Namdapha",3,"Pakke","northeast","northeast",FALSE,FALSE,310.84,577.332227683717,462.5219326885,2,3,"edge",FALSE,TRUE
+4,"baseline",2,"Namdapha",4,"Kamlang","northeast","northeast",FALSE,TRUE,0.3,0,0,2,2,"block",NA,NA
+5,"baseline",2,"Namdapha",7,"Kaziranga","northeast","northeast",FALSE,FALSE,276.15,685.932167040966,369.128648852419,2,7,"edge",FALSE,FALSE
+6,"baseline",3,"Pakke",5,"Manas","northeast","northeast",FALSE,FALSE,82.81,180.570396433477,87.0886120346132,3,5,"parallel",NA,NA
+7,"baseline",3,"Pakke",6,"Nameri","northeast","northeast",FALSE,TRUE,0,0,0,3,3,"block",NA,NA
+8,"baseline",3,"Pakke",7,"Kaziranga","northeast","northeast",FALSE,FALSE,36.9,275.090992994739,68.0416407586001,3,7,"edge",FALSE,TRUE
+9,"baseline",5,"Manas",6,"Nameri","northeast","northeast",FALSE,FALSE,70.67,140.371807632678,74.7836603496162,5,3,"edge",FALSE,TRUE
+10,"baseline",5,"Manas",8,"Orang","northeast","northeast",FALSE,FALSE,43.95,422.593066471945,86.6449510224598,5,8,"edge",FALSE,FALSE
+11,"baseline",5,"Manas",58,"Buxa","northeast","northeast",FALSE,TRUE,0,0,0,5,5,"block",NA,NA
+12,"baseline",6,"Nameri",7,"Kaziranga","northeast","northeast",FALSE,FALSE,24.67,276.732338243788,67.7454560858481,3,7,"parallel",NA,NA
+13,"baseline",6,"Nameri",8,"Orang","northeast","northeast",FALSE,FALSE,50.01,326.946158009399,59.8033784784746,3,8,"edge",FALSE,TRUE
+15,"baseline",8,"Orang",37,"Dampa","northeast","northeast",FALSE,FALSE,305.24,1310.83886311829,534.954611989268,8,37,"edge",TRUE,TRUE
+16,"baseline",9,"Valmiki",52,"Dudhwa","north","north",FALSE,FALSE,300.31,4186.07248062532,363.174377936226,9,52,"edge",TRUE,TRUE
+17,"baseline",10,"Indravati",11,"Udanti-Sitanadi","central","central",FALSE,FALSE,147.31,276.266247407646,165.880077087798,10,11,"edge",FALSE,TRUE
+18,"baseline",10,"Indravati",32,"Tadoba-Andhari","central","central",FALSE,FALSE,128.01,449.753793158461,160.954291312708,10,32,"edge",FALSE,FALSE
+19,"baseline",10,"Indravati",35,"Nawegaon-Nagzira","central","central",FALSE,FALSE,168.35,375.945711752714,210.450534001818,10,35,"edge",FALSE,TRUE
+20,"baseline",10,"Indravati",50,"Kawal","central","central",FALSE,FALSE,118.66,330.15288726455,145.713834729957,10,50,"edge",FALSE,TRUE
+22,"baseline",11,"Udanti-Sitanadi",12,"Achanakmar","central","central",FALSE,FALSE,221.82,920.857578959492,431.227921921859,11,12,"edge",FALSE,FALSE
+23,"baseline",11,"Udanti-Sitanadi",22,"Kanha","central","central",FALSE,FALSE,213.47,748.241934477284,342.070436378006,11,22,"edge",FALSE,FALSE
+24,"baseline",11,"Udanti-Sitanadi",35,"Nawegaon-Nagzira","central","central",FALSE,FALSE,176.32,423.867719486543,209.64839771555,11,35,"edge",FALSE,FALSE
+25,"baseline",11,"Udanti-Sitanadi",39,"Satkosia","central","central",FALSE,FALSE,236.73,718.129096333879,364.340599897552,11,39,"edge",FALSE,TRUE
+26,"baseline",12,"Achanakmar",13,"Guru Ghasidas-Tamor Pingla","central","central",FALSE,FALSE,119.45,457.069120302504,155.504067789193,12,13,"edge",FALSE,TRUE
+27,"baseline",12,"Achanakmar",22,"Kanha","central","central",FALSE,FALSE,60.73,118.705806633831,65.9749513537284,12,22,"edge",FALSE,TRUE
+28,"baseline",12,"Achanakmar",24,"Bandhavgarh","central","central",FALSE,FALSE,115.32,458.823908201543,144.321533599068,12,24,"edge",FALSE,FALSE
+29,"baseline",13,"Guru Ghasidas-Tamor Pingla",14,"Palamau","central","central",FALSE,FALSE,71.93,181.466567609614,79.8973108322435,13,14,"edge",FALSE,TRUE
+30,"baseline",13,"Guru Ghasidas-Tamor Pingla",24,"Bandhavgarh","central","central",FALSE,FALSE,68.26,245.749317803523,101.27113602648,13,24,"edge",FALSE,FALSE
+31,"baseline",13,"Guru Ghasidas-Tamor Pingla",27,"Sanjay Dubri","central","central",FALSE,FALSE,1.59,1.52312672138214,1,13,27,"edge",FALSE,TRUE
+32,"baseline",14,"Palamau",38,"Similipal","central","central",FALSE,FALSE,243.81,796.97892395468,295.737009750163,14,38,"edge",FALSE,FALSE
+33,"baseline",14,"Palamau",39,"Satkosia","central","central",FALSE,FALSE,291.05,860.604575017126,367.177524349271,14,39,"edge",FALSE,FALSE
+34,"baseline",15,"Bandipur",18,"Nagarhole","western_ghats","western_ghats",FALSE,TRUE,0,0,0,15,15,"block",NA,NA
+36,"baseline",15,"Bandipur",47,"Mudumalai","western_ghats","western_ghats",FALSE,TRUE,0,0,0,15,15,"block",NA,NA
+37,"baseline",15,"Bandipur",48,"Sathyamangalam","western_ghats","western_ghats",FALSE,TRUE,0,0,0,15,15,"block",NA,NA
+38,"baseline",16,"Bhadra",17,"Kali","western_ghats","western_ghats",FALSE,FALSE,167.26,643.778127590729,254.601436637794,16,17,"edge",TRUE,TRUE
+39,"baseline",16,"Bhadra",18,"Nagarhole","western_ghats","western_ghats",FALSE,FALSE,134.14,455.605928036197,153.38165029432,16,15,"edge",TRUE,TRUE
+41,"baseline",17,"Kali",34,"Sahyadri","western_ghats","western_ghats",FALSE,FALSE,220.65,560.160469539145,253.386038899572,17,34,"edge",TRUE,TRUE
+44,"baseline",19,"Biligiri Ranganatha Temple",48,"Sathyamangalam","western_ghats","western_ghats",FALSE,FALSE,10.12,30.1557131924264,13.4721359549996,19,15,"edge",TRUE,TRUE
+46,"baseline",20,"Periyar",45,"Kalakad-Mundanthurai","western_ghats","western_ghats",FALSE,FALSE,52.95,98.8246098113007,62.6897279958473,20,45,"edge",TRUE,TRUE
+48,"baseline",20,"Periyar",49,"Srivilliputhur-Megamalai","western_ghats","western_ghats",FALSE,TRUE,0,0,0,20,20,"block",NA,NA
+49,"baseline",21,"Parambikulam",46,"Anamalai","western_ghats","western_ghats",FALSE,TRUE,0,0,0,21,21,"block",NA,NA
+51,"baseline",22,"Kanha",23,"Pench","central","central",FALSE,FALSE,106.18,422.605468601758,129.862543063307,22,23,"edge",FALSE,TRUE
+52,"baseline",22,"Kanha",24,"Bandhavgarh","central","central",FALSE,FALSE,124.88,510.785521504706,169.699737200299,22,24,"edge",FALSE,FALSE
+53,"baseline",22,"Kanha",28,"Veerangana Durgavati","central","central",FALSE,FALSE,138.97,1313.3043995517,224.096426936439,22,28,"edge",FALSE,FALSE
+54,"baseline",22,"Kanha",35,"Nawegaon-Nagzira","central","central",FALSE,FALSE,104.62,379.314921527601,159.488728067328,22,35,"edge",FALSE,TRUE
+56,"baseline",23,"Pench",28,"Veerangana Durgavati","central","central",FALSE,FALSE,177.41,1672.68317812522,370.79960063157,23,28,"edge",FALSE,FALSE
+57,"baseline",23,"Pench",33,"Pench (MH)","central","central",FALSE,FALSE,8.98,14.7168976595355,11.3584854723723,23,33,"edge",FALSE,TRUE
+58,"baseline",23,"Pench",35,"Nawegaon-Nagzira","central","central",FALSE,FALSE,72.43,686.917424456276,90.0547861778391,23,35,"edge",FALSE,FALSE
+60,"baseline",24,"Bandhavgarh",27,"Sanjay Dubri","central","central",FALSE,FALSE,49.58,239.463768917291,58.9301743803409,24,27,"edge",FALSE,TRUE
+61,"baseline",24,"Bandhavgarh",28,"Veerangana Durgavati","central","central",FALSE,FALSE,97.36,1042.46316083056,128.89198031483,24,28,"edge",FALSE,FALSE
+63,"baseline",25,"Panna",28,"Veerangana Durgavati","central","central",FALSE,FALSE,97.4,1132.44375260956,134.673446361821,25,28,"edge",FALSE,FALSE
+64,"baseline",25,"Panna",29,"Ratapani","central","central",FALSE,FALSE,236.37,1207.84589814662,296.515308987593,25,29,"edge",FALSE,FALSE
+65,"baseline",25,"Panna",30,"Madhav","central","central",FALSE,FALSE,198.6,1380.47508143202,296.542562134748,25,30,"edge",FALSE,TRUE
+66,"baseline",25,"Panna",54,"Ranipur","central","central",FALSE,FALSE,69.02,312.991638129827,83.1618639508469,25,54,"edge",FALSE,TRUE
+67,"baseline",26,"Satpura",28,"Veerangana Durgavati","central","central",FALSE,FALSE,168.58,1212.84053932653,202.605815044788,26,28,"edge",FALSE,FALSE
+68,"baseline",26,"Satpura",29,"Ratapani","central","central",FALSE,FALSE,41.82,776.036148646104,48.3803979038564,26,29,"edge",FALSE,TRUE
+69,"baseline",26,"Satpura",31,"Melghat","central","central",FALSE,FALSE,104.84,301.682635562036,132.842824934449,26,31,"edge",FALSE,TRUE
+70,"baseline",26,"Satpura",33,"Pench (MH)","central","central",FALSE,FALSE,102.84,394.381743644426,129.002484384413,26,33,"edge",FALSE,TRUE
+71,"baseline",26,"Satpura",36,"Bor","central","central",FALSE,FALSE,148.53,861.986007529722,303.75233927377,26,36,"edge",FALSE,FALSE
+72,"baseline",27,"Sanjay Dubri",54,"Ranipur","central","central",FALSE,FALSE,97.67,904.32035949571,235.46271711238,27,54,"edge",FALSE,TRUE
+73,"baseline",28,"Veerangana Durgavati",29,"Ratapani","central","central",FALSE,FALSE,174.1,771.222416262156,223.363174357668,28,29,"edge",FALSE,TRUE
+74,"baseline",29,"Ratapani",30,"Madhav","central","central",FALSE,FALSE,243.04,1711.85212231063,362.561328153188,29,30,"edge",FALSE,FALSE
+75,"baseline",29,"Ratapani",31,"Melghat","central","central",FALSE,FALSE,122.57,1047.91368589057,163.285523637926,29,31,"edge",FALSE,FALSE
+76,"baseline",29,"Ratapani",42,"Mukundara Hills","central","central",FALSE,FALSE,204.9,2639.53693377212,304.463969502844,29,42,"edge",FALSE,FALSE
+77,"baseline",30,"Madhav",40,"Ranthambore","central","central",FALSE,FALSE,112.75,785.523439049266,170.465863525425,30,40,"edge",FALSE,TRUE
+78,"baseline",30,"Madhav",41,"Sariska","central","central",FALSE,FALSE,203.59,2499.23890885418,277.001552670509,30,41,"edge",FALSE,FALSE
+80,"baseline",31,"Melghat",36,"Bor","central","central",FALSE,FALSE,138.41,546.022550271975,166.557601576568,31,36,"edge",FALSE,TRUE
+82,"baseline",32,"Tadoba-Andhari",33,"Pench (MH)","central","central",FALSE,FALSE,116.1,1279.87037070474,415.586397195973,32,33,"edge",FALSE,FALSE
+83,"baseline",32,"Tadoba-Andhari",35,"Nawegaon-Nagzira","central","central",FALSE,FALSE,89.74,561.860858341721,169.789291147074,32,35,"edge",FALSE,FALSE
+84,"baseline",32,"Tadoba-Andhari",36,"Bor","central","central",FALSE,FALSE,78.1,777.981697906254,111.303999574578,32,36,"edge",FALSE,FALSE
+85,"baseline",32,"Tadoba-Andhari",50,"Kawal","central","central",FALSE,FALSE,94.91,438.592065956638,134.458048623599,32,50,"edge",FALSE,TRUE
+86,"baseline",33,"Pench (MH)",35,"Nawegaon-Nagzira","central","central",FALSE,FALSE,66.82,666.820922308193,86.2689417238547,33,35,"edge",FALSE,FALSE
+87,"baseline",33,"Pench (MH)",36,"Bor","central","central",FALSE,FALSE,62.84,639.539064931469,81.0525918752134,33,36,"edge",FALSE,FALSE
+89,"baseline",38,"Similipal",39,"Satkosia","central","central",FALSE,FALSE,149.44,494.527939395549,172.866931668559,38,39,"edge",FALSE,TRUE
+90,"baseline",38,"Similipal",57,"Sundarbans","central","central",FALSE,FALSE,207.7,2690.8788997412,279.78519262361,38,57,"edge",TRUE,TRUE
+91,"baseline",40,"Ranthambore",41,"Sariska","central","central",FALSE,FALSE,104.81,1899.97754756969,120.299621167584,40,41,"edge",FALSE,TRUE
+93,"baseline",40,"Ranthambore",43,"Ramgarh Vishdhari","central","central",FALSE,FALSE,41.03,279.609210416649,47.814329595088,40,43,"edge",FALSE,TRUE
+96,"baseline",41,"Sariska",56,"Rajaji","central","north",TRUE,FALSE,290.82,5636.84334898897,394.595154009961,41,56,"edge",TRUE,TRUE
+97,"baseline",42,"Mukundara Hills",43,"Ramgarh Vishdhari","central","central",FALSE,FALSE,43.97,408.29618847447,63.5181551205935,42,43,"edge",FALSE,TRUE
+99,"baseline",46,"Anamalai",47,"Mudumalai","western_ghats","western_ghats",FALSE,FALSE,110.71,413.03600857081,129.713834729957,21,15,"edge",TRUE,TRUE
+100,"baseline",46,"Anamalai",48,"Sathyamangalam","western_ghats","western_ghats",FALSE,FALSE,105.32,473.192968383552,153.628669388433,21,15,"parallel",NA,NA
+101,"baseline",46,"Anamalai",49,"Srivilliputhur-Megamalai","western_ghats","western_ghats",FALSE,FALSE,44.61,187.330518130225,73.382592206482,21,20,"edge",TRUE,TRUE
+104,"baseline",50,"Kawal",51,"Amrabad","central","central",FALSE,FALSE,261.17,2442.84530084331,619.355018103769,50,1,"edge",FALSE,FALSE
+105,"baseline",52,"Dudhwa",55,"Corbett","north","north",FALSE,FALSE,157.81,763.289946444612,210.676882856653,52,55,"edge",TRUE,TRUE
+106,"baseline",55,"Corbett",56,"Rajaji","north","north",FALSE,FALSE,28.95,70.6933385840452,30.0175340244903,55,56,"edge",TRUE,TRUE

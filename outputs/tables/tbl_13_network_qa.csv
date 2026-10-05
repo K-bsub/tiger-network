@@ -1,0 +1,92 @@
+"surface","check","value","pass"
+"test graph","hand-computed self-test of the metric and scan functions","17 of 17 cases",TRUE
+"baseline","each reserve in one node only","56 reserves, 0 duplicated, 0 with no node",TRUE
+"baseline","reserve count as expected","56",TRUE
+"baseline","node count as expected","47",TRUE
+"baseline","graph vertices = nodes","47",TRUE
+"baseline","no loop, no duplicate edge","73",TRUE
+"baseline","edge weights above zero, none NA","min 1.523",TRUE
+"baseline","each edge traces to one pair_id","73 edges, 73 pair_ids",TRUE
+"baseline","each in-network pair has a link_role","0",TRUE
+"baseline","set sizes add up to the node count","47",TRUE
+"baseline","set reserves add up to the reserve count","56",TRUE
+"baseline","betweenness_norm is 0 to 1; NA only in a set below the minimum size","range 0.0000 to 0.7143, 0 NA",TRUE
+"baseline","linchpin = fewer than top-n nodes of the set are higher, value > 0","8 linchpins",TRUE
+"baseline","isolated = degree 0 = a set of one node","0",TRUE
+"baseline","pendant = degree 1","6",TRUE
+"baseline","a cut node has degree 2 or more","12",TRUE
+"baseline","betweenness_raw is 0 at degree 0 and 1","6",TRUE
+"baseline","cheapest link: NA only at degree 0; rank 1 = the highest value","0 NA",TRUE
+"baseline","sum of betweenness = nodes between the ends of the shortest paths, by set","set 1: 1862 = 1862; set 2: 47 = 47; set 3: 10 = 10",TRUE
+"baseline","each edge weight = the cost of its pair_id in the layer","73 edges",TRUE
+"noghm","each reserve in one node only","56 reserves, 0 duplicated, 0 with no node",TRUE
+"noghm","reserve count as expected","56",TRUE
+"noghm","node count as expected","47",TRUE
+"noghm","graph vertices = nodes","47",TRUE
+"noghm","no loop, no duplicate edge","75",TRUE
+"noghm","edge weights above zero, none NA","min 1.000",TRUE
+"noghm","each edge traces to one pair_id","75 edges, 75 pair_ids",TRUE
+"noghm","each in-network pair has a link_role","0",TRUE
+"noghm","set sizes add up to the node count","47",TRUE
+"noghm","set reserves add up to the reserve count","56",TRUE
+"noghm","betweenness_norm is 0 to 1; NA only in a set below the minimum size","range 0.0000 to 0.7143, 0 NA",TRUE
+"noghm","linchpin = fewer than top-n nodes of the set are higher, value > 0","8 linchpins",TRUE
+"noghm","isolated = degree 0 = a set of one node","0",TRUE
+"noghm","pendant = degree 1","6",TRUE
+"noghm","a cut node has degree 2 or more","11",TRUE
+"noghm","betweenness_raw is 0 at degree 0 and 1","6",TRUE
+"noghm","cheapest link: NA only at degree 0; rank 1 = the highest value","0 NA",TRUE
+"noghm","sum of betweenness = nodes between the ends of the shortest paths, by set","set 1: 1672 = 1672; set 2: 47 = 47; set 3: 10 = 10",TRUE
+"noghm","each edge weight = the cost of its pair_id in the layer","75 edges",TRUE
+"road15","each reserve in one node only","56 reserves, 0 duplicated, 0 with no node",TRUE
+"road15","reserve count as expected","56",TRUE
+"road15","node count as expected","47",TRUE
+"road15","graph vertices = nodes","47",TRUE
+"road15","no loop, no duplicate edge","72",TRUE
+"road15","edge weights above zero, none NA","min 1.523",TRUE
+"road15","each edge traces to one pair_id","72 edges, 72 pair_ids",TRUE
+"road15","each in-network pair has a link_role","0",TRUE
+"road15","set sizes add up to the node count","47",TRUE
+"road15","set reserves add up to the reserve count","56",TRUE
+"road15","betweenness_norm is 0 to 1; NA only in a set below the minimum size","range 0.0000 to 0.7143, 0 NA",TRUE
+"road15","linchpin = fewer than top-n nodes of the set are higher, value > 0","8 linchpins",TRUE
+"road15","isolated = degree 0 = a set of one node","0",TRUE
+"road15","pendant = degree 1","6",TRUE
+"road15","a cut node has degree 2 or more","12",TRUE
+"road15","betweenness_raw is 0 at degree 0 and 1","6",TRUE
+"road15","cheapest link: NA only at degree 0; rank 1 = the highest value","0 NA",TRUE
+"road15","sum of betweenness = nodes between the ends of the shortest paths, by set","set 1: 2023 = 2023; set 2: 47 = 47; set 3: 10 = 10",TRUE
+"road15","each edge weight = the cost of its pair_id in the layer","72 edges",TRUE
+"road50","each reserve in one node only","56 reserves, 0 duplicated, 0 with no node",TRUE
+"road50","reserve count as expected","56",TRUE
+"road50","node count as expected","47",TRUE
+"road50","graph vertices = nodes","47",TRUE
+"road50","no loop, no duplicate edge","75",TRUE
+"road50","edge weights above zero, none NA","min 1.523",TRUE
+"road50","each edge traces to one pair_id","75 edges, 75 pair_ids",TRUE
+"road50","each in-network pair has a link_role","0",TRUE
+"road50","set sizes add up to the node count","47",TRUE
+"road50","set reserves add up to the reserve count","56",TRUE
+"road50","betweenness_norm is 0 to 1; NA only in a set below the minimum size","range 0.0000 to 0.7143, 0 NA",TRUE
+"road50","linchpin = fewer than top-n nodes of the set are higher, value > 0","8 linchpins",TRUE
+"road50","isolated = degree 0 = a set of one node","0",TRUE
+"road50","pendant = degree 1","6",TRUE
+"road50","a cut node has degree 2 or more","11",TRUE
+"road50","betweenness_raw is 0 at degree 0 and 1","6",TRUE
+"road50","cheapest link: NA only at degree 0; rank 1 = the highest value","0 NA",TRUE
+"road50","sum of betweenness = nodes between the ends of the shortest paths, by set","set 1: 1852 = 1852; set 2: 47 = 47; set 3: 10 = 10",TRUE
+"road50","each edge weight = the cost of its pair_id in the layer","75 edges",TRUE
+"baseline","metrics table: one row for each network reserve","56",TRUE
+"baseline","the reserves of one block have the same node values","47 different rows, 47 nodes",TRUE
+"baseline","each bridge is in the minimum spanning forest","13 bridges",TRUE
+"baseline","spanning-forest edges = nodes - sets","44 = 47 - 3",TRUE
+"baseline","second run: each set is inside one set of the main graph","4 sets",TRUE
+"baseline","cross_group_dependent only on a baseline linchpin","1",TRUE
+"baseline","scan: one row per edge, cost does not decrease","73",TRUE
+"baseline","scan: joining edges = nodes - sets; the last n_sets = the sets","44 joining, 3 sets at the end",TRUE
+"all","stable_linchpin = a linchpin on the baseline and each variant","7",TRUE
+"all","variant labels are robust or sensitive; one row per variant","noghm robust; road15 robust; road50 robust",TRUE
+"all","on disk: tbl_13_network_links.csv","85 rows, 85 expected",TRUE
+"all","on disk: tbl_13_network_metrics.csv","56 rows, 56 expected",TRUE
+"all","on disk: tbl_13_network_variant_comparison.csv","3 rows, 3 expected",TRUE
+"all","on disk: tbl_13_network_threshold_scan.csv","73 rows, 73 expected",TRUE
