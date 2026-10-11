@@ -2,14 +2,21 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** Week 11 complete — **Stage 2 (Connectivity) reserve network
-built.** The network of Decision 19 from the Week-10 paths: 47 nodes (56
-reserves, contiguous reserves merged), 73 edges, 3 sets; node metrics, a
-second run without cross-group links, a threshold scan, the Decision-19
-variant comparison (gHM multiplier and road value both robust) and network QA
-(`tbl_13_*`). A literature check is descriptive. Next: Week 12 — road pinch
-points, the network figure, the publishable table. Prior: Week 10 —
-least-cost paths (Decisions 17–18).
+**Status:** Week 12 complete — **Stage 2 (Connectivity) complete.** Road
+pinch points by **Decision 20**, recorded 2026-10-10 before any road crossing
+was computed: 556 crossings of barrier roads on 74 of the 76 in-network
+baseline paths; 365 sites; 200 pinch points (tier 1: 3, tier 2: 98, tier 3:
+99). By the Decision-20 rule the **gHM multiplier is "sensitive"** for the
+pinch points (site overlap 0.520) and the road value is "robust" (0.866 and
+0.820). Pinch-point QA 74 of 74 (`tbl_14_*`). Publishable outputs, with
+positions at a 10 km grid cell: `tbl_03_reserve_network.csv`,
+`tbl_03b_pinch_points.csv`, `tbl_03_notes.md`, `fig_03_reserve_network.png`
+(the figure text is a draft that the author keeps for now). A literature
+check of the pinch points is descriptive. The Stage-2 summary against
+proposal question 2 is in the change log (2026-10-10, "Week 12 complete").
+Next: Week 13 — Stage 3 (habitat suitability): occurrence cleaning and
+effort; Decision 21 (cleaning rule) comes first. Prior: Week 11 — reserve network (Decision 19); Week 10 — least-cost
+paths (Decisions 17–18).
 
 This document is the processing log and the decision record. Every significant
 choice becomes a **numbered Decision** with a date and a justification, recorded
@@ -48,8 +55,14 @@ the engine; Decision 18 fixes the variant comparison. No least-cost-path
 package is in the pipeline; `gdistance` is for validation only. Reserve
 network as a graph (`igraph`; rules in Decision 19 — no cost threshold,
 contiguous reserves merged into one node): betweenness identifies linchpin
-reserves, components identify isolated reserves. Road crossings give pinch
-points.
+reserves, components identify isolated reserves. Road crossings of the paths
+give pinch points (rules in Decision 20: a crossing is a run of barrier-road
+cells on a path; crossings at most 5 km apart are one site; a pinch point is
+a site on a bridge edge or a site that two or more edges use — not the
+pinch point of circuit-theory mapping). The outputs for publication are
+`tbl_03_reserve_network.csv`, `tbl_03b_pinch_points.csv` (with the note file
+`tbl_03_notes.md`) and `fig_03_reserve_network.png`; a crossing or a pinch
+point is given as a 10 km grid cell with its state and district.
 All Stage-2 steps (Weeks 9–12: resistance, least-cost paths, network graph,
 pinch points) are built in **one script, `scripts/07_connectivity.R`**, with one
 STEP block per task.
@@ -1580,24 +1593,329 @@ a1 + a4, b1, c1 + k3, d2, e2, f2.
 This closes the **[Week 11] Functional-link rule** pending item (both parts:
 the link rule and the variant repeat).
 
+### Decision 20 — Road pinch points: roads, paths, crossing, site, pinch-point rule, variant comparison, publication
+**Date:** 2026-10-10 (fixed **before** any road crossing is computed — see
+"What was seen before this Decision")
+**Choice:** Settings in `R/00_config.R` (`PINCH_*`). The Week-12 STEPs of
+`scripts/07_connectivity.R` apply them. Fork codes as raised on 2026-10-10:
+a1 + n1, b1 + k1, c1 + r1 + m1, d1 + t1, e2, p1 + q1 + g1, `fig_03`, a new
+policy rule.
+
+1. **Roads — the barrier-road cells of Decision 15 (a1, n1).**
+   - The roads are the four barrier classes of Decision 15 (`motorway`,
+     `trunk`, `primary`, `secondary`), with each `_link` ramp in its parent
+     class. They are rasterised onto the surface grid with `touches = TRUE`
+     and masked to the footprint. This is the rule of STEP 9.6, so the cells
+     are the cells that the path engine saw.
+   - Guard: the number of barrier-road cells must be the `n_road_cells` value
+     in `tbl_11_resistance_qa.csv`. A difference stops the script.
+   - Each barrier-road cell records `road_class_top`: the highest class that
+     touches the cell, in the order motorway, trunk, primary, secondary. The
+     class is a description. It is not a traffic volume and it is not in any
+     rule (point 5).
+   - The barrier-road cells come from geometry, so they are the same on all
+     four surfaces.
+   - No road name or reference (n1): the road layer holds `osm_id` and
+     `highway` only. A name for a published pinch point comes from a hand
+     check (task 12.9).
+2. **Paths — every in-network path gets its crossings; the rule uses the
+   edges (b1, k1).**
+   - On each surface, crossings are computed for every in-network pair that
+     has a path: `link_role` `edge` and `parallel` (Decision 19 point 3). On
+     the baseline this is 76 paths (73 `edge` + 3 `parallel`). Each crossing
+     carries its `pair_id`, `link_role` and `is_bridge`.
+   - The pinch-point rule (point 5) counts `edge` links only.
+   - A pair that is not in the network (Decision 17 point 2; 21 on the
+     baseline) gets no crossing. A contiguous pair has no path and no
+     crossing.
+   - `lit_flag` (k1): a link in `PINCH_LIT_FLAG_PAIRS` is marked in every
+     table. The list is the four links that the Limitations name as without
+     literature support, or with a described barrier: Orang–Dampa,
+     Anamalai–Srivilliputhur-Megamalai, Periyar–Kalakad-Mundanthurai and
+     Sariska–Rajaji. No link is dropped. The list was fixed on 2026-10-04
+     (Week-11 Limitations), before this Decision.
+3. **One crossing — a run of barrier-road cells on the path (c1, r1).**
+   - **The cell list of a path:** the path cells in order (the line
+     vertices), and, for each knight step, the two middle cells that the step
+     crosses, put between its two end cells in the order in which the
+     straight line meets them. This is the crossed-cells rule of the engine
+     (Decision 17 point 3). Orthogonal and diagonal steps add no cell.
+   - **A crossing** is one unbroken run of barrier-road cells in that list.
+     A run ends at the first cell that is not a barrier-road cell.
+   - Each crossing records: `n_cells` (the length of the run), its
+     `road_class_top` (the highest class in the run) and its cells. A path
+     that goes along a road gives one long run; `n_cells` shows it.
+   - **Reserve cells (r1):** every barrier-road cell on the path counts,
+     also a cell in the footprint of the source reserve, the target reserve
+     or a third reserve. `in_reserve_unit_ids` lists the reserves whose
+     footprint cells the run holds (empty if none). No cell is excluded.
+4. **Site — crossings at most 5 km apart are one place (m1).**
+   - Two crossings are joined if the shortest distance between a cell centre
+     of one and a cell centre of the other is **≤ 5 km**
+     (`PINCH_SITE_MERGE_KM`). The crossings can be on one link or on
+     different links. A **site** is a connected set of joined crossings.
+   - The sites of a surface are made from all crossings of that surface
+     (`edge` and `parallel` links).
+   - Each site records: the number of crossings, `n_links` (different
+     `pair_id`s), `n_edges` (different `pair_id`s with `link_role` `edge`),
+     `n_bridges` (of those, with `is_bridge` true), its distinct road cells,
+     `road_class_top`, `span_km` (the longest distance between two of its
+     cell centres), `in_reserve_unit_ids` and `lit_flag` (true if every edge
+     of the site has the flag; `lit_flag_any` if one or more has it).
+   - The site position is the mean of its distinct cell centres. It is
+     published only at the precision of point 7.
+5. **Pinch point and order (d1, t1).** Three columns on each site, all fixed
+   now:
+   - `on_bridge` = `n_bridges` ≥ 1: a bridge edge (Decision 19 point 5)
+     uses the site. Without that edge, its set divides.
+   - `shared` = `n_edges` ≥ **2** (`PINCH_SHARED_MIN_EDGES`): two or more
+     edges use the site.
+   - `pinch_point` = `on_bridge` **or** `shared`.
+   - `pinch_tier`: 1 = both flags; 2 = `on_bridge` only; 3 = `shared` only;
+     `NA` if the site is not a pinch point. Sites in one tier have no order
+     between them. Tables sort by tier, then by `site_id`.
+   - The road class, the cost and the number of crossings are columns. They
+     are not in the rule and they give no order.
+   - No upper limit on the number of pinch points. The count is a result.
+   - **Term (t1):** the label stays "pinch point". Here it means a place
+     where a barrier road meets a modelled least-cost path that the network
+     depends on or that edges share. It is **not** the pinch point of
+     circuit-theory mapping, which is a narrow part of a corridor with high
+     current flow. A least-cost path has no width. Each table header, the
+     figure caption and the write-up say this.
+6. **Variant repeat and comparison (e2).** Points 1–5 are applied to
+   `noghm`, `road15` and `road50`, each with its own paths and its own edges
+   and bridges (the Decision-19 graph of that surface). Each variant is
+   compared with the baseline only:
+   - Two sites are **near** if the shortest distance between a cell centre
+     of one and a cell centre of the other is ≤ 5 km (`PINCH_COMPARE_D_KM`).
+   - `share_base` = baseline pinch points with a variant pinch point near
+     them ÷ baseline pinch points. `share_variant` = variant pinch points
+     with a baseline pinch point near them ÷ variant pinch points.
+   - **`site_overlap` = min(`share_base`, `share_variant`).**
+   - **Label (fixed now): robust** if `site_overlap` **≥ 2/3**
+     (`PINCH_COMPARE_ROBUST_MIN_OVERLAP`); otherwise **sensitive**. A
+     surface with no pinch point gives no overlap value and the label
+     "sensitive". `noghm` gives the label for the gHM multiplier (Decision
+     14). The road value (Decision 15) is robust only if **both** `road15`
+     and `road50` are robust.
+   - Descriptive columns (no limits): the numbers of crossings, sites and
+     pinch points, and the pinch points by tier, on each surface; the same
+     overlap at 10 km; the same overlap for all sites; the baseline
+     tier-1 and tier-2 pinch points with no variant pinch point near them,
+     by link.
+7. **Publication (p1, q1, g1, `fig_03`, policy).**
+   - **Position (p1):** a committed table, a figure, a caption and a popup
+     give a crossing or a site as a **10 km grid cell** with its state and
+     district. The 10 km grid is the analysis grid aggregated by 10
+     (`PINCH_PUBLISH_GRID_M`), from the top-left corner of that grid. The
+     state is from `boundary_states_7755.gpkg`; the district is from the
+     DataMeet Census-2011 layer (641 districts, from before later district
+     changes). The 1 km cells go only into a gitignored layer under
+     `data/processed/`. This applies to `tbl_14_*` too: `outputs/tables/` is
+     committed.
+   - **Tables (q1):** `tbl_03_<slug>.csv`, one row per network reserve (56):
+     the network results from `tbl_13_network_metrics.csv` (node, set,
+     linchpin with `cross_group_dependent` and `stable_linchpin`, cut node,
+     pendant, cheapest link) and the pinch-point counts on the edges of the
+     node, by tier. `tbl_03b_<slug>.csv`, one row per baseline pinch point:
+     tier, the two flags, `n_edges`, `n_bridges`, the links by name,
+     `road_class_top`, `in_reserve_unit_ids`, `lit_flag`, state, district,
+     10 km cell, and the variant result of the site.
+   - **Figure (g1):** `fig_03_<slug>.png`, a map: the nodes by flag
+     (linchpin with its two flags, cut node, pendant); the 73 baseline edge
+     paths as modelled lines, with the bridges marked; the baseline pinch
+     points at their 10 km cell, by tier. The caption says that the paths
+     are modelled and not observed movement, that the surface is India-only,
+     what a pinch point is here (point 5), and the limits of the linchpin
+     labels.
+   - **Figure number:** `fig_03` (author choice; the plan named `fig_04`
+     while `fig_03` was not in use).
+   - **Path lines:** the lines are drawn in the static figure only, at
+     national scale. A published path layer that a reader can zoom or
+     download (the Stage-4 Leaflet maps) needs its own rule first (pending
+     item below).
+   - **Policy:** `docs/sensitive-data-policy.md` §3 gets one rule for
+     modelled paths and crossings. `assert_no_raw_points()` stops all point
+     geometry, so a published site is a table row or a grid cell, never a
+     point layer. The publish check for the 10 km rule is written with the
+     publishable table (task 12.7).
+
+**What was seen before this Decision (pre-registration, stated plainly):**
+- **The network results were seen** (Week 11): the linchpin, cut and pendant
+  nodes, the number of bridges and the bridge list on the console, the path
+  costs, the length/gap ratios, the reserves that paths cross, and the NTCA
+  overlap. The author knows which links are bridges.
+- **Road figures seen:** the Decision-15 data check (barrier-road cells are
+  17.5 % of India's cells; cells by class; 2,711 reserve cells touched) and
+  the Week-9 QA (535,592 barrier-road cells in the footprint). The field
+  names of the road layer (`osm_id`, `highway`).
+- **The Decision-18 result was seen:** the routes are robust on all three
+  variants. A robust label in point 6 is therefore the more likely result.
+  The 2/3 limit is the Decision-19 value; it was not set from a crossing.
+- **Not seen by anyone:** a road crossing. No crossing is computed, and the
+  paths layer and the `tbl_12_*` and `tbl_13_*` tables hold no road field.
+- **Not seen by the chat that drafted this Decision:** the path geometry and
+  the `tbl_12_*` and `tbl_13_*` files (the documents only).
+- **The author did not look at the paths on a map that shows roads** (stated
+  2026-10-10).
+- Result: `on_bridge` is post-result for **which links** it marks and
+  pre-result for **where** the sites are. `shared`, the site positions, the
+  counts and the variant label are pre-result. No rule uses a crossing
+  count, a cost or a road class.
+
+**Reason and sources:**
+- **What the term means in the literature.** A pinch point is a bottleneck
+  where movement is funnelled inside a linkage, and a small loss of area
+  there can cut the linkage. The mapping method uses current flow from
+  circuit theory inside least-cost corridors (WHCWG 2013; McRae 2012). For
+  16 protected areas in central India, pinch points are parts of the
+  linkages where movement is restricted by poor habitat, transport networks,
+  human habitation, or a mix (Dutta et al. 2016). This project has paths,
+  not corridors, and no circuit run, so point 5 defines the term for this
+  project and states the difference. A circuit-theory check stays a pending
+  item (after Stage 3).
+- **Path × highway is an established step.** Factorial least-cost paths were
+  intersected with highways and the crossings ranked by intensity, with
+  movement data as a check (Cushman et al. 2013). In India, a count of the
+  linear projects that pass through tiger corridors (399 proposed projects in
+  the Central Indian and Eastern Ghats area) is the unit that planning uses
+  (Pariwakam et al. 2018, from news reports). This project has no movement
+  data, so the crossings are not validated.
+- **Roads are almost everywhere.** 57 % of the area of the tiger
+  conservation landscapes is in the road-effect zone (Carter et al. 2020),
+  and 17.5 % of India's 1 km cells are barrier-road cells (Decision 15). "A
+  link crosses a road" is therefore true for almost every link. The result
+  is where, how many, and which crossings the network depends on — hence the
+  two flags.
+- **Cells, not line intersection.** The engine saw the roads as cells
+  (`touches = TRUE`), and a path is a line through 1 km cell centres. A
+  line-on-line intersection with an OSM road has an error of about 1 km, and
+  a path beside a road can cross the line many times. A run of cells is the
+  crossing in the terms of the surface.
+- **`on_bridge`.** A bridge is the only connection between two parts of a
+  set (Decision 19 point 5). A barrier road on that path is a place where
+  the modelled network has no second route. This ties the pinch point to
+  the meaning in the literature (a small loss cuts the connection) without a
+  corridor width.
+- **`shared`.** Two or more edges through one place is the path-based
+  analogue of a high corridor intensity in Cushman et al. (2013).
+- **No order by class.** Decision 15 gave one barrier value to the four
+  classes, because the OSM class is only an approximate traffic proxy in
+  India. An order by class would claim more than Decision 15 did.
+- **5 km.** The Decision-18 route distance (about one resident female
+  home-range radius). Two crossings inside that distance are one place for a
+  tiger and for a mitigation structure.
+- **Repeat on the variants.** `road15` and `road50` change the cost of each
+  road cell. Decision 18 found the routes robust at 5 km, but it did not
+  test the road crossings, and the bridges can differ by surface (the cut
+  nodes differ on `noghm` and `road50`).
+- **10 km.** A crossing is a modelled place on a public road, not a tiger
+  location. The reason for the coarse position is false precision: the path
+  position depends on judgement values (Decisions 14–16), and a 1 km "tiger
+  crossing" on a public map can be read as an observed place. 10 km is the
+  Decision-11 approach-zone width and two times the merge distance.
+
+**Judgement values:** 5 km (site merge and variant distance), 2 edges
+(`shared`), 2/3 (robust limit), 10 km (published position).
+
+**Rejected:**
+- *a2 — motorway and trunk only; a3 — all four classes for the crossings,
+  motorway and trunk only for pinch points.* The engine did not separate the
+  classes (Decision 15).
+- *n2 — a new pull of `ref` and `name`.* A second road read with a
+  different field set; names come from the hand check.
+- *b2 — the 73 edges only; b3 — the 13 bridges only; b4 — all 97 paths.* b3
+  cannot give `shared`; b4 counts paths that are not links.
+- *k2 — no flag.*
+- *c2 — line-on-line intersection.* See Reason.
+- *r2 — no exit and entry cells; r3 — no reserve cell.* A road at a reserve
+  edge is a real crossing for an animal that leaves the reserve; the flag
+  keeps the information.
+- *m2 — no merge; m3 — 10 km.* m2 makes one road section into many sites;
+  10 km has no basis in the earlier Decisions as a "same place" distance.
+- *d2 — `on_bridge` only; d3 — `shared` only; d4 — order by road class; d5 —
+  order by edge betweenness.* d5 needs a new network metric after the
+  network results were seen.
+- *t2 — the term "priority crossing".*
+- *e1 — baseline only; e3 — the two road variants only.*
+- *p2 — state and district only; p3 — the 1 km cell.*
+- *q2 — one table; g2 — a schematic graph with no map.*
+
+**Limitations:**
+- A crossing is a modelled place. No tiger movement data checks it.
+- The path is one route of minimum cost. A tiger can cross the same road at
+  a different place; a path a few cells away gives a different site.
+- `on_bridge` comes from the geometry rules of Decisions 17 and 19 (no cost
+  threshold). A bridge can be a link with no literature support; `lit_flag`
+  marks the four known cases.
+- Joined crossings can make a chain: a path beside a road gives a long
+  site. `span_km` shows it; no upper limit is set.
+- Roads inside a block of contiguous reserves get no crossing (a contiguous
+  pair has no path). Roads inside one reserve are counted only on the exit,
+  entry or through cells of a path.
+- Crossing structures are not mapped (Decision 15 point 6): a pinch point
+  can be at a place that has an underpass.
+- Railways, canals and power lines are not in the road layer.
+- The OSM class is not a traffic volume, and no road name is in the data.
+- The district layer is from the 2011 Census.
+- The numbers 5 km, 2, 2/3 and 10 km are judgement values.
+
+**Consequences:**
+- `scripts/07`: STEP 12.1 builds the barrier-road cells with their class
+  (the guard of point 1); STEP 12.2 computes the baseline crossings →
+  `tbl_14_road_crossings.csv`; STEP 12.3 builds the sites and applies point
+  5 → `tbl_14_pinch_points.csv`; STEP 12.4 repeats on the variants →
+  `tbl_14_pinch_variant_comparison.csv` (now required); STEP 12.5 is the QA
+  → `tbl_14_pinch_qa.csv`; STEP 12.6 writes `tbl_03` and `tbl_03b`; STEP
+  12.7 draws `fig_03`.
+- QA (STEP 12.5) checks, with a stop on any failure: the functions on a
+  hand-made case (a known path, a known road, a known count, one knight
+  step over a road cell); each crossing cell is in the cell list of its
+  path and is a barrier-road cell; each barrier-road cell in a cell list is
+  in one crossing only; no crossing for a contiguous pair or a pair that is
+  not in the network; each crossing is in one site only; two sites are more
+  than 5 km apart; the counts per link and per site add up to the table
+  totals; no committed table holds a 1 km position.
+- `R/00_config.R`: new `PINCH_*` settings.
+- `docs/sensitive-data-policy.md`: one new rule in §3.
+- `docs/project-plan.md`: task 12.5 is required; `fig_04` becomes `fig_03`
+  in the Week-12 text.
+- The Week-12 write-up reports the labels as fixed here.
+
+This closes the **[Week 12] Pinch-point rule** pending item.
+
 ### Decisions pending (raised, not yet made)
 
 These forks are open. Each is decided in the week noted in the project plan,
 before the relevant code is written.
 
-- **[Week 12] Pinch-point rule (raised 2026-10-04; decide before any road
-  crossing is computed).** What a road pinch point is: which roads (the
-  barrier classes of Decision 15, or a subset); which paths (all in-network
-  pairs, the 73 edges, or the 13 bridges); how a crossing is counted and
-  ranked; whether it is repeated on the variant surfaces; and what the
-  publishable `tbl_03` and `fig_04` hold (sensitive-data policy §3). The
-  network results are already seen (Week 11), so say in the Decision what was
-  seen.
+- **[Week 18] Published path layer (raised 2026-10-10 with Decision 20;
+  decide before a path layer goes on the site).** Decision 20 point 7 allows
+  the path lines in a static figure at national scale only. An interactive
+  or downloadable path layer (the Stage-4 Leaflet maps) lets a reader zoom to
+  1 km and find a crossing position that the tables give at 10 km. Decide:
+  no path layer on the site, lines simplified to a fixed tolerance, or a
+  zoom limit.
+- **[Week 13] Occurrence-cleaning rule (raised 2026-10-10; decide before any
+  cleaned count is seen — it becomes Decision 21).** The GBIF tiger pull has
+  4,606 records inside India with a median coordinate uncertainty of about
+  30 km and years from 1840 to 2026; the Mammalia background has 39,057
+  records, 2006–2022. Decide: the uncertainty limit and the rule for a
+  missing value; the year window; the record types to remove (captive,
+  specimen, fossil, centroid, zero coordinates); obscured records;
+  duplicates and thinning to the 1 km grid; records with no covariate value;
+  whether the background takes the same rule; and a minimum number of clean
+  presence cells below which the Week-14 plan changes. The raw counts, the
+  median uncertainty and the Phase-1 result (about 116 clean points) are
+  already seen; the Decision must say so.
 - **[Week 8–9 → Week 13] Settlement layer for the KDE.** The OSM settlement pull is
   village-dominated (~195k of 199,800 points: city 495, town 4,102, village
   195,203). A 15 km KDE over all points will near-saturate nationally. Decide
   whether to use all city/town/village, trim to city/town (4,597), or change the
-  KDE radius, when the density surface is built.
+  KDE radius, when the density surface is built. *(2026-10-10: the config
+  value is `KDE_RADIUS_M` = 20 km, not 15 km. Task 13.5 fixes the radius in
+  Decision 22, with the surfaces that Week 13 builds and the place of Gi*.)*
 - **[After Stage 3] SDM-based resistance + circuit-theory check.** Raised
   2026-09-26 (Decision 14, F1). After the SDM exists, build a resistance
   surface from 1 − suitability and run circuit theory between reserves, to
@@ -1626,6 +1944,639 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-10-10 — Week 12 committed and pushed; Week-13 plan added (no code)
+
+- **Week 12 is committed and pushed** (task 12.11, by the author).
+- **`docs/project-plan.md`:** task 12.11 ticked; new section "Week 13 — task
+  breakdown" (tasks 13.1–13.10; estimates 4.6–6.3 hours; a split point after
+  task 13.4).
+- **Pending item added:** "[Week 13] Occurrence-cleaning rule" (Decision 21,
+  before any cleaned count). A dated note on the settlement item: the config
+  radius is 20 km and the item said 15 km.
+- **Three points that the plan raises, not decided:** (1) a minimum number
+  of clean presence cells, fixed before the count is seen, below which the
+  Week-14 plan changes; (2) Getis-Ord Gi* is named in §5.5 and is in no week
+  of Stage 3; (3) a density surface of few tiger records can show a record
+  position, which the ≥ 1 km rule of the policy does not prevent.
+- **`handoff.md`:** the Week-13 entry point now names the tasks.
+
+### 2026-10-10 — Week 12 complete: task 12.10 (note file, Limitations, Stage-2 summary, docs close)
+
+- **Note file for the publishable tables (author choice 2026-10-10).**
+  Decision 20 point 5 says that each table says what a pinch point is here;
+  a CSV file has no place for a note. `R/00_functions_pinch.R`:
+  `pinch_table_note()`. `scripts/07_connectivity.R` STEP 12.6 (part 12.6e)
+  writes `outputs/tables/tbl_03_notes.md`: what a pinch point is here, the
+  tiers, the limits, and the counts of the run. Each value in the text is a
+  config value or a count of the run; the text is ASCII; the file holds no
+  position. The file name and the wording are from the drafting chat; the
+  author asked for no change. **Run on the project machine (2026-10-10):**
+  the file was written (32 lines); STEPs 12.6 and 12.7 gave the same checks
+  and the same figures as before.
+- **Week-12 code, in one list.** `R/00_functions_pinch.R` (new; 33
+  functions). `R/00_functions_sensitive.R`: `assert_publishable_table()`.
+  `R/00_config.R`: 21 `PINCH_*` settings. `scripts/07_connectivity.R`: STEPs
+  12.1–12.7 after the Week-11 STEPs, and a third run switch,
+  `RUN_ROAD_CELLS` (`FALSE`: STEP 12.1 reads the barrier-road raster from
+  disk). STEP 12.7 loads `ggplot2`. No new package. The code of Weeks 9 to
+  11 is not changed.
+- **Stage 2 against proposal question 2 (a summary of the record; it is not
+  narrative text).** The question has four parts:
+
+  | Part of question 2 | What was built | Result on the baseline surface | Read it with |
+  |---|---|---|---|
+  | "Where are the likely movement corridors between reserves?" | Least-cost paths between neighbour reserves, edge to edge, on a resistance surface of land cover × human pressure, with roads as barriers (Decisions 14–18) | 106 pairs: 97 paths and 9 contiguous pairs; 85 pairs are in the network. Cost median 577.3 resistance-km | A path is a modelled line with no width, not a corridor and not observed movement. Some routes differ from documented corridors (Limitations, "Least-cost routes…"). The share of path length inside the NTCA corridor polygons has a median of 0.064; the paths cross 31 of the 59 corridors. No path leaves India |
+  | "Which reserves are connectivity linchpins?" | A graph of the in-network pairs; betweenness inside each connected set; `linchpin` = rank 1 to 3 in the set (Decision 19) | 47 nodes from 56 reserves; 73 edges; 3 sets (33, 8 and 6 nodes). 8 linchpin nodes: Madhav, Guru Ghasidas-Tamor Pingla, Sanjay Dubri; the Bandipur block, Bhadra, Parambikulam + Anamalai; Pakke + Nameri, Orang. 12 cut nodes; 13 bridges | 7 of the 8 are linchpins on all four surfaces. Madhav is a linchpin only with the cross-group link Sariska–Rajaji in the graph. The number 3 is a judgement value; in a set of 6 or 8 nodes it is a large share |
+  | "…and which are isolated?" | `isolated` = degree 0; graded columns `pendant` and `cheapest_link_rkm` (Decision 19) | No node is isolated by the rule. 6 pendant nodes: Valmiki, Sundarbans, Dampa, Sahyadri, Kalakad-Mundanthurai, Biligiri Ranganatha Temple | The network has no cost threshold: each pair inside 315 km that passes the through-reserve rule is a link. Some links have no support in the literature. Two reserves are not in the network (no boundary polygon) |
+  | "Where do corridors cross major roads?" | Crossings of the in-network paths with barrier roads (OpenStreetMap motorway to secondary); crossings at most 5 km apart are one site; a pinch point is a site on a bridge edge or a site that two or more edges use (Decision 20) | 556 crossings on 74 of 76 paths; 365 sites; 200 pinch points — tier 1: 3, tier 2: 98, tier 3: 99. Published at a 10 km grid cell with state and district (`tbl_03b`, `fig_03`) | The answer is for modelled lines, not for corridors. "Pinch point" is a position in the network; it is not a measure of the effect of a road, and it is not the pinch point of circuit-theory mapping. No traffic data. The label separates little (Limitations) |
+
+- **The Stage-2 variant labels, together** (each by a rule fixed before its
+  result):
+
+  | Result | gHM multiplier (`noghm`) | Road value (`road15`, `road50`) |
+  |---|---|---|
+  | Path routes and cost ranks (Decision 18) | robust | robust |
+  | Network sets, betweenness, linchpins (Decision 19) | robust | robust |
+  | Pinch points (Decision 20) | **sensitive** (site overlap 0.520; limit 2/3) | robust (0.866 and 0.820) |
+
+  The routes and the node ranks stay when the human-pressure multiplier is
+  removed; the places where the paths meet barrier roads do not. A write-up
+  that names a pinch point must give the third row.
+- **What Stage 2 does not give.** A corridor width or a current-flow map
+  (circuit theory; pending, after Stage 3). A resistance surface from the
+  SDM (pending, after Stage 3). Links across the national border. Traffic
+  volume or road-kill risk. A test against telemetry or genetic data (not
+  public); the three literature checks are descriptive.
+- **`proposal.md` §8: no new entry.** §8 records where the as-built work
+  differs from a choice that the proposal states. For Week 12 the proposal
+  states "road pinch points" (§5) and question 2 asks where corridors cross
+  major roads; both are built. What a crossing and a pinch point are is an
+  elaboration that the proposal left open, and it is Decision 20.
+- **Limitations: ten items added** (below, from "A pinch point is a
+  position in the network…" to "`fig_03` at national scale").
+- **Open items, carried forward.** The title, the subtitle and the caption
+  of `fig_03` are draft text. The sources of the Week-12 literature check
+  are news reports and must be verified before they are cited. The entries
+  of `references.md`, "Road pinch points (Decision 20)", were read from
+  abstracts only. `fig_04` is the next free figure number; the Week-16 plan
+  row names `fig_05`. Pending Decision: "[Week 18] Published path layer".
+- **Docs:** `data-dictionary.md` (`tbl_03_notes.md`),
+  `naming-conventions.md` §6, `project-plan.md` (task 12.10 ticked; Week 12
+  and the Stage-2 milestone marked), `README.md`, `handoff.md`; the
+  Limitations below.
+
+### 2026-10-10 — Week 12 (in progress): task 12.9 (literature check of the pinch points)
+
+- **Author choice 2026-10-10:** task 12.9 (optional) is done. It changes no
+  value, no rule and no label. Sources: `references.md`, "Week-12 pinch
+  points — literature check".
+- **Scope, fixed before the search.** (A) the 3 tier-1 pinch points; (B) the
+  tier-2 pinch points by bridge link (13 links); (C) the districts with 5 or
+  more tier-3 pinch points (6 districts); (D) the other direction: named
+  road conflicts on tiger corridors, compared with the table.
+- **Level of the match.** The road layer has no road name (Decision 20,
+  n1). A match is the same link or reserve, and the same district when the
+  source names one. No pinch point is matched to a named road. No 1 km
+  position was used in a search.
+- **Result (descriptive), 21 groups in A to C.**
+  - A source for a road conflict in the same district or reserve: 10
+    groups. Examples: Valmiki–Dudhwa (the Indo-Nepal Border Road goes
+    through all six districts of the 11 pinch points; a proposal in 2019);
+    Orang–Dampa at Kaziranga (NH-715; Golaghat and Karbi Anglong);
+    Biligiri Ranganatha Temple–Sathyamangalam (the night traffic ban on the
+    highway in Sathyamangalam, Erode); Corbett–Rajaji (the
+    Laldhang–Chillarkhal road, stopped by the Supreme Court in 2019);
+    Periyar–Kalakad-Mundanthurai (road and railway in the Shencottah gap).
+  - A source for the link only, or context only: 5 groups.
+  - No source found or read: 6 groups (Similipal–Sundarbans,
+    Bhadra–Nagarhole, Anamalai–Mudumalai, Anamalai–Srivilliputhur-Megamalai,
+    Guntur, Krishna).
+  - Tier 1: Sonitpur has a district-level source from 2010 that does not
+    name tigers; Chikmagalur has a district-level source (NH-169) that names
+    another species. **No source confirms a tier-1 pinch point as a known
+    tiger crossing place.**
+  - Sariska–Rajaji has 21 of the 98 tier-2 pinch points. The sources are
+    for roads at the two ends of the link only. The pinch points in
+    Haryana, Delhi and western Uttar Pradesh have no source: they follow
+    from a bridge link with `lit_flag`.
+- **Two limits of the rule, from part D (for the Limitations section, task
+  12.10).**
+  1. *A road inside a node is not in the result.* NH 766 through Bandipur
+     (a night traffic ban, in force for about ten years in 2019) has no
+     crossing in the tables: Bandipur, Nagarhole, Mudumalai and Sathyamangalam are one
+     node, and no path is modelled inside a node. The same applies to the
+     Nagzira–Navegaon part of NH 6, inside the reserve unit
+     Nawegaon-Nagzira.
+  2. *A documented crossing place can be a crossing that is not a pinch
+     point.* NH-44 in the Maharashtra part of Pench has nine monitored
+     crossing structures that tigers use (Saxena & Habib 2022). In Nagpur
+     district the paths have road crossings on three links
+     (`tbl_14_road_crossings.csv`), and none is a pinch point, because one
+     edge uses each and no edge there is a bridge. The pinch-point label
+     gives the position of a site in the network; it does not say where
+     roads affect tigers most.
+- **Quality of the sources (stated plainly).** Almost all are news reports,
+  read as web pages or extracts on 2026-10-10. One peer-reviewed paper is
+  cited through a news report. Two pages gave a summary only. One source is
+  an exam-preparation page. Each search was short (one or two queries for
+  each group): "no source found" means that these queries found none.
+- **Docs:** `references.md` (new section, 22 entries), `project-plan.md`
+  (task 12.9 ticked).
+
+### 2026-10-10 — Week 12 (in progress): task 12.8 (STEP 12.7 figure `fig_03`)
+
+- **Author choice (2026-10-10, before the code).** The figure shows the
+  pinch points of all three tiers; tier 3 is small and pale.
+- **Code.** `R/00_functions_pinch.R`: `pinch_node_points()`,
+  `pinch_figure_classes()`, `pinch_figure_marks()`,
+  `pinch_selftest_figure()`. `R/00_config.R`: `PINCH_FIG_SLUG`,
+  `PINCH_FIG_SIZE_IN`, `PINCH_FIG_DPI`, `PINCH_FIG_KEY_POS`.
+  `scripts/07_connectivity.R`: STEP 12.7 after STEP 12.6; it loads
+  `ggplot2`. The checks run first; the file is not written if one fails.
+- **What the figure shows** (Decision 20 point 7). A map at national scale,
+  11 × 10.6 in at 200 dpi.
+  - Nodes by flag: a linchpin on all four surfaces (filled circle); a
+    linchpin only with the cross-group links in the graph (filled diamond);
+    a linchpin that is not a linchpin on all four surfaces (open circle);
+    other node; pendant node; a ring for each cut node. Each linchpin has a
+    number; the list by set gives the names.
+  - The 73 baseline edge paths as modelled lines; the 13 bridge links are
+    thick and dark.
+  - The 200 baseline pinch points as triangles at the centre of their 10 km
+    cell: tier 1 large with an outline, tier 2 medium, tier 3 small and
+    pale.
+- **Positions (sensitive-data policy §3).** The pinch points are read from
+  `tbl03b`, the publishable table, and from no other object; the publish
+  check runs again on it in STEP 12.7. The figure table of the paths holds
+  the line and the pair number only. The lines are in this static figure
+  only. A node is drawn at the centroid of its reserve polygons (public
+  boundaries).
+- **Choices made in the drafting chat, with no author decision before the
+  code. Author decision 2026-10-10, with the project-machine figure and the
+  list at hand: all seven stay.**
+  1. Slug `reserve_network`, the slug of `tbl_03`.
+  2. Size 11 × 10.6 in (`fig_02` is 9 × 9.6 in); the legend needs the width.
+  3. A number in each linchpin mark and a list of the names by set.
+  4. The reserve polygons are drawn (pale green). Decision 20 does not list
+     them.
+  5. The `lit_flag` links are not marked.
+  6. The tier-1 pinch points are drawn last, on top of the nodes.
+  7. The draft caption adds three items to those of Decision 20: the
+     variant result, the states of the tier-1 pinch points, the data
+     sources.
+- **Result on the project machine (2026-10-10).** Self-test 8 of 8; 10 of 10
+  figure checks. 47 nodes (8 linchpin, 12 cut-node rings, 6 pendant); 73
+  edge paths (13 bridge links); 200 pinch points (tier 1: 3, tier 2: 98,
+  tier 3: 99) in 194 cells of 10 km. Legend classes: linchpin on all four
+  surfaces 6; linchpin only with the cross-group links 1 (Madhav); linchpin
+  not on all four surfaces 1 (Sanjay Dubri); other node 33; pendant node 6.
+  Linchpin numbers: set of 33 nodes — 1 Madhav, 2 Guru Ghasidas-Tamor
+  Pingla, 3 Sanjay Dubri; set of 8 — 4 Bandipur + Nagarhole + Mudumalai +
+  Sathyamangalam, 5 Bhadra, 6 Parambikulam + Anamalai; set of 6 — 7 Pakke +
+  Nameri, 8 Orang. The file is 2200 × 2120 pixels. The same figures as in
+  the drafting chat.
+- **Limits of the figure (stated plainly).**
+  - The 3 tier-1 pinch points show as 2 marks: the two sites in Assam are
+    in adjacent 10 km cells. The caption gives the count by state. The 200
+    pinch points are in 194 cells.
+  - The tier-1 mark in Assam is on top of linchpins 7 and 8 and hides a
+    part of the mark of linchpin 8. The number stays readable.
+  - Tier 3 has low contrast against the map (fill 1.4 to 1, outline 2.3 to
+    1). This is the author choice "small and pale"; `tbl_03b` is the full
+    list.
+  - Colours: the green and the red of the site symbology pass a
+    colour-vision separation check as a pair. The green `#225522` does not
+    pass two style checks of the same tool (it is dark and has low chroma).
+    It was kept because it is the site colour. Each class has a shape or a
+    size of its own.
+  - The thin grey lines of the links that are not bridges are faint on the
+    project-machine file. Author decision 2026-10-10: the line width stays
+    0.3.
+  - The title, the subtitle and the caption are draft text of the drafting
+    chat. Author decision 2026-10-10: the draft stays for now. All numbers
+    in them are read from the objects of the run.
+- **Test before delivery** (with the real files; `ggplot2` 3.4.4 in the
+  drafting chat). The same figures. The mark counts made a second way, from
+  the CSV tables on disk, are the same. All 200 triangles of the plot object
+  are at a 10 km cell centre; none is at the 1 km site position. Six
+  planted faults each stopped the code (a position off the grid; the 1 km
+  site table; an `sf` site table; an isolated node; sites that are not
+  pinch points; a reserve with no node). The 14 CSV tables did not change,
+  byte for byte.
+- **Docs:** `data-dictionary.md` (`fig_03`), `project-plan.md` (task 12.8
+  ticked). Not yet: `README.md`, `handoff.md`, the Limitations section
+  (task 12.10).
+
+### 2026-10-10 — Week 12 (in progress): task 12.7 (STEP 12.6 publishable tables)
+
+- **Author choices (2026-10-10, before the code).** `tbl_03b` holds all
+  baseline pinch points, sorted by tier (not tiers 1 and 2 only). Slugs:
+  `reserve_network` and `pinch_points`.
+- **Code.** `R/00_functions_sensitive.R`: `assert_publishable_table()` — the
+  publish check of sensitive-data policy §3. It stops for: an `sf` object; a
+  column with a 1 km cell or a point coordinate; a position that is not a
+  centre of the publish grid; a grid id that is not the cell at that
+  position; a grid finer than 10 km; a grid column in a table that must hold
+  no position. `R/00_functions_pinch.R`: `pinch_node_summary()`.
+  `scripts/07_connectivity.R`: STEP 12.6 after STEP 12.5. The checks run
+  first; no table is written if one fails.
+- **`tbl_03_reserve_network.csv`** — one row per network reserve (56). The
+  values are per node (47): the reserves of one block share them. The
+  network columns are those of `tbl_13_network_metrics.csv`. The pinch-point
+  columns count the sites on the edges of the node. No position.
+- **`tbl_03b_pinch_points.csv`** — one row per baseline pinch point, sorted
+  by tier, then `site_id`. The rows are the pinch points of
+  `tbl_14_pinch_points.csv`. Position: the 10 km cell, state and district.
+- **Columns added to the list of Decision 20 point 7 (no column of the list
+  is absent).** `tbl_03`: `state`, `n_bridge_edges`, `n_crossings`,
+  `n_sites`. `tbl_03b`: `site_id` (the key to the `tbl_14` tables),
+  `district_code`, `lit_flag_any`.
+- **How the node counts are made.** A site on an edge counts for the two
+  nodes of the edge. A site that two edges of one node use counts one time
+  for that node. The node counts thus do not add up to the number of pinch
+  points, and a block of reserves repeats its node values on each row.
+- **Result on the project machine (2026-10-10).** 9 of 9 table checks; the
+  two publish checks pass. `tbl_03`: 56 reserves, 47 nodes; 42 nodes have a
+  pinch point on an edge; 7 have a tier-1 pinch point. `tbl_03b`: 200 rows
+  (tier 1: 3, tier 2: 98, tier 3: 99).
+  - Linchpin nodes, pinch points on their edges: Madhav 24 (all tier 3);
+    Bhadra 18 (tier 1: 1, tier 2: 17); Bandipur + Nagarhole + Mudumalai +
+    Sathyamangalam 15 (1, 14); Orang 12 (tier 1: 2, tier 2: 9, tier 3: 1);
+    Parambikulam + Anamalai 8 (all tier 2); Pakke + Nameri 3 (tier 1: 2,
+    tier 3: 1); Guru Ghasidas-Tamor Pingla 1 and Sanjay Dubri 1 (tier 3).
+  - Highest counts: Ratapani 29, Indravati 26, Madhav 24, Kawal 24, Panna
+    23 (tier 3 only, each); Sariska 23 (tier 2: 21, tier 3: 2); Rajaji 22
+    (all tier 2); Nagarjunsagar-Srisailam + Amrabad 21 (tier 3 only).
+  - The count of a node is not an order of nodes: Decision 20 gives no
+    order in a tier, and a node with more edges or longer edges can have
+    more road crossings.
+- **Test before delivery** (with the real files). The same figures. The node
+  counts made a second way, from the two `tbl_14` tables on disk, equal
+  `tbl_03`. Six planted faults each stopped the publish check: a point
+  coordinate column; a position 1 km off the grid; a wrong grid id; a 5 km
+  grid; a position column in `tbl_03`; an `sf` object.
+- **Open, for the author.** Decision 20 point 5 says that each table header
+  says what a pinch point is here. A CSV file has no place for a note. The
+  statement is in the `data-dictionary.md` entries of the two tables. A
+  note file next to the tables is possible; it is not made.
+- **Docs:** `data-dictionary.md` (`tbl_03_reserve_network.csv`,
+  `tbl_03b_pinch_points.csv`), `naming-conventions.md` §6,
+  `project-plan.md` (task 12.7 ticked). Not yet: `README.md`, `handoff.md`.
+
+### 2026-10-10 — Week 12 (in progress): task 12.6 (STEP 12.5 pinch-point QA)
+
+- **Code.** `R/00_functions_pinch.R`: `pinch_check_surface()` — the QA list
+  of Decision 20 for one surface. `scripts/07_connectivity.R`: STEP 12.5
+  after STEP 12.4; STEP 12.4 now keeps the link table and the bridge flags
+  of each surface for it. The table is written first; then any failure
+  stops the script.
+- **What STEP 12.5 checks.** (1) The three hand-made self-tests of STEPs
+  12.2–12.4, collected (19, 22 and 11 cases). (2) The road-cell guard of
+  STEP 12.1 (6 checks). (3) On each of the four surfaces, 12 checks: each
+  link in the roles has its crossings; the cost from the cell list is the
+  cost of the path; each crossing cell is in the cell list of its path and
+  is a barrier-road cell; each barrier-road cell of a cell list is in one
+  crossing only; no crossing for a contiguous pair or a pair that is not in
+  the network; each crossing is in one site only; two sites are more than
+  the merge distance apart; the counts add up; `n_edges` and `n_bridges`
+  from the crossings equal the site table; the rule written a second way;
+  each site on a bridge edge is a pinch point; `lit_flag` agrees with the
+  config list. The cell lists are made again in the check; the stored
+  counts are not used. (4) Baseline: the chain function gives the result
+  of STEPs 12.2–12.3; the site ids; the `lit_flag` links are in-network
+  links. (5) The comparison: one row per variant; the shares; the labels
+  by the fixed rule, written a second way; `n_variants_near`. (6) On disk:
+  the row count of each `tbl_14` table; no position finer than the publish
+  grid in each; the 1 km file has one layer per surface with one point per
+  crossing cell, and it is under `data/`.
+- **Result on the project machine (2026-10-10): 74 of 74** — test cases 3
+  of 3, roads 6 of 6, baseline 15 of 15, `noghm`, `road15` and `road50` 12
+  of 12 each, all 14 of 14. Output `tbl_14_pinch_qa.csv` (74 rows).
+- **Test before delivery** (with the real files). The same 74 of 74. Eleven
+  planted faults in a copy of the baseline result (a removed crossing cell,
+  a cell that is not a road cell, a crossing with no site, a changed tier,
+  a changed `n_edges`, two sites inside the merge distance, a crossing on a
+  contiguous pair, a failed cost check, a wrong `lit_flag`, a changed link
+  count, a changed bridge flag) each failed one or more checks. A 1 km
+  column put into a table on disk stopped the script after the QA table
+  was written with the failure.
+- **Defect found by the QA, corrected before delivery.** The first run in
+  the drafting chat gave 73 of 74: the `choice_label` column of the
+  comparison table was a one-dimension array, not a plain vector, so the
+  second-way label check was not identical. The values and the CSV were
+  right. STEP 12.4 now makes a plain vector; the CSV on disk is the same
+  file, byte for byte.
+- **Docs:** `data-dictionary.md` (`tbl_14_pinch_qa.csv`),
+  `naming-conventions.md` §6, `project-plan.md` (task 12.6 ticked; the
+  split point was reached and the author chose to continue). Not yet:
+  `README.md`, `handoff.md`.
+
+### 2026-10-10 — Week 12 (in progress): task 12.5 (STEP 12.4 variants and the Decision-20 comparison)
+
+- **Process choices (put to the author before the code):**
+  `outputs/tables` gets only `tbl_14_pinch_variant_comparison.csv`; the
+  variant crossing cells go to the gitignored 1 km file, one layer per
+  variant; `tbl_14_pinch_points.csv` is written again with
+  `near_pinch_<variant>` and `n_variants_near`. No "stable" label is made:
+  Decision 20 has none.
+- **Code.** `R/00_functions_pinch.R`: `pinch_run_surface()` (the chain of
+  STEPs 12.2–12.3 as one function), `pinch_sites_near()`,
+  `pinch_compare_variant()`, `pinch_selftest_compare()`.
+  `scripts/07_connectivity.R`: STEP 12.4. Each variant uses its own paths
+  (STEP 10.4), its own link table and its own bridges (the Decision-19 graph
+  of STEP 11.3). The STEP first checks that the chain function gives the
+  baseline result of STEPs 12.2–12.3 again.
+- **Result on the project machine (2026-10-10).** Rule fixed in Decision 20
+  point 6, before any crossing.
+
+  | Surface (tests) | Paths (bridges) | Crossings | Sites | Pinch points (tier 1 / 2 / 3) | Share of baseline | Share of variant | Site overlap | At 10 km | All sites | Label |
+  |---|---|---|---|---|---|---|---|---|---|---|
+  | `baseline` | 76 (13) | 556 | 365 | 200 (3 / 98 / 99) | — | — | — | — | — | — |
+  | `noghm` (gHM multiplier) | 78 (11) | 496 | 372 | 155 (2 / 72 / 81) | 0.520 | 0.671 | **0.520** | 0.625 | 0.667 | **sensitive** |
+  | `road15` (road value) | 75 (13) | 610 | 383 | 202 (3 / 98 / 101) | 0.895 | 0.866 | **0.866** | 0.886 | 0.851 | robust |
+  | `road50` (road value) | 78 (11) | 546 | 363 | 192 (4 / 72 / 116) | 0.820 | 0.859 | **0.820** | 0.880 | 0.860 | robust |
+
+  By the rule (limit 2/3 at 5 km): **gHM multiplier — sensitive; road value
+  — robust** (both road variants). Checks 6 of 6 on each variant, with the
+  cost check on the real variant surfaces.
+- **This is not the result that Decision 20 named as likely.** Its "What
+  was seen" text says that a robust label is the more likely result, because
+  the routes (Decision 18) and the network (Decision 19) were robust on all
+  three variants. The pinch points are more sensitive than the routes and
+  the node ranks. The Decision text is a dated record and is not changed.
+- **Where the `noghm` difference is.** 49 baseline tier-1 and tier-2 pinch
+  points have no `noghm` pinch point within 5 km: Sariska–Rajaji 17,
+  Bhadra–Kali 8, Similipal–Sundarbans 7, Bhadra–Nagarhole 4, Dudhwa–Corbett
+  3, Orang–Dampa 3, Valmiki–Dudhwa 2, and one each on five more entries.
+  Sariska–Rajaji and Bhadra–Kali had a material route change on `noghm` in
+  Week 10 (route overlap 0.261 and 0.225), and `noghm` has 11 bridges, not
+  13. On `road50` the count is 23 (Sariska–Rajaji 15); on `road15` it is 3.
+- **Per baseline pinch point.** 98 of the 200 have a variant pinch point
+  near them on all three variants; 3 have one on none. By tier and
+  `n_variants_near` (0 / 1 / 2 / 3): tier 1 — 0, 0, 1, 2; tier 2 — 0, 26, 22,
+  50; tier 3 — 3, 19, 31, 46. The two tier-1 sites near Orang are near a
+  pinch point on all three variants; the Bhadra site is not on `noghm`.
+- **Stage-2 labels together.** Paths (Decision 18): gHM multiplier robust,
+  road value robust. Network (Decision 19): robust, robust. Pinch points
+  (Decision 20): **sensitive**, robust. The write-up must give all three.
+- **Test before delivery** (R 4.3.3, `terra` 1.7-65, `sf` 1.0-15, with the
+  real paths of the four layers and the real road raster). **Each printed
+  figure is the same as on the project machine.** For each variant, a second
+  route (dense points along each path line; `hclust()` for the sites; plain
+  coordinate distances for the near flags) gave the same crossings, sites,
+  `share_base` and near flags. Limit of that test: the `noghm` and `road15`
+  surfaces were not available to the drafting chat, so their cost check ran
+  there on a stand-in; the `road50` surface was rebuilt exactly from the
+  baseline and the road cells (mean 25.450, as in `tbl_11`). The run on the
+  project machine did the cost check on the three real surfaces.
+- **Detail fixed at the build:** in `base_tier12_not_near_by_link` the
+  entries are divided by " | ", because the link list of one site uses "; ".
+- **Docs:** `data-dictionary.md` (the comparison table; the variant columns
+  and layers), `naming-conventions.md` §6, `project-plan.md` (task 12.5
+  ticked). Not yet: the Limitations (with the Week-12 docs close),
+  `README.md`, `handoff.md`.
+
+### 2026-10-10 — Week 12 (in progress): task 12.4 (STEP 12.3 sites and pinch points, baseline)
+
+- **Details fixed at the build** (not in Decision 20; each put to the author
+  before the code): `site_id` = 1 to n in the order of the lowest 1 km cell
+  number of each site; the published position of a site = the 10 km cell
+  that holds the mean of its distinct cell centres, with the state and
+  district of that point; `tbl_14_road_crossings.csv` and the 1 km layer are
+  written again with `site_id`. **Found in the build, not put to the
+  author:** a mean position exactly on a line of the 10 km grid goes to the
+  cell to the east or to the south (`pinch_grid_cell_xy()`); a site of two
+  diagonal cells has this case.
+- **Code.** `R/00_functions_pinch.R`: `pinch_build_sites()`,
+  `pinch_min_site_gap_km()`, `pinch_apply_rule()`, `pinch_site_table()`,
+  `pinch_link_summary()`, `pinch_check_publish_table()`,
+  `pinch_grid_cell_xy()`, `pinch_admin_lookup_xy()`,
+  `pinch_selftest_sites()`. `scripts/07_connectivity.R`: STEP 12.3; STEP
+  12.2 now uses the same publish guard (no result changed).
+- **Checks in the STEP (each stops the script).** A self-test on a hand-made
+  case (22 cases: a join at exactly 5 km, no join at 6 km, a chain of 8 km,
+  a parallel link that does not count as an edge, each tier, a position on
+  a grid line). Each crossing is in one site; two sites are more than 5 km
+  apart; the rule written a second way gives the same flags and tiers; the
+  counts add up; each site on a bridge edge is a pinch point; no table holds
+  a position finer than the publish grid (8 of 8).
+- **Result on the project machine (2026-10-10).** **365 sites** from 556
+  crossings; crossings per site median 1, maximum 8; 234 sites of one
+  crossing; shortest gap between two sites 5.10 km; span median 0, maximum
+  22.6 km; 4 sites with a span above 10 km. **200 pinch points (54.8 % of
+  the sites):** `on_bridge` 101, `shared` 102; **tier 1 (both) 3, tier 2
+  (`on_bridge` only) 98, tier 3 (`shared` only) 99.** 33 pinch points have
+  `lit_flag` (each edge of the site has the flag), 35 `lit_flag_any`; 7 have
+  a cell in a reserve footprint; 3 sites have parallel links only. Outputs:
+  `tbl_14_pinch_points.csv` (365 rows, one per site),
+  `tbl_14_pinch_link_summary.csv` (76 rows), `tbl_14_road_crossings.csv`
+  and the 1 km layer again with `site_id`.
+- **The three tier-1 pinch points.** Sites 54 and 56 (Assam, Sonitpur
+  district): each used by Manas–Orang, Nameri–Orang and the bridge
+  Orang–Dampa (a `lit_flag` link). Site 346 (Karnataka, Chikmagalur
+  district): on two bridges, Bhadra–Kali and Bhadra–Nagarhole.
+- **Assessment of the result (no rule changed).** The label separates
+  little: more than half of the sites are pinch points. Decision 20 set no
+  upper limit, and each crossing on a bridge edge is `on_bridge`: the 13
+  bridge edges give 101 pinch points, and Sariska–Rajaji alone gives 21. Of
+  the 261 sites that only non-bridge edges use, 99 are `shared`. 58 of the
+  76 links have a pinch point; 17 edges have none. The tiers are the only
+  order that Decision 20 gives; tier 1 is a list of three. How the write-up,
+  `tbl_03b` and `fig_03` use the tiers is an author choice (tasks
+  12.7–12.8).
+- **Sites with a long span.** Site 24 (Sariska–Rajaji, Delhi): 7 crossings,
+  span 22.6 km — the chain that Decision 20 names as a limitation.
+- **Test before delivery** (R 4.3.3, `terra` 1.7-65, `sf` 1.0-15, with the
+  real files). The Week-12 block ran as delivered; **each printed figure is
+  the same as on the project machine.** A second method (single-linkage
+  clustering of the crossing cells with `hclust()`, cut at 5 km) gave the
+  same 365 sites. The flags and tiers, computed again from
+  `tbl_14_road_crossings.csv` on disk, equal the site table.
+- **Corrections in the build.** Two hand values of the site self-test were
+  wrong at first (the 10 km cell of sites 2 and 4). For site 2 the code was
+  right. Site 4 was the grid-line case; the rule for it is now explicit and
+  the self-test holds it.
+- **Docs:** `data-dictionary.md` (the three `tbl_14` tables of STEPs
+  12.2–12.3 and the 1 km layer), `naming-conventions.md` §6 (`tbl_14` row),
+  `project-plan.md` (task 12.4 ticked). Not yet: `README.md`, `handoff.md`.
+
+### 2026-10-10 — Week 12 (in progress): task 12.3 (STEP 12.2 road crossings of the baseline paths)
+
+- **These are the first road-crossing results.** Decision 20 was recorded
+  before them (task 12.1).
+- **Details fixed at the build** (not in Decision 20; put to the author
+  before the code, answer "ok"): (1) the path cells come from the `cells`
+  column that STEP 10.2 holds in memory (the layer on disk has no cell
+  list); (2) the position of a crossing is the middle cell of its run (for
+  an even run, the cell nearer the start); (3) the publish-grid columns are
+  `grid10_id`, `grid10_x_km`, `grid10_y_km` (the centre of the 10 km cell,
+  EPSG:7755); (4) state and district are those of the middle cell; (5) the
+  1 km cells go to `data/processed/lcp_road_crossings_7755.gpkg` (one layer
+  per surface, one point per crossing cell; gitignored); (6) `crossing_id` =
+  `<pair_id>-<run number along the path>`. Added without a question, and
+  reported: the column `district_code` (2011 census code; 10 district names
+  are not unique).
+- **Code.** `R/00_functions_pinch.R`: `pinch_path_cell_list()`,
+  `pinch_cell_list_cost()`, `pinch_runs()`, `pinch_crossings()`,
+  `pinch_grid_cell()`, `pinch_admin_lookup()`, `pinch_write_layer()`,
+  `pinch_selftest()`. `scripts/07_connectivity.R`: STEP 12.2 after STEP
+  12.1. State layer: `data/processed/boundary_states_7755.gpkg` (field
+  `name`). District layer:
+  `data/raw/administrative/boundary_districts_datameet2011_7755.gpkg`
+  (fields `DISTRICT`, `censuscode`).
+- **Checks in the STEP (each stops the script).** The self-test on a
+  hand-made case (19 cases; one crossing lies only on the middle cells of a
+  knight step). **The cost from each cell list must be the cost that the
+  engine gave the path** (`cost_rkm`, relative 1e-9): this ties the third
+  copy of the knight-step rule to the validated engine, on every path of
+  every run. Each crossing cell is a barrier-road cell and a footprint cell;
+  the counts add up; no column or position of the table is finer than the
+  publish grid.
+- **Result on the project machine (2026-10-10).** 76 paths (73 `edge`, 3
+  `parallel`); cell lists 15,948 cells, 5,684 of them middle cells of knight
+  steps. **556 crossings on 74 paths; 765 road cells on the paths** (4.8 %
+  of the list cells, against 17.5 % of the footprint). Cells per crossing:
+  median 1, mean 1.38, maximum 7; 380 crossings of one cell. By link role:
+  `edge` 545, `parallel` 11. By `road_class_top`: motorway 10, trunk 234,
+  primary 171, secondary 141. Crossings per path: median 6, range 0–35;
+  median 3.5 per 100 km of path. 122 crossings on the 13 bridge edges; 49
+  on the four links with `lit_flag`; 13 with a cell in a reserve footprint;
+  166 with a middle cell of a knight step. One state came from the nearest
+  polygon; no district did. Outputs: `tbl_14_road_crossings.csv` (556 rows)
+  and the layer `baseline` of `lcp_road_crossings_7755.gpkg` (765 points).
+- **Notes on the result (no rule changed).**
+  - *Sariska–Rajaji goes through Delhi.* This bridge (the only
+    north–central link, with `lit_flag`) has the most crossings, 35 (68 road
+    cells; 8.9 per 100 km). Seven of them are in Delhi, with the two longest
+    runs of the table (7 cells each; New Delhi and Central). The path is a
+    true least-cost path on the baseline surface; the result shows how weak
+    this geometry-rule link is.
+  - *Two paths have no crossing:* Guru Ghasidas-Tamor Pingla – Sanjay Dubri
+    (1.00 km) and Pench – Pench (MH) (11.36 km).
+  - *State and district come from two layers* (Natural Earth states; DataMeet
+    2011 districts) and can disagree at a border: one crossing has the state
+    Haryana and a Delhi district.
+- **Test before delivery** (R 4.3.3, `terra` 1.7-65, `sf` 1.0-15, with the
+  real surface, reserve layer, paths file, road raster and admin layers).
+  The Week-12 block ran as delivered; **each printed figure is the same as
+  on the project machine.** A second route (dense points along each path
+  line, never on a cell edge) gave the same cell lists and the same runs for
+  76 of 76 paths. The 10 km cell ids equal those of
+  `terra::aggregate(fact = 10)`. Six planted faults each stopped the script.
+- **Error in the first delivery, corrected.** The first STEP 12.2 looked for
+  the district layer in four folders and not in `data/raw/administrative`;
+  the run on the project machine stopped before any output. The script now
+  has the one path.
+- **Docs:** `project-plan.md` (task 12.3 ticked). Not yet:
+  `data-dictionary.md` and `naming-conventions.md` §6 for the `tbl_14`
+  tables and the crossings layer (with task 12.4); `README.md`,
+  `handoff.md`.
+
+### 2026-10-10 — Week 12 (in progress): task 12.2 (process choices; STEP 12.1 barrier-road cells)
+
+- **Process choices (not numbered; each put to the author before the code):**
+  **A2** — the barrier-road cells are written one time to an interim raster,
+  and a run switch `RUN_ROAD_CELLS` then reads it from disk; **B1** — the
+  Week-12 functions go into a new file, `R/00_functions_pinch.R` (the engine
+  file is not changed); **C1** — five `tbl_14` tables, baseline rows only:
+  `road_crossings`, `pinch_points` (all sites, with the flags),
+  `pinch_link_summary`, `pinch_variant_comparison`, `pinch_qa`; the counts
+  per node go to `tbl_03`; **L2** — `PINCH_LIT_FLAG_PAIRS` holds `unit_id`
+  pairs with a names guard (naming §5). L2 replaces the names-only list of
+  the task-12.1 entry below: the `unit_id` of Sariska (41) is in
+  `tbl_12_reserve_pairs.csv`.
+- **Code.** New `R/00_functions_pinch.R` (`pinch_road_class_raster()`,
+  `pinch_road_cell_counts()`, `pinch_check_road_cells()`,
+  `pinch_lit_flag_pairs()`, `pinch_road_layer_name()`).
+  `scripts/07_connectivity.R`: header (it now names `fig_03`), the switch
+  `RUN_ROAD_CELLS`, a Week-12 settings guard, the `lit_flag` guard, and STEP
+  12.1 after STEP 11.4. The code of Weeks 9 to 11 is not changed.
+  `R/00_config.R`: `PINCH_LIT_FLAG_PAIRS` (L2).
+- **STEP 12.1 — method.** The Decision-15 classes, each `_link` ramp in its
+  parent class; one rasterise call per class with the arguments of STEP 9.6
+  (`field = 1`, `background = 0`, `touches = TRUE`); each cell keeps the rank
+  of its highest class (1 = motorway … 4 = secondary); mask = the footprint.
+  The guard stops the script if: the grid is not the surface grid; the layer
+  name does not record the class order of the config; a value is not a class
+  rank; a road cell is outside the footprint; the Week-9 QA gives more than
+  one count; or the cell count is not `n_road_cells` of
+  `tbl_11_resistance_qa.csv`. The guard runs on the raster of the run and
+  again on the file from disk.
+- **Result on the project machine (2026-10-10).** Road layer 885,669
+  features; barrier classes 444,234 (motorway 23,474; trunk 164,589; primary
+  112,711; secondary 143,460). **535,592 barrier-road cells — the
+  `n_road_cells` value of all four Week-9 surfaces**; 17.5 % of the
+  3,067,467 footprint cells. By `road_class_top`: motorway 9,240 (1.7 %),
+  trunk 155,723 (29.1 %), primary 168,278 (31.4 %), secondary 202,351
+  (37.8 %). Read and rasterise 35 s. Guard 6 of 6, on the run and on the
+  file. Output `data/interim/cov_roadbarrier_class_1km_7755.tif` (`INT1U`,
+  read-back verified). `RUN_ROAD_CELLS` is now `FALSE`.
+- **Test before delivery** (R 4.3.3, `terra` 1.7-65, `sf` 1.0-15; a synthetic
+  grid and road set — the real road layer was not available to the drafting
+  chat): the Week-12 block ran as delivered with the switch `TRUE` and
+  `FALSE`; the cell set was identical to the cells of the one STEP-9.6 call;
+  the class ranks were identical to a second calculation
+  (`terra::cells()` per line); seven planted faults each stopped the script.
+- **Details fixed at the build** (not in Decision 20): the file name
+  `cov_roadbarrier_class_1km_7755.tif`; the class order is written into the
+  layer name of the raster (`rank_motorway_trunk_primary_secondary`), so
+  that a file built with a different order fails the guard.
+- **Seen after Decision 20, from the Week-11 tables (no crossing):** all four
+  `lit_flag` links are bridges (pairs 15, 46, 96 and 101; 4 of the 13
+  bridges). `on_bridge` will therefore mark the sites on each of these links.
+  Decision 20 gives this as a limitation; no rule changed.
+- **Files checked for the crossing STEP** (2026-10-10): the baseline surface
+  (3,067,467 cells, mean 22.463), the reserve layer (58 rows, 56 with
+  geometry) and the paths file (4 layers of 106 pairs; baseline 97 paths, 85
+  in the network; the costs equal `tbl_13_network_links.csv`). For 97 of 97
+  baseline paths, the line vertices give back the path cells (count, exit
+  cell, entry cell).
+- **Docs:** `data-dictionary.md` (the new raster), `project-plan.md` (task
+  12.2 ticked; the fifth table). Not yet: `naming-conventions.md` §6 (with
+  the first `tbl_14` table), `README.md`, `handoff.md`.
+
+### 2026-10-10 — Week 12, task 12.1: Decision 20 recorded (no code, no crossing)
+
+- **Decision 20** fixes the road pinch-point rules before any road crossing
+  is computed: the roads are the barrier-road cells of Decision 15; every
+  in-network path gets its crossings and the rule counts the edges; a
+  crossing is one unbroken run of barrier-road cells in the cell list of a
+  path (knight-step middle cells included); reserve cells count and are
+  flagged; crossings at most 5 km apart are one site; `pinch_point` =
+  `on_bridge` or `shared` (two or more edges), in three tiers, with no order
+  by road class; the same on the three variants, "robust" if the site
+  overlap is at least 2/3; published positions at a 10 km grid cell with
+  state and district; two publishable tables (`tbl_03`, `tbl_03b`) and the
+  figure `fig_03`.
+- **Fork codes** (raised and chosen 2026-10-10): a1, n1, b1, k1, c1, r1, m1,
+  d1, t1, e2, p1, q1, g1; figure number `fig_03`; a policy rule. The author
+  gave a1, n1, b1, c1, d1, e2, p1, q1, g1, `fig_03` and the policy rule in
+  one answer; k1, r1, m1 and t1 had no code in that answer and were asked
+  again before the Decision was written.
+- **`R/00_config.R`:** new `PINCH_*` settings. No script reads them yet.
+  `PINCH_LIT_FLAG_PAIRS` holds reserve names, not `unit_id`: the `unit_id`
+  of Sariska was not in the files of the drafting chat. The script must
+  check that each name resolves to one network reserve.
+- **`docs/sensitive-data-policy.md`:** one new rule in §3 (modelled paths
+  and road crossings). No other text of the policy changed.
+- **Pending item closed:** "[Week 12] Pinch-point rule". **Pending item
+  added:** "[Week 18] Published path layer".
+- **`docs/project-plan.md`:** task 12.1 ticked; task 12.5 (variants) is now
+  required; `fig_04` → `fig_03` in the Week-12 text; a second publishable
+  table `tbl_03b`; the size estimate without the optional task is now
+  4.9–6.9 hours.
+- **`docs/references.md`:** new section "Road pinch points (Decision 20)" —
+  five new entries, all read from abstracts and web pages only.
+- **Not changed, to change when the file is next edited:** the header of
+  `scripts/07_connectivity.R` still names `fig_04` (task 12.2);
+  `handoff.md` still names `fig_04` and the pending Decision (end of the
+  week). The Week-11 exit state in the plan keeps `fig_04` as a dated
+  record.
+- **Seen before this Decision:** the network results, the Decision-15 road
+  cell counts and the Decision-18 route result. No road crossing. The author
+  did not look at the paths on a map that shows roads. The Decision states
+  this.
 
 ### 2026-10-04 — Week 11 complete: tasks 11.2–11.7 (network graph, metrics, variants, QA, literature check, docs)
 
@@ -2621,3 +3572,67 @@ refine, but do not change, Decision 4.
 - **Block members share one value.** The metrics table has one row per
   reserve (56) but the values are per node (47). The 8 linchpin nodes are 13
   reserve rows. Count by `node_id`.
+- **A pinch point is a position in the network, not a measure of the effect
+  of a road (Decision 20).** A pinch point is a site where a barrier road
+  meets a modelled path that is a bridge edge, or that two or more edges
+  share. The rule uses the graph of Decision 19 and nothing more: no traffic
+  volume, no road width, no record of animals on roads. It is not the pinch
+  point of circuit-theory mapping (a narrow part of a corridor with high
+  current flow); a least-cost path has no width. The tiers give no order
+  inside a tier, and the road class is a description only.
+- **The pinch-point label separates little.** 200 of the 365 baseline sites
+  (54.8 %) are pinch points. Each crossing on a bridge edge is a pinch
+  point, so the 13 bridge edges give 101 of them, and Sariska–Rajaji alone
+  gives 21. Tier 1 is the only short list (3 sites). The count of pinch
+  points on the edges of a node (`tbl_03`) follows the number and the length
+  of its edges; it is not an order of nodes.
+- **The pinch points are sensitive to the gHM multiplier (Decision 20 point
+  6).** Without the multiplier (`noghm`) the site overlap is 0.520, below
+  the limit of 2/3; the road variants give 0.866 and 0.820. 98 of the 200
+  baseline pinch points have a variant pinch point within 5 km on all three
+  variants; 3 have one on none (`n_variants_near`). The path routes
+  (Decision 18) and the network (Decision 19) were robust on the same
+  variants, and Decision 20 named a robust result as the more likely one;
+  that forecast was wrong.
+- **A road inside a node has no crossing.** A path goes from the edge of one
+  node to the edge of another; no path is modelled inside a node or between
+  the parts of one reserve. NH 766 through Bandipur has had a night traffic
+  ban for years, and it is not in the tables: Bandipur, Nagarhole, Mudumalai
+  and Sathyamangalam are one node. The same applies to the road between the
+  two parts of Nawegaon-Nagzira.
+- **A documented crossing place can be a crossing that is not a pinch
+  point.** NH-44 at Pench (Maharashtra) has monitored crossing structures
+  that tigers use (Saxena & Habib 2022). The paths in Nagpur district have
+  road crossings on three links (`tbl_14_road_crossings.csv`); none is a
+  pinch point, because one edge uses each and no edge there is a bridge.
+  The full list of crossings is `tbl_14_road_crossings.csv`, not `tbl_03b`.
+- **Pinch points on links without literature support.** 33 of the 200 pinch
+  points are on sites whose edges all have `lit_flag` (Orang–Dampa,
+  Anamalai–Srivilliputhur-Megamalai, Periyar–Kalakad-Mundanthurai,
+  Sariska–Rajaji). The path Sariska–Rajaji has 35 crossings, 7 of them in
+  Delhi, and the site with the longest span (22.6 km): a least-cost path
+  through a city shows how weak this geometry-rule link is. Two of the three
+  tier-1 pinch points are on a site that Orang–Dampa uses.
+- **Roads are the OpenStreetMap class only.** The road layer holds two
+  fields, the OSM id and the class. It has no road name, no traffic volume,
+  and no tag for a bridge, a tunnel or a crossing structure: a road on a
+  viaduct is a barrier cell like any other. A pinch point thus cannot be
+  matched to a named road. Class tagging in OSM is not the same in all
+  states (Decision 15), and a road that was built or planned after the
+  extract is not in the layer.
+- **Published position: a 10 km cell; state and district from two layers.**
+  A crossing is one or more 1 km cells; the tables and the figure give the
+  10 km cell (Decision 20 point 7). The state is from Natural Earth and the
+  district from the DataMeet Census-2011 layer, so a few rows have a state
+  and a district that do not agree at a border (for example a Haryana state
+  with a Delhi district), and a district made after 2011 has its 2011 name.
+- **The literature check of the pinch points is at the level of link and
+  district, and its sources are news reports.** No source confirms a tier-1
+  pinch point as a known tiger crossing place. 6 of the 21 groups have no
+  source. Each group had one or two searches. Sources: `references.md`,
+  "Week-12 pinch points".
+- **`fig_03` at national scale.** Marks in the same 10 km cell or in
+  adjacent cells overlap: the 200 pinch points are in 194 cells, and the 3
+  tier-1 pinch points show as 2 marks. Tier 3 is small and pale by author
+  choice. The thin lines of the links that are not bridges are faint. The
+  title, the subtitle and the caption are draft text.

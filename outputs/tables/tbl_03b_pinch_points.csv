@@ -1,0 +1,201 @@
+"site_id","pinch_tier","on_bridge","shared","n_edges","n_bridges","links","road_class_top","in_reserve_unit_ids","lit_flag","lit_flag_any","state","district","district_code","grid10_id","grid10_x_km","grid10_y_km","near_pinch_noghm","near_pinch_road15","near_pinch_road50","n_variants_near"
+54,1,TRUE,TRUE,3,1,"Manas - Orang; Nameri - Orang; Orang - Dampa","secondary","",FALSE,TRUE,"Assam","Sonitpur","306",26357,5209,4350,TRUE,TRUE,TRUE,3
+56,1,TRUE,TRUE,3,1,"Manas - Orang; Nameri - Orang; Orang - Dampa","trunk","",FALSE,TRUE,"Assam","Sonitpur","306",26358,5219,4350,TRUE,TRUE,TRUE,3
+346,1,TRUE,TRUE,2,2,"Bhadra - Kali; Bhadra - Nagarhole","primary","",FALSE,FALSE,"Karnataka","Chikmagalur","570",69237,3509,2850,FALSE,TRUE,TRUE,2
+1,2,TRUE,FALSE,1,1,"Sariska - Rajaji","trunk","",TRUE,TRUE,"Uttarakhand","Hardwar","68",17605,3789,4650,FALSE,TRUE,FALSE,1
+2,2,TRUE,FALSE,1,1,"Sariska - Rajaji","secondary","",TRUE,TRUE,"Uttar Pradesh","Saharanpur","132",17891,3779,4640,FALSE,TRUE,FALSE,1
+3,2,TRUE,FALSE,1,1,"Corbett - Rajaji","trunk","",FALSE,FALSE,"Uttarakhand","Garhwal","61",18186,3859,4630,FALSE,TRUE,TRUE,2
+4,2,TRUE,FALSE,1,1,"Sariska - Rajaji","primary","",TRUE,TRUE,"Uttar Pradesh","Saharanpur","132",18465,3779,4620,FALSE,TRUE,FALSE,1
+5,2,TRUE,FALSE,1,1,"Sariska - Rajaji","secondary","",TRUE,TRUE,"Uttar Pradesh","Muzaffarnagar","133",18751,3769,4610,FALSE,TRUE,FALSE,1
+6,2,TRUE,FALSE,1,1,"Dudhwa - Corbett","trunk","55",FALSE,FALSE,"Uttarakhand","Nainital","66",19053,3919,4600,TRUE,TRUE,TRUE,3
+7,2,TRUE,FALSE,1,1,"Sariska - Rajaji","trunk","",TRUE,TRUE,"Uttar Pradesh","Muzaffarnagar","133",19325,3769,4590,FALSE,TRUE,FALSE,1
+8,2,TRUE,FALSE,1,1,"Sariska - Rajaji","secondary","",TRUE,TRUE,"Uttar Pradesh","Muzaffarnagar","133",19613,3779,4580,FALSE,TRUE,FALSE,1
+9,2,TRUE,FALSE,1,1,"Dudhwa - Corbett","primary","",FALSE,FALSE,"Uttarakhand","Nainital","66",19630,3949,4580,TRUE,TRUE,TRUE,3
+10,2,TRUE,FALSE,1,1,"Sariska - Rajaji","secondary","",TRUE,TRUE,"Uttar Pradesh","Muzaffarnagar","133",19613,3779,4580,FALSE,TRUE,FALSE,1
+11,2,TRUE,FALSE,1,1,"Dudhwa - Corbett","trunk","",FALSE,FALSE,"Uttarakhand","Nainital","66",19918,3959,4570,TRUE,TRUE,TRUE,3
+12,2,TRUE,FALSE,1,1,"Sariska - Rajaji","secondary","",TRUE,TRUE,"Uttar Pradesh","Meerut","138",20187,3779,4560,FALSE,TRUE,FALSE,1
+14,2,TRUE,FALSE,1,1,"Sariska - Rajaji","trunk","",TRUE,TRUE,"Uttar Pradesh","Meerut","138",20473,3769,4550,FALSE,TRUE,FALSE,1
+16,2,TRUE,FALSE,1,1,"Sariska - Rajaji","trunk","",TRUE,TRUE,"Uttar Pradesh","Meerut","138",20473,3769,4550,FALSE,TRUE,FALSE,1
+17,2,TRUE,FALSE,1,1,"Dudhwa - Corbett","trunk","",FALSE,FALSE,"Uttarakhand","Udham Singh Nagar","67",20783,3999,4540,TRUE,TRUE,TRUE,3
+18,2,TRUE,FALSE,1,1,"Sariska - Rajaji","secondary","",TRUE,TRUE,"Uttar Pradesh","Meerut","138",20759,3759,4540,FALSE,TRUE,FALSE,1
+19,2,TRUE,FALSE,1,1,"Dudhwa - Corbett","secondary","",FALSE,FALSE,"Uttarakhand","Udham Singh Nagar","67",21070,3999,4530,FALSE,TRUE,TRUE,2
+20,2,TRUE,FALSE,1,1,"Sariska - Rajaji","motorway","",TRUE,TRUE,"Uttar Pradesh","Baghpat","139",21045,3749,4530,FALSE,TRUE,FALSE,1
+22,2,TRUE,FALSE,1,1,"Sariska - Rajaji","motorway","",TRUE,TRUE,"Uttar Pradesh","Ghaziabad","140",21044,3739,4530,FALSE,TRUE,FALSE,1
+23,2,TRUE,FALSE,1,1,"Dudhwa - Corbett","secondary","",FALSE,FALSE,"Uttar Pradesh","Udham Singh Nagar","67",21358,4009,4520,FALSE,TRUE,TRUE,2
+24,2,TRUE,FALSE,1,1,"Sariska - Rajaji","trunk","",TRUE,TRUE,"Delhi","New Delhi","94",21904,3729,4500,FALSE,TRUE,FALSE,1
+25,2,TRUE,FALSE,1,1,"Dudhwa - Corbett","secondary","",FALSE,FALSE,"Uttar Pradesh","Kheri","153",22222,4039,4490,FALSE,TRUE,FALSE,1
+26,2,TRUE,FALSE,1,1,"Sariska - Rajaji","primary","",TRUE,TRUE,"Haryana","South","98",22478,3729,4480,FALSE,TRUE,TRUE,2
+27,2,TRUE,FALSE,1,1,"Sariska - Rajaji","trunk","",TRUE,TRUE,"Haryana","Gurgaon","86",22764,3719,4470,FALSE,TRUE,TRUE,2
+28,2,TRUE,FALSE,1,1,"Valmiki - Dudhwa","primary","",FALSE,FALSE,"Uttar Pradesh","Kheri","153",22801,4089,4470,FALSE,FALSE,TRUE,1
+29,2,TRUE,FALSE,1,1,"Sariska - Rajaji","motorway","",TRUE,TRUE,"Haryana","Mewat","87",23050,3709,4460,TRUE,TRUE,TRUE,3
+30,2,TRUE,FALSE,1,1,"Sariska - Rajaji","secondary","",TRUE,TRUE,"Haryana","Mewat","87",23337,3709,4450,TRUE,TRUE,TRUE,3
+32,2,TRUE,FALSE,1,1,"Valmiki - Dudhwa","trunk","",FALSE,FALSE,"Uttar Pradesh","Bahraich","180",23666,4129,4440,TRUE,TRUE,TRUE,3
+33,2,TRUE,FALSE,1,1,"Valmiki - Dudhwa","trunk","",FALSE,FALSE,"Uttar Pradesh","Bahraich","180",23668,4149,4440,TRUE,TRUE,TRUE,3
+34,2,TRUE,FALSE,1,1,"Valmiki - Dudhwa","secondary","",FALSE,FALSE,"Uttar Pradesh","Shrawasti","181",23957,4169,4430,TRUE,TRUE,TRUE,3
+35,2,TRUE,FALSE,1,1,"Sariska - Rajaji","secondary","",TRUE,TRUE,"Rajasthan","Alwar","104",24483,3689,4410,TRUE,TRUE,TRUE,3
+36,2,TRUE,FALSE,1,1,"Sariska - Rajaji","primary","",TRUE,TRUE,"Rajasthan","Alwar","104",24483,3689,4410,TRUE,TRUE,TRUE,3
+38,2,TRUE,FALSE,1,1,"Sariska - Rajaji","primary","",TRUE,TRUE,"Rajasthan","Alwar","104",24481,3669,4410,FALSE,TRUE,FALSE,1
+39,2,TRUE,FALSE,1,1,"Valmiki - Dudhwa","secondary","",FALSE,FALSE,"Uttar Pradesh","Balrampur","182",24826,4249,4400,TRUE,TRUE,TRUE,3
+41,2,TRUE,FALSE,1,1,"Valmiki - Dudhwa","primary","",FALSE,FALSE,"Uttar Pradesh","Siddharth Nagar","184",25402,4269,4380,TRUE,TRUE,TRUE,3
+42,2,TRUE,FALSE,1,1,"Orang - Dampa","primary","6",TRUE,TRUE,"Assam","West Kameng","246",25498,5229,4380,FALSE,TRUE,TRUE,2
+43,2,TRUE,FALSE,1,1,"Valmiki - Dudhwa","trunk","",FALSE,FALSE,"Uttar Pradesh","Siddharth Nagar","184",25403,4279,4380,FALSE,TRUE,FALSE,1
+44,2,TRUE,FALSE,1,1,"Valmiki - Dudhwa","trunk","",FALSE,FALSE,"Uttar Pradesh","Siddharth Nagar","184",25691,4289,4370,TRUE,TRUE,TRUE,3
+48,2,TRUE,FALSE,1,1,"Orang - Dampa","trunk","",TRUE,TRUE,"Assam","Sonitpur","306",25792,5299,4370,TRUE,TRUE,TRUE,3
+50,2,TRUE,FALSE,1,1,"Valmiki - Dudhwa","trunk","",FALSE,FALSE,"Uttar Pradesh","Maharajganj","187",25698,4359,4370,TRUE,TRUE,TRUE,3
+51,2,TRUE,FALSE,1,1,"Valmiki - Dudhwa","trunk","",FALSE,FALSE,"Uttar Pradesh","Siddharth Nagar","184",25979,4299,4360,TRUE,TRUE,TRUE,3
+53,2,TRUE,FALSE,1,1,"Valmiki - Dudhwa","trunk","",FALSE,FALSE,"Uttar Pradesh","Maharajganj","187",26269,4329,4350,TRUE,TRUE,TRUE,3
+57,2,TRUE,FALSE,1,1,"Orang - Dampa","trunk","7",TRUE,TRUE,"Assam","Golaghat","313",26654,5309,4340,TRUE,TRUE,TRUE,3
+72,2,TRUE,FALSE,1,1,"Orang - Dampa","trunk","",TRUE,TRUE,"Assam","Karbi Anglong","314",28376,5309,4280,TRUE,TRUE,TRUE,3
+76,2,TRUE,FALSE,1,1,"Orang - Dampa","trunk","",TRUE,TRUE,"Assam","Karbi Anglong","314",29237,5309,4250,TRUE,TRUE,TRUE,3
+86,2,TRUE,FALSE,1,1,"Orang - Dampa","trunk","",TRUE,TRUE,"Manipur","Tamenglong","273",32107,5309,4150,FALSE,TRUE,TRUE,2
+96,2,TRUE,FALSE,1,1,"Orang - Dampa","trunk","",TRUE,TRUE,"Mizoram","Kolasib","282",33539,5279,4100,TRUE,TRUE,TRUE,3
+106,2,TRUE,FALSE,1,1,"Orang - Dampa","trunk","",TRUE,TRUE,"Mizoram","Kolasib","282",34685,5259,4060,FALSE,TRUE,TRUE,2
+116,2,TRUE,FALSE,1,1,"Orang - Dampa","trunk","",TRUE,TRUE,"Mizoram","Mamit","281",35258,5249,4040,TRUE,TRUE,TRUE,3
+192,2,TRUE,FALSE,1,1,"Similipal - Sundarbans","secondary","",FALSE,FALSE,"West Bengal","South 24 Parganas","343",40669,4829,3850,TRUE,TRUE,TRUE,3
+194,2,TRUE,FALSE,1,1,"Similipal - Sundarbans","trunk","",FALSE,FALSE,"West Bengal","South 24 Parganas","343",40957,4839,3840,TRUE,TRUE,TRUE,3
+195,2,TRUE,FALSE,1,1,"Similipal - Sundarbans","trunk","",FALSE,FALSE,"West Bengal","Purba Medinipur","345",40953,4799,3840,FALSE,TRUE,TRUE,2
+196,2,TRUE,FALSE,1,1,"Similipal - Sundarbans","primary","",FALSE,FALSE,"West Bengal","Haora","341",40954,4809,3840,FALSE,TRUE,TRUE,2
+199,2,TRUE,FALSE,1,1,"Similipal - Sundarbans","primary","",FALSE,FALSE,"West Bengal","South 24 Parganas","343",41246,4859,3830,TRUE,TRUE,TRUE,3
+202,2,TRUE,FALSE,1,1,"Similipal - Sundarbans","secondary","",FALSE,FALSE,"West Bengal","South 24 Parganas","343",41246,4859,3830,FALSE,TRUE,TRUE,2
+207,2,TRUE,FALSE,1,1,"Similipal - Sundarbans","secondary","",FALSE,FALSE,"West Bengal","South 24 Parganas","343",41534,4869,3820,FALSE,TRUE,FALSE,1
+211,2,TRUE,FALSE,1,1,"Similipal - Sundarbans","primary","",FALSE,FALSE,"West Bengal","Pashchim Medinipur","344",41803,4689,3810,FALSE,TRUE,TRUE,2
+212,2,TRUE,FALSE,1,1,"Similipal - Sundarbans","secondary","",FALSE,FALSE,"West Bengal","Pashchim Medinipur","344",41810,4759,3810,TRUE,TRUE,TRUE,3
+213,2,TRUE,FALSE,1,1,"Similipal - Sundarbans","primary","",FALSE,FALSE,"West Bengal","Pashchim Medinipur","344",41805,4709,3810,FALSE,TRUE,TRUE,2
+215,2,TRUE,FALSE,1,1,"Similipal - Sundarbans","primary","",FALSE,FALSE,"West Bengal","Pashchim Medinipur","344",42094,4729,3800,FALSE,TRUE,TRUE,2
+216,2,TRUE,FALSE,1,1,"Similipal - Sundarbans","trunk","",FALSE,FALSE,"West Bengal","Pashchim Medinipur","344",42095,4739,3800,TRUE,TRUE,TRUE,3
+217,2,TRUE,FALSE,1,1,"Similipal - Sundarbans","primary","",FALSE,FALSE,"West Bengal","Pashchim Medinipur","344",42096,4749,3800,TRUE,TRUE,TRUE,3
+219,2,TRUE,FALSE,1,1,"Similipal - Sundarbans","trunk","",FALSE,FALSE,"Odisha","Mayurbhanj","376",42089,4679,3800,TRUE,TRUE,TRUE,3
+313,2,TRUE,FALSE,1,1,"Kali - Sahyadri","trunk","",FALSE,FALSE,"Maharashtra","Ratnagiri","528",57741,3349,3250,TRUE,TRUE,TRUE,3
+317,2,TRUE,FALSE,1,1,"Kali - Sahyadri","primary","",FALSE,FALSE,"Maharashtra","Kolhapur","530",58315,3349,3230,TRUE,TRUE,TRUE,3
+324,2,TRUE,FALSE,1,1,"Kali - Sahyadri","trunk","",FALSE,FALSE,"Maharashtra","Kolhapur","530",59176,3349,3200,FALSE,TRUE,TRUE,2
+326,2,TRUE,FALSE,1,1,"Kali - Sahyadri","primary","",FALSE,FALSE,"Maharashtra","Sindhudurg","529",59750,3349,3180,TRUE,TRUE,TRUE,3
+332,2,TRUE,FALSE,1,1,"Kali - Sahyadri","trunk","",FALSE,FALSE,"Maharashtra","Sindhudurg","529",60899,3359,3140,TRUE,TRUE,TRUE,3
+333,2,TRUE,FALSE,1,1,"Kali - Sahyadri","primary","",FALSE,FALSE,"Maharashtra","Sindhudurg","529",61474,3369,3120,TRUE,TRUE,TRUE,3
+334,2,TRUE,FALSE,1,1,"Kali - Sahyadri","trunk","",FALSE,FALSE,"Karnataka","North Goa","585",61762,3379,3110,TRUE,TRUE,TRUE,3
+335,2,TRUE,FALSE,1,1,"Kali - Sahyadri","trunk","",FALSE,FALSE,"Goa","South Goa","586",62624,3389,3080,TRUE,TRUE,TRUE,3
+336,2,TRUE,FALSE,1,1,"Bhadra - Kali","trunk","",FALSE,FALSE,"Karnataka","Uttara Kannada","563",64350,3429,3020,TRUE,TRUE,TRUE,3
+337,2,TRUE,FALSE,1,1,"Bhadra - Kali","primary","",FALSE,FALSE,"Karnataka","Uttara Kannada","563",65211,3429,2990,TRUE,TRUE,TRUE,3
+338,2,TRUE,FALSE,1,1,"Bhadra - Kali","trunk","",FALSE,FALSE,"Karnataka","Uttara Kannada","563",65498,3429,2980,FALSE,TRUE,TRUE,2
+339,2,TRUE,FALSE,1,1,"Bhadra - Kali","primary","",FALSE,FALSE,"Karnataka","Uttara Kannada","563",66072,3429,2960,FALSE,TRUE,TRUE,2
+340,2,TRUE,FALSE,1,1,"Bhadra - Kali","trunk","",FALSE,FALSE,"Karnataka","Uttara Kannada","563",66359,3429,2950,FALSE,TRUE,TRUE,2
+341,2,TRUE,FALSE,1,1,"Bhadra - Kali","primary","",FALSE,FALSE,"Karnataka","Shimoga","568",66933,3429,2930,FALSE,TRUE,TRUE,2
+342,2,TRUE,FALSE,1,1,"Bhadra - Kali","trunk","",FALSE,FALSE,"Karnataka","Udupi","569",67508,3439,2910,FALSE,TRUE,TRUE,2
+343,2,TRUE,FALSE,1,1,"Bhadra - Kali","primary","",FALSE,FALSE,"Karnataka","Shimoga","568",68084,3459,2890,FALSE,TRUE,TRUE,2
+344,2,TRUE,FALSE,1,1,"Bhadra - Kali","trunk","",FALSE,FALSE,"Karnataka","Udupi","569",68946,3469,2860,FALSE,FALSE,TRUE,1
+345,2,TRUE,FALSE,1,1,"Bhadra - Kali","trunk","",FALSE,FALSE,"Karnataka","Chikmagalur","570",69234,3479,2850,FALSE,FALSE,TRUE,1
+347,2,TRUE,FALSE,1,1,"Bhadra - Nagarhole","trunk","",FALSE,FALSE,"Karnataka","Chikmagalur","570",70099,3519,2820,TRUE,TRUE,TRUE,3
+348,2,TRUE,FALSE,1,1,"Bhadra - Nagarhole","trunk","",FALSE,FALSE,"Karnataka","Dakshina Kannada","575",70961,3529,2790,TRUE,TRUE,TRUE,3
+349,2,TRUE,FALSE,1,1,"Bhadra - Nagarhole","primary","",FALSE,FALSE,"Karnataka","Dakshina Kannada","575",71535,3529,2770,FALSE,TRUE,FALSE,1
+350,2,TRUE,FALSE,1,1,"Bhadra - Nagarhole","primary","",FALSE,FALSE,"Karnataka","Kodagu","576",72110,3539,2750,FALSE,TRUE,FALSE,1
+351,2,TRUE,FALSE,1,1,"Bhadra - Nagarhole","trunk","",FALSE,FALSE,"Karnataka","Kodagu","576",72398,3549,2740,FALSE,TRUE,FALSE,1
+352,2,TRUE,FALSE,1,1,"Bhadra - Nagarhole","primary","",FALSE,FALSE,"Karnataka","Kodagu","576",72399,3559,2740,FALSE,TRUE,FALSE,1
+353,2,TRUE,FALSE,1,1,"Bhadra - Nagarhole","primary","18",FALSE,FALSE,"Karnataka","Kodagu","576",72974,3569,2720,TRUE,TRUE,TRUE,3
+354,2,TRUE,FALSE,1,1,"Biligiri Ranganatha Temple - Sathyamangalam","trunk","48",FALSE,FALSE,"Tamil Nadu","Erode","610",74995,3689,2650,TRUE,TRUE,TRUE,3
+355,2,TRUE,FALSE,1,1,"Anamalai - Mudumalai","trunk","",FALSE,FALSE,"Tamil Nadu","The Nilgiris","611",75275,3619,2640,FALSE,TRUE,FALSE,1
+358,2,TRUE,FALSE,1,1,"Anamalai - Mudumalai; Anamalai - Sathyamangalam","primary","",FALSE,FALSE,"Kerala","Palakkad","593",76710,3619,2590,FALSE,TRUE,TRUE,2
+359,2,TRUE,FALSE,1,1,"Anamalai - Mudumalai; Anamalai - Sathyamangalam","trunk","",FALSE,FALSE,"Kerala","Palakkad","593",77574,3649,2560,TRUE,TRUE,TRUE,3
+360,2,TRUE,FALSE,1,1,"Anamalai - Mudumalai; Anamalai - Sathyamangalam","primary","",FALSE,FALSE,"Tamil Nadu","Coimbatore","632",77862,3659,2550,TRUE,TRUE,TRUE,3
+361,2,TRUE,FALSE,1,1,"Anamalai - Mudumalai; Anamalai - Sathyamangalam","primary","",FALSE,FALSE,"Tamil Nadu","Coimbatore","632",78149,3659,2540,TRUE,TRUE,TRUE,3
+362,2,TRUE,FALSE,1,1,"Anamalai - Mudumalai; Anamalai - Sathyamangalam","secondary","",FALSE,FALSE,"Tamil Nadu","Coimbatore","632",78436,3659,2530,TRUE,TRUE,TRUE,3
+363,2,TRUE,FALSE,1,1,"Anamalai - Srivilliputhur-Megamalai","trunk","",TRUE,TRUE,"Tamil Nadu","Idukki","596",80162,3699,2470,TRUE,TRUE,TRUE,3
+364,2,TRUE,FALSE,1,1,"Anamalai - Srivilliputhur-Megamalai","primary","",TRUE,TRUE,"Tamil Nadu","Theni","624",81022,3689,2440,TRUE,TRUE,TRUE,3
+365,2,TRUE,FALSE,1,1,"Periyar - Kalakad-Mundanthurai","trunk","",TRUE,TRUE,"Kerala","Kollam","600",83604,3679,2350,TRUE,TRUE,TRUE,3
+47,3,FALSE,TRUE,2,0,"Pakke - Manas; Manas - Nameri; Manas - Orang","primary","",FALSE,FALSE,"Arunachal Pradesh","West Kameng","246",25780,5179,4370,TRUE,TRUE,TRUE,3
+80,3,FALSE,TRUE,2,0,"Madhav - Ranthambore; Madhav - Sariska","trunk","",FALSE,FALSE,"Madhya Pradesh","Sheopur","418",29651,3709,4230,FALSE,TRUE,FALSE,1
+82,3,FALSE,TRUE,2,0,"Madhav - Ranthambore; Madhav - Sariska","secondary","",FALSE,FALSE,"Madhya Pradesh","Sheopur","418",30517,3759,4200,TRUE,TRUE,TRUE,3
+88,3,FALSE,TRUE,2,0,"Panna - Madhav; Ratapani - Madhav","secondary","",FALSE,FALSE,"Madhya Pradesh","Shivpuri","423",32243,3799,4140,TRUE,TRUE,TRUE,3
+90,3,FALSE,TRUE,2,0,"Panna - Madhav; Ratapani - Madhav","secondary","",FALSE,FALSE,"Madhya Pradesh","Shivpuri","423",32817,3799,4120,TRUE,TRUE,TRUE,3
+91,3,FALSE,TRUE,2,0,"Panna - Madhav; Ratapani - Madhav","secondary","",FALSE,FALSE,"Madhya Pradesh","Shivpuri","423",33105,3809,4110,TRUE,TRUE,TRUE,3
+101,3,FALSE,TRUE,2,0,"Panna - Madhav; Ratapani - Madhav","primary","",FALSE,FALSE,"Madhya Pradesh","Ashoknagar","459",33967,3819,4080,TRUE,TRUE,TRUE,3
+104,3,FALSE,TRUE,2,0,"Panna - Ratapani; Panna - Madhav","trunk","",FALSE,FALSE,"Madhya Pradesh","Chhatarpur","425",34556,3969,4060,TRUE,FALSE,TRUE,2
+108,3,FALSE,TRUE,2,0,"Panna - Madhav; Ratapani - Madhav","secondary","",FALSE,FALSE,"Uttar Pradesh","Lalitpur","167",34542,3829,4060,FALSE,TRUE,TRUE,2
+112,3,FALSE,TRUE,2,0,"Panna - Madhav; Ratapani - Madhav","secondary","",FALSE,FALSE,"Uttar Pradesh","Lalitpur","167",35117,3839,4040,TRUE,TRUE,TRUE,3
+113,3,FALSE,TRUE,2,0,"Panna - Madhav; Ratapani - Madhav","trunk","",FALSE,FALSE,"Madhya Pradesh","Lalitpur","167",35119,3859,4040,FALSE,TRUE,TRUE,2
+114,3,FALSE,TRUE,2,0,"Panna - Ratapani; Panna - Madhav","primary","",FALSE,FALSE,"Madhya Pradesh","Damoh","428",35127,3939,4040,TRUE,TRUE,TRUE,3
+117,3,FALSE,TRUE,2,0,"Panna - Ratapani; Panna - Madhav","trunk","",FALSE,FALSE,"Madhya Pradesh","Chhatarpur","425",35412,3919,4030,TRUE,TRUE,TRUE,3
+118,3,FALSE,TRUE,2,0,"Panna - Ratapani; Panna - Madhav","trunk","",FALSE,FALSE,"Madhya Pradesh","Sagar","427",35411,3909,4030,TRUE,TRUE,TRUE,3
+122,3,FALSE,TRUE,2,0,"Panna - Madhav; Ratapani - Madhav","secondary","",FALSE,FALSE,"Madhya Pradesh","Lalitpur","167",35407,3869,4030,FALSE,TRUE,TRUE,2
+124,3,FALSE,TRUE,2,0,"Panna - Ratapani; Panna - Madhav","secondary","",FALSE,FALSE,"Madhya Pradesh","Sagar","427",35409,3889,4030,TRUE,TRUE,TRUE,3
+126,3,FALSE,TRUE,2,0,"Panna - Ratapani; Ratapani - Madhav","secondary","",FALSE,FALSE,"Madhya Pradesh","Sagar","427",35982,3879,4010,FALSE,TRUE,TRUE,2
+128,3,FALSE,TRUE,2,0,"Panna - Ratapani; Ratapani - Madhav","trunk","",FALSE,FALSE,"Madhya Pradesh","Sagar","427",35980,3859,4010,FALSE,TRUE,TRUE,2
+131,3,FALSE,TRUE,2,0,"Panna - Ratapani; Ratapani - Madhav","primary","",FALSE,FALSE,"Madhya Pradesh","Sagar","427",36266,3849,4000,FALSE,TRUE,FALSE,1
+132,3,FALSE,TRUE,2,0,"Panna - Ratapani; Ratapani - Madhav","trunk","",FALSE,FALSE,"Madhya Pradesh","Sagar","427",36266,3849,4000,TRUE,TRUE,TRUE,3
+135,3,FALSE,TRUE,2,0,"Panna - Ratapani; Ratapani - Madhav","trunk","",FALSE,FALSE,"Madhya Pradesh","Sagar","427",36839,3839,3980,TRUE,TRUE,TRUE,3
+137,3,FALSE,TRUE,2,0,"Panna - Ratapani; Ratapani - Madhav","secondary","",FALSE,FALSE,"Madhya Pradesh","Sagar","427",37126,3839,3970,TRUE,TRUE,TRUE,3
+142,3,FALSE,TRUE,3,0,"Kanha - Veerangana Durgavati; Bandhavgarh - Veerangana Durgavati; Panna - Veerangana Durgavati","secondary","",FALSE,FALSE,"Madhya Pradesh","Damoh","428",37427,3979,3960,TRUE,TRUE,TRUE,3
+143,3,FALSE,TRUE,2,0,"Panna - Ratapani; Ratapani - Madhav","primary","",FALSE,FALSE,"Madhya Pradesh","Raisen","446",37412,3829,3960,TRUE,TRUE,TRUE,3
+145,3,FALSE,TRUE,2,0,"Kanha - Veerangana Durgavati; Bandhavgarh - Veerangana Durgavati","secondary","",FALSE,FALSE,"Madhya Pradesh","Katni","450",37716,3999,3950,FALSE,TRUE,FALSE,1
+147,3,FALSE,TRUE,2,0,"Kanha - Veerangana Durgavati; Bandhavgarh - Veerangana Durgavati","trunk","",FALSE,FALSE,"Madhya Pradesh","Katni","450",37431,4019,3960,FALSE,TRUE,FALSE,1
+148,3,FALSE,TRUE,2,0,"Kanha - Veerangana Durgavati; Bandhavgarh - Veerangana Durgavati","primary","",FALSE,FALSE,"Madhya Pradesh","Jabalpur","451",37717,4009,3950,FALSE,TRUE,FALSE,1
+149,3,FALSE,TRUE,2,0,"Guru Ghasidas-Tamor Pingla - Bandhavgarh; Bandhavgarh - Sanjay Dubri","secondary","",FALSE,FALSE,"Madhya Pradesh","Umaria","431",37728,4119,3950,TRUE,TRUE,TRUE,3
+150,3,FALSE,TRUE,2,0,"Kanha - Veerangana Durgavati; Bandhavgarh - Veerangana Durgavati","secondary","",FALSE,FALSE,"Madhya Pradesh","Katni","450",37721,4049,3950,FALSE,TRUE,TRUE,2
+154,3,FALSE,TRUE,2,0,"Panna - Ratapani; Ratapani - Madhav","primary","",FALSE,FALSE,"Madhya Pradesh","Raisen","446",38271,3809,3930,TRUE,TRUE,TRUE,3
+155,3,FALSE,TRUE,2,0,"Palamau - Similipal; Palamau - Satkosia","primary","",FALSE,FALSE,"Jharkhand","Gumla","366",38335,4449,3930,FALSE,TRUE,TRUE,2
+157,3,FALSE,TRUE,2,0,"Achanakmar - Bandhavgarh; Kanha - Bandhavgarh","trunk","",FALSE,FALSE,"Madhya Pradesh","Umaria","431",38302,4119,3930,TRUE,TRUE,TRUE,3
+159,3,FALSE,TRUE,3,0,"Pench - Veerangana Durgavati; Satpura - Veerangana Durgavati; Veerangana Durgavati - Ratapani","trunk","",FALSE,FALSE,"Madhya Pradesh","Damoh","428",38286,3959,3930,TRUE,FALSE,TRUE,2
+163,3,FALSE,TRUE,3,0,"Panna - Ratapani; Veerangana Durgavati - Ratapani; Ratapani - Madhav","secondary","",FALSE,FALSE,"Madhya Pradesh","Raisen","446",38559,3819,3920,TRUE,TRUE,TRUE,3
+169,3,FALSE,TRUE,2,0,"Pench - Veerangana Durgavati; Satpura - Veerangana Durgavati","trunk","",FALSE,FALSE,"Madhya Pradesh","Narsimhapur","452",39142,3909,3900,FALSE,FALSE,TRUE,1
+171,3,FALSE,TRUE,2,0,"Palamau - Similipal; Palamau - Satkosia","trunk","",FALSE,FALSE,"Jharkhand","Gumla","366",39197,4459,3900,TRUE,TRUE,TRUE,3
+172,3,FALSE,TRUE,2,0,"Pench - Veerangana Durgavati; Satpura - Veerangana Durgavati","trunk","",FALSE,FALSE,"Madhya Pradesh","Narsimhapur","452",39428,3899,3890,FALSE,FALSE,TRUE,1
+176,3,FALSE,TRUE,2,0,"Satpura - Ratapani; Ratapani - Melghat","trunk","",FALSE,FALSE,"Madhya Pradesh","Sehore","445",39990,3779,3870,FALSE,TRUE,TRUE,2
+183,3,FALSE,TRUE,2,0,"Satpura - Ratapani; Ratapani - Melghat","primary","",FALSE,FALSE,"Madhya Pradesh","Hoshangabad","449",40277,3779,3860,FALSE,TRUE,TRUE,2
+187,3,FALSE,TRUE,2,0,"Satpura - Ratapani; Ratapani - Melghat","secondary","",FALSE,FALSE,"Madhya Pradesh","Hoshangabad","449",40565,3789,3850,FALSE,TRUE,TRUE,2
+193,3,FALSE,TRUE,3,0,"Satpura - Melghat; Satpura - Bor; Ratapani - Melghat","trunk","",FALSE,FALSE,"Madhya Pradesh","Hoshangabad","449",40851,3779,3840,FALSE,TRUE,TRUE,2
+200,3,FALSE,TRUE,2,0,"Udanti-Sitanadi - Achanakmar; Achanakmar - Kanha","primary","",FALSE,FALSE,"Chhattisgarh","Kabeerdham","407",41174,4139,3830,TRUE,TRUE,TRUE,3
+218,3,FALSE,TRUE,3,0,"Satpura - Melghat; Satpura - Bor; Ratapani - Melghat","trunk","",FALSE,FALSE,"Madhya Pradesh","Betul","447",41996,3749,3800,TRUE,TRUE,TRUE,3
+221,3,FALSE,TRUE,2,0,"Pench - Veerangana Durgavati; Satpura - Pench (MH)","primary","",FALSE,FALSE,"Madhya Pradesh","Chhindwara","455",42005,3839,3800,TRUE,FALSE,TRUE,2
+226,3,FALSE,TRUE,2,0,"Pench - Veerangana Durgavati; Satpura - Pench (MH)","primary","",FALSE,FALSE,"Madhya Pradesh","Chhindwara","455",42292,3839,3790,TRUE,FALSE,TRUE,2
+227,3,FALSE,TRUE,2,0,"Kanha - Pench; Tadoba-Andhari - Pench (MH)","secondary","",FALSE,FALSE,"Madhya Pradesh","Seoni","456",42308,3999,3790,FALSE,TRUE,TRUE,2
+228,3,FALSE,TRUE,2,0,"Kanha - Pench; Tadoba-Andhari - Pench (MH)","primary","",FALSE,FALSE,"Madhya Pradesh","Balaghat","457",42308,3999,3790,FALSE,TRUE,TRUE,2
+230,3,FALSE,TRUE,2,0,"Pench - Veerangana Durgavati; Satpura - Pench (MH)","trunk","",FALSE,FALSE,"Madhya Pradesh","Chhindwara","455",42868,3859,3770,TRUE,FALSE,TRUE,2
+231,3,FALSE,TRUE,3,0,"Satpura - Melghat; Satpura - Bor; Ratapani - Melghat","trunk","",FALSE,FALSE,"Madhya Pradesh","Betul","447",42856,3739,3770,TRUE,TRUE,TRUE,3
+233,3,FALSE,TRUE,2,0,"Kanha - Pench; Tadoba-Andhari - Pench (MH)","trunk","23",FALSE,FALSE,"Madhya Pradesh","Seoni","456",42877,3949,3770,FALSE,TRUE,TRUE,2
+234,3,FALSE,TRUE,2,0,"Kanha - Pench; Tadoba-Andhari - Pench (MH)","primary","",FALSE,FALSE,"Madhya Pradesh","Balaghat","457",43167,3979,3760,FALSE,TRUE,TRUE,2
+235,3,FALSE,TRUE,2,0,"Pench - Veerangana Durgavati; Satpura - Pench (MH)","trunk","",FALSE,FALSE,"Madhya Pradesh","Chhindwara","455",43157,3879,3760,FALSE,FALSE,TRUE,1
+237,3,FALSE,TRUE,3,0,"Udanti-Sitanadi - Achanakmar; Udanti-Sitanadi - Kanha; Kanha - Nawegaon-Nagzira","secondary","",FALSE,FALSE,"Chhattisgarh","Rajnandgaon","408",43178,4089,3760,TRUE,TRUE,TRUE,3
+238,3,FALSE,TRUE,2,0,"Pench - Veerangana Durgavati; Satpura - Pench (MH)","primary","",FALSE,FALSE,"Madhya Pradesh","Chhindwara","455",43733,3899,3740,FALSE,FALSE,TRUE,1
+242,3,FALSE,TRUE,2,0,"Pench - Nawegaon-Nagzira; Pench (MH) - Nawegaon-Nagzira","primary","",FALSE,FALSE,"Maharashtra","Bhandara","506",44027,3969,3730,TRUE,FALSE,FALSE,1
+243,3,FALSE,TRUE,2,0,"Pench - Nawegaon-Nagzira; Pench (MH) - Nawegaon-Nagzira","trunk","",FALSE,FALSE,"Maharashtra","Bhandara","506",44029,3989,3730,FALSE,FALSE,FALSE,0
+248,3,FALSE,TRUE,2,0,"Pench - Nawegaon-Nagzira; Pench (MH) - Nawegaon-Nagzira","primary","",FALSE,FALSE,"Maharashtra","Gondiya","507",44030,3999,3730,FALSE,FALSE,FALSE,0
+249,3,FALSE,TRUE,2,0,"Satpura - Bor; Melghat - Bor","trunk","",FALSE,FALSE,"Madhya Pradesh","Betul","447",44293,3759,3720,FALSE,TRUE,TRUE,2
+250,3,FALSE,TRUE,2,0,"Pench - Nawegaon-Nagzira; Pench (MH) - Nawegaon-Nagzira","trunk","",FALSE,FALSE,"Maharashtra","Gondiya","507",44317,3999,3720,FALSE,FALSE,FALSE,0
+253,3,FALSE,TRUE,2,0,"Satpura - Bor; Melghat - Bor","trunk","",FALSE,FALSE,"Maharashtra","Amravati","503",44297,3799,3720,TRUE,TRUE,TRUE,3
+254,3,FALSE,TRUE,3,0,"Udanti-Sitanadi - Achanakmar; Udanti-Sitanadi - Kanha; Kanha - Nawegaon-Nagzira","secondary","",FALSE,FALSE,"Chhattisgarh","Rajnandgaon","408",44325,4079,3720,TRUE,TRUE,TRUE,3
+259,3,FALSE,TRUE,2,0,"Satpura - Bor; Melghat - Bor","trunk","",FALSE,FALSE,"Maharashtra","Wardha","504",44873,3819,3700,TRUE,TRUE,TRUE,3
+260,3,FALSE,TRUE,3,0,"Udanti-Sitanadi - Achanakmar; Udanti-Sitanadi - Kanha; Kanha - Nawegaon-Nagzira","primary","",FALSE,FALSE,"Chhattisgarh","Rajnandgaon","408",44898,4069,3700,TRUE,TRUE,TRUE,3
+262,3,FALSE,TRUE,2,0,"Satpura - Bor; Melghat - Bor","trunk","",FALSE,FALSE,"Maharashtra","Wardha","504",45160,3819,3690,TRUE,TRUE,TRUE,3
+263,3,FALSE,TRUE,4,0,"Udanti-Sitanadi - Achanakmar; Udanti-Sitanadi - Kanha; Kanha - Nawegaon-Nagzira; Tadoba-Andhari - Pench (MH)","trunk","",FALSE,FALSE,"Chhattisgarh","Rajnandgaon","408",45471,4059,3680,TRUE,TRUE,TRUE,3
+265,3,FALSE,TRUE,2,0,"Satpura - Bor; Melghat - Bor","primary","",FALSE,FALSE,"Maharashtra","Wardha","504",45449,3839,3680,TRUE,TRUE,TRUE,3
+275,3,FALSE,TRUE,3,0,"Udanti-Sitanadi - Achanakmar; Udanti-Sitanadi - Kanha; Tadoba-Andhari - Pench (MH)","primary","",FALSE,FALSE,"Maharashtra","Garhchiroli","508",46331,4049,3650,FALSE,TRUE,TRUE,2
+278,3,FALSE,TRUE,3,0,"Indravati - Nawegaon-Nagzira; Udanti-Sitanadi - Nawegaon-Nagzira; Tadoba-Andhari - Nawegaon-Nagzira","trunk","",FALSE,FALSE,"Maharashtra","Garhchiroli","508",46904,4039,3630,TRUE,TRUE,TRUE,3
+282,3,FALSE,TRUE,2,0,"Tadoba-Andhari - Pench (MH); Tadoba-Andhari - Nawegaon-Nagzira","primary","",FALSE,FALSE,"Maharashtra","Garhchiroli","508",47763,4019,3600,FALSE,FALSE,TRUE,1
+283,3,FALSE,TRUE,3,0,"Udanti-Sitanadi - Achanakmar; Udanti-Sitanadi - Kanha; Udanti-Sitanadi - Nawegaon-Nagzira","trunk","",FALSE,FALSE,"Chhattisgarh","Rajnandgaon","408",47768,4069,3600,TRUE,TRUE,TRUE,3
+286,3,FALSE,TRUE,2,0,"Tadoba-Andhari - Pench (MH); Tadoba-Andhari - Nawegaon-Nagzira","primary","",FALSE,FALSE,"Maharashtra","Chandrapur","509",47758,3969,3600,FALSE,FALSE,TRUE,1
+287,3,FALSE,TRUE,2,0,"Tadoba-Andhari - Pench (MH); Tadoba-Andhari - Nawegaon-Nagzira","trunk","",FALSE,FALSE,"Maharashtra","Garhchiroli","508",47761,3999,3600,FALSE,FALSE,TRUE,1
+288,3,FALSE,TRUE,3,0,"Udanti-Sitanadi - Achanakmar; Udanti-Sitanadi - Kanha; Udanti-Sitanadi - Nawegaon-Nagzira","primary","",FALSE,FALSE,"Chhattisgarh","Uttar Bastar Kanker","413",48059,4109,3590,TRUE,TRUE,TRUE,3
+289,3,FALSE,TRUE,2,0,"Tadoba-Andhari - Pench (MH); Tadoba-Andhari - Nawegaon-Nagzira","primary","",FALSE,FALSE,"Maharashtra","Chandrapur","509",48045,3969,3590,FALSE,FALSE,TRUE,1
+291,3,FALSE,TRUE,4,0,"Indravati - Udanti-Sitanadi; Udanti-Sitanadi - Achanakmar; Udanti-Sitanadi - Kanha; Udanti-Sitanadi - Nawegaon-Nagzira","trunk","",FALSE,FALSE,"Chhattisgarh","Bastar","414",48351,4159,3580,FALSE,TRUE,TRUE,2
+292,3,FALSE,TRUE,2,0,"Indravati - Tadoba-Andhari; Tadoba-Andhari - Kawal","trunk","",FALSE,FALSE,"Maharashtra","Chandrapur","509",48617,3949,3570,TRUE,TRUE,TRUE,3
+297,3,FALSE,TRUE,2,0,"Indravati - Tadoba-Andhari; Tadoba-Andhari - Kawal","trunk","",FALSE,FALSE,"Maharashtra","Chandrapur","509",49478,3949,3540,TRUE,TRUE,TRUE,3
+305,3,FALSE,TRUE,2,0,"Indravati - Tadoba-Andhari; Indravati - Kawal","trunk","",FALSE,FALSE,"Maharashtra","Garhchiroli","508",51494,4019,3470,FALSE,TRUE,TRUE,2
+306,3,FALSE,TRUE,2,0,"Indravati - Kawal; Kawal - Amrabad","trunk","",FALSE,FALSE,"Telangana","Adilabad","532",51774,3949,3460,TRUE,TRUE,TRUE,3
+308,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","trunk","",FALSE,FALSE,"Maharashtra","Garhchiroli","508",52643,4029,3430,FALSE,FALSE,TRUE,1
+309,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","trunk","",FALSE,FALSE,"Telangana","Warangal","540",54079,4039,3380,TRUE,TRUE,TRUE,3
+310,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","trunk","",FALSE,FALSE,"Telangana","Khammam","541",56378,4069,3300,FALSE,TRUE,TRUE,2
+311,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","trunk","",FALSE,FALSE,"Telangana","Khammam","541",57527,4079,3260,FALSE,TRUE,TRUE,2
+312,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","motorway","",FALSE,FALSE,"Telangana","Khammam","541",57814,4079,3250,FALSE,TRUE,TRUE,2
+314,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","trunk","",FALSE,FALSE,"Andhra Pradesh","Krishna","547",58101,4079,3240,FALSE,TRUE,TRUE,2
+315,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","trunk","",FALSE,FALSE,"Andhra Pradesh","Krishna","547",58100,4069,3240,FALSE,TRUE,TRUE,2
+316,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","primary","",FALSE,FALSE,"Andhra Pradesh","Khammam","541",58386,4059,3230,FALSE,TRUE,TRUE,2
+318,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","secondary","",FALSE,FALSE,"Telangana","Khammam","541",58673,4059,3220,FALSE,TRUE,FALSE,1
+319,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","primary","",FALSE,FALSE,"Andhra Pradesh","Krishna","547",58958,4039,3210,FALSE,TRUE,FALSE,1
+320,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","primary","",FALSE,FALSE,"Andhra Pradesh","Krishna","547",58959,4049,3210,FALSE,TRUE,FALSE,1
+321,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","trunk","",FALSE,FALSE,"Andhra Pradesh","Krishna","547",58957,4029,3210,FALSE,TRUE,TRUE,2
+322,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","primary","",FALSE,FALSE,"Andhra Pradesh","Guntur","548",58955,4009,3210,TRUE,TRUE,TRUE,3
+323,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","primary","",FALSE,FALSE,"Andhra Pradesh","Krishna","547",58960,4059,3210,FALSE,TRUE,FALSE,1
+325,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","secondary","",FALSE,FALSE,"Andhra Pradesh","Guntur","548",59528,3999,3190,TRUE,TRUE,TRUE,3
+327,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","trunk","",FALSE,FALSE,"Andhra Pradesh","Guntur","548",59815,3999,3180,TRUE,TRUE,TRUE,3
+328,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","trunk","",FALSE,FALSE,"Andhra Pradesh","Guntur","548",60101,3989,3170,TRUE,TRUE,TRUE,3
+329,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","primary","",FALSE,FALSE,"Andhra Pradesh","Guntur","548",60099,3969,3170,TRUE,TRUE,TRUE,3
+330,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","primary","",FALSE,FALSE,"Andhra Pradesh","Guntur","548",60384,3949,3160,TRUE,TRUE,TRUE,3
+331,3,FALSE,TRUE,2,0,"Nagarjunsagar-Srisailam - Indravati; Kawal - Amrabad","trunk","1",FALSE,FALSE,"Andhra Pradesh","Guntur","548",60669,3929,3150,TRUE,TRUE,TRUE,3

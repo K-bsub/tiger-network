@@ -536,7 +536,7 @@ is complete and publishable on its own. Docs updated; Week 7 ticked.
 | **9** ✅ | Resistance surface | **Decisions 11–16**; `scripts/07_connectivity.R` STEPs 9.2 + 9.5–9.8 → four resistance surfaces (`baseline`, `noghm`, `road15`, `road50`) + `tbl_11_resistance_qa.csv` | 2–3 h planned; ~4× as run |
 | **10** ✅ | Least-cost paths | **Decisions 17–18**; `scripts/07_connectivity.R` STEPs 10.0–10.5 → 106 pairs, paths on four surfaces (`lcp_reserve_network_7755.gpkg`), validation, QA, Decision-18 comparison, NTCA overlap (`tbl_12_*`); `scripts/02` Amrabad split | 3–4 h planned; well over as run |
 | **11** ✅ | Reserve network graph | **Decision 19**; `scripts/07_connectivity.R` STEPs 11.1–11.4 with `R/00_functions_network.R` → 47 nodes (56 reserves), 73 edges, 3 sets; node metrics, second run without cross-group links, threshold scan, Decision-19 variant comparison, network QA (`tbl_13_*`); literature check | 3–4 h planned; as-run time not recorded |
-| **12** | Pinch points + visuals | **Decision 20** (pinch-point rule) first; `scripts/07_connectivity.R` pinch-point STEPs: road crossings of the paths, pinch points, QA (`tbl_14_*`); the publishable `tbl_03`; the network figure `fig_04` | 3–4 h planned; the task estimates add up to 5.5–7.7 h (split point after task 12.6) |
+| **12** ✅ | Pinch points + visuals | **Decision 20**; `scripts/07_connectivity.R` STEPs 12.1–12.7 with `R/00_functions_pinch.R` → 556 road crossings on 74 of 76 baseline paths, 365 sites, 200 pinch points (tier 1: 3, tier 2: 98, tier 3: 99); Decision-20 variant comparison (gHM multiplier sensitive, road value robust); QA 74 of 74 (`tbl_14_*`); the publishable `tbl_03_reserve_network.csv`, `tbl_03b_pinch_points.csv` and `tbl_03_notes.md`; `fig_03_reserve_network.png`; literature check | 3–4 h planned; the task estimates added up to 5.5–7.7 h; as-run time not recorded |
 
 **Script plan (fixed 2026-09-26):** all of Stage 2 from Week 9 on is **one
 script, `scripts/07_connectivity.R`**, with one STEP block per task (STEP 9.x,
@@ -869,7 +869,7 @@ and isolated reserves named (or "no reserve is isolated by the rule", with the
 pendant nodes); docs updated; Week 11 ticked. Ready for Week 12 (pinch points,
 `fig_04`, the publishable `tbl_03`).
 
-### Week 12 — task breakdown
+### Week 12 — task breakdown *(complete)*
 
 Entry state (as of Week-11 close, 2026-10-04): the reserve network of Decision
 19 — 47 nodes (56 reserves), 73 edges, 3 sets, 13 bridges
@@ -882,8 +882,8 @@ road input of Decision 15 is `data/raw/osm/osm_roads_major_7755.gpkg`
 (885,669 features; the barrier classes are motorway to secondary, with
 `_link` merged into the parent class). **No road crossing is computed yet:**
 the paths layer and the `tbl_12_*` / `tbl_13_*` tables hold no road field.
-**Raised, not decided** (methodology → Decisions pending → "[Week 12]
-Pinch-point rule").
+**Decision 20 recorded 2026-10-10** (task 12.1), before any road crossing;
+the tasks below name its numbered points.
 
 Week 12 adds the pinch-point STEPs to `scripts/07_connectivity.R`: the places
 where the least-cost paths cross barrier roads, a rule that names pinch points
@@ -891,29 +891,31 @@ among them, the publishable network table and the network figure. Week 12
 closes Stage 2 (proposal question 2).
 
 Naming (naming-conventions §2/§6): working tables `tbl_14_*` (a new group, the
-next free number); the publishable table `tbl_03_<slug>.csv` (number reserved
-since Week 10); the figure `fig_04_<slug>.png`. `fig_03` is not in use — see
-the pitfalls.
+next free number); the publishable tables `tbl_03_<slug>.csv` (number reserved
+since Week 10) and its companion `tbl_03b_<slug>.csv`; the figure
+`fig_03_<slug>.png` (author choice 2026-10-10; the plan first named `fig_04`
+— see the pitfalls).
 
-**Size.** The estimates add up to about 5.5–7.7 hours (4.4–6.2 without the
-two optional tasks, 12.5 and 12.9), above one week of 2–4 hours. A split point
+**Size.** The estimates add up to about 5.5–7.7 hours (4.9–6.9 without the
+optional task 12.9; task 12.5 is required since Decision 20), above one week
+of 2–4 hours. A split point
 is marked after task 12.6: crossings, pinch points and QA
 first; the publishable table, the figure and the Stage-2 close second.
 
 | # | Task | Done when | Est. |
 |---|---|---|---|
-| 12.1 | **Pinch-point Decision (numbered — Decision 20), before any road crossing is computed.** Research, raise the forks, record the choices: (a) the roads — the four barrier classes of Decision 15 or a subset, and the `_link` rule; (b) the paths — all 76 in-network baseline paths (73 `edge` + 3 `parallel`), the 73 edges only, or the 13 bridges; what to do with `parallel` links and with links that have no literature support; (c) what one crossing is — path cells that are barrier-road cells (the form the engine used) or a line-on-line intersection; how crossings of the same road that are close together are merged; (d) what a pinch point is and how it is ranked — for example a crossing on a bridge, a road section that more than one path crosses, the road class — with no traffic data; (e) whether the crossings are repeated on the variant surfaces, with a comparison fixed in advance; (f) what the publishable `tbl_03` and `fig_04` hold, and the position precision of a published crossing (sensitive-data policy §3); (g) a statement of what was seen before the Decision (the network results are seen; no crossing is) | Decision 20 recorded in methodology; settings in `R/00_config.R` | 45–60 min |
-| 12.2 | Process choices before code (not numbered): how the road layer is read (each run, or one interim barrier-road layer and a run switch); where the functions go; the `tbl_14_*` slugs. Then STEP 12.1 in `scripts/07`: the barrier roads for the crossing step, by the same class rule as STEP 9.6 and Decision 20 point (a), with a guard against `tbl_11_resistance_qa.csv` (`n_road_cells`) | Road input ready; the cell count agrees with the Week-9 surfaces | 20–30 min |
-| 12.3 | STEP 12.2: the crossings of the baseline paths per Decision 20 points (b)–(c) → `tbl_14_road_crossings.csv` (one row per crossing: `pair_id`, the two nodes, `link_role`, `is_bridge`, road class, road reference or name if the layer has one, position at the fixed precision) | Table written; each crossing traces to one `pair_id` and one road | 45–60 min |
-| 12.4 | STEP 12.3: the pinch-point rule of Decision 20 point (d) applied to the crossings; summaries per link and per node → `tbl_14_pinch_points.csv` | Table written; labels applied as fixed | 30–45 min |
-| 12.5 | STEP 12.4 — **only if Decision 20 point (e) says so**: the same on the variant surfaces, compared by the pre-fixed metric → `tbl_14_pinch_variant_comparison.csv` | Comparison written by the fixed metric | 30–45 min |
-| 12.6 | STEP 12.5: QA — the crossing and pinch-point functions on a hand-made case first (a known path, a known road, a known count); then each crossing lies on a path and on a barrier road; no crossing for a contiguous pair; counts per link add up to the table total → `tbl_14_pinch_qa.csv`; any failure stops the script | QA passes | 20–30 min |
-| — | **Split point** (if the week is over 4 hours): commit tasks 12.1–12.6; continue with 12.7 in the next session | — | — |
-| 12.7 | STEP 12.6: the publishable table `tbl_03_<slug>.csv` per Decision 20 point (f) — network results per reserve from `tbl_13_network_metrics.csv` (node, set, linchpin with its flags, cut node, pendant, cheapest link) and the pinch-point summary; publish checks of the sensitive-data policy §3 | `tbl_03` written; publish checks pass; no precise coordinate | 20–30 min |
-| 12.8 | STEP 12.7: the network figure `fig_04_<slug>.png` per Decision 20 point (f) — nodes, edges, linchpins with their flags, bridges, pinch points. The caption states that the paths are modelled and not observed movement, that the surface is India-only, and the limits of the linchpin labels | Figure written; caption has the caveats; publish checks pass | 45–60 min |
-| 12.9 | *(Optional, as done in Weeks 10 and 11)* Literature check of the named pinch points (documented road and corridor conflicts, mitigation structures) → `references.md` | Each named pinch point has a source or a "no source found" note | 30–45 min |
-| 12.10 | Update `data-dictionary.md` (`tbl_14_*`, `tbl_03`, `fig_04`), `methodology.md` (Decision 20, Week-12 change log, Limitations, a Stage-2 summary against proposal question 2), `proposal.md` §8 if a stated choice changed, `naming-conventions.md` §6, `README.md`/handoff (Stage 2 complete; entry point for Week 13) | Docs match as-built | 30–45 min |
-| 12.11 | Commit (`analysis:` for `07`, config, functions, outputs; `docs:` separate; `docs: update handoff after Week 12` with the plan) | Committed and pushed | 10 min |
+| 12.1 ✅ | **Pinch-point Decision (numbered — Decision 20), before any road crossing is computed.** Research, raise the forks, record the choices: (a) the roads; (b) the paths; (c) what one crossing is, and how close crossings are merged; (d) what a pinch point is and how it is ranked, with no traffic data; (e) whether the crossings are repeated on the variant surfaces; (f) what the publishable `tbl_03` and the figure hold, and the position precision of a published crossing (sensitive-data policy §3); (g) a statement of what was seen before the Decision | Decision 20 recorded in methodology; settings in `R/00_config.R` *(done 2026-10-10: a1 + n1, b1 + k1, c1 + r1 + m1, d1 + t1, e2, p1 + q1 + g1 — the barrier-road cells of Decision 15, no road names; crossings for the 76 in-network paths, the rule counts the 73 edges, four links flagged; a crossing = one unbroken run of barrier-road cells in the cell list of a path, reserve cells counted and flagged; crossings at most 5 km apart = one site; `pinch_point` = `on_bridge` or `shared` (2 or more edges), three tiers, no order by road class; variants repeated — "robust" if the site overlap is ≥ 2/3; positions at a 10 km grid cell with state and district; `tbl_03` + `tbl_03b`; `fig_03`; a new rule in the policy §3. No crossing was seen; the network results were)* | 45–60 min |
+| 12.2 ✅ | Process choices before code (not numbered): how the road layer is read (each run, or one interim barrier-road layer and a run switch); where the functions go; the `tbl_14_*` slugs. Then STEP 12.1 in `scripts/07`: the barrier roads for the crossing step, by the same class rule as STEP 9.6 and Decision 20 point 1, with a guard against `tbl_11_resistance_qa.csv` (`n_road_cells`) | Road input ready; the cell count agrees with the Week-9 surfaces *(done 2026-10-10: choices A2, B1, C1, L2 — an interim raster with the switch `RUN_ROAD_CELLS`; new `R/00_functions_pinch.R`; five `tbl_14` tables (`road_crossings`, `pinch_points`, `pinch_link_summary`, `pinch_variant_comparison`, `pinch_qa`), baseline rows only; `PINCH_LIT_FLAG_PAIRS` by `unit_id` with a names guard. STEP 12.1 on the project machine: 444,234 barrier-road features → **535,592 cells, the Week-9 count**; by highest class: motorway 9,240, trunk 155,723, primary 168,278, secondary 202,351; guard 6 of 6; `cov_roadbarrier_class_1km_7755.tif` written; 35 s. All four `lit_flag` links are bridges)* | 20–30 min |
+| 12.3 ✅ | STEP 12.2: the crossings of the baseline paths per Decision 20 points 2–3 → `tbl_14_road_crossings.csv` (one row per crossing: `pair_id`, the two nodes, `link_role`, `is_bridge`, `lit_flag`, `n_cells`, `road_class_top`, `in_reserve_unit_ids`, position as a 10 km grid cell with state and district). The road layer has no name or reference field (n1). The 1 km cells go to a gitignored layer | Table written; each crossing traces to one `pair_id`; no 1 km position in the table *(done 2026-10-10: 76 paths (73 `edge`, 3 `parallel`); **556 crossings on 74 paths, 765 road cells**; cells per crossing median 1, maximum 7; by highest class motorway 10, trunk 234, primary 171, secondary 141; 122 crossings on the 13 bridge edges, 49 on the four `lit_flag` links; self-test 19 of 19; the cost from each cell list equals the engine cost on every path; the workspace build on the real files gave the same figures. Two paths have no crossing. Sariska–Rajaji has 35 crossings, 7 of them in Delhi. Outputs: `tbl_14_road_crossings.csv`; `lcp_road_crossings_7755.gpkg` (1 km cells, gitignored). District layer: `data/raw/administrative/`)* | 45–60 min |
+| 12.4 ✅ | STEP 12.3: the sites (Decision 20 point 4) and the pinch-point rule (point 5) applied to the crossings; → `tbl_14_pinch_points.csv` (one row per site); the summary per link → `tbl_14_pinch_link_summary.csv` (choice C1; the counts per node go to `tbl_03`) | Tables written; flags and tiers applied as fixed *(done 2026-10-10: **365 sites; 200 pinch points — tier 1: 3, tier 2: 98, tier 3: 99**; `on_bridge` 101, `shared` 102; shortest gap between two sites 5.10 km; longest span 22.6 km (Sariska–Rajaji, Delhi); self-test 22 of 22; publish guard 8 of 8; the workspace build on the real files and a second method (`hclust()`) gave the same sites. The label separates little: 54.8 % of the sites are pinch points; tier 1 is three sites (two near Orang, one near Bhadra). `tbl_14_road_crossings.csv` is written again with `site_id`)* | 30–45 min |
+| 12.5 ✅ | STEP 12.4 — **required (Decision 20 point 6)**: points 1–5 on `noghm`, `road15` and `road50`, each with its own paths, edges and bridges; compared with the baseline by the pre-fixed metric (site overlap at 5 km; robust if ≥ 2/3) → `tbl_14_pinch_variant_comparison.csv` | Comparison written by the fixed metric; labels applied as fixed *(done 2026-10-10: `noghm` — 496 crossings, 372 sites, 155 pinch points, site overlap **0.520, sensitive**; `road15` — 610, 383, 202, **0.866, robust**; `road50` — 546, 363, 192, **0.820, robust**. By the Decision-20 rule: **gHM multiplier — sensitive; road value — robust.** This is not the result that Decision 20 named as likely. 98 of the 200 baseline pinch points have a variant pinch point near them on all three variants. `tbl_14_pinch_points.csv` is written again with `near_pinch_<variant>` and `n_variants_near`; the variant crossing cells are in the gitignored 1 km file)* | 30–45 min |
+| 12.6 ✅ | STEP 12.5: QA — the crossing and pinch-point functions on a hand-made case first (a known path, a known road, a known count); then each crossing lies on a path and on a barrier road; no crossing for a contiguous pair; counts per link add up to the table total → `tbl_14_pinch_qa.csv`; any failure stops the script | QA passes *(done 2026-10-10: **74 of 74 checks** — test cases 3 of 3 (52 hand-made cases), roads 6 of 6, baseline 15 of 15, each variant 12 of 12, all 14 of 14; `tbl_14_pinch_qa.csv` written; eleven planted faults each failed a check in the drafting chat)* | 20–30 min |
+| — | **Split point** (if the week is over 4 hours): commit tasks 12.1–12.6; continue with 12.7 in the next session *(2026-10-10: reached after about 2 hours; the author chose to continue with task 12.7 in the same session)* | — | — |
+| 12.7 ✅ | STEP 12.6: the publishable tables per Decision 20 point 7 — `tbl_03_<slug>.csv`, one row per reserve (56): the network results from `tbl_13_network_metrics.csv` (node, set, linchpin with its flags, cut node, pendant, cheapest link) and the pinch-point counts on the edges of the node, by tier; `tbl_03b_<slug>.csv`, one row per baseline pinch point. The publish check for the 10 km rule (sensitive-data policy §3) is written here | `tbl_03` and `tbl_03b` written; publish checks pass; no position finer than 10 km *(done 2026-10-10: `tbl_03_reserve_network.csv` — 56 reserves, 47 nodes, 42 nodes with a pinch point on an edge, 7 with a tier-1 pinch point; `tbl_03b_pinch_points.csv` — all 200 pinch points by tier (author choice); `assert_publishable_table()` in `R/00_functions_sensitive.R`; six planted faults each stopped the publish check in the drafting chat)* | 20–30 min |
+| 12.8 ✅ | STEP 12.7: the network figure `fig_03_<slug>.png` per Decision 20 point 7 — nodes by flag, the 73 edge paths as modelled lines, bridges marked, pinch points at their 10 km cell by tier. The caption states that the paths are modelled and not observed movement, that the surface is India-only, what a pinch point is here, and the limits of the linchpin labels | Figure written; caption has the caveats; publish checks pass *(done 2026-10-10: `fig_03_reserve_network.png` — 47 nodes with 8 linchpins, 73 edge paths with 13 bridge links, 200 pinch points of all three tiers (author choice: tier 3 small and pale) in 194 cells of 10 km; 10 of 10 figure checks; the pinch points are read from `tbl_03b` only. **Title, subtitle and caption are draft text of the drafting chat; the author keeps the draft for now.** Seven build choices of the drafting chat are listed in the change log; the author keeps all seven, and the link line width of 0.3)* | 45–60 min |
+| 12.9 ✅ | *(Optional, as done in Weeks 10 and 11)* Literature check of the named pinch points (documented road and corridor conflicts, mitigation structures) → `references.md` | Each named pinch point has a source or a "no source found" note *(done 2026-10-10: the road layer has no road names, so the check is by group — the 3 tier-1 pinch points, the tier-2 pinch points by bridge link, the 6 districts with 5 or more tier-3 pinch points — and at the level of link and district. Of 21 groups: 10 with a source for a road conflict in the same district or reserve, 5 with a source for the link or context only, 6 with no source. No source confirms a tier-1 pinch point. Two limits of the rule recorded for task 12.10. Sources are news reports; verify before citing)* | 30–45 min |
+| 12.10 ✅ | Update `data-dictionary.md` (`tbl_14_*`, `tbl_03`, `tbl_03b`, `fig_03`, the gitignored crossings layer), `methodology.md` (Decision 20, Week-12 change log, Limitations, a Stage-2 summary against proposal question 2), `proposal.md` §8 if a stated choice changed, `naming-conventions.md` §6, `README.md`/handoff (Stage 2 complete; entry point for Week 13) | Docs match as-built *(done 2026-10-10: the note file `tbl_03_notes.md` — written by STEP 12.6, author choice — and its dictionary and naming entries; `methodology.md` status, the "Week 12 complete" entry with the Stage-2 summary against proposal question 2, ten new Limitations; `README.md`; `handoff.md` with the Week-13 entry point. `proposal.md` §8: no new entry — no stated choice changed)* | 30–45 min |
+| 12.11 ✅ | Commit (`analysis:` for `07`, config, functions, outputs; `docs:` separate; `docs: update handoff after Week 12` with the plan) | Committed and pushed *(done 2026-10-10, by the author)* | 10 min |
 
 **Week 12 pitfalls:**
 - **Decision 20 before any crossing — and the network results are already
@@ -948,20 +950,22 @@ first; the publishable table, the figure and the Stage-2 close second.
   nodes. Count and draw by `node_id`.
 - **Publication.** The sensitive-data policy §3 allows no precise coordinate
   in a figure, table or caption. A crossing is a modelled path on a public
-  road, not a tiger location; fix its published precision in Decision 20
-  point (f) before `tbl_03` and `fig_04` are built.
-- **Numbers.** `tbl_03` is reserved for the publishable table. `fig_03` is
-  not in use and the plan names `fig_04` — confirm the figure number before
-  the file is written (naming §6).
+  road, not a tiger location. Decision 20 point 7 fixes the published
+  position at a 10 km grid cell with state and district — in `tbl_14_*` too,
+  because `outputs/tables/` is committed.
+- **Numbers.** `tbl_03` is reserved for the publishable table; `tbl_03b` is
+  its companion (naming §6). The figure is `fig_03` (author choice
+  2026-10-10). `fig_04` is then the next free figure number, and the Week-16
+  row names `fig_05` — confirm that number at Week 16.
 - **PROJ `proj.db` clash still applies** — fresh session.
 
 **Decision due this week:** **20** (pinch-point rule), numbered, before any
-road crossing is computed.
+road crossing is computed. *(Recorded 2026-10-10.)*
 
 **Exit state:** Decision 20 recorded; `tbl_14_road_crossings.csv`,
-`tbl_14_pinch_points.csv` and `tbl_14_pinch_qa.csv` written (and
-`tbl_14_pinch_variant_comparison.csv` if Decision 20 point (e) says so);
-`tbl_03_<slug>.csv` and `fig_04_<slug>.png` written and through the publish
+`tbl_14_pinch_points.csv`, `tbl_14_pinch_link_summary.csv`,
+`tbl_14_pinch_variant_comparison.csv` and `tbl_14_pinch_qa.csv` written; `tbl_03_<slug>.csv`, `tbl_03b_<slug>.csv` and
+`fig_03_<slug>.png` written and through the publish
 checks; docs updated; Week 12 ticked; Stage 2 complete. Ready for Week 13
 (Stage 3, habitat suitability).
 
@@ -976,7 +980,7 @@ that. Each is named (naming §3, `NN_verb_object.R`) when its stage starts.
 
 | Week | Focus | Exit state (deliverable) | Est. |
 |---|---|---|---|
-| **13** | Occurrence + effort | `scripts/08_<verb_object>.R` (new script, named at Week 13) outputs: cleaned occurrences, target-group background, KDE | 3–4 h |
+| **13** | Occurrence + effort | **Decisions 21–22** first; `scripts/08_<verb_object>.R` (new script, named at Week 13) outputs: cleaned occurrences, target-group background, KDE (task breakdown below) | 3–4 h planned; the task estimates add up to 4.6–6.3 h (split point after task 13.4) |
 | **14** | SDM fit | `scripts/08`: `maxnet` fitted with bias correction; model saved | 3–4 h |
 | **15** | Predict + validate | National suitability surface; validation against reserves; publish-floor gate | 3–4 h |
 | **16** | SDM visuals | `fig_05` suitability map with effort caveat | 2–3 h |
@@ -985,6 +989,120 @@ that. Each is named (naming §3, `NN_verb_object.R`) when its stage starts.
 an SDM-based resistance surface (1 − suitability) and a circuit-theory run
 between reserves, to reproduce the national method and check the Stage-2 paths.
 Transform and tool are decided then (see `methodology.md`, Decisions pending).
+
+### Week 13 — task breakdown
+
+*(Written 2026-10-10, after the Week-12 push.)*
+
+Entry state (as of Week-12 close, 2026-10-10): Stage 2 is complete and
+pushed. Stage 3 reads none of its outputs. On disk from Week 2
+(`scripts/01`), all gitignored:
+
+- `data/interim/occ_tiger_gbif_raw_7755.gpkg` — 4,606 GBIF tiger records
+  inside India (DOI 10.15468/dl.npxmxx). Median coordinate uncertainty about
+  30 km. Year span 1840–2026.
+- `data/interim/effort_background_tgs_7755.gpkg` — 39,057 GBIF Mammalia
+  records inside India, tiger excluded, 2006–2022 (Decision 5; DOI
+  10.15468/dl.2d523e).
+- `osm_settlements_7755.gpkg` — 199,800 settlement points (city 495, town
+  4,102, village 195,203). Folder not verified for this plan; the OSM roads
+  are in `data/raw/osm/`.
+- `data/processed/cov_stack_1km_7755.tif` — 6 bands on the 1 km grid, with the
+  common NA mask (Decision 10).
+
+**No cleaned count is known.** What is already seen: the two raw counts, the
+median uncertainty, the year span, and the Phase-1 result (about 116 clean
+baseline points for 7 reserves).
+
+Week 13 starts Stage 3 with a new script, `scripts/08_<verb_object>.R`
+(named in task 13.2; naming §3). It cleans the tiger records and the
+target-group background by one rule, counts what each rule step removes, and
+builds the effort surface. Week 14 fits the SDM on these outputs.
+
+Naming (naming-conventions §2/§6): layers `occ_tiger_gbif_clean_7755.gpkg`
+(the dictionary has a placeholder entry) and
+`effort_background_tgs_clean_7755.gpkg`; density surfaces `kde_<what>_1km_7755.tif`;
+working tables `tbl_15_*` (a new group; 15 is the next number after
+`tbl_14` — confirm it against a listing of `outputs/tables/`).
+
+**Size.** The estimates add up to about 4.6–6.3 hours (4.3–5.9 without the
+optional task 13.8), above one week of 2–4 hours. A split point is marked
+after task 13.4: the two cleaned sets and the counts first; the effort
+Decision, the density surfaces, QA and the docs second.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 13.1 | **Occurrence-cleaning Decision (numbered — Decision 21), before any cleaned count is seen.** Research, raise the forks, record the choices: (a) the coordinate-uncertainty limit, and what to do with a record that has no uncertainty value; (b) the year window for the tiger records (the background is 2006–2022; the tiger pull is 1840–2026); (c) the record types to remove — captive and zoo records, museum specimens, fossil records, records at a country, state or institution centroid, records with zero or equal coordinates; (d) obscured records (policy tier T1): keep, or remove because the position is not good to 1 km; (e) duplicates and thinning — one record per 1 km cell, per cell and year, or none; (f) records on a cell with no covariate value (the common NA mask) or outside India; (g) whether the background takes the same rule in each point — the target-group method needs the same bias in the two sets; (h) a minimum number of clean presence cells below which the Week-14 plan changes, fixed now; (i) what was seen (the entry state above). Also the tool: base `sf`/`dplyr` rules, or the `CoordinateCleaner` package (a new dependency) | Decision 21 recorded in `methodology.md` with the date, the choices, the judgement values and what was seen; the pending item closed; `OCC_*` settings in `R/00_config.R`. No record is cleaned and no count is made before it | 45–60 min |
+| 13.2 | Process choices before code (not numbered): the script name; one script for all of Stage 3 with one STEP block per task (as `scripts/07`), or one script per week; a function file (`R/00_functions_occ.R`); the `tbl_15_*` slugs; any new package (`renv::snapshot()`, and the `scripts/00a` list); whether a data file goes to the chat for tests (the records are public GBIF data, but they hold precise tiger positions — decide it, do not default). Then the script header, the guards (inputs present, CRS 7755, PROJ check) and STEP 13.1: read the two raw layers, list the fields, and count the records by each field that Decision 21 uses — **counts of the raw state only** | Header and guards run; the raw field list and the raw counts are in the console; the fields that Decision 21 names are all present, or the Decision is amended with a dated note before any record is removed | 30–45 min |
+| 13.3 | STEP 13.2: apply Decision 21 to the tiger records, one rule step at a time, in the fixed order → `data/processed/occ_tiger_gbif_clean_7755.gpkg` (gitignored) and the attrition table `tbl_15_occ_cleaning.csv` (one row per rule step and set: records in, removed, out — **no coordinate**) | Clean layer written and read back; the attrition rows add up to the raw count; the minimum of point (h) is compared with the result and the outcome is stated | 30–45 min |
+| 13.4 | STEP 13.3: the same rule on the background → `data/processed/effort_background_tgs_clean_7755.gpkg` (gitignored), rows added to `tbl_15_occ_cleaning.csv`; a tally of the clean background by order and family → `tbl_15_background_taxa.csv` (the evidence for the pending Decision "target-group scope") | Clean background written; attrition adds up; the taxa table written; the target-group scope is decided now or the reason to wait for Week 14 is recorded | 30 min |
+| — | **Split point** (if the week is over 4 hours): commit tasks 13.1–13.4; continue with 13.5 in the next session | — | — |
+| 13.5 | **Effort-surface Decision (numbered — Decision 22), before any density surface is seen.** It closes the pending item "Settlement layer for the KDE". Record: (a) which surfaces Week 13 builds — background effort, tiger records, settlements — and what each is for (a description of effort, a bias input for the SDM, a covariate); (b) the settlement classes (all, or city and town only); (c) the kernel and the radius — the config has `KDE_RADIUS_M` 20 km with a 10/20/30 km test, and the pending item says 15 km: one of the two is wrong; (d) the time windows (`BASELINE_WINDOW` 2006–2010 and `CURRENT_WINDOW` 2018–2022 are in the config; the census baseline is 2014); (e) the edge rule at the coast and the border; (f) Getis-Ord Gi* — `methodology.md` §5.5 names it and no week of Stage 3 holds it: Week 13, a later week, or not built; (g) the published form of a tiger-record surface (see the pitfalls); (h) what was seen — the cleaned counts of tasks 13.3–13.4 | Decision 22 recorded before STEP 13.4 runs; the pending item closed; `KDE_*` settings corrected in `R/00_config.R` | 30–45 min |
+| 13.6 | STEP 13.4: the density surfaces per Decision 22 on the 1 km template → `data/processed/kde_<what>_1km_7755.tif` (through `write_processed_rast()`, read back) | Surfaces written; each has the grid of the covariate stack (`compareGeom`); value range and sum reported | 30–45 min |
+| 13.7 | STEP 13.5: QA — the cleaning functions on a hand-made case first (known records, a known count at each rule step); then: no clean record outside the complete-case footprint; no clean record fails a rule of Decision 21; the thinning rule holds (count per cell); the attrition adds up on disk; the tiger and background sets went through the same steps; each surface has the template grid and no value below zero; the publish checks (`assert_publishable_rast()`, `assert_no_raw_points()`, no coordinate column in a `tbl_15` table) → `tbl_15_occ_qa.csv`; any failure stops the script | QA passes | 20–30 min |
+| 13.8 | *(Optional)* Clean tiger records per reserve (count inside the reserve polygon, by `unit_id`) → `tbl_15_occ_by_reserve.csv`, with `warn_small_n()`; an input to the Week-15 validation and to the effort text | Table written; reserves with no clean record counted; small counts handled by the policy | 20 min |
+| 13.9 | Update `data-dictionary.md` (the two clean layers, the surfaces, `tbl_15_*`), `methodology.md` (Decisions 21–22, Week-13 change log, Limitations), `data-sources.md` (the cleaning note of the GBIF entries), `naming-conventions.md` §6, `README.md`/handoff (Week 13 status; entry point for Week 14) | Docs match as-built | 30–45 min |
+| 13.10 | Commit (`analysis:` for `08`, config, functions, outputs; `docs:` separate; `docs: update handoff after Week 13` with the plan) | Committed and pushed; `git status --short` shows no point layer staged | 10 min |
+
+**Week 13 pitfalls:**
+- **Decision 21 before any cleaned count — and some figures are already
+  seen.** The raw counts, the 30 km median uncertainty and the Phase-1 result
+  are known. Say so in the Decision, and set the limits from the grid, the
+  literature and the use (a 1 km SDM), not from the result.
+- **A precise tiger record is sensitive (policy tier T2).** The clean point
+  layers stay under `data/` (gitignored). A `tbl_15` table holds counts, never
+  a coordinate. The console text that goes to a chat holds counts, never a
+  coordinate. Check `git status --short` before each commit.
+- **A density surface of few points can show a position.** A kernel peak of
+  one isolated record is at that record. The ≥ 1 km rule of the policy does
+  not prevent this. Decision 22 point (g) fixes the published form; use
+  `warn_small_n()`.
+- **A missing uncertainty value is not a precise record.** Count the `NA`
+  values first; Decision 21 point (a) gives the rule.
+- **Obscured records are probably the cause of the 30 km median** (not
+  verified). They are tier T1, and they cannot place a record in a 1 km cell.
+- **Captive animals and museum specimens.** A zoo record is a true record of
+  a tiger and a false record of habitat. Check the record-type fields before
+  the rule is written (task 13.2 lists the fields).
+- **One rule for the two sets.** If the tiger records are thinned or limited
+  by uncertainty and the background is not, the background no longer has the
+  bias of the tiger records (Decision 5).
+- **The year windows do not match.** The tiger pull has records from 1840;
+  the background starts in 2006. `BASELINE_YEAR` and `CURRENT_YEAR` in the
+  config are the download bounds, not the census baseline (handoff gotcha).
+- **Expect a small clean set.** Phase 1 kept about 116 points. A small set
+  limits the SDM; the plan's risk table has "SDM adds little" with the
+  response "drop it". Decision 21 point (h) makes that a rule before the
+  count is seen.
+- **Records on cells with no covariate value.** The stack has `NA` on 98
+  cells inside India and on each cell outside it. A record there cannot go
+  into the model.
+- **"In a reserve" is by the KML polygon.** The polygons are national-park
+  and sanctuary outlines (polygon/census ratio median 0.515), so a record in
+  a buffer zone is "outside". This affects task 13.8 and the Week-15
+  validation. Join by `unit_id`; `unit_name` is not a unique key.
+- **A KDE over India needs a plan for the window and the run time.** A
+  `spatstat` window from the national polygon on a 3093 × 2864 grid is large;
+  a raster method on the template can be the better tool. Decide in task
+  13.5 and test on a small area first.
+- **`scripts/07` is not changed.** Stage 3 is a new script. The stubs of the
+  old numbering were deleted in Week 9.
+- **Numbers.** `tbl_15` is the next table group. `fig_04` is the next free
+  figure number, and the Week-16 row names `fig_05` — confirm at Week 16.
+- **PROJ `proj.db` clash still applies** — fresh session.
+
+**Decisions due this week:** **21** (occurrence cleaning), before any cleaned
+count; **22** (effort surfaces; closes the pending settlement item), before
+any density surface. The pending item "target-group scope" is decided in
+task 13.4 or carried to Week 14 with a recorded reason.
+
+**Exit state:** Decisions 21 and 22 recorded; `occ_tiger_gbif_clean_7755.gpkg`
+and `effort_background_tgs_clean_7755.gpkg` written (gitignored);
+`tbl_15_occ_cleaning.csv`, `tbl_15_background_taxa.csv` and
+`tbl_15_occ_qa.csv` written with no coordinate; the density surfaces of
+Decision 22 written and through the publish check; the minimum of Decision
+21 point (h) compared with the result; docs updated; Week 13 ticked. Ready
+for Week 14 (SDM fit).
 
 ---
 
@@ -1006,7 +1124,7 @@ Transform and tool are decided then (see `methodology.md`, Decisions pending).
 | Scaffold committed to GitHub | 0 | Version-controlled, data-free base to build on |
 | Data audited and gaps closed | 2 | Know exactly what must be rebuilt |
 | **Growth track complete** | 7 | ✅ Achieved Week 7 — priority-1 deliverable done and publishable (tbl_01, tbl_02, fig_01, fig_02) |
-| Connectivity track complete | 12 | Priority-2 deliverable done |
+| **Connectivity track complete** | 12 | ✅ Achieved Week 12 — priority-2 deliverable done (`tbl_03`, `tbl_03b`, `fig_03`; working tables `tbl_11`–`tbl_14`). The figure text is a draft; the path layer for the site needs its own rule (Week 18) |
 | Suitability track complete | 16 | Priority-3 deliverable done |
 | **Site published** | 20 | Full project live |
 
@@ -1043,6 +1161,6 @@ deliverable exists.
 | 9 | Resistance surfaces (Decisions 11–16) | ✅ Complete |
 | 10 | Least-cost paths + variant comparison | ✅ Complete |
 | 11 | Reserve network graph (Decision 19) | ✅ Complete |
-| 12 | Pinch points + network figure | ⚪ Not started |
+| 12 | Pinch points + network figure (Decision 20) | ✅ Complete |
 | 13–16 | Suitability track | ⚪ Not started |
 | 17–20 | Site + close | ⚪ Not started |

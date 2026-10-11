@@ -1,0 +1,75 @@
+"surface","check","value","pass"
+"test case","crossings: hand-made path, road and counts (STEP 12.2)","19 of 19 cases",TRUE
+"test case","sites and rule: hand-made case (STEP 12.3)","22 of 22 cases",TRUE
+"test case","variant comparison: hand-made case (STEP 12.4)","11 of 11 cases",TRUE
+"roads","the road raster is on the surface grid","3093 x 2864",TRUE
+"roads","the layer name records the class order of the config","rank_motorway_trunk_primary_secondary",TRUE
+"roads","values are whole class ranks, 1 to the number of classes","1 to 4",TRUE
+"roads","no road cell outside the footprint","0",TRUE
+"roads","the Week-9 QA gives one road-cell count for all surfaces","535,592",TRUE
+"roads","road cells = n_road_cells of tbl_11_resistance_qa.csv","535,592 here, 535,592 in the Week-9 QA",TRUE
+"baseline","each link in the roles has its crossings computed","76 paths",TRUE
+"baseline","cost from the cell list = cost of the path (every path)","76 of 76",TRUE
+"baseline","each crossing cell is in the cell list of its path and is a barrier-road cell","765 cells",TRUE
+"baseline","each barrier-road cell of a cell list is in one crossing only","765 road cells in the lists, 765 crossing cells",TRUE
+"baseline","no crossing for a contiguous pair or a pair that is not in the network","556 crossings on 74 links",TRUE
+"baseline","each crossing is in one site only","556 crossings, 365 sites",TRUE
+"baseline","two sites are more than the merge distance apart","shortest gap 5.10 km, merge distance 5 km",TRUE
+"baseline","the counts per link and per site add up to the totals","556 crossings, 584 site cells",TRUE
+"baseline","n_edges and n_bridges from the crossings = the site table","365 sites",TRUE
+"baseline","pinch_point = on_bridge OR shared; tiers (rule written a second way)","200 pinch points: tier 1 3, tier 2 98, tier 3 99",TRUE
+"baseline","each site on a bridge edge is a pinch point","13 bridge edges, 101 sites on them",TRUE
+"baseline","lit_flag marks the crossings of the links of the config list","49 crossings",TRUE
+"noghm","each link in the roles has its crossings computed","78 paths",TRUE
+"noghm","cost from the cell list = cost of the path (every path)","78 of 78",TRUE
+"noghm","each crossing cell is in the cell list of its path and is a barrier-road cell","608 cells",TRUE
+"noghm","each barrier-road cell of a cell list is in one crossing only","608 road cells in the lists, 608 crossing cells",TRUE
+"noghm","no crossing for a contiguous pair or a pair that is not in the network","496 crossings on 76 links",TRUE
+"noghm","each crossing is in one site only","496 crossings, 372 sites",TRUE
+"noghm","two sites are more than the merge distance apart","shortest gap 5.10 km, merge distance 5 km",TRUE
+"noghm","the counts per link and per site add up to the totals","496 crossings, 494 site cells",TRUE
+"noghm","n_edges and n_bridges from the crossings = the site table","372 sites",TRUE
+"noghm","pinch_point = on_bridge OR shared; tiers (rule written a second way)","155 pinch points: tier 1 2, tier 2 72, tier 3 81",TRUE
+"noghm","each site on a bridge edge is a pinch point","11 bridge edges, 74 sites on them",TRUE
+"noghm","lit_flag marks the crossings of the links of the config list","35 crossings",TRUE
+"road15","each link in the roles has its crossings computed","75 paths",TRUE
+"road15","cost from the cell list = cost of the path (every path)","75 of 75",TRUE
+"road15","each crossing cell is in the cell list of its path and is a barrier-road cell","856 cells",TRUE
+"road15","each barrier-road cell of a cell list is in one crossing only","856 road cells in the lists, 856 crossing cells",TRUE
+"road15","no crossing for a contiguous pair or a pair that is not in the network","610 crossings on 73 links",TRUE
+"road15","each crossing is in one site only","610 crossings, 383 sites",TRUE
+"road15","two sites are more than the merge distance apart","shortest gap 5.10 km, merge distance 5 km",TRUE
+"road15","the counts per link and per site add up to the totals","610 crossings, 646 site cells",TRUE
+"road15","n_edges and n_bridges from the crossings = the site table","383 sites",TRUE
+"road15","pinch_point = on_bridge OR shared; tiers (rule written a second way)","202 pinch points: tier 1 3, tier 2 98, tier 3 101",TRUE
+"road15","each site on a bridge edge is a pinch point","13 bridge edges, 101 sites on them",TRUE
+"road15","lit_flag marks the crossings of the links of the config list","49 crossings",TRUE
+"road50","each link in the roles has its crossings computed","78 paths",TRUE
+"road50","cost from the cell list = cost of the path (every path)","78 of 78",TRUE
+"road50","each crossing cell is in the cell list of its path and is a barrier-road cell","687 cells",TRUE
+"road50","each barrier-road cell of a cell list is in one crossing only","687 road cells in the lists, 687 crossing cells",TRUE
+"road50","no crossing for a contiguous pair or a pair that is not in the network","546 crossings on 76 links",TRUE
+"road50","each crossing is in one site only","546 crossings, 363 sites",TRUE
+"road50","two sites are more than the merge distance apart","shortest gap 5.10 km, merge distance 5 km",TRUE
+"road50","the counts per link and per site add up to the totals","546 crossings, 498 site cells",TRUE
+"road50","n_edges and n_bridges from the crossings = the site table","363 sites",TRUE
+"road50","pinch_point = on_bridge OR shared; tiers (rule written a second way)","192 pinch points: tier 1 4, tier 2 72, tier 3 116",TRUE
+"road50","each site on a bridge edge is a pinch point","11 bridge edges, 76 sites on them",TRUE
+"road50","lit_flag marks the crossings of the links of the config list","39 crossings",TRUE
+"baseline","the chain function gives the crossings and sites of STEPs 12.2-12.3","556 crossings, 365 sites",TRUE
+"baseline","site ids are 1 to n, in the order of the lowest cell","365",TRUE
+"baseline","each lit_flag link of the config is an in-network link","15, 101, 46, 96",TRUE
+"all","comparison: one row per variant; each variant differs in one choice","noghm, road15, road50",TRUE
+"all","comparison: shares are 0 to 1; site_overlap = the lower share","0.520, 0.866, 0.820",TRUE
+"all","comparison: labels by the fixed rule (written a second way)","noghm sensitive; road15 robust; road50 robust",TRUE
+"all","n_variants_near = the number of variants with a pinch point near","365 sites",TRUE
+"all","on disk: tbl_14_road_crossings.csv","556 rows, 556 expected",TRUE
+"all","no position finer than the publish grid: tbl_14_road_crossings.csv","positions at 10 km",TRUE
+"all","on disk: tbl_14_pinch_points.csv","365 rows, 365 expected",TRUE
+"all","no position finer than the publish grid: tbl_14_pinch_points.csv","positions at 10 km",TRUE
+"all","on disk: tbl_14_pinch_link_summary.csv","76 rows, 76 expected",TRUE
+"all","no position finer than the publish grid: tbl_14_pinch_link_summary.csv","no position column",TRUE
+"all","on disk: tbl_14_pinch_variant_comparison.csv","3 rows, 3 expected",TRUE
+"all","no position finer than the publish grid: tbl_14_pinch_variant_comparison.csv","no position column",TRUE
+"all","1 km file: one layer per surface, one point per crossing cell","baseline 765; noghm 608; road15 856; road50 687",TRUE
+"all","1 km file is under data/ (gitignored), not under outputs/","/data/processed/lcp_road_crossings_7755.gpkg",TRUE

@@ -789,6 +789,296 @@ The allocation zones of STEP 10.1 on the 1 km EPSG:7755 grid. Value =
 `unit_id` of the nearest reserve; `NA` off the footprint. `INT2U`. Not an
 analysis output; kept to check the pairs by eye.
 
+## cov_roadbarrier_class_1km_7755.tif  *(data/interim; Week 12 — built, task 12.2)*
+
+Written by `scripts/07_connectivity.R` STEP 12.1 (Decision 20 point 1;
+`R/00_functions_pinch.R`) when `RUN_ROAD_CELLS` is `TRUE`; read from disk
+when it is `FALSE`. The barrier-road cells of Decision 15 on the surface
+grid, with the highest road class in each cell. `INT1U`, read-back verified.
+The cells are the cells that STEP 9.6 raised to the road value: the same
+classes (`ROAD_BARRIER_CLASSES`, each `_link` ramp in its parent class) and
+the same rasterise rule (`touches = TRUE`), masked to the footprint. They
+come from geometry, so one raster serves all four surfaces. A guard stops
+the script if the cell count is not `n_road_cells` of
+`tbl_11_resistance_qa.csv`.
+
+**As built (2026-10-10):** 535,592 road cells (17.5 % of the 3,067,467
+footprint cells) from 444,234 barrier-road features. By value: 1 motorway
+9,240; 2 trunk 155,723; 3 primary 168,278; 4 secondary 202,351.
+
+| Band | Type | Meaning |
+|---|---|---|
+| `rank_motorway_trunk_primary_secondary` | integer, 1–4 | `road_class_top` as a rank: the highest barrier class that touches the cell, in the order of `PINCH_ROAD_CLASS_ORDER` (1 = motorway, 2 = trunk, 3 = primary, 4 = secondary). `NA` on a cell that is not a barrier-road cell, and outside the footprint. The band name records the class order; the guard compares it with the config. The class is a description, not a traffic volume, and it is in no rule (Decision 20) |
+
+## tbl_14_road_crossings.csv  *(Week 12 — built, tasks 12.3–12.4)*
+
+Written by `scripts/07_connectivity.R` STEP 12.2 and written again by STEP
+12.3 with `site_id` (Decision 20 points 2, 3 and 7;
+`R/00_functions_pinch.R`). One row per road crossing of a **baseline**
+in-network path (`link_role` `edge` or `parallel`). A crossing is one
+unbroken run of barrier-road cells in the cell list of a path; the cell list
+holds the path cells and the two middle cells of each knight step. A
+crossing is a modelled place, not an observed one. **The table gives the
+position only as a 10 km grid cell** (sensitive-data policy §3); the 1 km
+cells are in `lcp_road_crossings_7755.gpkg`.
+
+**As built (2026-10-10):** 556 crossings on 74 of 76 paths (two paths have
+none); 765 road cells; cells per crossing median 1, maximum 7; `edge` 545,
+`parallel` 11; motorway 10, trunk 234, primary 171, secondary 141.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `crossing_id` | character | `<pair_id>-<run number along the path>`, from the source reserve of the path |
+| `site_id` | integer | The site of the crossing (`tbl_14_pinch_points.csv`) |
+| `pair_id`, `surface`, `from_unit_id`, `from_name`, `to_unit_id`, `to_name`, `from_node_id`, `to_node_id`, `link_role`, `is_bridge` | — | The link, from `tbl_13_network_links.csv`. `is_bridge` is `NA` for a `parallel` link |
+| `lit_flag` | logical | The link is in `PINCH_LIT_FLAG_PAIRS`: no literature support, or a described barrier (Decision 20 point 2) |
+| `run_no` | integer | Number of the crossing along the path |
+| `n_cells` | integer | Barrier-road cells in the run. A high value shows a path that goes along a road |
+| `road_class_top` | character | The highest road class in the run (motorway, trunk, primary, secondary). A description; not a traffic volume; in no rule |
+| `in_reserve_unit_ids` | character | `unit_id`s of the reserves whose footprint cells the run holds, `;`-separated; empty if none. The cells count (Decision 20 point 3) |
+| `grid10_id` | integer | Cell number of the 10 km publish grid (the analysis grid aggregated by 10 from its top-left corner; 310 rows × 287 columns) that holds the middle cell of the run |
+| `grid10_x_km`, `grid10_y_km` | numeric | Centre of that 10 km cell, EPSG:7755, km |
+| `state` | character | State of the middle cell (Natural Earth, `boundary_states_7755.gpkg`) |
+| `district`, `district_code` | character | District of the middle cell and its 2011 census code (DataMeet Census-2011 layer; the names are not unique). State and district come from two layers and can disagree at a border |
+
+## tbl_14_pinch_points.csv  *(Week 12 — built, tasks 12.4–12.5)*
+
+Written by `scripts/07_connectivity.R` STEP 12.3 (Decision 20 points 4, 5
+and 7). **One row per site** of the baseline surface — pinch points and
+other sites; filter on `pinch_point`. A site is a connected set of crossings
+joined at a distance of at most 5 km (`PINCH_SITE_MERGE_KM`, cell centres).
+Sorted by `pinch_tier`, then `site_id`. STEP 12.4 writes the table again
+with the variant columns.
+
+**"Pinch point" here** = a site on a bridge edge of the network, or a site
+that two or more edges use. It is **not** the pinch point of circuit-theory
+mapping (a narrow part of a corridor with high current flow): a least-cost
+path has no width.
+
+**As built (2026-10-10):** 365 sites; 200 pinch points (tier 1: 3, tier 2:
+98, tier 3: 99); `on_bridge` 101, `shared` 102. 98 of the 200 pinch points
+have `n_variants_near` 3; 3 have 0.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `site_id` | integer | 1 to n, in the order of the lowest 1 km cell number of each site |
+| `surface` | character | `baseline` |
+| `pinch_point` | logical | `on_bridge` or `shared` (Decision 20 point 5) |
+| `pinch_tier` | integer | 1 = both flags; 2 = `on_bridge` only; 3 = `shared` only; `NA` = not a pinch point. Sites in one tier have no order between them |
+| `on_bridge` | logical | A bridge edge (Decision 19) uses the site: `n_bridges` ≥ 1 |
+| `shared` | logical | `n_edges` ≥ 2 (`PINCH_SHARED_MIN_EDGES`) |
+| `n_crossings`, `n_links`, `n_edges`, `n_bridges` | integer | Crossings in the site; different links (`pair_id`s); of those, `edge` links; of those, bridge edges. A `parallel` link is a link but not an edge |
+| `n_cells`, `span_km` | integer / numeric | Distinct road cells of the site; the longest distance between two of its cell centres (0 for one cell). A long span is a chain of joined crossings |
+| `road_class_top` | character | The highest road class in the site (a description, not in the rule) |
+| `in_reserve_unit_ids` | character | Reserves whose footprint cells the site holds |
+| `lit_flag`, `lit_flag_any` | logical | The site has an edge and each of its edges has `lit_flag`; one or more of its edges has it |
+| `pair_ids`, `edge_pair_ids`, `bridge_pair_ids` | character | `pair_id`s of the links, the edges and the bridge edges of the site, `;`-separated |
+| `links` | character | The links by name, `; `-separated |
+| `grid10_id`, `grid10_x_km`, `grid10_y_km` | integer / numeric | The 10 km cell that holds the mean of the distinct cell centres of the site (a mean on a grid line goes to the cell to the east or south) |
+| `state`, `district`, `district_code` | character | Of the mean position |
+| `near_pinch_noghm`, `near_pinch_road15`, `near_pinch_road50` | logical | A pinch point of that variant surface is within 5 km of the site (`PINCH_COMPARE_D_KM`; cell centres). Written by STEP 12.4 |
+| `n_variants_near` | integer | The number of variants (0 to 3) with a pinch point near the site. A count, not a label |
+
+## tbl_14_pinch_link_summary.csv  *(Week 12 — built, task 12.4)*
+
+Written by `scripts/07_connectivity.R` STEP 12.3 (process choice C1). One row
+per baseline link with crossings computed (76: 73 `edge`, 3 `parallel`). No
+position.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `pair_id`, `surface`, `from_unit_id`, `from_name`, `to_unit_id`, `to_name`, `from_node_id`, `to_node_id`, `link_role`, `is_bridge`, `cost_rkm`, `path_km` | — | The link, from `tbl_13_network_links.csv` |
+| `lit_flag` | logical | The link is in `PINCH_LIT_FLAG_PAIRS` |
+| `n_crossings`, `n_road_cells` | integer | Crossings of the path; barrier-road cells in its cell list |
+| `n_sites` | integer | Sites that the path uses |
+| `n_pinch_points`, `n_pinch_tier1`, `n_pinch_tier2`, `n_pinch_tier3` | integer | Of those sites, the pinch points, and by tier. A site counts for each link that uses it, so the column totals are above the number of sites |
+
+## tbl_14_pinch_variant_comparison.csv  *(Week 12 — built, task 12.5)*
+
+Written by `scripts/07_connectivity.R` STEP 12.4 (Decision 20 point 6). One
+row per variant surface; each variant is compared with the baseline only. No
+position. The crossings, sites and pinch points of a variant come from its
+own paths, edges and bridges.
+
+**As built (2026-10-10):** `noghm` site overlap 0.520, sensitive; `road15`
+0.866, robust; `road50` 0.820, robust. By choice: gHM multiplier sensitive;
+road value robust.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `variant`, `tests` | character | `noghm`, `road15` or `road50`; the choice that the variant tests (gHM multiplier, Decision 14; road value, Decision 15) |
+| `n_paths`, `n_bridge_edges` | integer | In-network paths with crossings computed on the variant; bridge edges of its graph |
+| `n_crossings`, `n_sites`, `n_pinch_points`, `n_pinch_tier1`, `n_pinch_tier2`, `n_pinch_tier3` | integer | Results on the variant surface |
+| `n_pinch_points_baseline` | integer | Pinch points on the baseline (the same in each row) |
+| `share_base` | numeric | Baseline pinch points with a variant pinch point within 5 km ÷ baseline pinch points |
+| `share_variant` | numeric | Variant pinch points with a baseline pinch point within 5 km ÷ variant pinch points |
+| `site_overlap` | numeric | min(`share_base`, `share_variant`). `NA` if a surface has no pinch point |
+| `site_overlap_5km`, `site_overlap_10km` | numeric | The same overlap at 5 km and 10 km (descriptive; no limit) |
+| `all_sites_share_base`, `all_sites_share_variant`, `all_sites_overlap` | numeric | The same at 5 km for all sites, not only pinch points (descriptive) |
+| `n_base_tier12_not_near` | integer | Baseline tier-1 and tier-2 pinch points with no variant pinch point within 5 km |
+| `base_tier12_not_near_by_link` | character | Those sites counted by their link list; entries divided by " \| " |
+| `label` | character | `robust` if `site_overlap` ≥ 2/3 (`PINCH_COMPARE_ROBUST_MIN_OVERLAP`); else `sensitive`. Fixed in Decision 20 before any crossing |
+| `choice_label` | character | The label of the choice: `robust` only if each variant that tests the choice is robust |
+
+## tbl_14_pinch_qa.csv  *(Week 12 — built, task 12.6)*
+
+Written by `scripts/07_connectivity.R` STEP 12.5 (the QA list of Decision
+20). One row per check. The table is written first; then any `FALSE` in
+`pass` stops the script. No position.
+
+**As built (2026-10-10):** 74 rows, 74 pass — `test case` 3, `roads` 6,
+`baseline` 15, `noghm` 12, `road15` 12, `road50` 12, `all` 14.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `surface` | character | `test case` (the hand-made self-tests of STEPs 12.2–12.4), `roads` (the road-cell guard of STEP 12.1), `baseline`, `noghm`, `road15`, `road50`, or `all` (the comparison; the tables and the 1 km file on disk) |
+| `check` | character | What is checked |
+| `value` | character | The value that the check found (for example "765 road cells in the lists, 765 crossing cells") |
+| `pass` | logical | `TRUE` if the check holds |
+
+## tbl_03_reserve_network.csv  *(Week 12 — built, task 12.7; publishable)*
+
+Written by `scripts/07_connectivity.R` STEP 12.6 (Decision 20 point 7). The
+publishable network table. **One row per network reserve (56), but the values
+are per node (47):** the reserves of one block share the values of their
+node. Count nodes by `node_id`, not by rows. All values are for the baseline
+surface. **No position.** The publish check `assert_publishable_table()`
+(`R/00_functions_sensitive.R`) runs before the file is written.
+
+**"Pinch point" here** = a place where a barrier road meets a modelled
+least-cost path, at a site on a bridge edge of the network or a site that
+two or more edges use (Decision 20 point 5). It is **not** the pinch point of
+circuit-theory mapping. A path and a crossing are modelled, not observed.
+
+**How the counts are made:** a site on an edge counts for the two nodes of
+the edge; a site that two edges of one node use counts one time for that
+node. The node counts do not add up to the number of sites. The count is not
+an order of nodes: a node with more edges or longer edges can have more
+crossings.
+
+**As built (2026-10-10):** 56 rows, 47 nodes; 42 nodes with a pinch point on
+an edge; 7 nodes with a tier-1 pinch point.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `unit_id`, `unit_name`, `state`, `network_group` | — | The reserve, its state (reserve layer) and its reporting group |
+| `node_id`, `node_name`, `block_size` | integer / character / integer | As in `tbl_13_network_metrics.csv` |
+| `set_id`, `set_size` | integer | The connected set of the node (1 = the largest) and its size in nodes |
+| `degree` | integer | Number of edges of the node |
+| `betweenness_norm`, `betweenness_rank` | numeric / integer | As in `tbl_13_network_metrics.csv`; `betweenness_norm` to 4 decimal places |
+| `linchpin` | logical | `betweenness_rank` ≤ 3 and `betweenness_norm` > 0 (Decision 19 point 6; 3 is a judgement value — read with `set_size`) |
+| `cross_group_dependent` | logical | A linchpin only when the cross-group links are in the graph |
+| `stable_linchpin` | logical | A linchpin on the baseline and on all three variants |
+| `cut_node`, `pendant`, `isolated` | logical | Without the node, its set divides; `degree` 1; `degree` 0 |
+| `cheapest_link_rkm`, `cheapest_link_rank` | numeric / integer | Lowest edge weight of the node (resistance-km, 1 decimal place); rank over all nodes, 1 = the highest value |
+| `n_bridge_edges` | integer | Edges of the node that are bridges |
+| `n_crossings` | integer | Road crossings on the edges of the node |
+| `n_sites` | integer | Sites that the edges of the node use (pinch points and other sites) |
+| `n_pinch_points` | integer | Of those, pinch points; = the sum of the three tier columns |
+| `n_pinch_tier1`, `n_pinch_tier2`, `n_pinch_tier3` | integer | Pinch points by tier: 1 = on a bridge edge and shared; 2 = on a bridge edge only; 3 = shared only |
+
+## tbl_03b_pinch_points.csv  *(Week 12 — built, task 12.7; publishable)*
+
+Written by `scripts/07_connectivity.R` STEP 12.6 (Decision 20 point 7). The
+publishable pinch-point table, companion to `tbl_03`. **One row per baseline
+pinch point, all tiers** (author choice 2026-10-10), sorted by `pinch_tier`,
+then `site_id`. The rows are the pinch points of `tbl_14_pinch_points.csv`;
+the fields have the same meaning as there. **Position: the 10 km grid cell
+with state and district only** (sensitive-data policy §3); the publish check
+`assert_publishable_table()` runs before the file is written.
+
+**"Pinch point" here** — see `tbl_03_reserve_network.csv`. Sites in one tier
+have no order between them. The road class is a description; it is not in
+the rule.
+
+**As built (2026-10-10):** 200 rows — tier 1: 3, tier 2: 98, tier 3: 99.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `site_id` | integer | Key to `tbl_14_pinch_points.csv` and `tbl_14_road_crossings.csv` |
+| `pinch_tier` | integer | 1 = both flags; 2 = `on_bridge` only; 3 = `shared` only |
+| `on_bridge`, `shared` | logical | A bridge edge uses the site; two or more edges use it |
+| `n_edges`, `n_bridges` | integer | Edges that use the site; of those, bridge edges |
+| `links` | character | The links of the site by name, `; `-separated |
+| `road_class_top` | character | The highest road class in the site |
+| `in_reserve_unit_ids` | character | Reserves whose footprint cells the site holds |
+| `lit_flag`, `lit_flag_any` | logical | Each edge of the site has `lit_flag` (no literature support, or a described barrier); one or more has it |
+| `state`, `district`, `district_code` | character | Of the site position (Natural Earth states; DataMeet Census-2011 districts) |
+| `grid10_id`, `grid10_x_km`, `grid10_y_km` | integer / numeric | The 10 km cell of the site and its centre (EPSG:7755, km) |
+| `near_pinch_noghm`, `near_pinch_road15`, `near_pinch_road50` | logical | A pinch point of that variant surface is within 5 km of the site |
+| `n_variants_near` | integer | The number of variants (0 to 3) with a pinch point near the site. A count, not a label |
+
+## tbl_03_notes.md  *(Week 12 — built, task 12.10; publishable)*
+
+Written by `scripts/07_connectivity.R` STEP 12.6 (part 12.6e), next to
+`tbl_03_reserve_network.csv` and `tbl_03b_pinch_points.csv`. **A note file,
+not a data table** (Decision 20 point 5: each table says what a pinch point
+is here; a CSV file has no place for a note; author choice 2026-10-10). The
+script writes it again on each run: do not edit it by hand.
+
+- **Contents:** what a pinch point is in these tables (and that it is not
+  the pinch point of circuit-theory mapping); barrier road, site and bridge
+  link; the three tiers; the limits (modelled paths, India-only surface,
+  10 km position, the variant result, the linchpin label, the node counts);
+  the counts of the run.
+- **Source of each value:** a config value (`PINCH_*`, `NET_LINCHPIN_TOP_N`)
+  or a count of the run. ASCII text. No position.
+- **As built (2026-10-10):** 32 lines.
+
+## Output figure — fig_03  *(Week 12 — built, task 12.8)*
+
+Not a data layer. **`outputs/figures/fig_03_reserve_network.png`**, written by
+`scripts/07_connectivity.R` STEP 12.7 (Decision 20 point 7). A static map at
+national scale, 11 × 10.6 in at 200 dpi (2200 × 2120 pixels). Settings:
+`PINCH_FIG_*` in `R/00_config.R`.
+
+- **Nodes** (47), at the centroid of the reserve polygons of the node: a
+  linchpin on all four surfaces (filled circle); a linchpin only with the
+  cross-group links in the graph (`cross_group_dependent`; filled diamond); a
+  linchpin that is not `stable_linchpin` (open circle); other node; pendant
+  node; a ring for a cut node. Each linchpin has a number; the list on the
+  map gives the names by set.
+- **Lines:** the 73 baseline edge paths (`link_role` `edge`). The bridge
+  links are thick and dark. The lines are modelled least-cost paths, not
+  observed movement; they are drawn in this static figure only
+  (sensitive-data policy §3).
+- **Pinch points** (200, all tiers; author choice 2026-10-10): triangles at
+  the centre of the 10 km cell, read from `tbl_03b_pinch_points.csv` only.
+  Tier 1 is large with an outline; tier 2 is medium; tier 3 is small and
+  pale. Marks in the same cell or in adjacent cells overlap: the 200 pinch
+  points are in 194 cells, and the 3 tier-1 pinch points show as 2 marks.
+- **Caption:** the paths are modelled; the surface is India-only; what a
+  pinch point is here (not the pinch point of circuit-theory mapping); the
+  limit of the linchpin label; the variant result; the reserves that are not
+  in the network; the data sources. **The title, the subtitle and the
+  caption are draft text of the drafting chat; the author keeps the draft
+  for now (2026-10-10).** Each number in them is read from the objects of
+  the run.
+- **Colours:** the site symbology of `scripts/05` (same hex values) and
+  mixes of them. Each class has a shape or a size of its own.
+
+## lcp_road_crossings_7755.gpkg  *(data/processed; Week 12 — built, tasks 12.3–12.5; gitignored)*
+
+Written by `scripts/07_connectivity.R` STEPs 12.2 and 12.3 (layer `baseline`)
+and STEP 12.4 (layers `noghm`, `road15`, `road50`; the same fields without
+`is_mid`). **One point per crossing cell, at the
+1 km cell centre. This file holds 1 km positions: it is never published and
+never committed** (Decision 20 point 7; sensitive-data policy §3). It is for
+checks by eye in a GIS.
+
+**As built (2026-10-10):** `baseline` 765 points; `noghm` 608; `road15` 856;
+`road50` 687.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `crossing_id`, `pair_id`, `surface`, `site_id` | — | Keys to `tbl_14_road_crossings.csv` and `tbl_14_pinch_points.csv` |
+| `seq` | integer | Position of the cell in its run |
+| `cell` | integer | Cell number of the 1 km EPSG:7755 grid |
+| `class_rank`, `road_class` | integer / character | The highest road class of the cell (`cov_roadbarrier_class_1km_7755.tif`) |
+| `is_vertex` | logical | `TRUE` if the cell is a path vertex; `FALSE` if it is a middle cell of a knight step |
+| `reserve_unit_ids` | character | Reserves whose footprint holds the cell |
+| `is_mid` | logical | The middle cell of the run (the position that the table generalises) |
+
 ## occ_tiger_gbif_clean_7755.gpkg  *(Week 13)*
 
 | Field | Type | Meaning |

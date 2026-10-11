@@ -398,6 +398,288 @@ resistance" — from the abstract: current flow centrality is highest for the
 Kanha and Pench tiger reserves and for the linkages Kanha–Phen, Kanha–Pench
 and Pench–Satpura.
 
+## Road pinch points (Decision 20)
+
+*All entries in this section were read from abstracts, web pages and search
+extracts on 2026-10-10. None was read in full.*
+
+Carter, N., Killion, A., Easter, T., Brandt, J., & Ford, A. (2020). Road
+development in Asia: Assessing the range-wide risks to tigers. *Science
+Advances*, 6(18), eaaz9619. https://doi.org/10.1126/sciadv.aaz9619 · *(134,000
+km of roads in the tiger conservation landscapes; 57 % of their area and 43 %
+of the breeding area is in the road-effect zone. Decision 20: a road crossing
+is true for almost every link.)* *(From the abstract.)*
+
+Cushman, S.A., Lewis, J.S., & Landguth, E.L. (2013). Evaluating the
+intersection of a regional wildlife connectivity network with highways.
+*Movement Ecology*, 1, 12. https://doi.org/10.1186/2051-3933-1-12 ·
+*(Factorial least-cost paths for American black bear in Montana and Idaho;
+the places where the predicted corridors cross major highways are found and
+ranked by intensity; the predictions agree with recorded highway crossings.
+Decision 20: path × highway as a method; `shared`.)* *(From the abstract.)*
+
+McRae, B.H. (2012). *Pinchpoint Mapper Connectivity Analysis Software*. The
+Nature Conservancy, Seattle, WA. · *(The tool that maps pinch points with
+current flow from circuit theory inside least-cost corridors. Decision 20:
+meaning of the term.)* *(Cited through WHCWG; title, year and version not
+verified — complete from the user guide.)*
+
+Pariwakam, M., Joshi, A., et al. (2018). *A Policy Framework for Connectivity
+Conservation and Smart Green Linear Infrastructure Development in the Central
+Indian and Eastern Ghats Tiger Landscape*. Wildlife Conservation Trust, India.
+https://www.wildlifeconservationtrust.org/wp-content/uploads/2018/11/Vol-1-Policy-Framework-CI-and-EG-Landscape-Low-Res-.pdf
+· *(A count of proposed linear infrastructure projects against mapped tiger
+corridors: 399 pass through corridors; 345 of them stated no need for a
+wildlife clearance. Decision 20: the project count as a planning unit.)*
+*(Figures from news reports — Down To Earth; The Better India — not from the
+report. Year and the authors after the second name not verified. Grey
+literature.)*
+
+Washington Wildlife Habitat Connectivity Working Group (WHCWG). (2013).
+*Columbia Plateau Ecoregion Addendum: Habitat Connectivity Centrality,
+Pinch-Points, and Barriers and Restoration Analyses*, Chapter 1. Washington
+Departments of Fish and Wildlife and Transportation, Olympia, WA.
+https://waconnected.org/wp-content/uploads/2013/04/PHASE-II_CHAPTER-1_April_18_Final-for-Posting.pdf
+· *(Pinch points — also bottlenecks or choke points — are areas where animal
+movement is funnelled inside a linkage; mapped with current flow. Decision
+20: meaning of the term.)* *(Year and publisher details not verified — read
+in fragments.)*
+
+*See also:* Dutta, T., et al. (2016), under "Tiger movement and landscape
+resistance" — from the abstract: pinch points are sections of the linkages
+where tiger movement is restricted due to unfavourable habitat, transportation
+networks, human habitation, or a combination of factors.
+
+## Week-12 pinch points — literature check (2026-10-10)
+
+*Context for the baseline pinch points of task 12.9 (`tbl_03b_pinch_points.csv`).
+Not used for any value, rule or label. Almost all sources are news reports
+(grey literature). All notes are from web pages and extracts read on
+2026-10-10; no source was read in full, and "summary only" marks a page
+where the article text was not available. Verify each entry before it is
+cited in a write-up.*
+
+**Scope, fixed before the search:**
+
+- **A.** The 3 tier-1 pinch points (2 groups by district).
+- **B.** The tier-2 pinch points, grouped by bridge link (13 links).
+- **C.** The districts with 5 or more tier-3 pinch points (6 districts; the
+  limit of 5 was set before the search).
+- **D.** The other direction: road conflicts on tiger corridors that the
+  sources of A to C name, compared with the table.
+
+**Level of the match.** The road layer has no road name or number
+(Decision 20, n1), so a pinch point cannot be matched to a named road. A
+match here is: the same link or reserve, and the same district when the
+source names one. "In the reserve" means that the pinch point holds a
+footprint cell of that reserve (`in_reserve_unit_ids`). No 1 km position was
+used in a search.
+
+| Group | Pinch points in `tbl_03b` | Source | Note |
+|---|---|---|---|
+| **A. Tier 1** | | | |
+| Sonitpur, Assam | 2 (Manas–Orang, Nameri–Orang, Orang–Dampa; trunk and secondary) | The Telegraph (2010) | The widening of the Balipara–Bhalukpong road in Sonitpur puts at risk the Sonitpur elephant reserve and the buffer of Nameri Tiger Reserve. The same district; the road of the pinch points is not known. **No source found** for a road conflict that names tigers on these links. |
+| Chikmagalur, Karnataka | 1 (Bhadra–Kali, Bhadra–Nagarhole; primary) | Bhardwaj (2021); Jhala et al. (2015, Week-11 section) | NH-169 is to be widened for 17 km in Chikkamagaluru district, on land of Kudremukh National Park. The source names the lion-tailed macaque and not the tiger. The same district; the road of the pinch point is not known. |
+| **B. Tier 2, by bridge link** | | | |
+| Sariska–Rajaji (`lit_flag`) | 21 (Alwar; Mewat and Gurgaon; Delhi; Baghpat, Ghaziabad, Meerut, Muzaffarnagar, Saharanpur; Hardwar) | PTI (2024a); India Legal (2019); Week-10 section (Sharma et al.) | Sariska end: a Central Empowered Committee report says that traffic on three roads in the reserve seriously affects wildlife. Rajaji end: the Chilla–Motichur corridor in Rajaji is cut by NH 58 and NH 72 (Haridwar–Dehradun section); a 721 m flyover was stalled for about nine years. **No source found** for a Sariska–Rajaji corridor, or for the pinch points in Haryana, Delhi and western Uttar Pradesh: they follow from a bridge link that the literature does not support. |
+| Similipal–Sundarbans | 14 (Pashchim Medinipur, South 24 Parganas and 3 other districts) | Week-11 section (Singh et al. 2015) | **No source found** (one search). The Sundarbans population is described as not connected to any mainland population. |
+| Valmiki–Dudhwa | 11 (Siddharth Nagar, Bahraich, Maharajganj, Balrampur, Kheri, Shrawasti) | Srivastava (2019) | The Indo-Nepal Border Road: 574 km in Uttar Pradesh, through Pilibhit, Lakhimpur Kheri, Bahraich, Shravasti, Balrampur, Siddharthnagar and Maharajganj, and through Dudhwa, Katarniaghat, Suhelwa and Sohagi Barwa. Forest officials say that it will disturb two corridors that tigers and elephants use to go to Nepal. All six districts of the pinch points are in the list. The road was a proposal in 2019; it is not known if it is in the road layer. |
+| Bhadra–Kali | 10 (Uttara Kannada, Shimoga, Udupi, Chikmagalur) | Patil (2020) | A tiger photographed in Bhadra in 2006 was photographed in Kali in 2008 (about 200 km). The source names a planned rail line as the threat; roads are named in general only. Agrees that tigers use the link. **No source found** for a road on it. |
+| Orang–Dampa (`lit_flag`) | 9 (Karbi Anglong 2, Golaghat 1, Kolasib 2, Mamit, Sonitpur, Tamenglong, West Kameng) | Deccan Herald (2026) | NH-715 at Kaziranga, in Nagaon, Karbi Anglong and Golaghat districts: animals go between Kaziranga and the Karbi Anglong hills; an elevated wildlife corridor of about 35 km is planned; a study counted 6,036 animals of 53 species killed by vehicles in 2016 and 2017. The 3 pinch points in Golaghat and Karbi Anglong are trunk-road sites, and the Golaghat site is in the Kaziranga footprint: this agrees with NH-715 (not verified). The link Orang–Dampa has no source (Week-11 section). No search for the pinch points in Mizoram and Manipur. |
+| Kali–Sahyadri | 8 (Sindhudurg, Kolhapur, Ratnagiri, Goa) | Variyar (n.d.); Patil (2020); Deccan Herald (2021, summary only) | The Sahyadri–Konkan corridor is the one way from Kali to Sahyadri; it is less than 1 km wide in places; linear infrastructure is named in general. A tiger seen in Sahyadri in 2018 was photographed in Kali in 2020. The expansion of NH 4, a rail line and a power line in Goa are said to affect Kali Tiger Reserve. Agrees with the link; no district is named. |
+| Bhadra–Nagarhole | 7 (Kodagu 4, Dakshina Kannada 2, Chikmagalur 1) | Deccan Herald (2023) | The Shiradi Ghat road is to be widened to four lanes for 26 km. The source names no district, no reserve and no tiger. **No source found** for a road conflict that names tigers on this link. |
+| Dudhwa–Corbett | 7 (Nainital 3, Udham Singh Nagar 3, Kheri 1) | WWF-India (2014) | The Kosi river corridor, in Nainital and Almora districts, joins Corbett with the Ramnagar Forest Division. The Ramnagar–Ranikhet highway (NH 121) is along the river; resorts and infrastructure along it are the threat. The same district (Nainital); the road of the pinch points is not known. |
+| Anamalai–Mudumalai (and the parallel link Anamalai–Sathyamangalam) | 6 (Coimbatore, Palakkad, The Nilgiris) | — | **No source read.** One search gave reports on elephant deaths on the rail line at Walayar; they were not read. |
+| Anamalai–Srivilliputhur-Megamalai (`lit_flag`) | 2 (Idukki, Theni) | Week-11 section (Johnsingh et al. 2009) | **No source found** (one search). The link is not supported as a route in use. |
+| Biligiri Ranganatha Temple–Sathyamangalam | 1 (Erode; trunk; in Sathyamangalam) | LiveLaw (2022) | The Madras High Court directed that the night traffic ban on the national highway between Bannari and Karapallam, in Sathyamangalam Tiger Reserve (Erode district), be applied from 10 February 2022. The same district, the same reserve and a trunk road: this agrees with that highway (not verified). |
+| Corbett–Rajaji | 1 (Garhwal; trunk) | LiveLaw (2019) | The Supreme Court stopped the construction of the Laldhang–Chillarkhal road (11.5 km) on 21 June 2019. NTCA: the road is in Rajaji Tiger Reserve and crosses a corridor between Rajaji and Corbett. The source names no district. |
+| Periyar–Kalakad-Mundanthurai (`lit_flag`) | 1 (Kollam; trunk) | CEPF (2013–2015); Week-11 section | A project to restore connection across the road and the railway in the Shencottah gap, between the Periyar and Agasthyamalai areas. Agrees: a road and a railway are a described barrier on this link. The source names no district. |
+| **C. Tier 3, districts with 5 or more** | | | |
+| Sagar, Madhya Pradesh | 8 (Panna–Ratapani, Ratapani–Madhav, Panna–Madhav) | NBM&CW (2025); The Aarch News (2025) | NH-45 (Bhopal–Jabalpur) has 25 animal underpasses on 11.96 km in Veerangana Durgavati Tiger Reserve. The sources name no district, and that reserve is not an end of these links. Context only; not a match. |
+| Guntur (7) and Krishna (6), Andhra Pradesh | 13 (Nagarjunsagar-Srisailam–Indravati, Kawal–Amrabad) | PTI (2024b) | **No source found** for these two districts. The one road source is for a corridor south of Nagarjunsagar-Srisailam (to Sri Venkateswara National Park), not for these links. The Week-11 section has no source for a link north of the reserve. |
+| Garhchiroli, Maharashtra | 6 (five link sets of Tadoba-Andhari, Indravati, Nawegaon-Nagzira, Kawal and others) | Pandey (2019) | The Chandrapur–Mul–Gadchiroli road (128 km) is upgraded to four lanes and is named as a threat to the corridors of Tadoba. The source does not say where on the road. Context at district level. |
+| Chhindwara, Madhya Pradesh | 5 (Pench–Veerangana Durgavati, Satpura–Pench (MH)) | Times of India (2015) | Pench–Satpura is one of the corridors with the highest modelled tiger movement in Dutta et al. Agrees with the link. The source names no road on it. |
+| Rajnandgaon, Chhattisgarh | 5 (Udanti-Sitanadi and Kanha links to Nawegaon-Nagzira and Achanakmar) | Times of India (2015) | Kanha–Navegaon and Kanha–Nagzira are among the corridors with the highest modelled movement; the four-laning of NH 6 and NH 7 is said to cut the corridors. Agrees with the Kanha–Nawegaon-Nagzira link. The source names no district. |
+| **D. Named road conflicts, compared with the table** | | | |
+| NH-44 (was NH 7), Pench | Seoni: 2 tier-3 (Kanha–Pench, Tadoba-Andhari–Pench (MH)); one is a trunk-road site in the Pench footprint. Nagpur: none | Saxena & Habib (2022, through Mongabay India) | Nine crossing structures on NH-44 in the Maharashtra part of Pench Tiger Reserve were monitored for two years; 21 mammal species used them, tigers among them. In Nagpur district the paths have road crossings on three links (`tbl_14_road_crossings.csv`), and none is a pinch point: one edge uses each, and no edge there is a bridge. **A documented crossing place with structures is not a pinch point by the rule.** |
+| NH 766 (was NH 212) and NH 67, Bandipur | None in Chamarajanagar, Mysore or Wayanad | Menon (2019) | About 19.7 km of NH 766 is in the centre of Bandipur Tiger Reserve; a night traffic ban (9 pm to 6 am) was in force for about ten years in 2019. Bandipur, Nagarhole, Mudumalai and Sathyamangalam are one node, and no path is modelled inside a node. **A road inside a node cannot be in the result.** |
+| NH 6 (now NH 53), Nagzira–Navegaon | Bhandara 2 and Gondiya 2, tier 3 (Pench and Pench (MH) to Nawegaon-Nagzira) | Times of India (2015) | Nagzira–Pench is one of the corridors with the highest modelled movement: agrees with the links. The Nagzira–Navegaon part is inside one reserve unit (Nawegaon-Nagzira), so it cannot be in the result. |
+| NH-363, Kawal–Tadoba | Adilabad: 1 tier-3 (Indravati–Kawal, Kawal–Amrabad). Chandrapur: 2 tier-3 on Tadoba-Andhari–Kawal | KP IAS Academy (2025) | Two eco-bridges are on NH-363 at Goleti and Goyagaon (Kumram Bheem Asifabad district; in the 2011 layer this is Adilabad), on tiger routes from Tadoba to Kawal. A weak source (an exam-preparation page). Agrees with the link; the road of the pinch points is not known. |
+
+**What the check shows (descriptive):**
+
+- **A source for a road conflict in the same district or reserve:** 10 of
+  the 21 groups of A to C (Sonitpur, Chikmagalur, Sariska–Rajaji at its two
+  ends, Valmiki–Dudhwa, Orang–Dampa at Kaziranga, Kali–Sahyadri,
+  Dudhwa–Corbett, Biligiri Ranganatha Temple–Sathyamangalam, Corbett–Rajaji,
+  Periyar–Kalakad-Mundanthurai). In two of them the source does not name
+  the tiger (Chikmagalur) or is from 2010 (Sonitpur).
+- **A source for the link only, or context only:** 5 groups (Bhadra–Kali,
+  Chhindwara, Rajnandgaon, Garhchiroli, Sagar).
+- **No source found or read:** 6 groups (Similipal–Sundarbans,
+  Bhadra–Nagarhole, Anamalai–Mudumalai, Anamalai–Srivilliputhur-Megamalai,
+  Guntur, Krishna).
+- **No source matches a pinch point to a named road.** The three sites
+  where district, reserve footprint and road class agree with a named
+  highway (Golaghat, Erode, Seoni) are "not verified".
+- **Two limits of the rule, from part D:** a road inside a node is not in
+  the result (Bandipur); a documented crossing place can be a crossing that
+  is not a pinch point (NH-44, Nagpur district).
+
+Bhardwaj, M. (2021, August 5). NH-169 highway widening will destroy the
+lion-tailed macaque habitat inside Kudremukh NP. *Green Minute*.
+https://greenminute.in/2021/08/05/nh-169-highway-widening-will-destroy-the-lion-tailed-macaque-habitat-inside-kudremukh-np/
+· *(17 km of NH-169, km 654 to 671, in Chikkamagaluru district; about 10.42
+ha of Kudremukh National Park. No mention of tigers. Grey literature.)*
+
+Critical Ecosystem Partnership Fund (CEPF). (2013–2015). *Overcoming
+Barriers: Restoring Ecological Connectivity Across Linear Intrusions in the
+Shencottah Gap* (grant page; grantee: Foundation for Ecological Research,
+Advocacy and Learning).
+https://www.cepf.net/grants/grantee-projects/overcoming-barriers-restoring-ecological-connectivity-across-linear
+· *(Aim: connection between the Periyar and Agasthyamalai areas across road
+and railway. No highway number, no district, no species on the page. The
+project report was not read.)*
+
+Deccan Herald. (2021, January 7). Goa projects to hit Kali Tiger Reserve:
+study.
+https://www.deccanherald.com/india/goa-projects-to-hit-kali-tiger-reserve-study-936420.html
+· *(Summary only: rail track doubling, the expansion of NH 4 and a power
+line. The study and its authors were not on the page. Grey literature.)*
+
+Deccan Herald. (2023, January 8). Greens worried over tunnel plan in Shiradi
+Ghat.
+https://www.deccanherald.com/amp/story/india/greens-worried-over-tunnel-plan-in-shiradi-ghat-1179105.html
+· *(Widening to four lanes, 26 km, Maranahalli to Addahole. No reserve, no
+district and no tiger named. Grey literature.)*
+
+Deccan Herald. (2026, January 18). Kaziranga corridor to ensure safe wildlife
+movement in national park, enhance connectivity.
+https://www.deccanherald.com/amp/story/india%2Fassam%2Fkaziranga-corridor-to-ensure-safe-wildlife-movement-in-national-park-enhance-connectivity-3866166
+· *(NH-715; an elevated wildlife corridor of 34.5 km or 35 km — the article
+gives the two figures; Nagaon, Karbi Anglong and Golaghat; a Gauhati
+University study: 6,036 animals of 53 species killed by vehicles in 2016 and
+2017. Grey literature; the study was not read.)*
+
+India Legal. (2019, January 27). Uttarakhand elephant corridor: tuskers'
+troubles.
+https://indialegallive.com/environment/uttarakhand-elephant-corridor-tuskers-troubles/
+· *(Chilla–Motichur corridor in Rajaji Tiger Reserve; NH 58 and NH 72,
+Haridwar–Dehradun section; a 721 m flyover, stalled for about nine years.
+Title taken from the URL. Grey literature.)*
+
+KP IAS Academy. (2025, December 3). Eco-Bridges to Come Up in Asifabad to
+Prevent Wildlife Casualties.
+https://kpiasacademy.com/eco-bridges-to-come-up-in-asifabad-to-prevent-wildlife-casualties/
+· *(Two eco-bridges on NH-363 at Goleti and Goyagaon; three more planned on
+a rail line. An exam-preparation page: a weak source; find the news report
+or the NTCA record.)*
+
+LiveLaw. (2019, June). SC Stays U'khand Govt's 'Illegal' Road Construction
+Work Inside Rajaji Tiger Reserve.
+https://www.livelaw.in/amp/top-stories/sc-stays-illegal-road-construction-rajaji-tiger-reserve-145824
+· *(Laldhang–Chillarkhal road, 11.5 km; order of 21 June 2019; NTCA: the road
+crosses a corridor between Rajaji and Corbett. Day of publication not
+recorded.)*
+
+LiveLaw. (2022). Madras High Court Directs Implementation Of 'Night Travel
+Ban' In Sathyamangalam Tiger Reserve To Prevent Roadkills.
+https://www.livelaw.in/amp/news-updates/madras-high-court-ban-on-plying-vehicles-in-sathyamangalam-tiger-reserve-at-night-191414
+· *(National highway between Bannari and Karapallam; notification of the
+Erode District Collector of 7 January 2019; in force from 10 February 2022;
+6 pm to 6 am for commercial vehicles, 9 pm to 6 am for others. The petitioner
+claims about 155 animal deaths — not verified. Highway number and day of
+publication not on the page.)*
+
+Menon, A. (2019, November 8). Bandipur: Much ado about a highway. *Mongabay
+India*.
+https://india.mongabay.com/2019/11/bandipur-much-ado-about-a-highway/
+· *(NH 766, before NH 212; NH 67 from Gundlupet to Ooty; about 19.7 km in
+the centre of the reserve; night ban 9 pm to 6 am; a 2004–2007 study: 89
+mammals killed, with one tiger. Grey literature.)*
+
+NBM&CW. (2025, December 16). NHAI Implements India's First Red Marking Safety
+Zone on Highway Through Tiger Reserve.
+https://www.nbmcw.com/news/nhai-implements-indias-first-red-marking-safety-zone-on-highway-through-tiger-reserve.html
+· *(25 animal underpasses on 11.96 km in Veerangana Durgavati Tiger Reserve.
+Trade press.)*
+
+Pandey, K. (2019, February 14). Tadoba reserve: Tourism is good news, but
+infra projects bad. *Down To Earth*.
+https://www.downtoearth.org.in/wildlife-biodiversity/tadoba-reserve-tourism-is-good-news-but-infra-projects-bad-63238
+· *(Chandrapur–Mul–Gadchiroli road, 128 km, and Nagpur–Umred–Nagbhid–
+Bramhapuri road, 137 km, to four lanes. No highway numbers. Grey
+literature.)*
+
+Patil, N. (2020, July 30). [Tiger dispersal and wildlife corridors in the
+Western Ghats of Karnataka; the Hubballi–Ankola railway line]. *The Wire
+Science*.
+https://science.thewire.in/environment/karnataka-tiger-dispersal-wildlife-corridors-western-ghats-hubballi-ankola-railway-line-fragment/
+· *(Tiger T-31: Sahyadri 2018 to Kali 2020, about 215 km. Tiger BDT-130:
+Bhadra 2006 to Kali 2008, about 200 km. Title not recorded — complete it.
+Grey literature.)*
+
+PTI. (2024a, August 5). Unchecked traffic seriously affecting wildlife in
+Sariska Tiger Reserve: Report. *ThePrint*.
+https://theprint.in/india/unchecked-traffic-seriously-affecting-wildlife-in-sariska-tiger-reserve-report/2208486/
+· *(Report of the Central Empowered Committee to the Supreme Court, 22 July
+2024: three roads to a temple in the reserve; a ban on private vehicles is
+recommended. No road numbers. Grey literature.)*
+
+PTI. (2024b, March 28). Centre gives green signal to road project in Andhra
+Pradesh tiger corridor. *The Week*.
+https://www.theweek.in/wire-updates/national/2024/03/28/des21-env-tiger-corridor.html
+· *(A road of about 5 km in the Nagarjunasagar–Sri Venkateswara National Park
+corridor; three tunnels and seven viaducts. No district. Grey literature.)*
+
+Saxena, A., & Habib, B. (2022). Crossing structure use in a tiger landscape,
+and implications for multi-species mitigation. *Transportation Research Part
+D: Transport and Environment*, 109, 103380.
+https://doi.org/10.1016/j.trd.2022.103380 · *(Read through Mongabay India,
+2022-07:
+https://india.mongabay.com/2022/07/monitoring-crossing-structures-in-tiger-reserves-offers-insights-into-species-movement-behaviour/
+— nine structures on NH-44, two years, 21 mammal species. The paper was not
+read.)*
+
+Srivastava, K. (2019, May 7). Indo-Nepal border road rides roughshod on Uttar
+Pradesh wildlife habitat. *Mongabay India*.
+https://india.mongabay.com/2019/05/indo-nepal-border-road-rides-roughshod-on-uttar-pradesh-wildlife-habitat/
+· *(1,715 km in total; 574 km in Uttar Pradesh, 302 km of that on forest
+land; seven districts; two corridors in the Dudhwa range to Shuklaphanta and
+Bardia in Nepal. Grey literature.)*
+
+The Aarch News. (2025, December 13). Madhya Pradesh Unveils Red-Chequered
+Highway to Enhance Connectivity and Protect Wildlife.
+https://theaarchnews.com/infrastructure-news/madhya-pradesh-red-chequered-highway/
+· *(The Hiran–Sindoor section of NH-45, Bhopal–Jabalpur. Trade press.)*
+
+The Telegraph (North East). (2010, August 21). Road work threat to wildlife.
+Through India Environment Portal:
+https://indiaenvironmentportal.org.in/news-clippings/road-work-threat-to-wildlife
+· *(Balipara–Bhalukpong road, Sonitpur. No species named. Grey literature;
+16 years old.)*
+
+Times of India (Nagpur). (2015, November 1). NH6, NH7 cut tiger corridors with
+highest movement: Study. Through India Environment Portal:
+https://www.indiaenvironmentportal.org.in/news-clippings/nh6-nh7-cut-tiger-corridors-with-highest-movement-study
+· *(News report of Dutta et al. — see Dutta, T., et al. (2016) under "Tiger
+movement and landscape resistance": 16 protected areas, 35 linkages;
+Kanha–Pench, Pench–Satpura, Kanha–Navegaon, Kanha–Nagzira, Nagzira–Navegaon
+and Nagzira–Pench with the highest movement. Check the claims in the
+paper.)*
+
+Variyar, P. (n.d.). Piecing Together a Threatened Corridor and Fates of Large
+Carnivores. Wildlife Conservation Trust.
+https://wildlifeconservationtrust.org/?p=9067 · *(The Sahyadri–Konkan
+corridor; no district and no road named; no date on the page. Grey
+literature.)*
+
+WWF-India. (2014). *Monitoring of tiger and associated species — Kosi river
+corridor, Uttarakhand, India*. Through India Environment Portal:
+https://indiaenvironmentportal.org.in/reports-and-documents/monitoring-of-tiger-and-associated-species-kosi-river-corridor-uttarakhand-india
+· *(From the portal summary: Nainital and Almora districts; Ramnagar–Ranikhet
+highway, NH 121. The report was not read.)*
+
 ## Tiger movement and landscape resistance (Decision 14)
 
 Dutta, S., & Krishnamurthy, R. (2024). Multiphasic movement and step-selection

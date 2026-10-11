@@ -12,12 +12,12 @@ Sibling in method to
 | | |
 |---|---|
 | **Author** | Kiran Balasubramanian |
-| **Status** | **Week 11 complete — Stage 2 (Connectivity) reserve network built.** `scripts/07_connectivity.R` STEPs 11.1–11.4 (functions in `R/00_functions_network.R`) build the network from the Week-10 paths by **Decision 19**, fixed before any network metric: each in-network pair is a link with its cost as the weight (no cost threshold); contiguous reserves merge into one node (56 reserves → 47 nodes); 73 edges; 3 sets (33, 8 and 6 nodes). Betweenness is normalised inside each set: 8 linchpin nodes, 12 cut nodes, no isolated node, 6 pendant nodes (`tbl_13_network_metrics.csv`). A second run without the one cross-group link changes one linchpin (Madhav). By the Decision-19 rule the gHM multiplier and the road value are both robust for the network; 7 of the 8 linchpins are stable on all four surfaces. Network QA 91 of 91 (`tbl_13_network_qa.csv`). A literature check is descriptive (`docs/references.md`). Next: **Week 12** — the pinch-point Decision, then road pinch points, the network figure and the publishable table. Prior: Week 10 — least-cost paths (Decisions 17–18). |
+| **Status** | **Week 12 complete — Stage 2 (Connectivity) complete.** `scripts/07_connectivity.R` STEPs 12.1–12.7 (functions in `R/00_functions_pinch.R`) find the places where the modelled least-cost paths cross barrier roads, by **Decision 20**, fixed before any road crossing was computed: a crossing is a run of barrier-road cells (OpenStreetMap motorway to secondary) on a path; crossings at most 5 km apart are one site; a **pinch point** is a site on a bridge link of the network or a site that two or more links share (a position in the network — not the pinch point of circuit-theory mapping, and not a measure of traffic). Baseline: 556 crossings on 74 of 76 paths, 365 sites, 200 pinch points (tier 1: 3, tier 2: 98, tier 3: 99). By the Decision-20 rule the pinch points are **sensitive** to the gHM multiplier and robust to the road value; the path routes (Decision 18) and the network (Decision 19) are robust to both. Pinch-point QA 74 of 74 (`tbl_14_pinch_qa.csv`). Outputs for publication, with each position as a 10 km grid cell: `tbl_03_reserve_network.csv`, `tbl_03b_pinch_points.csv`, `tbl_03_notes.md`, `fig_03_reserve_network.png`. The paths and crossings are modelled; they are not observed tiger movement. A literature check is descriptive (`docs/references.md`). Stage-2 summary against proposal question 2: `docs/methodology.md`, change log, "Week 12 complete". Next: **Week 13** — Stage 3 (habitat suitability): occurrence cleaning and effort. Prior: Week 11 — reserve network (Decision 19); Week 10 — least-cost paths (Decisions 17–18). |
 | **Focal species** | *Panthera tigris* (Bengal tiger) |
 | **Study area** | India — all tiger reserves with reserve-level census data |
 | **Primary unit** | Reserve, rolled up to landscape complex and state |
 | **Analysis CRS** | EPSG:7755 — WGS 84 / India NSF LCC (national equal-area/conformal frame) |
-| **Stack** | R (sf, terra, xml2, spatstat, sfdep, igraph, maxnet, ggplot2, gganimate + gifski; least-cost-path tool fixed in Decision 17), Quarto, Leaflet |
+| **Stack** | R (sf, terra, xml2, spatstat, sfdep, igraph, maxnet, ggplot2, gganimate + gifski; own least-cost-path engine on `terra` + `igraph`, Decision 17), Quarto, Leaflet |
 | **Story site** | Planned — Quarto site on GitHub Pages, one page per analysis track |
 
 ---
@@ -39,7 +39,7 @@ This project runs **three analyses in R for all reserves**, not seven:
 | Priority | Track | Method | Prior basis |
 |---|---|---|---|
 | 1 | **Growth** | Per-reserve census metrics 2014/2018/2022 (Decision 6), 3-frame animated choropleth | Phase 1, scaled 7 → all |
-| 2 | **Connectivity** | Least-cost paths + reserve-network graph | Phase 2 plan, ported ArcGIS → R |
+| 2 | **Connectivity** | Least-cost paths + reserve-network graph + road pinch points | Phase 2 plan, ported ArcGIS → R |
 | 3 | **Habitat suitability** | SDM (`maxnet`), sampling-bias corrected | New; the honest form of "occupancy" |
 | — | **Effort / observer bias** | Woven through all three as a caveat | Signature thread from both prior projects |
 

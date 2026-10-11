@@ -57,7 +57,55 @@
 #               betweenness identity, edge weights, second run, scan, tables
 #               on disk). Any failure stops the script (task 11.5;
 #               Decision 19 point 11) -> tbl_13_network_qa.csv
-#   WEEK 12 — road pinch points + fig_04 / tbl_03                  TODO(Week 12)
+#   WEEK 12 — road pinch points (Decision 20; functions in
+#             R/00_functions_pinch.R)
+#     guard     the Decision-20 settings; the lit_flag links resolve to pairs
+#     STEP 12.1 barrier-road cells with their class (task 12.2; Decision 20
+#               point 1): the Decision-15 classes, one rasterise call per
+#               class with the arguments of STEP 9.6; guard against
+#               n_road_cells of tbl_11_resistance_qa.csv
+#               -> data/interim/cov_roadbarrier_class_1km_7755.tif;
+#               switch RUN_ROAD_CELLS
+#     STEP 12.2 road crossings of the baseline paths (task 12.3; Decision
+#               20 points 2, 3 and 7): self-test on a hand-made case; the cell
+#               list of each in-network path (knight-step middle cells
+#               included; cost check against the engine); a crossing = one
+#               unbroken run of barrier-road cells; position at the 10 km
+#               publish grid with state and district
+#               -> tbl_14_road_crossings.csv;
+#               data/processed/lcp_road_crossings_7755.gpkg (1 km cells,
+#               gitignored)
+#     STEP 12.3 sites and pinch points, baseline (task 12.4; Decision 20
+#               points 4, 5 and 7): self-test on a hand-made case; crossings
+#               at most 5 km apart = one site; pinch_point = on_bridge OR
+#               shared, three tiers; the summary per link
+#               -> tbl_14_pinch_points.csv (one row per site),
+#               tbl_14_pinch_link_summary.csv; tbl_14_road_crossings.csv and
+#               the 1 km layer written again with site_id
+#     STEP 12.4 the same chain on noghm, road15 and road50, each with its
+#               own paths, edges and bridges; each compared with the baseline
+#               by the fixed rule (task 12.5; Decision 20 point 6)
+#               -> tbl_14_pinch_variant_comparison.csv; tbl_14_pinch_points.csv
+#               written again with near_pinch_<variant> and n_variants_near;
+#               the variant crossing cells in the gitignored 1 km file
+#     STEP 12.5 pinch-point QA: the self-tests and the road-cell guard,
+#               collected; the QA list of Decision 20 on each of the four
+#               surfaces; the comparison; the tables and the 1 km file on
+#               disk; no position finer than the publish grid. Any failure
+#               stops the script (task 12.6) -> tbl_14_pinch_qa.csv
+#     STEP 12.6 publishable tables (task 12.7; Decision 20 point 7):
+#               tbl_03_reserve_network.csv (one row per network reserve: the
+#               node results and the pinch points on its edges, by tier) and
+#               tbl_03b_pinch_points.csv (one row per baseline pinch point);
+#               publish check assert_publishable_table()
+#               (R/00_functions_sensitive.R); tbl_03_notes.md (what a
+#               pinch point is here, the tiers, the limits)
+#     STEP 12.7 figure fig_03_reserve_network.png (task 12.8; Decision 20
+#               point 7): the nodes by flag, the baseline edge paths with
+#               the bridge links marked, the baseline pinch points at their
+#               publish-grid cell, by tier. The pinch points are read from
+#               tbl_03b only. Title, subtitle and caption are draft text
+#               for the author's edit
 #
 # Tasks 9.3 and 9.4 (resistance values, barrier road classes) are numbered
 # Decisions (14 and 15) recorded in docs/methodology.md BEFORE their STEPs are
@@ -70,6 +118,10 @@
 #                   FALSE -> they are skipped; the Week-10+ STEPs read the four
 #                            surfaces from disk, after the surface guard.
 #   RUN_LCP_SMOKE   TRUE  -> STEP 10.0 runs (task 10.3).
+#   RUN_ROAD_CELLS  TRUE  -> STEP 12.1 reads the road layer, builds the
+#                            barrier-road class raster and writes it.
+#                   FALSE -> STEP 12.1 reads the raster from disk.
+#                            The STEP-12.1 guard runs in both cases.
 #
 # -----------------------------------------------------------------------------
 # STEP 9.2 — WHAT IT DOES
@@ -173,6 +225,28 @@
 #   betweenness_norm_<variant>, linchpin_<variant>, stable_linchpin)
 # OUTPUTS (STEP 11.4): outputs/tables/tbl_13_network_qa.csv (one row per
 #   check: surface, check, value, pass)
+# OUTPUTS (STEP 12.1): data/interim/cov_roadbarrier_class_1km_7755.tif (INT1U;
+#   class rank 1..4 on a barrier-road cell of the footprint, NA elsewhere;
+#   the layer name records the class order)
+# OUTPUTS (STEP 12.2): outputs/tables/tbl_14_road_crossings.csv (one row per
+#   crossing; position at the publish grid only);
+#   data/processed/lcp_road_crossings_7755.gpkg, layer "baseline" (one point
+#   per crossing cell; 1 km positions — gitignored, never published)
+# OUTPUTS (STEP 12.3): outputs/tables/tbl_14_pinch_points.csv (one row per
+#   site: flags, tier, counts, links, position at the publish grid);
+#   outputs/tables/tbl_14_pinch_link_summary.csv (one row per link);
+#   tbl_14_road_crossings.csv and the 1 km layer again, with site_id
+# OUTPUTS (STEP 12.4): outputs/tables/tbl_14_pinch_variant_comparison.csv (one
+#   row per variant); tbl_14_pinch_points.csv again, with the variant columns;
+#   layers "noghm", "road15", "road50" of lcp_road_crossings_7755.gpkg
+# OUTPUTS (STEP 12.5): outputs/tables/tbl_14_pinch_qa.csv (one row per check:
+#   surface, check, value, pass)
+# OUTPUTS (STEP 12.6): outputs/tables/tbl_03_reserve_network.csv (56 rows; no
+#   position); outputs/tables/tbl_03b_pinch_points.csv (one row per baseline
+#   pinch point; position at the publish grid only);
+#   outputs/tables/tbl_03_notes.md (the note file of the two tables)
+# OUTPUTS (STEP 12.7): outputs/figures/fig_03_reserve_network.png (a static
+#   map at national scale; pinch points at the publish grid only)
 #
 # MACHINE TRAP: same PROJ / PostGIS proj.db clash as scripts/06. Run in a FRESH
 # session; the guard below stops if EPSG:7755 does not resolve.
@@ -196,6 +270,10 @@ rule <- function(txt) cat("\n", strrep("=", 78), "\n", txt, "\n",
 RUN_RESISTANCE <- FALSE   # TRUE: re-run the Week-9 STEPs (clean clone)
 RUN_LCP_SMOKE  <- FALSE   # TRUE: STEP 10.0 tool check (task 10.3; done
                           # 2026-10-02 — set TRUE to repeat it)
+RUN_ROAD_CELLS <- FALSE   # TRUE: STEP 12.1 builds the barrier-road class
+                          # raster from the road layer (done 2026-10-10 — set
+                          # TRUE on a clean clone, or after a change of the
+                          # road layer). FALSE: read it from disk
 
 # ---- Paths ------------------------------------------------------------------
 stack_in     <- file.path(DIR_PROCESSED, "cov_stack_1km_7755.tif")
@@ -216,8 +294,10 @@ tbl10_in     <- file.path(DIR_TABLES,    "tbl_10_covariate_stack_qa.csv")
 gap_params <- c("GAP_BUFFER_M", "GAP_MIN_PCT", "GAP_MIN_CELLS",
                 "GAP_WATER_CLASS", "GAP_FILL_WINDOW", "GAP_FILL_MAX_ITER",
                 "GHM_GAP_FILL", "BOUNDARY_SPLIT_STATUS")
-if (!is.logical(RUN_RESISTANCE) || !is.logical(RUN_LCP_SMOKE)) {
-  stop("RUN_RESISTANCE and RUN_LCP_SMOKE must be TRUE or FALSE.", call. = FALSE)
+if (!is.logical(RUN_RESISTANCE) || !is.logical(RUN_LCP_SMOKE) ||
+    !is.logical(RUN_ROAD_CELLS)) {
+  stop("RUN_RESISTANCE, RUN_LCP_SMOKE and RUN_ROAD_CELLS must be TRUE or FALSE.",
+       call. = FALSE)
 }
 missing_params <- gap_params[!vapply(gap_params, exists, logical(1))]
 if (isTRUE(RUN_RESISTANCE) && length(missing_params) > 0) {
@@ -247,7 +327,8 @@ if (length(missing_inputs) > 0) {
 }
 
 rule(paste0("07_connectivity.R — inputs found; CRS OK | RUN_RESISTANCE = ",
-            RUN_RESISTANCE, " | RUN_LCP_SMOKE = ", RUN_LCP_SMOKE))
+            RUN_RESISTANCE, " | RUN_LCP_SMOKE = ", RUN_LCP_SMOKE,
+            " | RUN_ROAD_CELLS = ", RUN_ROAD_CELLS))
 
 # =============================================================================
 # WEEK 9 — resistance surfaces. Runs only when RUN_RESISTANCE is TRUE.
@@ -2106,3 +2187,1471 @@ if (!all(net_qa$pass)) {
 rule(sprintf(paste0("STEP 11.4 done — network QA: %d of %d checks pass. ",
                     "Week-11 STEPs complete."),
              sum(net_qa$pass), nrow(net_qa)))
+
+# =============================================================================
+# WEEK 12 — road pinch points (Decision 20)
+# =============================================================================
+# Functions: R/00_functions_pinch.R. Every Decision-20 value is read from
+# R/00_config.R (PINCH_*). The Week-12 STEPs use `lcp_base`, `resqa_disk`,
+# `pairs` and `res_net` from the Week-10 STEPs of this run.
+source(here("R", "00_functions_pinch.R"))
+
+# ---- Guard: settings --------------------------------------------------------
+pinch_params <- c("PINCH_ROAD_CLASSES", "PINCH_ROAD_TOUCHES",
+                  "PINCH_ROAD_CLASS_ORDER", "PINCH_PATH_LINK_ROLES",
+                  "PINCH_RULE_LINK_ROLES", "PINCH_LIT_FLAG_PAIRS",
+                  "PINCH_CROSSING_RULE", "PINCH_RESERVE_CELL_RULE",
+                  "PINCH_SITE_MERGE_KM", "PINCH_RULE", "PINCH_SHARED_MIN_EDGES",
+                  "PINCH_COMPARE_VARIANTS", "PINCH_COMPARE_D_KM",
+                  "PINCH_COMPARE_D_DESCR_KM", "PINCH_COMPARE_ROBUST_MIN_OVERLAP",
+                  "PINCH_PUBLISH_GRID_M", "PINCH_FIG_NUMBER", "PINCH_FIG_SLUG",
+                  "PINCH_FIG_SIZE_IN", "PINCH_FIG_DPI", "PINCH_FIG_KEY_POS")
+missing_pinch <- pinch_params[!vapply(pinch_params, exists, logical(1))]
+if (length(missing_pinch) > 0) {
+  stop("Decision-20 setting(s) missing from R/00_config.R: ",
+       paste(missing_pinch, collapse = ", "), call. = FALSE)
+}
+# The functions build one rule set only (Decision 20 points 3 and 5). A
+# different value in the config needs a new Decision and new code.
+if (!identical(PINCH_CROSSING_RULE, "cell_run") ||
+    !identical(PINCH_RESERVE_CELL_RULE, "count_and_flag") ||
+    !identical(PINCH_RULE, "bridge_or_shared")) {
+  stop("R/00_functions_pinch.R builds only PINCH_CROSSING_RULE = 'cell_run', ",
+       "PINCH_RESERVE_CELL_RULE = 'count_and_flag', PINCH_RULE = ",
+       "'bridge_or_shared' (Decision 20). The config has: ",
+       PINCH_CROSSING_RULE, ", ", PINCH_RESERVE_CELL_RULE, ", ", PINCH_RULE,
+       ".", call. = FALSE)
+}
+# Decision 20 point 1: the road cells are the cells that the engine saw, so
+# the classes and the rasterise rule must be the Decision-15 ones. The class
+# order must hold each barrier class once.
+if (!identical(PINCH_ROAD_CLASSES, ROAD_BARRIER_CLASSES) ||
+    !identical(PINCH_ROAD_TOUCHES, ROAD_BARRIER_TOUCHES)) {
+  stop("PINCH_ROAD_CLASSES / PINCH_ROAD_TOUCHES are not the Decision-15 ",
+       "settings (ROAD_BARRIER_CLASSES / ROAD_BARRIER_TOUCHES).", call. = FALSE)
+}
+if (anyDuplicated(PINCH_ROAD_CLASS_ORDER) ||
+    !setequal(PINCH_ROAD_CLASS_ORDER, PINCH_ROAD_CLASSES)) {
+  stop("PINCH_ROAD_CLASS_ORDER must hold each class of PINCH_ROAD_CLASSES ",
+       "once.", call. = FALSE)
+}
+# Decision 20 point 7: the publish grid is the analysis grid aggregated by a
+# whole factor, and it is not finer than the publish floor.
+if (PINCH_PUBLISH_GRID_M %% GRID_CELL_M != 0 ||
+    PINCH_PUBLISH_GRID_M < PUBLISH_FLOOR_M) {
+  stop("PINCH_PUBLISH_GRID_M (", PINCH_PUBLISH_GRID_M, ") must be a whole ",
+       "multiple of GRID_CELL_M (", GRID_CELL_M, ") and at least ",
+       "PUBLISH_FLOOR_M (", PUBLISH_FLOOR_M, ").", call. = FALSE)
+}
+
+# ---- Guard: the lit_flag links resolve (Decision 20 point 2, k1) ---------------
+# Each entry of PINCH_LIT_FLAG_PAIRS must be a pair of STEP 10.1, with the
+# stated names. A stop here means that the config list or the pair table
+# changed.
+pinch_lit <- pinch_lit_flag_pairs(PINCH_LIT_FLAG_PAIRS, pairs)
+cat("links with lit_flag (no literature support, or a described barrier):\n")
+print(pinch_lit, row.names = FALSE)
+
+# =============================================================================
+# STEP 12.1 — barrier-road cells with their class (task 12.2; Decision 20
+#             point 1)
+# =============================================================================
+# 1. Roads: the Decision-15 barrier classes; a `_link` ramp is in its parent
+#    class (the rule of STEP 9.6).
+# 2. One rasterise call per class onto the surface grid, with the arguments of
+#    STEP 9.6 (field = 1, background = 0, touches). The cells of all classes
+#    together are the cells of the one STEP-9.6 call. Each cell keeps the rank
+#    of the highest class that touches it (1 = the first class of
+#    PINCH_ROAD_CLASS_ORDER). Mask: the footprint (the non-NA cells of the
+#    baseline surface).
+# 3. Guard, on the raster of this run or on the file from disk: the grid, the
+#    class order in the layer name, the values, the footprint, and the cell
+#    count against n_road_cells of tbl_11_resistance_qa.csv. Any failure
+#    stops the script.
+# The road cells come from geometry: the same on all four surfaces. STEP 9.6
+# does not run when RUN_RESISTANCE is FALSE, so this STEP has its own road
+# read. No crossing is computed here (STEP 12.2).
+rule("STEP 12.1 — barrier-road cells (Decision 20 point 1)")
+roadcells_file <- "cov_roadbarrier_class_1km_7755.tif"
+roadcells_out  <- file.path(DIR_INTERIM, roadcells_file)
+
+if (isTRUE(RUN_ROAD_CELLS)) {
+  if (!file.exists(roads_in)) {
+    stop("Missing road layer: ", roads_in, call. = FALSE)
+  }
+  t_r <- Sys.time()
+  roads_pinch <- read_vec(roads_in)
+  if (!"highway" %in% names(roads_pinch)) {
+    stop("Road layer has no 'highway' field: ", roads_in, call. = FALSE)
+  }
+  n_roads_all <- nrow(roads_pinch)
+  roads_pinch$road_class <- sub("_link$", "", roads_pinch$highway)  # ramp -> parent
+  roads_pinch <- roads_pinch[roads_pinch$road_class %in% PINCH_ROAD_CLASSES, ]
+  if (nrow(roads_pinch) == 0) {
+    stop("No road features in PINCH_ROAD_CLASSES.", call. = FALSE)
+  }
+  pinch_feat <- as.data.frame(table(factor(roads_pinch$road_class,
+                                           levels = PINCH_ROAD_CLASS_ORDER)))
+  names(pinch_feat) <- c("road_class", "n_features")
+  cat(sprintf("road layer: %s features | barrier classes: %s\n",
+              format(n_roads_all, big.mark = ","),
+              format(nrow(roads_pinch), big.mark = ",")))
+  cat("barrier road features (links merged into parent class):\n")
+  print(pinch_feat, row.names = FALSE)
+
+  road_class_r <- pinch_road_class_raster(roads_pinch, lcp_base,
+                                          class_field = "road_class",
+                                          class_order = PINCH_ROAD_CLASS_ORDER,
+                                          touches = PINCH_ROAD_TOUCHES)
+  cat(sprintf("read + rasterise: %.0f s\n",
+              as.numeric(difftime(Sys.time(), t_r, units = "secs"))))
+  rm(roads_pinch); invisible(gc())
+} else {
+  if (!file.exists(roadcells_out)) {
+    stop("Missing barrier-road raster: ", roadcells_out,
+         "\nSet RUN_ROAD_CELLS <- TRUE to build it.", call. = FALSE)
+  }
+  road_class_r <- terra::rast(roadcells_out)
+  cat("read from disk:", roadcells_out, "\n")
+}
+
+# ---- 12.1a Guard (stop on any failure; nothing is written before it) ---------
+road_chk <- pinch_check_road_cells(road_class_r, lcp_base,
+                                   PINCH_ROAD_CLASS_ORDER,
+                                   n_expected = resqa_disk$n_road_cells)
+for (i in seq_len(nrow(road_chk))) {
+  cat(sprintf("  %-4s %s (%s)\n", if (road_chk$pass[i]) "ok" else "FAIL",
+              road_chk$check[i], road_chk$value[i]))
+}
+if (!all(road_chk$pass)) {
+  stop("Barrier-road cell check(s) failed: ",
+       paste(road_chk$check[!road_chk$pass], collapse = "; "),
+       if (!isTRUE(RUN_ROAD_CELLS)) ". Re-run with RUN_ROAD_CELLS <- TRUE."
+       else ". The road cells are not the cells of the Week-9 surfaces.",
+       call. = FALSE)
+}
+
+# ---- 12.1b Cells per class (report) --------------------------------------------
+road_class_n <- pinch_road_cell_counts(road_class_r, PINCH_ROAD_CLASS_ORDER)
+road_class_n$pct_of_road_cells <- round(100 * road_class_n$n_cells /
+                                          sum(road_class_n$n_cells), 1)
+cat("barrier-road cells by road_class_top (the highest class in the cell):\n")
+print(road_class_n, row.names = FALSE)
+n_foot_12 <- sum(!is.na(terra::values(lcp_base, mat = FALSE)))
+cat(sprintf("barrier-road cells in the footprint: %s (%.1f%% of %s cells)\n",
+            format(sum(road_class_n$n_cells), big.mark = ","),
+            100 * sum(road_class_n$n_cells) / n_foot_12,
+            format(n_foot_12, big.mark = ",")))
+
+# ---- 12.1c Output ----------------------------------------------------------------
+if (isTRUE(RUN_ROAD_CELLS)) {
+  write_processed_rast(road_class_r, roadcells_file, dir = DIR_INTERIM,
+                       datatype = "INT1U")
+  # The file must give the same result in the guard as the raster in memory.
+  road_chk_disk <- pinch_check_road_cells(terra::rast(roadcells_out), lcp_base,
+                                          PINCH_ROAD_CLASS_ORDER,
+                                          n_expected = resqa_disk$n_road_cells)
+  if (!all(road_chk_disk$pass)) {
+    stop("The barrier-road raster on disk fails the guard: ",
+         paste(road_chk_disk$check[!road_chk_disk$pass], collapse = "; "),
+         call. = FALSE)
+  }
+  cat("the file on disk passes the same guard\n")
+}
+
+# For the crossing STEPs: the class rank of each cell of the grid (NA = not a
+# barrier-road cell).
+road_rank_v <- as.integer(terra::values(road_class_r, mat = FALSE))
+rule(sprintf(paste0("STEP 12.1 done — %s barrier-road cells, the count of the ",
+                    "Week-9 surfaces. Next: STEP 12.2 crossings (task 12.3)."),
+             format(sum(!is.na(road_rank_v)), big.mark = ",")))
+
+# =============================================================================
+# STEP 12.2 — road crossings of the baseline paths (task 12.3; Decision 20
+#             points 2, 3 and 7)
+# =============================================================================
+# 1. Links: every baseline in-network pair with a path — link_role in
+#    PINCH_PATH_LINK_ROLES (edge, parallel). Their path cells come from
+#    `paths_base` (STEP 10.2 of this run; the layer on disk has no cell list).
+# 2. Cell list of a path: the path cells in order, with the two middle cells
+#    of each knight step (crossed-cells rule, Decision 17 point 3). Check: the
+#    step cost from the cell list must be the cost of the path on the layer.
+# 3. Crossing: one unbroken run of barrier-road cells in the cell list. Every
+#    road cell counts, also a cell in a reserve footprint (the reserves are
+#    listed). No cell is excluded.
+# 4. Position: the middle cell of the run (for an even run, the cell nearer
+#    the start). The table gives only its cell of the PINCH_PUBLISH_GRID_M
+#    grid, with the state and the district. The 1 km cells go to a gitignored
+#    layer under data/processed.
+# No site and no pinch point is made here (STEP 12.3).
+rule(paste0("STEP 12.2 — road crossings, baseline (Decision 20) -> ",
+            "tbl_14_road_crossings.csv"))
+PINCH_BASE_SURFACE <- NET_BASE_SURFACE          # "baseline"
+crossings_gpkg <- file.path(DIR_PROCESSED, "lcp_road_crossings_7755.gpkg")
+states_in      <- file.path(DIR_PROCESSED, "boundary_states_7755.gpkg")
+# The district layer of scripts/01 Block 8 (DataMeet, Census 2011).
+districts_in   <- file.path(DIR_RAW, "administrative",
+                            "boundary_districts_datameet2011_7755.gpkg")
+ADMIN_STATE_FIELD         <- "name"        # Natural Earth admin-1 name
+ADMIN_DISTRICT_FIELD      <- "DISTRICT"    # DataMeet 2011 district name
+ADMIN_DISTRICT_CODE_FIELD <- "censuscode"  # 2011 census district code (the
+                                           # names are not unique)
+admin_in <- c(states_in, districts_in)
+if (any(!file.exists(admin_in))) {
+  stop("Missing admin layer(s) for the crossing positions:\n  ",
+       paste(admin_in[!file.exists(admin_in)], collapse = "\n  "),
+       call. = FALSE)
+}
+
+# ---- 12.2a Self-test (hand-made case; stop on any failure) ----------------------
+pinch_st <- pinch_selftest()
+cat(sprintf("self-test on the hand-made case: %d of %d cases pass\n",
+            sum(pinch_st$pass), nrow(pinch_st)))
+if (!all(pinch_st$pass)) {
+  print(pinch_st[!pinch_st$pass, ], row.names = FALSE, right = FALSE)
+  stop("Pinch-point self-test failed — the crossing functions are wrong. ",
+       "Nothing further runs.", call. = FALSE)
+}
+
+# ---- 12.2b Crossings ---------------------------------------------------------------
+if (!"cells" %in% names(paths_base) ||
+    !identical(sort(paths_base$pair_id), sort(pairs$pair_id))) {
+  stop("`paths_base` (STEP 10.2) does not hold the path cells of the pairs of ",
+       "this run.", call. = FALSE)
+}
+t_x <- Sys.time()
+lcp_vals <- terra::values(lcp_base, mat = FALSE)
+cross_base <- pinch_crossings(
+  paths = paths_base, links = net_links, link_roles = PINCH_PATH_LINK_ROLES,
+  road_rank_v = road_rank_v, class_order = PINCH_ROAD_CLASS_ORDER,
+  vals = lcp_vals, nc = terra::ncol(lcp_base),
+  res_km = terra::xres(lcp_base) / 1000, reserve_cells = res_cells,
+  unit_id = res_net$unit_id, surface = PINCH_BASE_SURFACE)
+cx  <- cross_base$crossings
+cxc <- cross_base$cells
+cxp <- cross_base$paths
+if (is.null(cx)) {
+  stop("No road crossing on any baseline path — check the road cells and the ",
+       "paths.", call. = FALSE)
+}
+cat(sprintf(paste0("paths with crossings computed: %d (%s) | cell lists: %s ",
+                   "cells, %s from knight steps | %.0f s\n"),
+            nrow(cxp),
+            paste(sprintf("%s %d", names(table(cxp$link_role)),
+                          as.integer(table(cxp$link_role))), collapse = ", "),
+            format(sum(cxp$n_list_cells), big.mark = ","),
+            format(sum(cxp$n_list_cells - cxp$n_vertices), big.mark = ","),
+            as.numeric(difftime(Sys.time(), t_x, units = "secs"))))
+
+# ---- 12.2c Checks (stop on any failure) ---------------------------------------------
+n_links_x <- sum(net_links$link_role %in% PINCH_PATH_LINK_ROLES)
+x_chk <- c(
+  "each link in the roles has its crossings computed" =
+    nrow(cxp) == n_links_x && setequal(cxp$pair_id,
+      net_links$pair_id[net_links$link_role %in% PINCH_PATH_LINK_ROLES]),
+  "cost from the cell list = cost of the path (every path)" = all(cxp$cost_ok),
+  "each crossing cell is a barrier-road cell" =
+    all(!is.na(road_rank_v[cxc$cell])),
+  "each crossing cell is a footprint cell" = all(!is.na(lcp_vals[cxc$cell])),
+  "crossing cells add up to the road cells on the paths" =
+    nrow(cxc) == sum(cx$n_cells) && nrow(cxc) == sum(cxp$n_road_cells),
+  "crossings add up per path" =
+    nrow(cx) == sum(cxp$n_crossings) && !anyDuplicated(cx$crossing_id),
+  "the middle cell is a cell of its crossing" =
+    all(mapply(function(m, cc) m %in% cc, cx$mid_cell, cx$cells))
+)
+for (i in seq_along(x_chk)) {
+  cat(sprintf("  %-4s %s\n", if (isTRUE(x_chk[[i]])) "ok" else "FAIL",
+              names(x_chk)[i]))
+}
+if (!all(x_chk)) {
+  if (!all(cxp$cost_ok)) {
+    print(cxp[!cxp$cost_ok, c("pair_id", "cost_rkm", "cost_from_list")],
+          row.names = FALSE, digits = 12)
+  }
+  stop("Crossing check(s) failed: ", paste(names(x_chk)[!x_chk],
+                                           collapse = "; "), call. = FALSE)
+}
+
+# ---- 12.2d Link fields and published position -----------------------------------------
+k_l <- match(cx$pair_id, net_links$pair_id)
+grid_prefix <- sprintf("grid%d", as.integer(PINCH_PUBLISH_GRID_M %/% 1000L))
+g_x <- pinch_grid_cell(cx$mid_cell, lcp_base, PINCH_PUBLISH_GRID_M)
+names(g_x) <- sub("^grid", grid_prefix, names(g_x))
+states_sf    <- read_vec(states_in)
+districts_sf <- read_vec(districts_in)
+cat("admin layers:", states_in, "|", districts_in, "\n")
+a_state <- pinch_admin_lookup(cx$mid_cell, lcp_base, states_sf,
+                              ADMIN_STATE_FIELD)
+a_dist  <- pinch_admin_lookup(cx$mid_cell, lcp_base, districts_sf,
+                              ADMIN_DISTRICT_FIELD)
+a_code  <- pinch_admin_lookup(cx$mid_cell, lcp_base, districts_sf,
+                              ADMIN_DISTRICT_CODE_FIELD)
+cat(sprintf(paste0("state from the nearest polygon (centre in no polygon): %d",
+                   " | district from the nearest polygon: %d (of %d crossings)\n"),
+            sum(a_state$nearest), sum(a_dist$nearest), nrow(cx)))
+
+cx$from_unit_id <- net_links$from_unit_id[k_l]
+cx$from_name    <- net_links$from_name[k_l]
+cx$to_unit_id   <- net_links$to_unit_id[k_l]
+cx$to_name      <- net_links$to_name[k_l]
+cx$from_node_id <- net_links$from_node_id[k_l]
+cx$to_node_id   <- net_links$to_node_id[k_l]
+cx$link_role    <- net_links$link_role[k_l]
+cx$is_bridge    <- net_links$is_bridge[k_l]      # NA for a parallel link
+cx$lit_flag     <- cx$pair_id %in% pinch_lit$pair_id
+cx <- cbind(cx, g_x)
+cx$state         <- a_state$value
+cx$district      <- a_dist$value
+cx$district_code <- a_code$value
+cross_base$crossings <- cx                       # for STEP 12.3 (with `cells`)
+
+# ---- 12.2e Report -------------------------------------------------------------------
+cat(sprintf(paste0("crossings: %s on %d paths | road cells on the paths: %s ",
+                   "(%.1f%% of the %s list cells)\n"),
+            format(nrow(cx), big.mark = ","), sum(cxp$n_crossings > 0),
+            format(nrow(cxc), big.mark = ","),
+            100 * nrow(cxc) / sum(cxp$n_list_cells),
+            format(sum(cxp$n_list_cells), big.mark = ",")))
+cat(sprintf(paste0("cells per crossing: median %g, mean %.2f, max %d | ",
+                   "crossings of 1 cell: %d | of 5 cells or more: %d\n"),
+            stats::median(cx$n_cells), mean(cx$n_cells), max(cx$n_cells),
+            sum(cx$n_cells == 1L), sum(cx$n_cells >= 5L)))
+cat("crossings by link_role:\n")
+print(table(link_role = cx$link_role))
+cat("crossings by road_class_top (the highest class in the run):\n")
+print(table(road_class_top = factor(cx$road_class_top,
+                                    levels = PINCH_ROAD_CLASS_ORDER)))
+cat(sprintf(paste0("crossings with a cell in a reserve footprint: %d | with ",
+                   "a middle cell of a knight step: %d | on a bridge edge: %d",
+                   " | on a link with lit_flag: %d\n"),
+            sum(cx$in_reserve_unit_ids != ""),
+            length(unique(cxc$crossing_id[!cxc$is_vertex])),
+            sum(cx$is_bridge %in% TRUE), sum(cx$lit_flag)))
+per_link <- merge(
+  net_links[net_links$link_role %in% PINCH_PATH_LINK_ROLES,
+            c("pair_id", "from_name", "to_name", "link_role", "is_bridge",
+              "path_km")],
+  cxp[, c("pair_id", "n_crossings", "n_road_cells")], by = "pair_id")
+per_link$lit_flag <- per_link$pair_id %in% pinch_lit$pair_id
+per_link$crossings_per_100km <- round(100 * per_link$n_crossings /
+                                        per_link$path_km, 1)
+cat(sprintf(paste0("crossings per path: median %g, range %d-%d | per 100 km ",
+                   "of path: median %.1f\n"),
+            stats::median(per_link$n_crossings), min(per_link$n_crossings),
+            max(per_link$n_crossings),
+            stats::median(per_link$crossings_per_100km)))
+if (any(per_link$n_crossings == 0L)) {
+  cat("paths with no road crossing:\n")
+  print(per_link[per_link$n_crossings == 0L,
+                 c("pair_id", "from_name", "to_name", "link_role", "path_km")],
+        row.names = FALSE, digits = 4)
+}
+cat("the bridge edges (Decision 19) and their crossings:\n")
+print(per_link[per_link$is_bridge %in% TRUE,
+               c("pair_id", "from_name", "to_name", "path_km", "n_crossings",
+                 "n_road_cells", "crossings_per_100km", "lit_flag")],
+      row.names = FALSE, digits = 4)
+cat("the longest runs (a path that goes along a road):\n")
+print(utils::head(cx[order(-cx$n_cells),
+                     c("crossing_id", "from_name", "to_name", "n_cells",
+                       "road_class_top", "state", "district")], 5),
+      row.names = FALSE)
+
+# ---- 12.2f Outputs --------------------------------------------------------------------
+# (i) The 1 km cells: one point per crossing cell. Gitignored (data/processed);
+# never a published layer (sensitive-data policy §3; Decision 20 point 7).
+k_c <- match(cxc$crossing_id, cx$crossing_id)
+cxc$is_mid <- cxc$cell == cx$mid_cell[k_c] &
+  cxc$seq == (cx$n_cells[k_c] - 1L) %/% 2L + 1L
+cxc_sf <- sf::st_as_sf(
+  cbind(cxc, as.data.frame(terra::xyFromCell(lcp_base, cxc$cell))),
+  coords = c("x", "y"), crs = sf::st_crs(res_net))
+pinch_write_layer(cxc_sf, crossings_gpkg, PINCH_BASE_SURFACE)
+
+# (ii) The table: one row per crossing; the position at the publish grid only.
+x_cols <- c("crossing_id", "pair_id", "surface", "from_unit_id", "from_name",
+            "to_unit_id", "to_name", "from_node_id", "to_node_id", "link_role",
+            "is_bridge", "lit_flag", "run_no", "n_cells", "road_class_top",
+            "in_reserve_unit_ids", names(g_x), "state", "district",
+            "district_code")
+crossings_out <- cx[order(cx$pair_id, cx$run_no), x_cols]
+rownames(crossings_out) <- NULL
+# Guard (Decision 20 point 7): no position finer than the publish grid in a
+# committed table. The columns are the list above.
+x_pub <- pinch_check_publish_table(crossings_out, lcp_base,
+                                   PINCH_PUBLISH_GRID_M, grid_prefix)
+if (!identical(names(crossings_out), x_cols) || !all(x_pub$pass)) {
+  print(x_pub[!x_pub$pass, ], row.names = FALSE, right = FALSE)
+  stop("tbl_14_road_crossings: a column or a position is finer than the ",
+       "publish grid (", PINCH_PUBLISH_GRID_M, " m). The table is not written.",
+       call. = FALSE)
+}
+write_table(crossings_out, 14, "road_crossings")
+rule(sprintf(paste0("STEP 12.2 done — %s crossings on %d baseline paths. ",
+                    "Next: STEP 12.3 sites and pinch points (task 12.4)."),
+             format(nrow(crossings_out), big.mark = ","), nrow(cxp)))
+
+# =============================================================================
+# STEP 12.3 — sites and pinch points, baseline (task 12.4; Decision 20
+#             points 4, 5 and 7)
+# =============================================================================
+# 1. Site: two crossings are joined if a cell centre of one is at most
+#    PINCH_SITE_MERGE_KM from a cell centre of the other (one link or
+#    different links). A site is a connected set of joined crossings. All
+#    crossings of STEP 12.2 enter (edge and parallel links).
+# 2. Pinch point: on_bridge = a bridge edge (Decision 19) uses the site;
+#    shared = PINCH_SHARED_MIN_EDGES or more edges use it; pinch_point =
+#    on_bridge OR shared; pinch_tier 1 = both, 2 = on_bridge only, 3 = shared
+#    only. Only `edge` links count. The road class, the cost and the number
+#    of crossings are columns; they are not in the rule and give no order.
+# 3. Position: the mean of the distinct cell centres of the site. The tables
+#    give only its cell of the publish grid, with state and district.
+# "Pinch point" here is NOT the pinch point of circuit-theory mapping (a
+# narrow part of a corridor with high current flow): a least-cost path has no
+# width (Decision 20 point 5).
+rule(paste0("STEP 12.3 — sites and pinch points, baseline (Decision 20) -> ",
+            "tbl_14_pinch_points.csv, tbl_14_pinch_link_summary.csv"))
+
+# ---- 12.3a Self-test (hand-made case; stop on any failure) ----------------------
+pinch_st2 <- pinch_selftest_sites()
+cat(sprintf("self-test of the sites and the rule: %d of %d cases pass\n",
+            sum(pinch_st2$pass), nrow(pinch_st2)))
+if (!all(pinch_st2$pass)) {
+  print(pinch_st2[!pinch_st2$pass, ], row.names = FALSE, right = FALSE)
+  stop("Site self-test failed — the site or rule functions are wrong. ",
+       "Nothing further runs.", call. = FALSE)
+}
+
+# ---- 12.3b Sites and the rule -------------------------------------------------------
+nc_12  <- terra::ncol(lcp_base)
+res_12 <- terra::xres(lcp_base) / 1000
+cx$site_id <- pinch_build_sites(cx, nc_12, res_12, PINCH_SITE_MERGE_KM)
+sites_base <- pinch_site_table(cx, lcp_base, PINCH_ROAD_CLASS_ORDER,
+                               PINCH_RULE_LINK_ROLES, PINCH_SHARED_MIN_EDGES,
+                               PINCH_BASE_SURFACE)
+site_gap_km <- pinch_min_site_gap_km(cx, cx$site_id, nc_12, res_12)
+
+# Position at the publish grid, state and district (of the mean point).
+g_s <- pinch_grid_cell_xy(sites_base$mean_x, sites_base$mean_y, lcp_base,
+                          PINCH_PUBLISH_GRID_M)
+names(g_s) <- sub("^grid", grid_prefix, names(g_s))
+s_xy    <- cbind(sites_base$mean_x, sites_base$mean_y)
+s_state <- pinch_admin_lookup_xy(s_xy, states_sf, ADMIN_STATE_FIELD)
+s_dist  <- pinch_admin_lookup_xy(s_xy, districts_sf, ADMIN_DISTRICT_FIELD)
+s_code  <- pinch_admin_lookup_xy(s_xy, districts_sf, ADMIN_DISTRICT_CODE_FIELD)
+sites_base <- cbind(sites_base, g_s)
+sites_base$state         <- s_state$value
+sites_base$district      <- s_dist$value
+sites_base$district_code <- s_code$value
+link_sum <- pinch_link_summary(cx, sites_base, cxp)
+cross_base$crossings <- cx                 # now with site_id (for STEP 12.4)
+
+# ---- 12.3c Checks (stop on any failure) ---------------------------------------------
+rule_2 <- sites_base$n_bridges >= 1L | sites_base$n_edges >= PINCH_SHARED_MIN_EDGES
+tier_2 <- ifelse(!rule_2, NA_integer_,
+                 3L - 2L * (sites_base$n_bridges >= 1L &
+                              sites_base$n_edges >= PINCH_SHARED_MIN_EDGES) -
+                   1L * (sites_base$n_bridges >= 1L &
+                           sites_base$n_edges < PINCH_SHARED_MIN_EDGES))
+s_chk <- c(
+  "each crossing is in one site" =
+    !anyNA(cx$site_id) && sum(sites_base$n_crossings) == nrow(cx),
+  "site ids are 1 to n, in the order of the lowest cell" =
+    identical(sites_base$site_id, seq_len(nrow(sites_base))) &&
+    !is.unsorted(tapply(vapply(cx$cells, min, numeric(1)), cx$site_id, min)),
+  "two sites are more than the merge distance apart" =
+    site_gap_km > PINCH_SITE_MERGE_KM,
+  "pinch_point = on_bridge OR shared (rule written a second way)" =
+    identical(sites_base$pinch_point, rule_2) &&
+    identical(sites_base$pinch_tier, tier_2),
+  "a bridge edge counts as an edge; edges are links" =
+    all(sites_base$n_bridges <= sites_base$n_edges) &&
+    all(sites_base$n_edges <= sites_base$n_links),
+  "site cells add up to the distinct crossing cells" =
+    sum(sites_base$n_cells) ==
+    nrow(unique(data.frame(s = rep(cx$site_id, lengths(cx$cells)),
+                           c = unlist(cx$cells)))),
+  "each link has a site for each of its crossings" =
+    all(link_sum$n_sites <= link_sum$n_crossings) &&
+    all((link_sum$n_sites > 0) == (link_sum$n_crossings > 0)) &&
+    all(link_sum$n_pinch_points == link_sum$n_pinch_tier1 +
+          link_sum$n_pinch_tier2 + link_sum$n_pinch_tier3),
+  "each site on a bridge edge is a pinch point" =
+    all(sites_base$pinch_point[sites_base$site_id %in%
+                                 cx$site_id[cx$is_bridge %in% TRUE]])
+)
+for (i in seq_along(s_chk)) {
+  cat(sprintf("  %-4s %s\n", if (isTRUE(s_chk[[i]])) "ok" else "FAIL",
+              names(s_chk)[i]))
+}
+if (!all(s_chk)) {
+  stop("Site check(s) failed: ", paste(names(s_chk)[!s_chk], collapse = "; "),
+       call. = FALSE)
+}
+
+# ---- 12.3d Report -------------------------------------------------------------------
+pp <- sites_base[sites_base$pinch_point, ]
+cat(sprintf(paste0("sites: %d from %d crossings (merge distance %g km) | ",
+                   "crossings per site: median %g, max %d | sites of one ",
+                   "crossing: %d | shortest gap between two sites: %.2f km\n"),
+            nrow(sites_base), nrow(cx), PINCH_SITE_MERGE_KM,
+            stats::median(sites_base$n_crossings), max(sites_base$n_crossings),
+            sum(sites_base$n_crossings == 1L), site_gap_km))
+cat(sprintf(paste0("span_km: median %.1f, max %.1f | sites with a span above ",
+                   "%g km (a chain): %d\n"),
+            stats::median(sites_base$span_km), max(sites_base$span_km),
+            2 * PINCH_SITE_MERGE_KM,
+            sum(sites_base$span_km > 2 * PINCH_SITE_MERGE_KM)))
+cat(sprintf(paste0("pinch points: %d of %d sites (%.1f%%) | on_bridge %d | ",
+                   "shared %d | tier 1 (both) %d, tier 2 (on_bridge only) %d, ",
+                   "tier 3 (shared only) %d\n"),
+            nrow(pp), nrow(sites_base), 100 * nrow(pp) / nrow(sites_base),
+            sum(sites_base$on_bridge), sum(sites_base$shared),
+            sum(pp$pinch_tier == 1L), sum(pp$pinch_tier == 2L),
+            sum(pp$pinch_tier == 3L)))
+cat(sprintf(paste0("pinch points with lit_flag (each edge has the flag): %d ",
+                   "| with lit_flag_any: %d | with a cell in a reserve ",
+                   "footprint: %d | sites with parallel links only: %d\n"),
+            sum(pp$lit_flag), sum(pp$lit_flag_any),
+            sum(pp$in_reserve_unit_ids != ""), sum(sites_base$n_edges == 0L)))
+cat("pinch points by pinch_tier and road_class_top (a description, not a rule):\n")
+print(table(pinch_tier = pp$pinch_tier,
+            road_class_top = factor(pp$road_class_top,
+                                    levels = PINCH_ROAD_CLASS_ORDER)))
+show_s <- c("site_id", "pinch_tier", "n_edges", "n_bridges", "n_crossings",
+            "span_km", "road_class_top", "lit_flag", "state", "district",
+            "links")
+if (any(pp$pinch_tier == 1L)) {
+  cat("tier-1 pinch points (on a bridge edge AND shared):\n")
+  print(pp[pp$pinch_tier == 1L, show_s], row.names = FALSE, digits = 3,
+        right = FALSE)
+}
+cat("the sites with the most edges:\n")
+print(utils::head(sites_base[order(-sites_base$n_edges, sites_base$site_id),
+                             show_s], 8), row.names = FALSE, digits = 3,
+      right = FALSE)
+cat("the sites with the longest span:\n")
+print(utils::head(sites_base[order(-sites_base$span_km), show_s], 5),
+      row.names = FALSE, digits = 3, right = FALSE)
+br <- merge(per_link[per_link$is_bridge %in% TRUE,
+                     c("pair_id", "from_name", "to_name", "lit_flag")],
+            link_sum[, c("pair_id", "n_crossings", "n_sites", "n_pinch_points",
+                         "n_pinch_tier1", "n_pinch_tier2")], by = "pair_id")
+cat("the bridge edges: crossings, sites and pinch points:\n")
+print(br, row.names = FALSE)
+cat("pinch points by state:\n")
+print(sort(table(pp$state), decreasing = TRUE))
+
+# ---- 12.3e Outputs --------------------------------------------------------------------
+# (i) Sites: one row per site (pinch points and other sites), position at the
+# publish grid only. Sorted by tier, then site_id (Decision 20 point 5).
+s_cols <- c("site_id", "surface", "pinch_point", "pinch_tier", "on_bridge",
+            "shared", "n_crossings", "n_links", "n_edges", "n_bridges",
+            "n_cells", "span_km", "road_class_top", "in_reserve_unit_ids",
+            "lit_flag", "lit_flag_any", "pair_ids", "edge_pair_ids",
+            "bridge_pair_ids", "links", names(g_s), "state", "district",
+            "district_code")
+sites_out <- sites_base[order(is.na(sites_base$pinch_tier),
+                              sites_base$pinch_tier, sites_base$site_id),
+                        s_cols]
+sites_out$span_km <- round(sites_out$span_km, 3)
+rownames(sites_out) <- NULL
+
+# (ii) Links: one row per link with crossings computed.
+k_ls <- match(link_sum$pair_id, net_links$pair_id)
+links_sum_out <- cbind(
+  net_links[k_ls, c("pair_id", "surface", "from_unit_id", "from_name",
+                    "to_unit_id", "to_name", "from_node_id", "to_node_id",
+                    "link_role", "is_bridge")],
+  lit_flag = link_sum$pair_id %in% pinch_lit$pair_id,
+  net_links[k_ls, c(NET_EDGE_WEIGHT_FIELD, "path_km")],
+  link_sum[, setdiff(names(link_sum), "pair_id")])
+rownames(links_sum_out) <- NULL
+
+# (iii) The crossing table again, with site_id (as STEP 11.3 does for the
+# metrics table).
+x_cols2 <- append(x_cols, "site_id", after = match("crossing_id", x_cols))
+crossings_out <- cx[order(cx$pair_id, cx$run_no), x_cols2]
+rownames(crossings_out) <- NULL
+
+# Guard (Decision 20 point 7): no position finer than the publish grid in a
+# committed table. Any failure stops the script before a table is written.
+pub_chk <- rbind(
+  cbind(table = "tbl_14_pinch_points",
+        pinch_check_publish_table(sites_out, lcp_base, PINCH_PUBLISH_GRID_M,
+                                  grid_prefix)),
+  cbind(table = "tbl_14_road_crossings",
+        pinch_check_publish_table(crossings_out, lcp_base,
+                                  PINCH_PUBLISH_GRID_M, grid_prefix)))
+if (!all(pub_chk$pass) || any(c(names(g_s), "state", "district") %in%
+                              names(links_sum_out))) {
+  print(pub_chk[!pub_chk$pass, ], row.names = FALSE, right = FALSE)
+  stop("A Week-12 table holds a position finer than the publish grid (",
+       PINCH_PUBLISH_GRID_M, " m). No table is written.", call. = FALSE)
+}
+cat(sprintf("publish guard: %d of %d checks pass (no position finer than %g km)\n",
+            sum(pub_chk$pass), nrow(pub_chk), PINCH_PUBLISH_GRID_M / 1000))
+write_table(sites_out, 14, "pinch_points")
+write_table(links_sum_out, 14, "pinch_link_summary")
+write_table(crossings_out, 14, "road_crossings")
+
+# (iv) The 1 km layer again, with site_id (gitignored; never published).
+cxc_sf$site_id <- cx$site_id[match(cxc_sf$crossing_id, cx$crossing_id)]
+pinch_write_layer(cxc_sf, crossings_gpkg, PINCH_BASE_SURFACE)
+rule(sprintf(paste0("STEP 12.3 done — %d sites, %d pinch points (tier 1: %d, ",
+                    "tier 2: %d, tier 3: %d). Next: STEP 12.4 variants ",
+                    "(task 12.5)."),
+             nrow(sites_base), nrow(pp), sum(pp$pinch_tier == 1L),
+             sum(pp$pinch_tier == 2L), sum(pp$pinch_tier == 3L)))
+
+# =============================================================================
+# STEP 12.4 — variants and the Decision-20 comparison (task 12.5; point 6)
+# =============================================================================
+# 1. For noghm, road15 and road50: the crossings, the sites and the pinch
+#    points, by the rules and the functions of the baseline
+#    (pinch_run_surface()). Each variant has its own paths (STEP 10.4), its
+#    own links, edges and bridges (the Decision-19 graph of STEP 11.3). The
+#    barrier-road cells are the same on every surface.
+# 2. Each variant is compared with the baseline only. The label rule was
+#    fixed in Decision 20 before any crossing: "robust" if site_overlap >=
+#    PINCH_COMPARE_ROBUST_MIN_OVERLAP, where site_overlap = min(share of the
+#    baseline pinch points with a variant pinch point within
+#    PINCH_COMPARE_D_KM, share of the variant pinch points with a baseline
+#    pinch point within that distance).
+# 3. A choice tested by two variants (the road value) is robust only if both
+#    are robust.
+# 4. Each baseline site gets near_pinch_<variant> (a variant pinch point is
+#    within the distance) and n_variants_near. No new label is made.
+# outputs/tables gets the comparison table only (process choice,
+# 2026-10-10); the variant crossing cells go to the gitignored 1 km file.
+rule(paste0("STEP 12.4 — variants (", paste(PINCH_COMPARE_VARIANTS,
+                                             collapse = ", "),
+            ") -> tbl_14_pinch_variant_comparison.csv"))
+if (!identical(sort(PINCH_COMPARE_VARIANTS), sort(NET_COMPARE_VARIANTS)) ||
+    !all(PINCH_COMPARE_VARIANTS %in% names(paths_var)) ||
+    !all(PINCH_COMPARE_VARIANTS %in% names(net_var_g))) {
+  stop("PINCH_COMPARE_VARIANTS must be the variants of STEPs 10.4 and 11.3 (",
+       paste(NET_COMPARE_VARIANTS, collapse = ", "), ").", call. = FALSE)
+}
+
+# ---- 12.4a Self-test of the comparison (stop on any failure) ---------------------
+pinch_st3 <- pinch_selftest_compare()
+cat(sprintf("self-test of the comparison: %d of %d cases pass\n",
+            sum(pinch_st3$pass), nrow(pinch_st3)))
+if (!all(pinch_st3$pass)) {
+  print(pinch_st3[!pinch_st3$pass, ], row.names = FALSE, right = FALSE)
+  stop("Comparison self-test failed. Nothing further runs.", call. = FALSE)
+}
+
+# ---- 12.4b The chain function on the baseline = STEPs 12.2 and 12.3 --------------
+run_surface <- function(paths, links, edge_flags, r, surface) {
+  pinch_run_surface(
+    paths = paths, links = links, edge_flags = edge_flags,
+    lit_pair_ids = pinch_lit$pair_id, link_roles = PINCH_PATH_LINK_ROLES,
+    rule_link_roles = PINCH_RULE_LINK_ROLES, road_rank_v = road_rank_v,
+    class_order = PINCH_ROAD_CLASS_ORDER, r = r, reserve_cells = res_cells,
+    unit_id = res_net$unit_id, merge_km = PINCH_SITE_MERGE_KM,
+    shared_min_edges = PINCH_SHARED_MIN_EDGES, surface = surface)
+}
+pinch_base <- run_surface(paths_base, net_links, net_flags, lcp_base,
+                          PINCH_BASE_SURFACE)
+same_cols <- c("site_id", "n_crossings", "n_links", "n_edges", "n_bridges",
+               "n_cells", "span_km", "pinch_point", "pinch_tier", "lit_flag",
+               "links")
+if (!identical(pinch_base$crossings$crossing_id, cx$crossing_id) ||
+    !identical(pinch_base$crossings$site_id, cx$site_id) ||
+    !isTRUE(all.equal(pinch_base$sites[, same_cols], sites_base[, same_cols],
+                      check.attributes = FALSE))) {
+  stop("pinch_run_surface() on the baseline does not give the crossings and ",
+       "sites of STEPs 12.2 and 12.3.", call. = FALSE)
+}
+cat(sprintf(paste0("the chain function on the baseline gives the result of ",
+                   "STEPs 12.2-12.3: %d crossings, %d sites, %d pinch points\n"),
+            nrow(pinch_base$crossings), nrow(pinch_base$sites),
+            sum(pinch_base$sites$pinch_point)))
+
+# ---- 12.4c Each variant -------------------------------------------------------------
+pinch_var     <- list()
+pinch_cmp     <- list()
+pinch_var_chk <- list()                       # kept for the QA STEP
+pinch_links   <- stats::setNames(list(net_links), PINCH_BASE_SURFACE)
+pinch_flags   <- stats::setNames(list(net_flags), PINCH_BASE_SURFACE)
+for (v in PINCH_COMPARE_VARIANTS) {
+  t_v <- Sys.time()
+  r_v <- terra::rast(resist_in[[v]])
+  links_v <- net_build_links(net_var_paths[[v]], net_nodes,
+                             NET_EDGE_WEIGHT_FIELD)
+  flags_v <- net_edge_flags(net_var_g[[v]])
+  if (!setequal(flags_v$pair_id,
+                links_v$pair_id[links_v$link_role == "edge"]) ||
+      !identical(sort(paths_var[[v]]$pair_id), sort(pairs$pair_id)) ||
+      !"cells" %in% names(paths_var[[v]])) {
+    stop("Variant '", v, "': the graph of STEP 11.3 and the paths of STEP ",
+         "10.4 do not agree with its link table.", call. = FALSE)
+  }
+  pv <- run_surface(paths_var[[v]], links_v, flags_v, r_v, v)
+  v_chk <- c(
+    "cost from the cell list = cost of the path (every path)" =
+      all(pv$paths$cost_ok),
+    "each crossing cell is a barrier-road cell" =
+      all(!is.na(road_rank_v[pv$cells$cell])),
+    "crossings and cells add up per path" =
+      nrow(pv$crossings) == sum(pv$paths$n_crossings) &&
+      nrow(pv$cells) == sum(pv$paths$n_road_cells),
+    "each crossing is in one site" =
+      !anyNA(pv$crossings$site_id) &&
+      sum(pv$sites$n_crossings) == nrow(pv$crossings),
+    "two sites are more than the merge distance apart" =
+      pv$site_gap_km > PINCH_SITE_MERGE_KM,
+    "each site on a bridge edge is a pinch point" =
+      all(pv$sites$pinch_point[pv$sites$site_id %in%
+            pv$crossings$site_id[pv$crossings$is_bridge %in% TRUE]])
+  )
+  pinch_var_chk[[v]] <- v_chk
+  if (!all(v_chk)) {
+    stop("Variant '", v, "' — check(s) failed: ",
+         paste(names(v_chk)[!v_chk], collapse = "; "), call. = FALSE)
+  }
+  cmp_v <- pinch_compare_variant(pinch_base, pv, nc_12, res_12,
+                                 PINCH_COMPARE_D_KM, PINCH_COMPARE_D_DESCR_KM,
+                                 PINCH_COMPARE_ROBUST_MIN_OVERLAP)
+  pinch_var[[v]] <- pv
+  pinch_cmp[[v]] <- cmp_v
+  pinch_links[[v]] <- links_v
+  pinch_flags[[v]] <- flags_v
+  cat(sprintf(paste0("%-7s paths %d (bridges %d) | crossings %d | sites %d | ",
+                     "pinch points %d (tier 1: %d, 2: %d, 3: %d) | checks %d ",
+                     "of %d | share_base %.3f, share_variant %.3f, ",
+                     "site_overlap %.3f | %s | %.0f s\n"),
+              v, nrow(pv$paths), sum(flags_v$is_bridge), nrow(pv$crossings),
+              nrow(pv$sites), cmp_v$row$n_pinch_points,
+              cmp_v$row$n_pinch_tier1, cmp_v$row$n_pinch_tier2,
+              cmp_v$row$n_pinch_tier3, sum(v_chk), length(v_chk),
+              cmp_v$row$share_base, cmp_v$row$share_variant,
+              cmp_v$row$site_overlap, cmp_v$row$label,
+              as.numeric(difftime(Sys.time(), t_v, units = "secs"))))
+  # The 1 km cells of the variant: gitignored; never published.
+  v_sf <- sf::st_as_sf(
+    cbind(pv$cells, as.data.frame(terra::xyFromCell(lcp_base, pv$cells$cell))),
+    coords = c("x", "y"), crs = sf::st_crs(res_net))
+  pinch_write_layer(v_sf, crossings_gpkg, v)
+  rm(r_v, v_sf)
+}
+
+# ---- 12.4d Comparison table and labels (fixed in Decision 20 point 6) ------------
+pinch_cmp_tbl <- do.call(rbind, lapply(PINCH_COMPARE_VARIANTS, function(v) {
+  cbind(data.frame(variant = v, tests = unname(net_variant_tests[v]),
+                   n_paths = nrow(pinch_var[[v]]$paths),
+                   n_bridge_edges = sum(net_edge_flags(net_var_g[[v]])$is_bridge),
+                   stringsAsFactors = FALSE),
+        pinch_cmp[[v]]$row)
+}))
+pinch_choice_label <- tapply(pinch_cmp_tbl$label, pinch_cmp_tbl$tests,
+                             function(z) if (all(z == "robust")) "robust"
+                             else "sensitive")
+pinch_cmp_tbl$choice_label <- as.vector(pinch_choice_label[pinch_cmp_tbl$tests])
+rownames(pinch_cmp_tbl) <- NULL
+cat(sprintf(paste0("baseline: %d crossings, %d sites, %d pinch points (tier ",
+                   "1: %d, 2: %d, 3: %d)\n"),
+            nrow(cx), nrow(sites_base), sum(sites_base$pinch_point),
+            sum(sites_base$pinch_tier %in% 1L),
+            sum(sites_base$pinch_tier %in% 2L),
+            sum(sites_base$pinch_tier %in% 3L)))
+print(pinch_cmp_tbl[, c("variant", "n_crossings", "n_sites", "n_pinch_points",
+                        "share_base", "share_variant", "site_overlap",
+                        paste0("site_overlap_", PINCH_COMPARE_D_DESCR_KM, "km"),
+                        "all_sites_overlap", "n_base_tier12_not_near",
+                        "label")], row.names = FALSE, digits = 3)
+cat(sprintf("limit: site_overlap >= %.3f at %g km (judgement values, Decision 20)\n",
+            PINCH_COMPARE_ROBUST_MIN_OVERLAP, PINCH_COMPARE_D_KM))
+for (ch in names(pinch_choice_label)) {
+  cat(sprintf("label — %s: %s (variants: %s)\n", ch, pinch_choice_label[[ch]],
+              paste(pinch_cmp_tbl$variant[pinch_cmp_tbl$tests == ch],
+                    collapse = ", ")))
+}
+for (v in PINCH_COMPARE_VARIANTS) {
+  z <- pinch_cmp_tbl$base_tier12_not_near_by_link[pinch_cmp_tbl$variant == v]
+  cat(sprintf("%-7s baseline tier-1 and tier-2 pinch points with no variant pinch point near, by link: %s\n",
+              v, if (nzchar(z)) z else "none"))
+}
+write_table(pinch_cmp_tbl, 14, "pinch_variant_comparison")
+
+# ---- 12.4e The variant result of each baseline site ---------------------------------
+near_cols <- paste0("near_pinch_", PINCH_COMPARE_VARIANTS)
+for (v in PINCH_COMPARE_VARIANTS) {
+  sites_base[[paste0("near_pinch_", v)]] <- pinch_cmp[[v]]$near_base
+}
+sites_base$n_variants_near <- as.integer(rowSums(sites_base[, near_cols,
+                                                             drop = FALSE]))
+ppb <- sites_base[sites_base$pinch_point, ]
+cat(sprintf(paste0("baseline pinch points near a variant pinch point on all ",
+                   "%d variants: %d of %d | on none: %d\n"),
+            length(near_cols), sum(ppb$n_variants_near == length(near_cols)),
+            nrow(ppb), sum(ppb$n_variants_near == 0L)))
+cat("baseline pinch points by pinch_tier and n_variants_near:\n")
+print(table(pinch_tier = ppb$pinch_tier, n_variants_near = ppb$n_variants_near))
+cat("tier-1 pinch points and their variant result:\n")
+print(ppb[ppb$pinch_tier == 1L, c("site_id", "links", near_cols,
+                                  "n_variants_near")], row.names = FALSE,
+      right = FALSE)
+s_cols2 <- c(s_cols, near_cols, "n_variants_near")
+sites_out <- sites_base[order(is.na(sites_base$pinch_tier),
+                              sites_base$pinch_tier, sites_base$site_id),
+                        s_cols2]
+sites_out$span_km <- round(sites_out$span_km, 3)
+rownames(sites_out) <- NULL
+pub_chk2 <- pinch_check_publish_table(sites_out, lcp_base, PINCH_PUBLISH_GRID_M,
+                                      grid_prefix)
+if (!all(pub_chk2$pass)) {
+  stop("tbl_14_pinch_points: a position is finer than the publish grid. ",
+       "The table is not written.", call. = FALSE)
+}
+write_table(sites_out, 14, "pinch_points")
+rule(sprintf("STEP 12.4 done — labels: %s. Next: STEP 12.5 QA (task 12.6).",
+             paste(sprintf("%s %s", sub(" \\(Decision.*$", "",
+                                        names(pinch_choice_label)),
+                           pinch_choice_label), collapse = "; ")))
+
+# =============================================================================
+# STEP 12.5 — pinch-point QA (task 12.6; Decision 20, "Consequences")
+# =============================================================================
+# The checks of the earlier Week-12 STEPs, collected, and the QA list of
+# Decision 20 on each surface: the functions on the hand-made cases; each
+# crossing cell is in the cell list of its path and is a barrier-road cell;
+# each barrier-road cell of a cell list is in one crossing only; no crossing
+# for a contiguous pair or a pair that is not in the network; each crossing
+# is in one site only; two sites are more than the merge distance apart; the
+# counts add up; the rule written a second way; no committed table holds a
+# position finer than the publish grid. The table is written first; then any
+# failure stops the script.
+rule("STEP 12.5 — pinch-point QA -> tbl_14_pinch_qa.csv")
+pqa_row <- function(surface, check, value, pass) {
+  data.frame(surface = surface, check = check, value = as.character(value),
+             pass = isTRUE(pass), stringsAsFactors = FALSE)
+}
+pqa_tbl <- function(surface, x) {
+  data.frame(surface = surface, check = x$check, value = x$value,
+             pass = x$pass, stringsAsFactors = FALSE)
+}
+
+# ---- 12.5a Self-tests and road cells (collected) ---------------------------------
+pinch_qa <- rbind(
+  pqa_row("test case", "crossings: hand-made path, road and counts (STEP 12.2)",
+          sprintf("%d of %d cases", sum(pinch_st$pass), nrow(pinch_st)),
+          all(pinch_st$pass)),
+  pqa_row("test case", "sites and rule: hand-made case (STEP 12.3)",
+          sprintf("%d of %d cases", sum(pinch_st2$pass), nrow(pinch_st2)),
+          all(pinch_st2$pass)),
+  pqa_row("test case", "variant comparison: hand-made case (STEP 12.4)",
+          sprintf("%d of %d cases", sum(pinch_st3$pass), nrow(pinch_st3)),
+          all(pinch_st3$pass)),
+  pqa_tbl("roads", road_chk))
+
+# ---- 12.5b Each surface ----------------------------------------------------------------
+pinch_all <- c(stats::setNames(list(pinch_base), PINCH_BASE_SURFACE), pinch_var)
+for (sname in names(pinch_all)) {
+  is_b <- sname == PINCH_BASE_SURFACE
+  pinch_qa <- rbind(pinch_qa, pqa_tbl(sname, pinch_check_surface(
+    ps = pinch_all[[sname]],
+    paths = if (is_b) paths_base else paths_var[[sname]],
+    links = pinch_links[[sname]], flags = pinch_flags[[sname]], pairs = pairs,
+    road_rank_v = road_rank_v, nc = nc_12, res_km = res_12,
+    link_roles = PINCH_PATH_LINK_ROLES,
+    rule_link_roles = PINCH_RULE_LINK_ROLES, merge_km = PINCH_SITE_MERGE_KM,
+    shared_min_edges = PINCH_SHARED_MIN_EDGES,
+    lit_pair_ids = pinch_lit$pair_id)))
+}
+
+# ---- 12.5c Baseline results and the comparison ------------------------------------------
+cmp_lab <- ifelse(!is.na(pinch_cmp_tbl$site_overlap) &
+                    pinch_cmp_tbl$site_overlap >=
+                    PINCH_COMPARE_ROBUST_MIN_OVERLAP - 1e-9, "robust",
+                  "sensitive")
+cmp_choice <- vapply(pinch_cmp_tbl$tests, function(ch) {
+  if (all(cmp_lab[pinch_cmp_tbl$tests == ch] == "robust")) "robust"
+  else "sensitive"
+}, character(1))
+shares <- unlist(pinch_cmp_tbl[, c("share_base", "share_variant",
+                                   "site_overlap", "all_sites_overlap")])
+pinch_qa <- rbind(
+  pinch_qa,
+  pqa_row(PINCH_BASE_SURFACE,
+          "the chain function gives the crossings and sites of STEPs 12.2-12.3",
+          sprintf("%d crossings, %d sites", nrow(cx), nrow(sites_base)),
+          identical(pinch_base$crossings$crossing_id, cx$crossing_id) &&
+            identical(pinch_base$crossings$site_id, cx$site_id) &&
+            identical(pinch_base$sites$pinch_tier, sites_base$pinch_tier)),
+  pqa_row(PINCH_BASE_SURFACE, "site ids are 1 to n, in the order of the lowest cell",
+          nrow(sites_base),
+          identical(sites_base$site_id, seq_len(nrow(sites_base))) &&
+            !is.unsorted(tapply(vapply(cx$cells, min, numeric(1)), cx$site_id,
+                                min))),
+  pqa_row(PINCH_BASE_SURFACE, "each lit_flag link of the config is an in-network link",
+          paste(pinch_lit$pair_id, collapse = ", "),
+          all(pinch_lit$pair_id %in% net_links$pair_id)),
+  pqa_row("all", "comparison: one row per variant; each variant differs in one choice",
+          paste(pinch_cmp_tbl$variant, collapse = ", "),
+          identical(pinch_cmp_tbl$variant, PINCH_COMPARE_VARIANTS) &&
+            !anyNA(pinch_cmp_tbl$tests)),
+  pqa_row("all", "comparison: shares are 0 to 1; site_overlap = the lower share",
+          paste(sprintf("%.3f", pinch_cmp_tbl$site_overlap), collapse = ", "),
+          all(shares >= 0 & shares <= 1, na.rm = TRUE) &&
+            isTRUE(all.equal(pinch_cmp_tbl$site_overlap,
+                             pmin(pinch_cmp_tbl$share_base,
+                                  pinch_cmp_tbl$share_variant)))),
+  pqa_row("all", "comparison: labels by the fixed rule (written a second way)",
+          paste(sprintf("%s %s", pinch_cmp_tbl$variant, pinch_cmp_tbl$label),
+                collapse = "; "),
+          identical(cmp_lab, pinch_cmp_tbl$label) &&
+            identical(unname(cmp_choice), pinch_cmp_tbl$choice_label)),
+  pqa_row("all", "n_variants_near = the number of variants with a pinch point near",
+          sprintf("%d sites", nrow(sites_base)),
+          identical(sites_base$n_variants_near,
+                    as.integer(rowSums(sites_base[, near_cols, drop = FALSE]))) &&
+            all(vapply(PINCH_COMPARE_VARIANTS, function(v) {
+              identical(sites_base[[paste0("near_pinch_", v)]],
+                        pinch_cmp[[v]]$near_base)
+            }, logical(1)))))
+
+# ---- 12.5d Tables and layers on disk -----------------------------------------------------
+# Each committed tbl_14 table: the row count, and no position finer than the
+# publish grid. (tbl_14_pinch_qa.csv itself holds no position.)
+pqa_disk <- list(
+  road_crossings = list(n = nrow(crossings_out), grid = TRUE),
+  pinch_points = list(n = nrow(sites_out), grid = TRUE),
+  pinch_link_summary = list(n = nrow(links_sum_out), grid = FALSE),
+  pinch_variant_comparison = list(n = nrow(pinch_cmp_tbl), grid = FALSE))
+banned_cols <- c("cell", "cells", "mid_cell", "mean_cell", "exit_cell",
+                 "entry_cell", "x", "y", "mean_x", "mean_y", "lon", "lat",
+                 "longitude", "latitude", "geom", "geometry")
+for (slug in names(pqa_disk)) {
+  f <- file.path(DIR_TABLES, sprintf("tbl_14_%s.csv", slug))
+  d <- if (file.exists(f)) utils::read.csv(f, stringsAsFactors = FALSE) else NULL
+  pinch_qa <- rbind(pinch_qa, pqa_row(
+    "all", sprintf("on disk: %s", basename(f)),
+    sprintf("%s rows, %d expected", if (is.null(d)) NA else nrow(d),
+            pqa_disk[[slug]]$n),
+    !is.null(d) && nrow(d) == pqa_disk[[slug]]$n))
+  pub_ok <- !is.null(d) && if (pqa_disk[[slug]]$grid) {
+    all(pinch_check_publish_table(d, lcp_base, PINCH_PUBLISH_GRID_M,
+                                  grid_prefix)$pass)
+  } else {
+    !any(names(d) %in% banned_cols) && !any(grepl("^grid", names(d)))
+  }
+  pinch_qa <- rbind(pinch_qa, pqa_row(
+    "all", sprintf("no position finer than the publish grid: %s", basename(f)),
+    if (pqa_disk[[slug]]$grid) sprintf("positions at %g km", PINCH_PUBLISH_GRID_M / 1000)
+    else "no position column", pub_ok))
+}
+lay <- if (file.exists(crossings_gpkg)) sf::st_layers(crossings_gpkg) else NULL
+lay_n <- vapply(names(pinch_all), function(s) nrow(pinch_all[[s]]$cells),
+                integer(1))
+pinch_qa <- rbind(
+  pinch_qa,
+  pqa_row("all", "1 km file: one layer per surface, one point per crossing cell",
+          if (is.null(lay)) "file absent" else
+            paste(sprintf("%s %s", lay$name, lay$features), collapse = "; "),
+          !is.null(lay) && setequal(lay$name, names(pinch_all)) &&
+            identical(as.integer(lay$features[match(names(pinch_all), lay$name)]),
+                      unname(lay_n))),
+  pqa_row("all", "1 km file is under data/ (gitignored), not under outputs/",
+          sub(here::here(), "", crossings_gpkg, fixed = TRUE),
+          startsWith(normalizePath(crossings_gpkg, winslash = "/", mustWork = FALSE),
+                     normalizePath(here::here("data"), winslash = "/",
+                                   mustWork = FALSE))))
+rownames(pinch_qa) <- NULL
+
+# ---- 12.5e Report, write, stop on failure --------------------------------------------------
+pqa_sum <- stats::aggregate(pass ~ surface, data = pinch_qa,
+                            FUN = function(x) sprintf("%d of %d", sum(x), length(x)))
+pqa_sum <- pqa_sum[match(unique(pinch_qa$surface), pqa_sum$surface), ]
+names(pqa_sum)[2] <- "checks_passed"
+print(pqa_sum, row.names = FALSE)
+write_table(pinch_qa, 14, "pinch_qa")
+if (!all(pinch_qa$pass)) {
+  cat("FAILED checks:\n")
+  print(pinch_qa[!pinch_qa$pass, ], row.names = FALSE, right = FALSE)
+  stop("Pinch-point QA failed: ", sum(!pinch_qa$pass), " check(s). See ",
+       "tbl_14_pinch_qa.csv.", call. = FALSE)
+}
+rule(sprintf(paste0("STEP 12.5 done — pinch-point QA: %d of %d checks pass. ",
+                    "Next: STEP 12.6 publishable tables (task 12.7)."),
+             sum(pinch_qa$pass), nrow(pinch_qa)))
+
+# =============================================================================
+# STEP 12.6 — publishable tables (task 12.7; Decision 20 point 7)
+# =============================================================================
+# tbl_03_reserve_network.csv — one row per network reserve (56). The network
+#   results of the reserve's node (STEPs 11.2-11.3: set, degree, betweenness,
+#   linchpin with cross_group_dependent and stable_linchpin, cut node,
+#   pendant, cheapest link) and the pinch points on the edges of the node, by
+#   tier. The values are per node: the reserves of one block share them. No
+#   position.
+# tbl_03b_pinch_points.csv — one row per baseline pinch point (all tiers;
+#   author choice 2026-10-10), sorted by tier, then site_id: the two flags,
+#   the edges and bridge edges, the links by name, the highest road class,
+#   the reserves, lit_flag, state, district, the cell of the publish grid,
+#   and the variant result of the site.
+# "Pinch point" here is NOT the pinch point of circuit-theory mapping
+# (Decision 20 point 5). A path and a crossing are modelled, not observed.
+# Publish check: assert_publishable_table() (R/00_functions_sensitive.R;
+# sensitive-data policy §3) before each write.
+# tbl_03_notes.md — the note file of the two tables (Decision 20 point 5:
+#   each table says what a pinch point is here; author choice 2026-10-10).
+rule(paste0("STEP 12.6 — publishable tables (Decision 20 point 7) -> ",
+            "tbl_03_reserve_network.csv, tbl_03b_pinch_points.csv"))
+source(here("R", "00_functions_sensitive.R"))
+
+# ---- 12.6a tbl_03: one row per network reserve -----------------------------------
+node_sum <- pinch_node_summary(cx, sites_base, net_links, net_nodes$node_id,
+                               PINCH_RULE_LINK_ROLES)
+met_cols <- c("unit_id", "unit_name", "network_group", "node_id", "node_name",
+              "block_size", "set_id", "set_size", "degree", "betweenness_norm",
+              "betweenness_rank", "linchpin", "cross_group_dependent",
+              "stable_linchpin", "cut_node", "pendant", "isolated",
+              "cheapest_link_rkm", "cheapest_link_rank")
+if (!all(met_cols %in% names(metrics_out))) {
+  stop("The metrics table of STEP 11.3 has no column(s): ",
+       paste(setdiff(met_cols, names(metrics_out)), collapse = ", "),
+       call. = FALSE)
+}
+tbl03 <- metrics_out[, met_cols]
+tbl03$state <- res_net$state[match(tbl03$unit_id, res_net$unit_id)]
+tbl03 <- tbl03[, append(met_cols, "state", after = 2L)]
+tbl03$betweenness_norm  <- round(tbl03$betweenness_norm, 4)
+tbl03$cheapest_link_rkm <- round(tbl03$cheapest_link_rkm, 1)
+k_ns <- match(tbl03$node_id, node_sum$node_id)
+tbl03 <- cbind(tbl03, node_sum[k_ns, c("n_bridge_edges", "n_crossings",
+                                       "n_sites", "n_pinch_points",
+                                       "n_pinch_tier1", "n_pinch_tier2",
+                                       "n_pinch_tier3")])
+tbl03 <- tbl03[order(tbl03$unit_id), ]
+rownames(tbl03) <- NULL
+
+# ---- 12.6b tbl_03b: one row per baseline pinch point --------------------------------
+b_cols <- c("site_id", "pinch_tier", "on_bridge", "shared", "n_edges",
+            "n_bridges", "links", "road_class_top", "in_reserve_unit_ids",
+            "lit_flag", "lit_flag_any", "state", "district", "district_code",
+            names(g_s), near_cols, "n_variants_near")
+tbl03b <- sites_base[sites_base$pinch_point, b_cols]
+tbl03b <- tbl03b[order(tbl03b$pinch_tier, tbl03b$site_id), ]
+rownames(tbl03b) <- NULL
+
+# ---- 12.6c Checks (stop on any failure; nothing is written before them) ----------
+per_node <- unique(tbl03[, setdiff(names(tbl03), c("unit_id", "unit_name",
+                                                   "state", "network_group"))])
+edge_sites <- unique(cx$site_id[cx$link_role %in% PINCH_RULE_LINK_ROLES])
+t_chk <- c(
+  "tbl_03: one row for each network reserve" =
+    nrow(tbl03) == NET_EXPECTED_RESERVES && !anyDuplicated(tbl03$unit_id) &&
+    setequal(tbl03$unit_id, res_net$unit_id) && !anyNA(tbl03$state),
+  "tbl_03: the reserves of one node have the same values" =
+    nrow(per_node) == NET_EXPECTED_NODES,
+  "tbl_03: the network columns are those of tbl_13_network_metrics" =
+    isTRUE(all.equal(tbl03$degree, metrics_out$degree[order(metrics_out$unit_id)])) &&
+    identical(tbl03$linchpin, metrics_out$linchpin[order(metrics_out$unit_id)]),
+  "tbl_03: node degree = its number of edges in the link table" =
+    all(node_sum$n_edges[k_ns] == tbl03$degree),
+  "tbl_03: pinch points per node = the sum of the three tiers" =
+    all(tbl03$n_pinch_points == tbl03$n_pinch_tier1 + tbl03$n_pinch_tier2 +
+          tbl03$n_pinch_tier3) && all(tbl03$n_pinch_points <= tbl03$n_sites),
+  "tbl_03: each site on an edge counts for 2 nodes or more" =
+    sum(node_sum$n_sites) >= 2L * length(edge_sites),
+  "tbl_03: bridge edges per node add up to 2 x the bridges" =
+    sum(node_sum$n_bridge_edges) == 2L * sum(net_flags$is_bridge),
+  "tbl_03b: one row for each baseline pinch point, by tier then site_id" =
+    nrow(tbl03b) == sum(sites_base$pinch_point) &&
+    !anyDuplicated(tbl03b$site_id) && !anyNA(tbl03b$pinch_tier) &&
+    identical(order(tbl03b$pinch_tier, tbl03b$site_id), seq_len(nrow(tbl03b))),
+  "tbl_03b: the rows are the pinch points of tbl_14_pinch_points" =
+    isTRUE(all.equal(tbl03b, sites_out[sites_out$pinch_point %in% TRUE,
+                                       b_cols], check.attributes = FALSE))
+)
+for (i in seq_along(t_chk)) {
+  cat(sprintf("  %-4s %s\n", if (isTRUE(t_chk[[i]])) "ok" else "FAIL",
+              names(t_chk)[i]))
+}
+if (!all(t_chk)) {
+  stop("Publishable-table check(s) failed: ",
+       paste(names(t_chk)[!t_chk], collapse = "; "), call. = FALSE)
+}
+
+# ---- 12.6d Publish checks (sensitive-data policy §3) and output -------------------
+assert_publishable_table(tbl03, prefix = NULL, name = "tbl_03_reserve_network")
+assert_publishable_table(tbl03b, prefix = grid_prefix, r = lcp_base,
+                         grid_m = PINCH_PUBLISH_GRID_M,
+                         name = "tbl_03b_pinch_points")
+cat("publish checks pass: tbl_03 has no position; tbl_03b has positions at the",
+    PINCH_PUBLISH_GRID_M / 1000, "km grid only\n")
+
+n03 <- unique(tbl03[, c("node_id", "node_name", "set_id", "linchpin",
+                        "cross_group_dependent", "stable_linchpin", "cut_node",
+                        "pendant", "degree", "n_bridge_edges", "n_pinch_points",
+                        "n_pinch_tier1", "n_pinch_tier2", "n_pinch_tier3")])
+cat(sprintf(paste0("tbl_03: %d reserves, %d nodes | nodes with a pinch point ",
+                   "on an edge: %d | with a tier-1 pinch point: %d\n"),
+            nrow(tbl03), nrow(n03), sum(n03$n_pinch_points > 0),
+            sum(n03$n_pinch_tier1 > 0)))
+cat("the linchpin nodes, with their flags and the pinch points on their edges:\n")
+print(n03[n03$linchpin, c("set_id", "node_name", "cross_group_dependent",
+                          "stable_linchpin", "cut_node", "degree",
+                          "n_bridge_edges", "n_pinch_points", "n_pinch_tier1",
+                          "n_pinch_tier2", "n_pinch_tier3")][
+            order(n03$set_id[n03$linchpin]), ], row.names = FALSE, right = FALSE)
+cat("the nodes with the most pinch points on their edges:\n")
+print(utils::head(n03[order(-n03$n_pinch_points, n03$node_id),
+                      c("node_name", "linchpin", "pendant", "degree",
+                        "n_bridge_edges", "n_pinch_points", "n_pinch_tier1",
+                        "n_pinch_tier2", "n_pinch_tier3")], 8),
+      row.names = FALSE, right = FALSE)
+cat(sprintf("tbl_03b: %d pinch points | tier 1: %d, tier 2: %d, tier 3: %d\n",
+            nrow(tbl03b), sum(tbl03b$pinch_tier == 1L),
+            sum(tbl03b$pinch_tier == 2L), sum(tbl03b$pinch_tier == 3L)))
+write_table(tbl03, 3, "reserve_network")
+utils::write.csv(tbl03b, file.path(DIR_TABLES, "tbl_03b_pinch_points.csv"),
+                 row.names = FALSE)
+message("Wrote ", file.path(DIR_TABLES, "tbl_03b_pinch_points.csv"), " (",
+        nrow(tbl03b), " rows)")
+for (f in c("tbl_03_reserve_network.csv", "tbl_03b_pinch_points.csv")) {
+  n_disk <- nrow(utils::read.csv(file.path(DIR_TABLES, f)))
+  if (n_disk != if (f == "tbl_03_reserve_network.csv") nrow(tbl03) else nrow(tbl03b)) {
+    stop(f, ": the file on disk has ", n_disk, " rows.", call. = FALSE)
+  }
+}
+# ---- 12.6e Note file (Decision 20 point 5; author choice 2026-10-10) -----------------
+# What a pinch point is here, the tiers and the limits, next to the two
+# tables. Every value is a config value or a count of this run. No position.
+note_path  <- file.path(DIR_TABLES, "tbl_03_notes.md")
+note_lines <- pinch_table_note(
+  n_reserves = nrow(tbl03), n_nodes = nrow(n03),
+  tiers = as.integer(table(factor(tbl03b$pinch_tier, levels = 1:3))),
+  road_classes = PINCH_ROAD_CLASS_ORDER, merge_km = PINCH_SITE_MERGE_KM,
+  shared_min = PINCH_SHARED_MIN_EDGES, grid_m = PINCH_PUBLISH_GRID_M,
+  compare_d_km = PINCH_COMPARE_D_KM,
+  n_variants = length(PINCH_COMPARE_VARIANTS),
+  choice_labels = stats::setNames(
+    as.vector(pinch_choice_label),
+    sub(" \\(Decision.*$", "", names(pinch_choice_label))),
+  linchpin_top_n = NET_LINCHPIN_TOP_N)
+if (any(grepl("[^ -~]", note_lines))) {
+  stop("The note file must be ASCII text; a line has another character.",
+       call. = FALSE)
+}
+writeLines(note_lines, note_path)
+if (!identical(readLines(note_path), note_lines)) {
+  stop("tbl_03_notes.md: the file on disk is not the text that was written.",
+       call. = FALSE)
+}
+message("Wrote ", note_path, " (", length(note_lines), " lines)")
+rule(sprintf(paste0("STEP 12.6 done — tbl_03 (%d reserves), tbl_03b (%d pinch ",
+                    "points) and tbl_03_notes.md written. Next: STEP 12.7 ",
+                    "figure (task 12.8)."),
+             nrow(tbl03), nrow(tbl03b)))
+
+# =============================================================================
+# STEP 12.7 — figure fig_03 (task 12.8; Decision 20 point 7, g1)
+# =============================================================================
+# A map at national scale:
+#   - the nodes by flag: linchpin with its two flags (`stable_linchpin`,
+#     `cross_group_dependent`), cut node (a ring), pendant, other;
+#   - the baseline edge paths as modelled lines, with the bridge links marked;
+#   - the baseline pinch points at the centre of their publish-grid cell, by
+#     tier. Author choice 2026-10-10: all three tiers; tier 3 small and pale.
+# Positions (sensitive-data policy §3): the pinch points are read from
+# `tbl03b` (the publishable table) only. The path lines are drawn in this
+# static figure at national scale only. A node is drawn at the centroid of
+# its reserve polygons (public boundaries).
+# Colours: the site symbology of scripts/05 (same hex values). Each class has
+# a shape or a size of its own, so that no class is told by colour only.
+# Title, subtitle and caption: DRAFT text for the author's edit. Every number
+# in them is read from the objects of this run.
+rule(sprintf("STEP 12.7 — figure fig_%02d (Decision 20 point 7)",
+             PINCH_FIG_NUMBER))
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  stop("STEP 12.7 needs the package ggplot2 (scripts/05 uses it; it is in ",
+       "renv.lock). Run renv::restore().", call. = FALSE)
+}
+suppressPackageStartupMessages(library(ggplot2))
+
+# ---- 12.7a Self-test of the figure tables ----------------------------------------
+fig_test <- pinch_selftest_figure()
+if (!all(fig_test)) {
+  stop("pinch_selftest_figure() failed: ",
+       paste(names(fig_test)[!fig_test], collapse = "; "), call. = FALSE)
+}
+cat(sprintf("figure-table self-test: %d of %d cases pass\n", sum(fig_test),
+            length(fig_test)))
+
+# ---- 12.7b The tables that the figure draws ---------------------------------------
+# Nodes: one row per node, from the publishable reserve table.
+fig_nodes <- unique(tbl03[, c("node_id", "node_name", "set_id", "set_size",
+                              "betweenness_rank", "linchpin",
+                              "stable_linchpin", "cross_group_dependent",
+                              "cut_node", "pendant", "isolated", "degree")])
+fig_nodes <- merge(fig_nodes, pinch_node_points(res_net, net_nodes),
+                   by = "node_id")
+fig_nodes <- fig_nodes[order(fig_nodes$node_id), ]
+# Pinch points: the publishable table only (it passed the publish check in
+# STEP 12.6; the check runs again here on the table that is drawn).
+assert_publishable_table(tbl03b, prefix = grid_prefix, r = lcp_base,
+                         grid_m = PINCH_PUBLISH_GRID_M,
+                         name = "the pinch points of the figure")
+fig_marks <- pinch_figure_marks(fig_nodes, tbl03b, grid_prefix)
+fig_cls   <- pinch_figure_classes(1L + length(PINCH_COMPARE_VARIANTS),
+                                  PINCH_SHARED_MIN_EDGES)
+fig_cls   <- fig_cls[fig_cls$cls %in% fig_marks$cls, ]
+fig_marks$cls <- factor(fig_marks$cls, levels = fig_cls$cls)
+fig_marks <- fig_marks[order(fig_cls$draw[as.integer(fig_marks$cls)]), ]
+# Edge paths: the line and the pair number only (no cell list).
+fig_edge_ids <- net_links$pair_id[net_links$link_role %in% PINCH_RULE_LINK_ROLES]
+fig_paths <- paths_base[match(fig_edge_ids, paths_base$pair_id), "pair_id"]
+fig_paths$bridge <- net_flags$is_bridge[match(fig_paths$pair_id,
+                                              net_flags$pair_id)]
+fig_link_levels <- c("Link", "Bridge link: without it,\nits set divides")
+fig_paths$kind <- factor(fig_link_levels[1L + fig_paths$bridge],
+                         levels = fig_link_levels)
+# Linchpin list: a number in each linchpin mark, and the names by set.
+fig_lp <- fig_nodes[fig_nodes$linchpin, ]
+fig_lp <- fig_lp[order(fig_lp$set_id, fig_lp$betweenness_rank, fig_lp$node_id), ]
+fig_lp$num <- seq_len(nrow(fig_lp))
+fig_key <- paste(c("Linchpin nodes", unlist(lapply(
+  split(fig_lp, fig_lp$set_id), function(z) {
+    c(sprintf("Set of %d nodes", z$set_size[1]),
+      vapply(seq_len(nrow(z)), function(i) {
+        paste(strwrap(z$node_name[i], width = 30,
+                      initial = sprintf("%d  ", z$num[i]), exdent = 5),
+              collapse = "\n")
+      }, character(1)))
+  }))), collapse = "\n")
+
+# ---- 12.7c Checks (stop on any failure; the file is not written before them) -----
+fig_bb <- sf::st_bbox(states_sf)
+in_bb  <- function(x, y) {
+  all(x >= fig_bb[["xmin"]] & x <= fig_bb[["xmax"]] &
+        y >= fig_bb[["ymin"]] & y <= fig_bb[["ymax"]])
+}
+pm <- fig_marks[fig_marks$kind == "pinch", ]
+k_pm <- match(pm$id, tbl03b$site_id)
+fig_chk <- c(
+  "nodes: one mark for each node of the network" =
+    sum(fig_marks$kind == "node") == NET_EXPECTED_NODES &&
+    setequal(fig_marks$id[fig_marks$kind == "node"], net_nodes$node_id),
+  "nodes: the linchpin marks are the linchpin nodes of tbl_03" =
+    setequal(fig_marks$id[grepl("^lp_", fig_marks$cls)],
+             tbl03$node_id[tbl03$linchpin]) &&
+    nrow(fig_lp) == length(unique(tbl03$node_id[tbl03$linchpin])),
+  "nodes: one ring for each cut node; one pendant mark for each pendant node" =
+    setequal(fig_marks$id[fig_marks$kind == "cut"],
+             tbl03$node_id[tbl03$cut_node]) &&
+    setequal(fig_marks$id[fig_marks$cls %in% "pend"],
+             tbl03$node_id[tbl03$pendant & !tbl03$linchpin]),
+  "nodes: each position is inside the extent of the state layer" =
+    in_bb(fig_nodes$x, fig_nodes$y),
+  "paths: one line for each baseline edge; each line is a path" =
+    nrow(fig_paths) == sum(net_links$link_role %in% PINCH_RULE_LINK_ROLES) &&
+    !anyNA(fig_paths$pair_id) && !anyDuplicated(fig_paths$pair_id) &&
+    all(paths_base$path_status[match(fig_paths$pair_id, paths_base$pair_id)] ==
+          "path") &&
+    !any(sf::st_is_empty(fig_paths)),
+  "paths: the bridge lines are the bridge edges" =
+    !anyNA(fig_paths$bridge) &&
+    sum(fig_paths$bridge) == sum(net_flags$is_bridge) &&
+    setequal(fig_paths$pair_id[fig_paths$bridge],
+             net_flags$pair_id[net_flags$is_bridge]),
+  "paths: the figure table holds the line and the pair number only" =
+    identical(setdiff(names(fig_paths), attr(fig_paths, "sf_column")),
+              c("pair_id", "bridge", "kind")),
+  "pinch points: one mark for each row of tbl_03b, with its tier" =
+    nrow(pm) == nrow(tbl03b) && !anyNA(k_pm) &&
+    identical(as.character(pm$cls), paste0("t", tbl03b$pinch_tier[k_pm])),
+  "pinch points: each mark is at the centre of its publish-grid cell" =
+    isTRUE(all.equal(pm$x, tbl03b[[paste0(grid_prefix, "_x_km")]][k_pm] * 1000)) &&
+    isTRUE(all.equal(pm$y, tbl03b[[paste0(grid_prefix, "_y_km")]][k_pm] * 1000)) &&
+    in_bb(pm$x, pm$y),
+  "legend: each mark has a class of the legend" = !anyNA(fig_marks$cls)
+)
+for (i in seq_along(fig_chk)) {
+  cat(sprintf("  %-4s %s\n", if (isTRUE(fig_chk[[i]])) "ok" else "FAIL",
+              names(fig_chk)[i]))
+}
+if (!all(fig_chk)) {
+  stop("Figure check(s) failed: ",
+       paste(names(fig_chk)[!fig_chk], collapse = "; "),
+       ". The figure is not written.", call. = FALSE)
+}
+
+# ---- 12.7d Colours and mark specifications -----------------------------------------
+# The first six values are the site symbology (the same hex values as in
+# scripts/05_growth_analysis.R). The other colours are mixes of them.
+PAL_GROW    <- "#225522"
+PAL_DECLINE <- "#e34a33"
+INK         <- "#1e1e1e"
+PAPER       <- "#f7f4ee"
+STATE_FILL  <- "#e9e4d8"
+STATE_LINE  <- "#d4cfc4"
+fig_mix <- function(a, b, w) {
+  grDevices::rgb(grDevices::colorRamp(c(a, b))(w), maxColorValue = 255)
+}
+FIG_RESERVE_FILL <- fig_mix(PAPER, PAL_GROW, 0.35)     # reserve polygons
+FIG_LINK_COL     <- fig_mix(PAPER, INK, 0.55)          # links; other nodes
+FIG_TIER3_FILL   <- fig_mix(PAPER, PAL_DECLINE, 0.35)  # tier 3: pale
+FIG_TIER3_LINE   <- fig_mix(PAPER, PAL_DECLINE, 0.75)
+# shape: 21 circle, 23 diamond, 24 triangle (each with a fill and an outline).
+# Nodes are circles or diamonds; pinch points are triangles.
+fig_spec <- data.frame(
+  cls    = c("lp_s", "lp_sx", "lp_n", "lp_nx", "oth", "pend", "cut",
+             "t1", "t2", "t3"),
+  shape  = c(21, 23, 21, 23, 21, 21, 21, 24, 24, 24),
+  fill   = c(PAL_GROW, PAL_GROW, PAPER, PAPER, FIG_LINK_COL, PAPER, NA,
+             PAL_DECLINE, PAL_DECLINE, FIG_TIER3_FILL),
+  colour = c(INK, INK, PAL_GROW, PAL_GROW, INK, INK, INK,
+             INK, PAL_DECLINE, FIG_TIER3_LINE),
+  size   = c(4.6, 4.6, 4.6, 4.6, 1.9, 1.9, 6.6, 3.0, 1.6, 0.9),
+  stroke = c(0.4, 0.4, 1.1, 1.1, 0.3, 0.5, 0.7, 0.6, 0.2, 0.25),
+  stringsAsFactors = FALSE)
+fig_spec <- fig_spec[match(fig_cls$cls, fig_spec$cls), ]
+fig_val  <- function(col) stats::setNames(fig_spec[[col]], fig_spec$cls)
+fig_num_col <- ifelse(fig_lp$stable_linchpin, PAPER, INK)   # number in the mark
+FIG_LINK_LWD <- stats::setNames(c(0.3, 0.9), fig_link_levels)
+fig_marks_name <- "Nodes and road pinch points"
+
+# ---- 12.7e Title, subtitle and caption (DRAFT text for the author's edit) ------------
+fig_tiers  <- table(factor(tbl03b$pinch_tier, levels = 1:3))
+fig_t1_states <- table(tbl03b$state[tbl03b$pinch_tier == 1L])
+fig_absent <- reserves_lcp$unit_name[!as.logical(reserves_lcp$geometry_present)]
+fig_title  <- "Tiger reserve network: modelled links, linchpin nodes and road pinch points"
+fig_sub <- sprintf(
+  paste0("%d nodes (%d reserves) and %d modelled links, of which %d are bridge ",
+         "links.\n%d road pinch points (tier 1: %d, tier 2: %d, tier 3: %d). ",
+         "Baseline resistance surface."),
+  nrow(fig_nodes), nrow(tbl03), nrow(fig_paths), sum(fig_paths$bridge),
+  nrow(tbl03b), fig_tiers[["1"]], fig_tiers[["2"]], fig_tiers[["3"]])
+fig_cap_parts <- c(
+  sprintf(paste0("Lines: the %d least-cost paths between the nodes on the ",
+                 "baseline resistance surface (Decisions 17 to 19). The paths ",
+                 "are modelled. They are not observed tiger movement. The ",
+                 "surface is India-only: a path cannot go through a neighbour ",
+                 "country."), nrow(fig_paths)),
+  sprintf(paste0("Pinch point (Decision 20): a place where a barrier road ",
+                 "(OpenStreetMap %s) meets a modelled path that is a bridge ",
+                 "link, or that %d or more links share. It is not the pinch ",
+                 "point of circuit-theory mapping. Each pinch point is drawn ",
+                 "at the centre of its %g km grid cell. The %d pinch points ",
+                 "are in %d cells; marks in the same cell or in adjacent ",
+                 "cells overlap."),
+          paste(PINCH_ROAD_CLASS_ORDER, collapse = ", "),
+          PINCH_SHARED_MIN_EDGES, PINCH_PUBLISH_GRID_M / 1000, nrow(tbl03b),
+          length(unique(tbl03b[[paste0(grid_prefix, "_id")]]))),
+  if (fig_tiers[["1"]] > 0) {
+    sprintf("The %d tier-1 pinch points are in: %s.", fig_tiers[["1"]],
+            paste(sprintf("%s (%d)", names(fig_t1_states), fig_t1_states),
+                  collapse = ", "))
+  },
+  sprintf(paste0("Linchpin: a node with a betweenness rank from 1 to %d in ",
+                 "its set of joined nodes. The number %d is a judgement ",
+                 "value: in a small set, %d nodes are a large share of the ",
+                 "set."), NET_LINCHPIN_TOP_N, NET_LINCHPIN_TOP_N,
+          NET_LINCHPIN_TOP_N),
+  sprintf("Variant result for the pinch points (Decision 20): %s.",
+          paste(sprintf("%s %s", sub(" \\(Decision.*$", "",
+                                     names(pinch_choice_label)),
+                        pinch_choice_label), collapse = "; ")),
+  if (length(fig_absent) > 0) {
+    sprintf("Not in the network (no boundary polygon): %s.",
+            paste(fig_absent, collapse = ", "))
+  },
+  paste0("Sources: roads \u00a9 OpenStreetMap contributors (ODbL); state ",
+         "lines Natural Earth (approximate); reserve boundaries NTCA."))
+fig_cap <- paste(strwrap(paste(fig_cap_parts, collapse = " "), width = 185),
+                 collapse = "\n")
+
+# ---- 12.7f The map ----------------------------------------------------------------------
+theme_map <- theme_void(base_size = 11) +
+  theme(
+    plot.background  = element_rect(fill = PAPER, colour = NA),
+    panel.background = element_rect(fill = PAPER, colour = NA),
+    plot.title       = element_text(face = "bold", colour = INK, size = 15),
+    plot.subtitle    = element_text(colour = INK, size = 11),
+    plot.caption     = element_text(colour = INK, size = 7.5, hjust = 0,
+                                    lineheight = 1.15),
+    plot.caption.position = "plot",
+    plot.title.position   = "plot",
+    legend.title     = element_text(colour = INK, size = 9),
+    legend.text      = element_text(colour = INK, size = 8, lineheight = 0.95),
+    legend.key.height = grid::unit(27, "pt"),
+    legend.position  = "right",
+    plot.margin      = margin(10, 10, 10, 10))
+fig_w <- fig_bb[["xmax"]] - fig_bb[["xmin"]]
+fig_h <- fig_bb[["ymax"]] - fig_bb[["ymin"]]
+p03 <- ggplot() +
+  geom_sf(data = states_sf, fill = STATE_FILL, colour = STATE_LINE,
+          linewidth = 0.2) +
+  geom_sf(data = res_net, fill = FIG_RESERVE_FILL, colour = NA) +
+  geom_sf(data = fig_paths[!fig_paths$bridge, ], aes(linewidth = kind),
+          colour = FIG_LINK_COL, key_glyph = "path") +
+  geom_sf(data = fig_paths[fig_paths$bridge, ], aes(linewidth = kind),
+          colour = INK, key_glyph = "path") +
+  geom_point(data = fig_marks,
+             aes(x = x, y = y, shape = cls, fill = cls, colour = cls,
+                 size = cls, stroke = cls)) +
+  geom_text(data = fig_lp, aes(x = x, y = y, label = num), colour = fig_num_col,
+            size = 2.7, fontface = "bold") +
+  annotate("text", x = fig_bb[["xmin"]] + PINCH_FIG_KEY_POS[["x"]] * fig_w,
+           y = fig_bb[["ymin"]] + PINCH_FIG_KEY_POS[["y"]] * fig_h,
+           label = fig_key, hjust = 0, vjust = 1, size = 2.7, colour = INK,
+           lineheight = 1.1) +
+  scale_linewidth_manual(
+    values = FIG_LINK_LWD, drop = FALSE,
+    name = "Modelled least-cost path",
+    guide = guide_legend(order = 1, override.aes = list(
+      colour = c(FIG_LINK_COL, INK)))) +
+  scale_shape_manual(values = fig_val("shape"), labels = fig_cls$label,
+                     name = fig_marks_name, guide = guide_legend(order = 2)) +
+  scale_fill_manual(values = fig_val("fill"), labels = fig_cls$label,
+                    name = fig_marks_name, na.value = NA,
+                    guide = guide_legend(order = 2)) +
+  scale_colour_manual(values = fig_val("colour"), labels = fig_cls$label,
+                      name = fig_marks_name, guide = guide_legend(order = 2)) +
+  scale_size_manual(values = fig_val("size"), labels = fig_cls$label,
+                    name = fig_marks_name, guide = guide_legend(order = 2)) +
+  scale_discrete_manual("stroke", values = fig_val("stroke"),
+                        labels = fig_cls$label, name = fig_marks_name,
+                        guide = guide_legend(order = 2)) +
+  coord_sf(crs = sf::st_crs(states_sf), datum = NA) +
+  labs(title = fig_title, subtitle = fig_sub, caption = fig_cap) +
+  theme_map
+
+# ---- 12.7g Output ------------------------------------------------------------------
+if (!dir.exists(DIR_FIGURES)) dir.create(DIR_FIGURES, recursive = TRUE)
+fig03_path <- file.path(DIR_FIGURES, sprintf("fig_%02d_%s.png", PINCH_FIG_NUMBER,
+                                             PINCH_FIG_SLUG))
+ggsave(fig03_path, plot = p03, width = PINCH_FIG_SIZE_IN[["width"]],
+       height = PINCH_FIG_SIZE_IN[["height"]], dpi = PINCH_FIG_DPI, bg = PAPER)
+if (!file.exists(fig03_path) || file.size(fig03_path) == 0) {
+  stop("The figure file was not written: ", fig03_path, call. = FALSE)
+}
+message("Wrote ", fig03_path)
+cat(sprintf(paste0("fig_%02d: %d nodes (%d linchpin, %d cut-node rings, %d ",
+                   "pendant) | %d edge paths (%d bridge links) | %d pinch ",
+                   "points (tier 1: %d, tier 2: %d, tier 3: %d) in %d cells ",
+                   "of %g km\n"),
+            PINCH_FIG_NUMBER, nrow(fig_nodes), nrow(fig_lp),
+            sum(fig_marks$kind == "cut"), sum(fig_marks$cls %in% "pend"),
+            nrow(fig_paths), sum(fig_paths$bridge), nrow(tbl03b),
+            fig_tiers[["1"]], fig_tiers[["2"]], fig_tiers[["3"]],
+            length(unique(tbl03b[[paste0(grid_prefix, "_id")]])),
+            PINCH_PUBLISH_GRID_M / 1000))
+cat("the classes in the legend:\n")
+print(data.frame(class = gsub("\n", " ", fig_cls$label),
+                 marks = as.vector(table(fig_marks$cls))),
+      row.names = FALSE, right = FALSE)
+cat("the linchpin numbers:\n")
+print(fig_lp[, c("num", "node_name", "set_id", "set_size", "betweenness_rank",
+                 "stable_linchpin", "cross_group_dependent", "cut_node")],
+      row.names = FALSE, right = FALSE)
+cat("title, subtitle and caption are DRAFT text for the author's edit:\n")
+cat(fig_title, "\n", fig_sub, "\n", fig_cap, "\n", sep = "")
+rule(sprintf(paste0("STEP 12.7 done — fig_%02d_%s.png written. Stage 2 code is ",
+                    "complete. Next: docs close (task 12.10)."),
+             PINCH_FIG_NUMBER, PINCH_FIG_SLUG))

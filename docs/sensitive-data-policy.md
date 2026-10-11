@@ -42,6 +42,16 @@ written agreement, following the Bay Area policy §4.
       reserve level or grid cell. Enforced by `assert_no_raw_points()`.
 - [ ] **No precise coordinates in any figure, table, caption, popup, or commit
       message.**
+- [ ] **Modelled least-cost paths and road crossings are published at a
+      generalised position** (Decision 20, `docs/methodology.md`). A path is
+      a modelled line from public data (T0); it is not a tiger location. A
+      road crossing or a pinch point is given as a 10 km grid cell with its
+      state and district, in every committed table, figure, caption and
+      popup. The 1 km cells stay in a gitignored layer under `data/`. Path
+      lines are drawn in static figures at national scale only; a path layer
+      that a reader can zoom or download needs its own rule first. Each
+      published path or crossing is labelled as modelled, not observed.
+      Enforced in code by `assert_publishable_table()`.
 - [ ] **Watch small-n.** A reserve or cell with very few underlying records can
       reverse-narrow a location. `warn_small_n()` flags these; suppress or
       coarsen before publishing.

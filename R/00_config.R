@@ -342,5 +342,95 @@ NET_COMPARE_VARIANTS             <- names(RESIST_VARIANTS)  # noghm, road15, roa
 NET_COMPARE_ROBUST_MIN_RHO       <- 0.9    # judgement value
 NET_COMPARE_ROBUST_MIN_RETENTION <- 2 / 3  # judgement value
 
+# ---- Connectivity: road pinch points (Decision 20, 2026-10-10) --------------
+# Fixed BEFORE any road crossing is computed. See docs/methodology.md,
+# Decision 20. The Week-12 STEPs of scripts/07_connectivity.R read these; do
+# not repeat the values as literals in any script.
+# The network results were seen in Week 11; no rule here uses a crossing
+# count, a cost or a road class.
+#   road cell   = a footprint cell that a barrier road touches (the cells of
+#                 STEP 9.6); road_class_top = the highest class in the cell
+#   cell list   = the path cells in order + the 2 middle cells of each knight
+#                 step (crossed-cells rule, Decision 17 point 3)
+#   crossing    = one unbroken run of road cells in the cell list of a path
+#   site        = crossings joined at <= PINCH_SITE_MERGE_KM (cell centres;
+#                 one link or different links)
+#   on_bridge   = a bridge edge uses the site
+#   shared      = >= PINCH_SHARED_MIN_EDGES edges use the site
+#   pinch_point = on_bridge OR shared
+#   pinch_tier  = 1 both flags; 2 on_bridge only; 3 shared only
+
+# (1) Roads (a1): the Decision-15 barrier classes and rasterise rule. The
+# class order is for road_class_top only (a description, not a rule and not a
+# traffic volume). scripts/07 asserts that the order holds every barrier
+# class once, and that the cell count equals n_road_cells in
+# tbl_11_resistance_qa.csv.
+PINCH_ROAD_CLASSES     <- ROAD_BARRIER_CLASSES
+PINCH_ROAD_TOUCHES     <- ROAD_BARRIER_TOUCHES
+PINCH_ROAD_CLASS_ORDER <- c("motorway", "trunk", "primary", "secondary")
+                          # highest first
+
+# (2) Paths (b1): crossings for the in-network pairs with these link roles
+# (Decision 19 point 3); the pinch-point rule counts the edges only.
+PINCH_PATH_LINK_ROLES <- c("edge", "parallel")
+PINCH_RULE_LINK_ROLES <- c("edge")
+
+# Links marked lit_flag = TRUE in every table (k1): no literature support, or
+# a described barrier (methodology Limitations, 2026-10-04). No link is
+# dropped. unit_id is the key (naming §5); the names are a guard (process
+# choice L2, 2026-10-10). scripts/07 asserts that each unit_id has the stated
+# name and that each entry is a pair of tbl_12_reserve_pairs.csv.
+PINCH_LIT_FLAG_PAIRS <- list(
+  list(unit_ids = c(8L, 37L),  names = c("Orang", "Dampa")),
+  list(unit_ids = c(46L, 49L), names = c("Anamalai", "Srivilliputhur-Megamalai")),
+  list(unit_ids = c(20L, 45L), names = c("Periyar", "Kalakad-Mundanthurai")),
+  list(unit_ids = c(41L, 56L), names = c("Sariska", "Rajaji"))
+)
+
+# (3) One crossing (c1, r1). The functions build one rule set only; a
+# different value needs a new Decision and new code.
+PINCH_CROSSING_RULE     <- "cell_run"        # not a line-on-line intersection
+PINCH_RESERVE_CELL_RULE <- "count_and_flag"  # reserve cells count; the
+                                             # reserves are listed
+
+# (4) Site (m1). 5 km = the Decision-18 route distance (judgement value).
+PINCH_SITE_MERGE_KM <- 5
+
+# (5) Pinch point (d1).
+PINCH_RULE             <- "bridge_or_shared"
+PINCH_SHARED_MIN_EDGES <- 2L                 # judgement value
+
+# (6) Variant repeat (e2). Each variant is compared with the baseline only.
+#   near          = two sites with cell centres <= PINCH_COMPARE_D_KM apart
+#   site_overlap  = min(share of baseline pinch points with a variant pinch
+#                       point near them, share of variant pinch points with a
+#                       baseline pinch point near them)
+#   label         = "robust" if site_overlap >= the minimum, else "sensitive";
+#                   a surface with no pinch point is "sensitive".
+#   The road value is robust only if BOTH road15 and road50 are robust.
+PINCH_COMPARE_VARIANTS           <- names(RESIST_VARIANTS)  # noghm, road15, road50
+PINCH_COMPARE_D_KM               <- 5       # = PINCH_SITE_MERGE_KM by Decision 20
+PINCH_COMPARE_D_DESCR_KM         <- c(5, 10)  # descriptive overlap columns
+PINCH_COMPARE_ROBUST_MIN_OVERLAP <- 2 / 3   # judgement value (the Decision-19
+                                            # retention limit)
+
+# (7) Publication (p1): a crossing or a site is given as a cell of this grid
+# (the analysis grid aggregated from its top-left corner), with state and
+# district, in every committed table, figure, caption and popup
+# (docs/sensitive-data-policy.md §3). It must be a whole multiple of
+# GRID_CELL_M. The 1 km cells go only into a gitignored layer.
+PINCH_PUBLISH_GRID_M <- 10000L               # judgement value
+PINCH_FIG_NUMBER     <- 3L                   # fig_03_<slug>.png (author choice)
+
+# (7, figure g1) The file name, the size, and the place of the linchpin list.
+# PINCH_FIG_KEY_POS: the top-left corner of the list, as a share of the extent
+# of the state layer (x from the west side, y from the south side). The
+# values put the list in the Bay of Bengal, between the mainland and the
+# islands.
+PINCH_FIG_SLUG       <- "reserve_network"    # fig_03_reserve_network.png
+PINCH_FIG_SIZE_IN    <- c(width = 11, height = 10.6)   # inches
+PINCH_FIG_DPI        <- 200L                 # as fig_01 and fig_02
+PINCH_FIG_KEY_POS    <- c(x = 0.60, y = 0.36)
+
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a

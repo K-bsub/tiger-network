@@ -1,0 +1,57 @@
+"unit_id","unit_name","state","network_group","node_id","node_name","block_size","set_id","set_size","degree","betweenness_norm","betweenness_rank","linchpin","cross_group_dependent","stable_linchpin","cut_node","pendant","isolated","cheapest_link_rkm","cheapest_link_rank","n_bridge_edges","n_crossings","n_sites","n_pinch_points","n_pinch_tier1","n_pinch_tier2","n_pinch_tier3"
+1,"Nagarjunsagar-Srisailam","Andhra Pradesh","central",1,"Nagarjunsagar-Srisailam + Amrabad",2,1,33,2,0,29,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,2073.6,3,0,54,22,21,0,0,21
+2,"Namdapha","Arunachal Pradesh","northeast",2,"Namdapha + Kamlang",2,3,6,2,0,3,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,577.3,10,0,11,11,0,0,0,0
+3,"Pakke","Arunachal Pradesh","northeast",3,"Pakke + Nameri",2,3,6,4,0.6,1,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,140.4,34,0,8,8,3,2,0,1
+4,"Kamlang","Arunachal Pradesh","northeast",2,"Namdapha + Kamlang",2,3,6,2,0,3,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,577.3,10,0,11,11,0,0,0,0
+5,"Manas","Assam","northeast",5,"Manas + Buxa",2,3,6,2,0,3,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,140.4,34,0,4,3,3,2,0,1
+6,"Nameri","Assam","northeast",3,"Pakke + Nameri",2,3,6,4,0.6,1,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,140.4,34,0,8,8,3,2,0,1
+7,"Kaziranga","Assam","northeast",7,"Kaziranga",1,3,6,2,0,3,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,275.1,30,0,8,8,0,0,0,0
+8,"Orang","Assam","northeast",8,"Orang",1,3,6,3,0.4,2,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,326.9,21,1,16,12,12,2,9,1
+9,"Valmiki","Bihar","north",9,"Valmiki",1,1,33,1,0,29,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,4186.1,1,1,12,11,11,0,11,0
+10,"Indravati","Chhattisgarh","central",10,"Indravati",1,1,33,5,0.129,14,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,276.3,28,0,37,30,26,0,0,26
+11,"Udanti-Sitanadi","Chhattisgarh","central",11,"Udanti-Sitanadi",1,1,33,5,0.0444,22,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,276.3,28,0,33,21,10,0,0,10
+12,"Achanakmar","Chhattisgarh","central",12,"Achanakmar",1,1,33,4,0.1673,13,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,118.7,36,0,19,17,10,0,0,10
+13,"Guru Ghasidas-Tamor Pingla","Chhattisgarh","central",13,"Guru Ghasidas-Tamor Pingla",1,1,33,4,0.2923,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,1.5,46,0,8,8,1,0,0,1
+14,"Palamau","Jharkhand","central",14,"Palamau",1,1,33,3,0.125,15,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,181.5,33,0,23,21,2,0,0,2
+15,"Bandipur","Karnataka","western_ghats",15,"Bandipur + Nagarhole + Mudumalai + Sathyamangalam",4,2,8,3,0.7143,1,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,30.2,42,3,16,15,15,1,14,0
+16,"Bhadra","Karnataka","western_ghats",16,"Bhadra",1,2,8,2,0.4762,2,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,455.6,16,2,19,18,18,1,17,0
+17,"Kali","Karnataka","western_ghats",17,"Kali",1,2,8,2,0.2857,4,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,560.2,11,2,19,19,19,1,18,0
+18,"Nagarhole","Karnataka","western_ghats",15,"Bandipur + Nagarhole + Mudumalai + Sathyamangalam",4,2,8,3,0.7143,1,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,30.2,42,3,16,15,15,1,14,0
+19,"Biligiri Ranganatha Temple","Karnataka","western_ghats",19,"Biligiri Ranganatha Temple",1,2,8,1,0,6,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,30.2,42,1,1,1,1,0,1,0
+20,"Periyar","Kerala","western_ghats",20,"Periyar + Srivilliputhur-Megamalai",2,2,8,2,0.2857,4,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,98.8,38,2,3,3,3,0,3,0
+21,"Parambikulam","Kerala","western_ghats",21,"Parambikulam + Anamalai",2,2,8,2,0.4762,2,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,187.3,32,2,9,8,8,0,8,0
+22,"Kanha","Madhya Pradesh","central",22,"Kanha",1,1,33,6,0.1996,9,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,118.7,36,0,40,33,19,0,0,19
+23,"Pench","Madhya Pradesh","central",23,"Pench",1,1,33,4,0.0786,18,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,14.7,44,0,25,22,16,0,0,16
+24,"Bandhavgarh","Madhya Pradesh","central",24,"Bandhavgarh",1,1,33,5,0.0222,26,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,239.5,31,0,26,20,7,0,0,7
+25,"Panna","Madhya Pradesh","central",25,"Panna",1,1,33,4,0.2016,8,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,313,22,0,39,32,23,0,0,23
+26,"Satpura","Madhya Pradesh","central",26,"Satpura",1,1,33,5,0.1734,12,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,301.7,24,0,27,21,19,0,0,19
+27,"Sanjay Dubri","Madhya Pradesh","central",27,"Sanjay Dubri",1,1,33,3,0.252,3,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,1.5,46,0,12,12,1,0,0,1
+28,"Veerangana Durgavati","Madhya Pradesh","central",28,"Veerangana Durgavati",1,1,33,6,0.0121,27,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,771.2,7,0,56,33,14,0,0,14
+29,"Ratapani","Madhya Pradesh","central",29,"Ratapani",1,1,33,6,0.2157,5,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,771.2,7,0,63,46,29,0,0,29
+30,"Madhav","Madhya Pradesh","central",30,"Madhav",1,1,33,4,0.3569,1,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,785.5,6,0,48,36,24,0,0,24
+31,"Melghat","Maharashtra","central",31,"Melghat",1,1,33,3,0.0464,21,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,301.7,24,0,15,12,11,0,0,11
+32,"Tadoba-Andhari","Maharashtra","central",32,"Tadoba-Andhari",1,1,33,5,0.0121,27,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,438.6,17,0,39,29,14,0,0,14
+33,"Pench (MH)","Maharashtra","central",33,"Pench (MH)",1,1,33,5,0.2137,6,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,14.7,44,0,33,30,19,0,0,19
+34,"Sahyadri","Maharashtra","western_ghats",34,"Sahyadri",1,2,8,1,0,6,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,560.2,11,1,8,8,8,0,8,0
+35,"Nawegaon-Nagzira","Maharashtra","central",35,"Nawegaon-Nagzira",1,1,33,6,0.1835,10,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,375.9,19,0,27,21,16,0,0,16
+36,"Bor","Maharashtra","central",36,"Bor",1,1,33,4,0.0242,24,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,546,13,0,31,21,8,0,0,8
+37,"Dampa","Mizoram","northeast",37,"Dampa",1,3,6,1,0,3,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,1310.8,5,1,11,11,11,2,9,0
+38,"Similipal","Odisha","central",38,"Similipal",1,1,33,3,0.0625,19,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,494.5,14,1,35,31,16,0,14,2
+39,"Satkosia","Odisha","central",39,"Satkosia",1,1,33,3,0.0242,24,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,494.5,14,0,25,25,2,0,0,2
+40,"Ranthambore","Rajasthan","central",40,"Ranthambore",1,1,33,3,0.0907,17,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,279.6,26,0,16,12,2,0,0,2
+41,"Sariska","Rajasthan","central",41,"Sariska",1,1,33,3,0.2258,4,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,1900,4,1,59,40,23,0,21,2
+42,"Mukundara Hills","Rajasthan","central",42,"Mukundara Hills",1,1,33,2,0,29,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,408.3,18,0,18,15,0,0,0,0
+43,"Ramgarh Vishdhari","Rajasthan","central",43,"Ramgarh Vishdhari",1,1,33,2,0.0323,23,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,279.6,26,0,7,6,0,0,0,0
+45,"Kalakad-Mundanthurai","Tamil Nadu","western_ghats",45,"Kalakad-Mundanthurai",1,2,8,1,0,6,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,98.8,38,1,1,1,1,0,1,0
+46,"Anamalai","Tamil Nadu","western_ghats",21,"Parambikulam + Anamalai",2,2,8,2,0.4762,2,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,187.3,32,2,9,8,8,0,8,0
+47,"Mudumalai","Tamil Nadu","western_ghats",15,"Bandipur + Nagarhole + Mudumalai + Sathyamangalam",4,2,8,3,0.7143,1,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,30.2,42,3,16,15,15,1,14,0
+48,"Sathyamangalam","Tamil Nadu","western_ghats",15,"Bandipur + Nagarhole + Mudumalai + Sathyamangalam",4,2,8,3,0.7143,1,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,30.2,42,3,16,15,15,1,14,0
+49,"Srivilliputhur-Megamalai","Tamil Nadu","western_ghats",20,"Periyar + Srivilliputhur-Megamalai",2,2,8,2,0.2857,4,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,98.8,38,2,3,3,3,0,3,0
+50,"Kawal","Telangana","central",50,"Kawal",1,1,33,3,0,29,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,330.2,20,0,35,28,24,0,0,24
+51,"Amrabad","Telangana","central",1,"Nagarjunsagar-Srisailam + Amrabad",2,1,33,2,0,29,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,2073.6,3,0,54,22,21,0,0,21
+52,"Dudhwa","Uttar Pradesh","north",52,"Dudhwa",1,1,33,2,0.0625,19,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,763.3,9,2,19,18,18,0,18,0
+54,"Ranipur","Uttar Pradesh","central",54,"Ranipur",1,1,33,2,0.2097,7,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,313,22,0,13,13,0,0,0,0
+55,"Corbett","Uttarakhand","north",55,"Corbett",1,1,33,2,0.121,16,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,70.7,40,2,8,8,8,0,8,0
+56,"Rajaji","Uttarakhand","north",56,"Rajaji",1,1,33,2,0.1754,11,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,70.7,40,2,36,22,22,0,22,0
+57,"Sundarbans","West Bengal","central",57,"Sundarbans",1,1,33,1,0,29,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,2690.9,2,1,18,14,14,0,14,0
+58,"Buxa","West Bengal","northeast",5,"Manas + Buxa",2,3,6,2,0,3,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,140.4,34,0,4,3,3,2,0,1
