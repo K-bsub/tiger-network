@@ -1,0 +1,8 @@
+"set","subset","records","n_cells","point8_outcome"
+"tiger","1km",45,17,"no_1km_model"
+"tiger","5km",300,44,""
+"tiger","obscured",884,104,""
+"background","1km",20905,4554,""
+"background","5km",23901,5512,""
+"background","matched_1km",6082,417,""
+"background","obscured",7029,825,""

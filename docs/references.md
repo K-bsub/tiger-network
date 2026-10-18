@@ -680,6 +680,226 @@ https://indiaenvironmentportal.org.in/reports-and-documents/monitoring-of-tiger-
 · *(From the portal summary: Nainital and Almora districts; Ramnagar–Ranikhet
 highway, NH 121. The report was not read.)*
 
+## Occurrence cleaning (Decision 21)
+
+*All entries in this section were read from abstracts, web pages, a source
+file and search extracts on 2026-10-11, except where an entry gives another
+date. No paper was read in full.*
+
+Barber, R.A., Ball, S.G., Morris, R.K.A., & Gilbert, F. (2022). Target-group
+backgrounds prove effective at correcting sampling bias in Maxent models.
+*Diversity and Distributions*, 28(1), 128–141.
+https://doi.org/10.1111/ddi.13442 · *(Hoverfly records from Great Britain
+(1983–2002) and virtual species with known distributions; four methods of
+bias correction compared. A target-group background was the best method to
+copy the sampling effort, but it sometimes corrected too much; the authors
+tell users to check that a model is ecologically plausible. Decision 5.)*
+*(From the repository page and the abstract, read 2026-10-17. Added
+2026-10-17: Decision 5 cited it and this file had no entry.)*
+
+Gábor, L., Jetz, W., Lu, M., Rocchini, D., Cord, A., Malavasi, M.,
+Zarzo-Arias, A., Barták, V., & Moudrý, V. (2022). Positional errors in
+species distribution modelling are not overcome by the coarser grains of
+analysis. *Methods in Ecology and Evolution*, 13(10), 2289–2302.
+https://doi.org/10.1111/2041-210X.13956 · data:
+https://doi.org/10.5061/dryad.79cnp5hx3 · *(Virtual species; 49
+combinations of position error and grain. Model performance fell with more
+position error and with a coarser grain; a coarser grain did not make up for
+the error. Decision 21: the 1,000 m limit; the caution for a coarse-grain
+model.)* *(From the abstract. Volume, issue, pages and the article DOI
+verified 2026-10-17 from a university repository record.)*
+
+GBIF.org. *Bengal Tiger (Panthera tigris) Sighting based on Photographs from
+Facebook in India*. Occurrence dataset, key
+`ff8a7785-27c8-4162-907e-658e28a09ba1` (Nature Mates-Nature Club; CC0).
+https://api.gbif.org/v1/dataset/ff8a7785-27c8-4162-907e-658e28a09ba1 ·
+*(The largest tiger dataset of the download (2,306 records), and most of the
+clean set: 20 of 45 records in the 1 km set, 273 of 300 in the 5 km set
+(corrected 2026-10-17: said 253). The
+entry does not say how a position was given to a photograph. Decision 21,
+pending Week-14 item.)* *(Registry entry, read 2026-10-11 and 2026-10-17.)*
+
+GBIF.org. *Mammal occurrence in rainforest fragments of the Valparai Plateau
+and Anamalai Tiger Reserve, Western Ghats, India (2005-06)*. Occurrence
+dataset, key `3732112e-848c-4fcc-b62d-e5acb9d12099` (CC BY 4.0).
+https://api.gbif.org/v1/dataset/3732112e-848c-4fcc-b62d-e5acb9d12099 ·
+*(The position is the approximate midpoint of a line transect, or comes
+from the name of a place, with a coordinate uncertainty in metres. Decision
+21, outcome of the dataset check: kept (k1).)* *(Registry entry, read
+2026-10-17.)*
+
+GBIF.org. *Camera trap database of Tiger from Rajaji National Park,
+Uttarakhand*. Occurrence dataset, key `e61455a4-352d-4c55-83ea-dbca254e3b29`.
+https://api.gbif.org/v1/dataset/e61455a4-352d-4c55-83ea-dbca254e3b29 ·
+*(305 tiger records, camera traps; the description says that the positions
+of the images were degraded for security, and that exact positions are
+available on request. Decision 21, Amendment 2.)* *(Registry entry, read
+2026-10-11. The publisher name is not in the entry; the contacts are from
+the Wildlife Institute of India.)*
+
+GBIF Secretariat. *Date and time interpretation*. GBIF technical
+documentation.
+https://techdocs.gbif.org/en/data-processing/temporal-interpretation · *(If
+the date fields of a record do not agree, GBIF keeps the part of the date on
+which they agree and adds the flag `RECORDED_DATE_MISMATCH`; in the examples
+of the page the year stays. A date that GBIF cannot process gets
+`RECORDED_DATE_INVALID`. Decision 21, Amendment 1: no rule for the date
+flags.)* *(Web page, read 2026-10-11 through a summary. The page has no
+example of a conflict in the year.)*
+
+GBIF Secretariat. *Occurrence download formats*. GBIF technical
+documentation. https://techdocs.gbif.org/en/data-use/download-formats ·
+*(The field list of the simple format: it has `issue`, `occurrenceStatus`,
+`establishmentMeans`, `coordinatePrecision`, `datasetKey`, `order`, `family`
+and `speciesKey`; `informationWithheld` and `dataGeneralizations` are in the
+Darwin Core Archive format only. Decision 21 point 1.)* *(Web page.)*
+
+GBIF Secretariat. *Occurrence issues and flags*. GBIF technical
+documentation.
+https://techdocs.gbif.org/en/data-use/occurrence-issues-and-flags · *(The
+names and meanings of the coordinate flags. Decision 21 step 4. The page
+does not say which flags `hasGeospatialIssue` uses.)* *(Web page.)*
+
+iNaturalist community forum. "Obscured polygons and rgbif?"
+https://forum.inaturalist.org/t/obscured-polygons-and-rgbif/47092 ; "Common
+birds being newly set to 'obscured' recently"
+https://forum.inaturalist.org/t/common-birds-being-newly-set-to-obscured-recently/9753
+; "When all sibling taxa have globally obscured taxon geoprivacy…"
+https://forum.inaturalist.org/t/when-all-sibling-taxa-have-globally-obscured-taxon-geoprivacy-the-parent-taxon-should-be-automatically-obscured/18305
+· *(An obscured observation gets a random point in a cell of a 0.2° grid,
+and its public accuracy is the diagonal of the cell — one GBIF example has
+29,458 m. The standard is to obscure a taxon with an IUCN status of Near
+Threatened or worse; a curator can change it. One post says that all living
+*Panthera* species are obscured. Decision 21 point 4.)* *(Forum posts, not
+the official help page. The geoprivacy state of the tiger taxon was not
+checked on iNaturalist.)*
+
+iNaturalist contributors, iNaturalist. (2026). *iNaturalist Research-grade
+Observations*. iNaturalist.org. Occurrence dataset.
+https://doi.org/10.15468/ab3s5x · *(GBIF dataset key
+`50c9509d-22c7-4a22-a47d-8c48425ef4a7`, read from the GBIF registry on
+2026-10-11. Decision 21: `OCC_INAT_DATASET_KEY`.)*
+
+Phillips, S.J. *maxnet: Fitting 'Maxent' Species Distribution Models with
+'glmnet'*. R package. Source file `R/maxnet.formula.R`,
+https://github.com/mrmaxent/maxnet · *(The default feature classes by the
+number of presences: `l` below 10, `lq` below 15, `lqh` below 80, `lqph`
+from 80. Decision 21 point 8: the value 80.)* *(Source file of the master
+branch; the package is not in `renv.lock` yet, so the locked version can
+differ.)*
+
+Phillips, S.J., Dudík, M., Elith, J., Graham, C.H., Lehmann, A., Leathwick,
+J., & Ferrier, S. (2009). Sample selection bias and presence-only
+distribution models: implications for background and pseudo-absence data.
+*Ecological Applications*, 19(1), 181–197.
+https://doi.org/10.1890/07-2153.1 · *(A background with the same bias as the
+occurrence data; all occurrences of a target group "observed by similar
+methods" as that background; 226 species. Decision 5; Decision 21 point
+7.)* *(From the abstract.)*
+
+van Proosdij, A.S.J., Sosef, M.S.M., Wieringa, J.J., & Raes, N. (2016).
+Minimum required number of specimen records to develop accurate species
+distribution models. *Ecography*, 39(6), 542–552.
+https://doi.org/10.1111/ecog.01509 · *(Simulated species. Minimum sample
+sizes of 3 (narrow-ranged) and 13 (widespread) in a virtual study area, and
+of 14 and 25 in a real African study area. Decision 21 point 8: the value
+25.)* *(From the abstract of the data record.)*
+
+Zizka, A., Silvestro, D., Andermann, T., Azevedo, J., Duarte Ritter, C.,
+Edler, D., Farooq, H., Herdean, A., Ariza, M., Scharn, R., Svantesson, S.,
+Wengström, N., Zizka, V., & Antonelli, A. (2019). CoordinateCleaner:
+Standardized cleaning of occurrence records from biological collection
+databases. *Methods in Ecology and Evolution*, 10(5), 744–751.
+https://doi.org/10.1111/2041-210X.13152 · *(Automated tests for records at a
+country or province centroid, at a capital, in the sea, and at an
+institution such as a zoo or a museum. Decision 21: the ideas of steps 7 and
+8; the package is not used.)* *(From the package manual, version 3.0.1.
+Title, authors, volume, issue and pages verified 2026-10-17 from two
+university repository records.)*
+
+## Effort surfaces (Decision 22)
+
+*All entries in this section were read from abstracts, repository records
+and documentation pages on 2026-10-17. No paper was read in full. Barber et
+al. (2022) and Phillips et al. (2009) are in the section above.*
+
+Baddeley, A., Turner, R., and contributors. *spatstat.explore: Exploratory
+Data Analysis for the 'spatstat' Family*. R package. Help page
+`density.ppp`.
+https://www.rdocumentation.org/packages/spatstat.explore/versions/3.5-2/topics/density.ppp
+· *(`sigma` is the standard deviation of the kernel; the default edge
+correction divides by the kernel mass inside the window (Diggle 1985).
+Decision 22 points 5 and 7.)* *(Help page. The support radius of the
+quartic kernel (√8 × `sigma`) was checked in a chat R session with
+`spatstat.explore` 3.2.5; it is not in the help page.)*
+
+Census of India 2011, as given in: Central Bureau of Health Intelligence
+(2018). *National Health Profile 2018*. Ministry of Health and Family
+Welfare, Government of India.
+https://cbhidghs.mohfw.gov.in/Ebook/National%20Health%20Profile-2018%20(e-Book)/files/assets/basic-html/page-49.html
+· *(640,932 villages, including uninhabited villages; 7,933 towns,
+including census towns. Decision 22 point 4: the coverage of the
+OpenStreetMap settlement layer.)* *(Secondary source; the Census tables
+were not read.)*
+
+Diggle, P. (1985). A kernel method for smoothing point process data.
+*Journal of the Royal Statistical Society, Series C (Applied Statistics)*,
+34(2), 138–147. https://doi.org/10.2307/2347366 · *(A kernel estimate of
+intensity with a correction for edge effects. Decision 22 point 7.)* *(From
+the abstract page.)*
+
+Esri. *How Kernel Density works*. ArcGIS Desktop 10.7 documentation.
+https://desktop.arcgis.com/en/arcmap/10.7/tools/spatial-analyst-toolbox/how-kernel-density-works.htm
+· *(The tool uses the quartic kernel of Silverman (1986, p. 76, equation
+4.5); the search radius is where the kernel stops; the output is scaled so
+that its integral is the number of points; the page gives no edge
+correction. Phase 1 used this tool. Decision 22 points 5 and 7.)* *(Web
+page.)*
+
+Fourcade, Y., Engler, J.O., Rödder, D., & Secondi, J. (2014). Mapping
+species distributions with MAXENT using a geographically biased sample of
+presence data: a performance assessment of methods for correcting sampling
+bias. *PLoS ONE*, 9(5), e97122.
+https://doi.org/10.1371/journal.pone.0097122 · *(Five correction methods,
+one virtual and two real species, four types of bias. Systematic sampling
+of the records was the most consistent method. Decision 22, reason for
+a2.)* *(From the abstract. The names of the other four methods are not in
+the abstract and were not verified.)*
+
+Kramer-Schadt, S., Niedballa, J., Pilgrim, J.D., Schröder, B., Lindenborn,
+J., Reinfelder, V., Stillfried, M., Heckmann, I., Scharf, A.K., Augeri,
+D.M., Cheyne, S.M., Hearn, A.J., Ross, J., Macdonald, D.W., Mathai, J.,
+Eaton, J., Marshall, A.J., Semiadi, G., Rustam, R., Bernard, H., Alfred,
+R., Samejima, H., Duckworth, J.W., Breitenmoser-Wuersten, C., Belant, J.L.,
+Hofer, H., & Wilting, A. (2013). The importance of correcting for sampling
+bias in MaxEnt species distribution models. *Diversity and Distributions*,
+19(11), 1366–1379. https://doi.org/10.1111/ddi.12096 · *(Spatial filtering
+and background manipulation compared on two virtual species and 504 Malay
+civet records; spatial filtering gave the best results. Decision 22,
+reason for a2.)* *(From the repository record and the abstract.)*
+
+Ranc, N., Santini, L., Rondinini, C., Boitani, L., Poitevin, F.,
+Angerbjörn, A., & Maiorano, L. (2017). Performance tradeoffs in
+target-group bias correction for species distribution models.
+*Ecography*. https://doi.org/10.1111/ecog.02414 · *(92 terrestrial mammal
+species, Mediterranean basin. A bias correction can replace an
+underestimate with an overestimate, mostly where the sampling is low.
+Decision 22, reason for a2.)* *(From the repository record. Volume and
+pages not verified.)*
+
+Silverman, B.W. (1986). *Density Estimation for Statistics and Data
+Analysis*. Chapman and Hall. · *(The quartic kernel, p. 76, equation 4.5,
+as the Esri page cites it. Decision 22 point 5.)* *(Not read.)*
+
+Warton, D.I., Renner, I.W., & Ramp, D. (2013). Model-based control of
+observer bias for the analysis of presence-only data in ecology. *PLoS
+ONE*, 8(11), e79168. https://doi.org/10.1371/journal.pone.0079168 ·
+*(Observer-bias variables, such as access variables, go into the model
+with the environmental variables; the prediction is made at one common
+level of bias. Decision 22: a candidate use of the settlement surface,
+decided in Week 14.)* *(From the repository record. Which bias value is
+used at prediction was not verified.)*
+
 ## Tiger movement and landscape resistance (Decision 14)
 
 Dutta, S., & Krishnamurthy, R. (2024). Multiphasic movement and step-selection

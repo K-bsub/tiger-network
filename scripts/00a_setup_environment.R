@@ -7,6 +7,9 @@
 
 # ---- 1. Required packages --------------------------------------------------
 # Checked against renv::dependencies(c("R", "scripts")) on 2026-10-02.
+# 2026-10-17: jsonlite added. R/00_functions_occ.R (Week 13) reads the cached
+# GBIF registry entries with jsonlite::fromJSON(). jsonlite was already in
+# renv.lock; this list did not name it.
 required <- c(
   # Core spatial
   "sf", "terra", "here",
@@ -14,7 +17,7 @@ required <- c(
   # igraph; Decision 17). gdistance + raster are for validation check (c) only.
   "igraph", "gdistance", "raster",
   # Data handling
-  "dplyr", "tidyr", "readr", "stringr", "tibble", "xml2",
+  "dplyr", "tidyr", "readr", "stringr", "tibble", "xml2", "jsonlite",
   # Acquisition (scripts/01)
   "rgbif", "elevatr", "osmextract", "rnaturalearth",
   # Figures (Stage 1 animation)

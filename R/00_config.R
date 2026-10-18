@@ -70,8 +70,7 @@ GRID_CELL_M <- 1000L
 # before publication (see docs/sensitive-data-policy.md §3).
 PUBLISH_FLOOR_M <- 1000L
 
-# KDE search radius (metres) — starting value; test 10/20/30 km as in Phase 1.
-KDE_RADIUS_M <- 20000L
+# KDE settings: see "Stage 3: effort surfaces (Decision 22)" below.
 
 # ---- Decision 11: gHM gap-fill relevance rule (Week 9, task 9.2) ------------
 # Fixed BEFORE the check is run (pre-registration). See docs/methodology.md,
@@ -431,6 +430,244 @@ PINCH_FIG_SLUG       <- "reserve_network"    # fig_03_reserve_network.png
 PINCH_FIG_SIZE_IN    <- c(width = 11, height = 10.6)   # inches
 PINCH_FIG_DPI        <- 200L                 # as fig_01 and fig_02
 PINCH_FIG_KEY_POS    <- c(x = 0.60, y = 0.36)
+
+# ---- Stage 3: occurrence cleaning (Decision 21, 2026-10-11) -----------------
+# Fixed BEFORE any record is cleaned and before any cleaned count is made. See
+# docs/methodology.md, Decision 21, for the sources, the reasons and what was
+# seen. The Stage-3 script (scripts/08) reads these; do not repeat the values
+# as literals in any script.
+#   source  = the two GBIF SIMPLE_CSV files of Week 2, read again (the interim
+#             layers do not hold the rule fields); the interim layers are the
+#             guard for the entry state
+#   steps   = OCC_STEP_ORDER, one order for the tiger records and for the
+#             background; a record is counted at the first step that removes it
+#   sets    = uncert_set "1km" (<= OCC_UNCERT_MAIN_M) and "5km" (above it and
+#             <= OCC_UNCERT_WIDE_M); the 1 km set is the main set, the 5 km
+#             set (both values) is for one sensitivity run
+#   cell    = one presence per 1 km complete-case cell; no distance thinning
+
+# (2) Rule steps, in order. Each name is a row of the attrition table.
+OCC_STEP_ORDER <- c("status", "basis", "year", "coord_flags", "uncert_na",
+                    "uncert", "centroid", "zoo", "footprint")
+
+# Steps 1-2 (c2): a record stays only with these values. A missing value is
+# removed. Amendment 1 (2026-10-11, after the names stage of STEP 13.1 and
+# before any count): c2 replaces c1, which kept only the first two record
+# types. OBSERVATION and OCCURRENCE are not in the two files.
+OCC_STATUS_KEEP <- c("PRESENT")
+OCC_BASIS_KEEP  <- c("HUMAN_OBSERVATION", "MACHINE_OBSERVATION",
+                     "OBSERVATION", "OCCURRENCE", "MATERIAL_SAMPLE")
+
+# Step 3 (b1): the year window is the window of the background download. A
+# record with no year is removed.
+OCC_YEAR_MIN <- BASELINE_YEAR   # 2006
+OCC_YEAR_MAX <- CURRENT_YEAR    # 2022
+
+# Step 4: GBIF `issue` flags. A record with a flag of OCC_ISSUE_REMOVE is
+# removed (the coordinate is wrong, or GBIF changed it on an assumption). The
+# flags of OCC_ISSUE_REPORT are counted and remove no record. Judgement lists.
+OCC_ISSUE_REMOVE <- c(
+  "ZERO_COORDINATE", "COORDINATE_OUT_OF_RANGE", "COORDINATE_INVALID",
+  "COUNTRY_COORDINATE_MISMATCH", "PRESUMED_SWAPPED_COORDINATE",
+  "PRESUMED_NEGATED_LATITUDE", "PRESUMED_NEGATED_LONGITUDE",
+  "COORDINATE_REPROJECTION_FAILED", "COORDINATE_REPROJECTION_SUSPICIOUS",
+  "COORDINATE_UNCERTAINTY_METERS_INVALID"
+)
+OCC_ISSUE_REPORT <- c(
+  "GEODETIC_DATUM_ASSUMED_WGS84", "GEODETIC_DATUM_INVALID",
+  "COORDINATE_ROUNDED", "COORDINATE_REPROJECTED",
+  "COORDINATE_PRECISION_INVALID"
+)
+
+# Steps 5-6 (n1, a3): coordinateUncertaintyInMeters.
+OCC_UNCERT_NA_RULE <- "remove"       # no value, or a value <= 0: removed
+OCC_UNCERT_MAIN_M  <- GRID_CELL_M    # 1,000 m: the main set ("1km")
+OCC_UNCERT_WIDE_M  <- as.integer(LCP_COMPARE_ROUTE_D_KM * 1000)
+                                     # 5,000 m: the Decision-18 distance
+                                     # (judgement value); the second set
+
+# (4) Obscured set (o2): a record that step 6 removes, from the iNaturalist
+# dataset, with an uncertainty of at least OCC_OBSCURED_MIN_UNCERT_M. It gets
+# the 0.2 degree cell of its public coordinates. It is never a 1 km presence.
+OCC_INAT_DATASET_KEY      <- "50c9509d-22c7-4a22-a47d-8c48425ef4a7"
+                             # "iNaturalist Research-grade Observations"
+                             # (GBIF registry, read 2026-10-11)
+OCC_OBSCURED_MIN_UNCERT_M <- 25000L  # judgement value: below the smallest
+                                     # diagonal of a 0.2 degree cell in India
+                                     # (about 28.4 km at 37 N)
+OCC_OBSCURED_CELL_DEG     <- 0.2     # the iNaturalist obscuring grid
+
+# Step 7 (z2): geometric centroid of India, of each state and of each
+# district; a record within the distance is removed.
+OCC_CENTROID_LEVELS <- c("india", "state", "district")
+OCC_CENTROID_DIST_M <- GRID_CELL_M   # judgement value
+
+# Step 8 (z2): OpenStreetMap zoo features (points and areas) from the cached
+# Geofabrik India file; a record within the distance is removed.
+OCC_ZOO_OSM_KEY   <- "tourism"
+OCC_ZOO_OSM_VALUE <- "zoo"
+OCC_ZOO_DIST_M    <- GRID_CELL_M     # judgement value
+
+# (5) Presence cells (e1). The functions build one rule only; a different
+# value needs a new Decision and new code.
+OCC_THIN_RULE <- "one_per_cell"
+
+# (7) Background (g3): the same steps and values. ds_match = the dataset of
+# the record holds at least this number of records of the tiger 1 km set.
+OCC_BG_SAME_RULE       <- TRUE
+OCC_BG_MATCH_MIN_TIGER <- 1L         # judgement value
+
+# (8) Minimum number of tiger presence cells in the 1 km set (h2, k2):
+#   below OCC_MIN_CELLS_MODEL          no 1 km suitability model; Week 14
+#                                      starts with a Decision (no model, or a
+#                                      model at a coarser grain)
+#   OCC_MIN_CELLS_MODEL to FULL - 1    a reduced model: feature classes at
+#                                      most OCC_REDUCED_MAX_CLASSES
+#   OCC_MIN_CELLS_FULL or more         the planned model
+# The outcome is stated in task 13.3 and does not change after that.
+OCC_MIN_CELLS_MODEL     <- 25L   # van Proosdij et al. 2016 (judgement value)
+OCC_MIN_CELLS_FULL      <- 80L   # the maxnet default adds product features
+                                 # from 80 presences (judgement value)
+OCC_REDUCED_MAX_CLASSES <- "lq"  # linear + quadratic (judgement value)
+
+# Decision-21 point-8 OUTCOME (process choice r1, 2026-10-17). The STEP-13.2
+# run of 2026-10-17 gave n_cells_1km = 17 -> "no_1km_model". scripts/08 stops
+# if a run gives another outcome. Set by the recorded outcome in
+# docs/methodology.md (Decision 21, "Outcome of point 8") — do not change it
+# to test alternatives. Values: "no_1km_model", "reduced_model",
+# "planned_model".
+OCC_POINT8_OUTCOME <- "no_1km_model"
+
+# Amendment 2 (2026-10-11, after the raw counts; process choice w1): the
+# dataset check. For each dataset with a record in the 1 km or the 5 km set,
+# the GBIF registry text (title, description, purpose, additional
+# information, sampling description) is searched for these word parts (case
+# is ignored). A hit stops the script before the clean layers are written,
+# unless the dataset key is in OCC_DATASET_CLEARED. Judgement list.
+OCC_DATASET_FLAG_WORDS <- c("degrad", "generali", "obscur", "fuzz", "withh",
+                            "blur", "randomi", "coarse", "rounded",
+                            "sensitiv", "approximat", "not precise")
+# Datasets that the author read and cleared: names = datasetKey, value = the
+# date, the decision and the reason (text). A dataset is added only by the
+# author, after the script stops on it.
+OCC_DATASET_CLEARED <- list(
+  # Mammal occurrence in rainforest fragments of the Valparai Plateau and
+  # Anamalai Tiger Reserve, Western Ghats, India (2005-06)
+  "3732112e-848c-4fcc-b62d-e5acb9d12099" = paste(
+    "2026-10-17: keep (k1). The word 'approximat' is in the method sentence:",
+    "the position is the midpoint of a line transect, or comes from the name",
+    "of a place, and each record has a coordinate uncertainty in metres.",
+    "Step 6 uses that value. Cleared after the sets and the point-8 outcome",
+    "of the first STEP-13.2 run were seen."),
+  # The five background datasets below (choice e1, 2026-10-17) stopped the
+  # first STEP-13.3 run. They were cleared after the background sets and the
+  # taxa of that run were seen.
+  # Mammal occurrence records from bird surveys and leopard study in the
+  # Anamalai Hills, Western Ghats, India (1999-2020)
+  "b045f965-8a06-4b9c-a1b1-a9b5a1628b52" = paste(
+    "2026-10-17: keep (e1). 'degrad' is about degraded forest fragments (the",
+    "habitat); 'approximat' is about the number of point counts, and about",
+    "positions from a place name, which have a coordinate uncertainty in",
+    "metres. The position is the start point of a line transect."),
+  # Mammal occurrence along line transects for hornbill survey in the
+  # Western Ghats, India (2005-06)
+  "7528e073-dea9-4172-a1cb-27c684f2a4b5" = paste(
+    "2026-10-17: keep (e1). The position is the approximate start point or",
+    "midpoint of a line transect from GPS records; the coordinate",
+    "uncertainty is based on the transect length and the position error."),
+  # Fruiting trees and their bird and mammalian visitors and seed predators
+  # in the Anamalai Hills, India
+  "cf973c89-6819-4fc5-be56-c23f0119ff69" = paste(
+    "2026-10-17: keep (e1). 'approximat' is about the annual rainfall. The",
+    "entry has no sentence about the positions."),
+  # India Roadkill Monitoring Project
+  "f334ae5e-0991-44bb-b64b-d602f4c8c289" = paste(
+    "2026-10-17: keep (e1). 'sensitiv' is about ecologically sensitive",
+    "landscapes. Note: the publisher changed an uncertainty of 0 m to 30 m",
+    "or 100 m, so such a record passes steps 5 and 6 with a value that the",
+    "publisher assigned."),
+  # Mammal occurrence along bird survey transects in the Dampa Tiger Reserve
+  # landscape, Mizoram, northeast India (2014)
+  "f896ef0c-7fad-44eb-bf56-b5dbe821fb5c" = paste(
+    "2026-10-17: keep (e1). The position is the approximate midpoint of a",
+    "line transect, with a coordinate uncertainty in metres (the sentence of",
+    "the k1 dataset).")
+)
+
+# (9) Model sets for Week 14. Each sensitivity set changes ONE choice against
+# `main`. `uncert` = the uncert_set values of the tiger cells and of the
+# background; `bg_matched` = only the background records with ds_match TRUE.
+OCC_MODEL_SETS <- list(
+  main      = list(uncert = c("1km"),        bg_matched = FALSE),
+  uncert5km = list(uncert = c("1km", "5km"), bg_matched = FALSE),
+  matched   = list(uncert = c("1km"),        bg_matched = TRUE)
+)
+
+# ---- Stage 3: effort surfaces (Decision 22, 2026-10-17) ---------------------
+# Fixed BEFORE any density surface is built and before any count by time
+# window is made. See docs/methodology.md, Decision 22, for the sources, the
+# reasons and what was seen. Fork codes: a2, p1, u2, b2, c2, d3, e2, f2, g1.
+# scripts/08 STEP 13.4 (task 13.6) reads these; do not repeat the values as
+# literals in any script.
+#   surfaces = effort (clean Mammalia background), tiger (clean tiger
+#              records), settlement (OSM city + town); all years 2006-2022
+#   unit     = a complete-case 1 km cell with one or more inputs counts 1
+#   value    = units per km2 after the edge correction; NA outside the
+#              complete-case cells of cov_stack_1km_7755.tif
+#   the tiger surface is never published or committed (g1)
+
+# (1)-(2) Surfaces and records (a2, p1). The uncert_set values of the clean
+# tiger and background layers that go into a surface (the 5 km sets). The
+# matched background (ds_match) is not used. The obscured set is in no
+# surface.
+KDE_SURFACES     <- c("effort", "tiger", "settlement")
+KDE_UNCERT_SETS  <- c("1km", "5km")
+
+# (3) Unit (u2): "cell" = one count per complete-case 1 km cell with one or
+# more records (or settlement points); the number in a cell is not a weight.
+KDE_UNIT <- "cell"
+
+# (4) Settlement classes (b2): OSM `place` values that are used. Villages are
+# not used (OSM holds about 30 % of the Census-2011 villages).
+KDE_SETTLEMENT_CLASSES <- c("city", "town")
+
+# (5) Kernel and radius (c2). KDE_RADIUS_M is the SUPPORT radius: the quartic
+# kernel K(d) = (1 - (d / R)^2)^2 is 0 at d >= R. On the grid, the weight of
+# a cell is K at the distance between cell centres; the weights are scaled to
+# a sum of 1 over the full disc. A tool that takes a standard deviation
+# (spatstat `sigma`) must get KDE_SIGMA_M = R / sqrt(8), not R (checked in
+# spatstat.explore 3.2.5: quartic, sigma 1 -> support radius 2.83).
+KDE_KERNEL     <- "quartic"
+KDE_RADIUS_M   <- 20000L                    # Phase-1 value (judgement)
+KDE_SIGMA_M    <- KDE_RADIUS_M / sqrt(8)    # 7,071 m; derived, do not edit
+KDE_RADII_QA_M <- c(10000L, 30000L)         # QA comparison only (c2); not an
+                                            # input to any later step
+
+# (6) Time windows (d3). The surfaces of point 1 use all years. The counts by
+# window cover each clean set. Effort window surfaces (KDE_RADIUS_M only) for
+# KDE_WINDOW_SURFACES, each built only if the window has KDE_WINDOW_MIN_UNITS
+# units or more; otherwise the count only.
+KDE_WINDOWS <- list(
+  baseline = BASELINE_WINDOW,                                   # 2006-2010
+  middle   = c(BASELINE_WINDOW[2] + 1L, CURRENT_WINDOW[1] - 1L), # 2011-2017
+  current  = CURRENT_WINDOW                                     # 2018-2022
+)
+KDE_WINDOW_SURFACES  <- c("baseline", "current")   # effort surface only
+KDE_WINDOW_MIN_UNITS <- 100L                       # judgement value
+
+# (7) Edge rule (e2): "uniform" = the value of a cell is divided by the kernel
+# mass of its disc that falls on window cells (the complete-case cells).
+# Cells with a mass below KDE_EDGE_FLAG_MASS keep their value and are counted.
+KDE_EDGE           <- "uniform"
+KDE_EDGE_FLAG_MASS <- 0.5                          # judgement value
+
+# (8) Gi* (f2): not built in Week 13; the Week-14 model Decision decides it.
+
+# (9) Publication (g1). The tiger surface and its QA surfaces stay under
+# data/ (gitignored). The published tiger product is the count by reserve
+# (task 13.8); a count below KDE_SMALL_N is not published.
+KDE_PUBLISH_TIGER <- FALSE
+KDE_SMALL_N       <- 3L                            # warn_small_n() default
 
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a

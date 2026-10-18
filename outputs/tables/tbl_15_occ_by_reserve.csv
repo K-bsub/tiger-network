@@ -1,0 +1,59 @@
+"unit_id","unit_name","state","landscape_complex","geometry_present","tiger_1km_records","tiger_1km_cells","tiger_5km_records","tiger_5km_cells","background_5km_records","background_5km_cells"
+1,"Nagarjunsagar-Srisailam","Andhra Pradesh","central_india_eastern",TRUE,"0","0","0","0",28,18
+2,"Namdapha","Arunachal Pradesh","northeast_hills",TRUE,"0","0","0","0",9,5
+3,"Pakke","Arunachal Pradesh","northeast_hills",TRUE,"0","0","0","0",8,3
+4,"Kamlang","Arunachal Pradesh","northeast_hills",TRUE,"0","0","0","0",0,0
+5,"Manas","Assam","northeast_hills",TRUE,"0","0","0","0",33,22
+6,"Nameri","Assam","northeast_hills",TRUE,"<3","<3","<3","<3",25,8
+7,"Kaziranga","Assam","northeast_hills",TRUE,"<3","<3","<3","<3",112,24
+8,"Orang","Assam","northeast_hills",TRUE,"0","0","0","0",0,0
+9,"Valmiki","Bihar","shivalik_gangetic",TRUE,"0","0","0","0",1,1
+10,"Indravati","Chhattisgarh","central_india_eastern",TRUE,"0","0","0","0",0,0
+11,"Udanti-Sitanadi","Chhattisgarh","central_india_eastern",TRUE,"0","0","0","0",0,0
+12,"Achanakmar","Chhattisgarh","central_india_eastern",TRUE,"0","0","0","0",24,4
+13,"Guru Ghasidas-Tamor Pingla","Chhattisgarh","central_india_eastern",TRUE,"0","0","0","0",0,0
+14,"Palamau","Jharkhand","central_india_eastern",TRUE,"0","0","0","0",0,0
+15,"Bandipur","Karnataka","western_ghats",TRUE,"0","0","0","0",84,32
+16,"Bhadra","Karnataka","western_ghats",TRUE,"0","0","0","0",15,7
+17,"Kali","Karnataka","western_ghats",TRUE,"0","0","0","0",6,4
+18,"Nagarhole","Karnataka","western_ghats",TRUE,"0","0","0","0",122,49
+19,"Biligiri Ranganatha Temple","Karnataka","western_ghats",TRUE,"0","0","0","0",34,15
+20,"Periyar","Kerala","western_ghats",TRUE,"0","0","0","0",103,32
+21,"Parambikulam","Kerala","western_ghats",TRUE,"<3","<3","<3","<3",203,12
+22,"Kanha","Madhya Pradesh","central_india_eastern",TRUE,"0","0","0","0",101,45
+23,"Pench","Madhya Pradesh","central_india_eastern",TRUE,"0","0","0","0",14,2
+24,"Bandhavgarh","Madhya Pradesh","central_india_eastern",TRUE,"4","<3","17","<3",171,35
+25,"Panna","Madhya Pradesh","central_india_eastern",TRUE,"0","0","0","0",30,11
+26,"Satpura","Madhya Pradesh","central_india_eastern",TRUE,"0","0","0","0",79,24
+27,"Sanjay Dubri","Madhya Pradesh","central_india_eastern",TRUE,"0","0","0","0",0,0
+28,"Veerangana Durgavati","Madhya Pradesh","central_india_eastern",TRUE,"0","0","0","0",0,0
+29,"Ratapani","Madhya Pradesh","central_india_eastern",TRUE,"0","0","0","0",2,1
+30,"Madhav","Madhya Pradesh","central_india_eastern",TRUE,"0","0","0","0",2,1
+31,"Melghat","Maharashtra","central_india_eastern",TRUE,"0","0","0","0",10,4
+32,"Tadoba-Andhari","Maharashtra","central_india_eastern",TRUE,"0","0","66","4",157,40
+33,"Pench (MH)","Maharashtra","central_india_eastern",TRUE,"0","0","73","<3",53,7
+34,"Sahyadri","Maharashtra","western_ghats",TRUE,"0","0","0","0",0,0
+35,"Nawegaon-Nagzira","Maharashtra","central_india_eastern",TRUE,"0","0","0","0",19,3
+36,"Bor","Maharashtra","central_india_eastern",TRUE,"0","0","0","0",1,1
+37,"Dampa","Mizoram","northeast_hills",TRUE,"0","0","0","0",1,1
+38,"Similipal","Odisha","central_india_eastern",TRUE,"0","0","0","0",1,1
+39,"Satkosia","Odisha","central_india_eastern",TRUE,"0","0","0","0",6,3
+40,"Ranthambore","Rajasthan","shivalik_gangetic",TRUE,"4","<3","14","4",373,79
+41,"Sariska","Rajasthan","shivalik_gangetic",TRUE,"0","0","0","0",22,10
+42,"Mukundara Hills","Rajasthan","shivalik_gangetic",TRUE,"0","0","0","0",0,0
+43,"Ramgarh Vishdhari","Rajasthan","shivalik_gangetic",TRUE,"0","0","0","0",4,1
+44,"Dholpur-Karauli","Rajasthan","shivalik_gangetic",FALSE,NA,NA,NA,NA,NA,NA
+45,"Kalakad-Mundanthurai","Tamil Nadu","western_ghats",TRUE,"0","0","0","0",7,4
+46,"Anamalai","Tamil Nadu","western_ghats",TRUE,"7","6","8","7",3237,112
+47,"Mudumalai","Tamil Nadu","western_ghats",TRUE,"0","0","0","0",361,54
+48,"Sathyamangalam","Tamil Nadu","western_ghats",TRUE,"0","0","0","0",2,2
+49,"Srivilliputhur-Megamalai","Tamil Nadu","western_ghats",TRUE,"0","0","0","0",3,2
+50,"Kawal","Telangana","central_india_eastern",TRUE,"0","0","0","0",2,1
+51,"Amrabad","Telangana","central_india_eastern",TRUE,"0","0","0","0",12,3
+52,"Dudhwa","Uttar Pradesh","shivalik_gangetic",TRUE,"0","0","0","0",17,5
+53,"Pilibhit","Uttar Pradesh","shivalik_gangetic",FALSE,NA,NA,NA,NA,NA,NA
+54,"Ranipur","Uttar Pradesh","shivalik_gangetic",TRUE,"0","0","0","0",0,0
+55,"Corbett","Uttarakhand","shivalik_gangetic",TRUE,"0","0","0","0",228,77
+56,"Rajaji","Uttarakhand","shivalik_gangetic",TRUE,"0","0","<3","<3",52,22
+57,"Sundarbans","West Bengal","sundarbans",TRUE,"0","0","11","4",93,18
+58,"Buxa","West Bengal","northeast_hills",TRUE,"0","0","0","0",3,3

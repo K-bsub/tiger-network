@@ -152,6 +152,18 @@ rejections are not re-litigated.
   fraction will be dropped at the 1 km grid. Year span 1840–2026 (windowed at
   cleaning). Raw clipped points in
   `data/interim/occ_tiger_gbif_raw_7755.gpkg`.
+- **Cleaning (Week 13, Decision 21; `scripts/08`):** the rule reads the
+  SIMPLE_CSV file of this download again (the interim layer lacks
+  `occurrenceStatus` and `issue`); the entry state is the same 4,606 records
+  (by `gbifID`). 300 records kept: 45 with an uncertainty of 1 km or less
+  (17 cells of 1 km), 255 above 1 km and up to 5 km. The 1,842 iNaturalist
+  records all have an uncertainty of 25 km or more (obscured); 884 of them
+  form the obscured set. The largest dataset, "Bengal Tiger (Panthera
+  tigris) Sighting based on Photographs from Facebook in India" (2,306
+  records), gives 273 of the 300 kept records. Clean layers
+  `data/processed/occ_tiger_gbif_clean_7755.gpkg` and
+  `occ_tiger_gbif_obscured_7755.gpkg` (gitignored). Counts in
+  `outputs/tables/tbl_15_*`.
 
 ### GBIF — target-group background (Mammalia only)
 - **Role:** Sampling-effort layer; target-group bias correction for the SDM.
@@ -166,6 +178,13 @@ rejections are not re-litigated.
   not all vertebrates** — see Decision 5 (birds/fish do not share the tiger's
   sampling bias). Raw clipped points in
   `data/interim/effort_background_tgs_7755.gpkg`.
+- **Cleaning (Week 13, Decision 21 point 7; `scripts/08`):** the same rule
+  as the tiger records, on the SIMPLE_CSV file of this download (the interim
+  layer holds only `yr`); the entry state is the same 39,057 records.
+  23,901 kept (20,905 with an uncertainty of 1 km or less). 38 datasets;
+  iNaturalist gives 21,083 of the entry state. Clean layer
+  `data/processed/effort_background_tgs_clean_7755.gpkg` (gitignored); taxa
+  in `outputs/tables/tbl_15_background_taxa.csv`.
 
 ---
 
@@ -249,8 +268,10 @@ rejections are not re-litigated.
   interim layer itself is not changed.
 - **Chosen over** Kennedy 2019 (per Bay Area Decision 15).
 
-### OpenStreetMap — roads and settlements (India)
-- **Role:** Road barriers for connectivity; settlement/human-footprint context.
+### OpenStreetMap — roads, settlements and zoos (India)
+- **Role:** Road barriers for connectivity; city and town points for the
+  settlement surface of the effort thread (Decision 22); zoos for the
+  occurrence cleaning (Decision 21 step 8).
 - **Source:** Geofabrik India `.osm.pbf` via `osmextract::oe_get`
   (https://download.geofabrik.de/asia/india.html). **Licence:** ODbL —
   attribution required (© OpenStreetMap contributors).
@@ -262,11 +283,26 @@ rejections are not re-litigated.
     Residential/track excluded. Output `osm_roads_major_7755.gpkg`.
   - **Settlements** (`place`): city (495), town (4,102), village (195,203) —
     **199,800 points total**. Output `osm_settlements_7755.gpkg`.
+  - **Zoos** (`tourism` = zoo; added 2026-10-11, task 13.3): points and areas,
+    from the cached Week-2 pbf (no new download; `scripts/01` Block 6, zoo
+    block). Kept: the features within 1 km of India (`OCC_ZOO_DIST_M`), so
+    that a zoo just outside India can remove a record inside it. **154
+    features: 63 points, 91 areas.** Output `osm_zoos_7755.gpkg`. The GDAL
+    read of the area layer gave 7 warnings "Non closed ring detected" (GDAL
+    accepts such a ring); `scripts/08` makes the areas valid in memory and
+    counts the invalid ones. The OSM coverage of zoos in India is not known
+    (Decision 21, Limitations).
 - **Settlements — flag for Week 13 (KDE):** the settlement layer is
   **village-dominated** (~195k of 199,800). A 15 km KDE over that many points
   will near-saturate across India and may not discriminate. Consider trimming to
   city/town (4,597 points) or a smaller radius when the density surface is built.
   This is a pending Decision (see `docs/methodology.md`, "Decisions pending").
+  *(2026-10-17: closed by **Decision 22**. The settlement surface uses city
+  and town only (4,597 points); the village points are not used, because
+  OpenStreetMap holds about 30 % of the 640,932 Census-2011 villages (rough
+  comparison). Kernel: quartic, radius 20 km (`KDE_RADIUS_M`), as the other
+  Week-13 surfaces. The "15 km" above is the settlement radius of the
+  Phase-2 plan; 20 km is the Phase-1 radius.)*
   The resistance surfaces do not use this layer; human pressure enters them
   through gHM (Decision 14).
 - **Tertiary roads — closed by Decision 15 (Week 9):** tertiary roads dominate

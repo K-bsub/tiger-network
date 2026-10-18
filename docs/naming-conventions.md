@@ -36,7 +36,7 @@ effort_background_tgs_7755.gpkg
 cov_stack_1km_7755.tif
 resist_tiger_baseline_7755.tif
 lcp_reserve_network_7755.gpkg
-kde_tiger_current_1km_7755.tif
+kde_effort_2006_2022_1km_7755.tif
 stats_reserve_census_7755.gpkg
 sdm_tiger_suitability_1km_7755.tif
 ```
@@ -138,17 +138,29 @@ suffix marks a companion table to a numbered one (`tbl_05b_…`). As built:
 | Number | Tables |
 |---|---|
 | `tbl_00` | `data_audit`, `kba_tr_match` |
+| `tbl_01` | `reserve_growth` (`scripts/04`, Week 6) |
 | `tbl_02` | `reserve_build_report` (`scripts/02`), `regional_rollup` (`scripts/05`) |
 | `tbl_03` / `tbl_03b` | `reserve_network` / `pinch_points` — the publishable Stage-2 tables (`scripts/07` STEP 12.6; publish check `assert_publishable_table()`); `tbl_03_notes.md` — the note file of the two tables (what a pinch point is here) |
 | `tbl_04` | `census_source_map`, `spotcheck_log` (`.md`), `secondary_sources_2006_2010` (`.md`) |
 | `tbl_05` / `tbl_05b` | `area_source_map` / `isfr_area_crosscheck` |
+| `tbl_06` to `tbl_09` | one QA table each: `census_wide_check` (`tbl_06`), `census_join_check` (`tbl_07`), `area_overwrite_check` (`tbl_08`), `density_check` (`tbl_09`) — all `scripts/03`, Week 5 |
+| `tbl_10` | `covariate_stack_qa` (`scripts/06`, Week 8) |
 | `tbl_11` | `ghm_gap_relevance_<state>` × 5 (`prefill`, `postfill`, `postfill_d12`, `postfill_d13`, `postfill_d13f`; `scripts/07` STEP 9.2), `resistance_qa`, `resistance_qa_pred16` (`scripts/07` STEP 9.8) |
 | `tbl_12` | `reserve_pairs` (STEP 10.1), `lcp_validation` (STEP 10.2b), `lcp_qa` (STEPs 10.3–10.4), `lcp_variant_comparison`, `lcp_variant_summary` (STEP 10.4), `lcp_ntca_overlap`, `lcp_ntca_corridors` (STEP 10.5) — all `scripts/07` |
 | `tbl_13` | `network_links` (STEP 11.1), `network_metrics` (STEP 11.2; written again by STEP 11.3), `network_threshold_scan` (STEP 11.2), `network_variant_comparison` (STEP 11.3), `network_qa` (STEP 11.4) — all `scripts/07` |
 | `tbl_14` | `road_crossings` (STEP 12.2; written again by STEP 12.3), `pinch_points` (STEP 12.3; one row per site; written again by STEP 12.4), `pinch_link_summary` (STEP 12.3), `pinch_variant_comparison` (STEP 12.4), `pinch_qa` (STEP 12.5) — all `scripts/07` |
+| `tbl_15` | `occ_raw_counts` (STEP 13.1), `occ_cleaning`, `occ_cleaning_by_dataset`, `occ_sets`, `occ_dataset_check` (STEP 13.2; written again by STEP 13.3 with the background rows), `background_taxa` (STEP 13.3), `occ_window_counts`, `kde_summary` (STEP 13.4), `occ_qa`, `kde_radius_compare` (STEP 13.5), `occ_by_reserve` (STEP 13.6; publishable) — all `scripts/08`. Counts, names and statistics only; no position (Decision 21 point 10; Decision 22 point 9) |
 
 Before a new table is written, check that its full filename is not already in
 use. A new, unrelated table takes the next free number.
+
+*(2026-10-17: the rows `tbl_01` and `tbl_06` to `tbl_10` were added from
+`data-dictionary.md` and the handoff. They are not yet checked against a
+listing of `outputs/tables/`.)* *(2026-10-18: checked. A listing of
+`outputs/tables/` after the Week-13 commit has 53 files; each file is in a
+row of this table, and each row has its files. The stale
+`tbl_05_census_wide_check.csv` is not on disk. `tbl_16` is the next free
+number.)*
 
 **Figures as built:** `fig_01_growth_ranking.png` and
 `fig_02_growth_animation.gif` (`scripts/05`); `fig_03_reserve_network.png`

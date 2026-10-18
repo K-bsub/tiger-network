@@ -13,6 +13,14 @@ Each reserve is built from its constituent protected-area polygon(s) named in
 `unit_id`. Geometry is the core-PA polygon and is used for **mapping and
 connectivity only**. Area comes from the census, not the polygon.
 
+**Overlaps (found 2026-10-18, task 13.8):** 6 pairs of reserve polygons
+overlap, 20.7 km² in total — Bandipur–Sathyamangalam 10.921 km²,
+Parambikulam–Anamalai 5.530, Periyar–Srivilliputhur-Megamalai 3.007,
+Manas–Buxa 0.851, Pakke–Nameri 0.335, Bandipur–Mudumalai 0.091. A point can
+therefore be in two reserves. Probably the KML outlines of neighbouring
+protected areas overlap at their shared edge (not verified). Not changed in
+Week 13 (open item).
+
 **Coverage (as built 2026-10-02):** 56 of 58 reserves have geometry: 55 from
 their own KML polygons, and Amrabad from the state split (Decision 17, D1a —
 `scripts/02` STEP 4b splits the Nagarjunsagar-Srisailam polygon at the Andhra
@@ -1079,14 +1087,282 @@ checks by eye in a GIS.
 | `reserve_unit_ids` | character | Reserves whose footprint holds the cell |
 | `is_mid` | logical | The middle cell of the run (the position that the table generalises) |
 
-## occ_tiger_gbif_clean_7755.gpkg  *(Week 13)*
+## occ_tiger_gbif_clean_7755.gpkg  *(data/processed; Week 13 — built, task 13.3; gitignored)*
+
+Written by `scripts/08_prepare_occurrences.R` STEP 13.2 (Decision 21). One
+point per tiger record that passes the nine rule steps, at its GBIF position
+in EPSG:7755. **Precise positions (policy tier T2): never published and never
+committed.** The 1 km set is `uncert_set == "1km"`; the 5 km set is all
+records (Decision 21 point 3).
+
+**As built (2026-10-17):** 300 records — 45 with `uncert_set` `1km` (17
+cells), 255 with `5km` (the 5 km set: 300 records in 44 cells).
+
+*(Replaces the placeholder entry of 2026-09-06, which had the fields
+`gbif_id`, `coord_uncert_m`, `obscured` and `source`. The obscured records are
+a separate layer.)*
 
 | Field | Type | Meaning |
 |---|---|---|
-| `gbif_id` | character | GBIF occurrence key |
-| `year` | integer | Observation year |
-| `coord_uncert_m` | numeric | Coordinate uncertainty, metres |
-| `obscured` | logical | Whether the source obscured the coordinate |
-| `source` | character | `gbif` |
+| `gbifID` | character | GBIF occurrence key |
+| `datasetKey` | character | GBIF dataset key |
+| `basisOfRecord` | character | GBIF record type (one of `OCC_BASIS_KEEP`) |
+| `year` | integer | Year of the record (2006–2022) |
+| `uncert_m` | numeric | `coordinateUncertaintyInMeters`, above 0 and ≤ 5,000 |
+| `uncert_set` | character | `1km` (≤ 1,000 m) or `5km` (above 1,000 m, ≤ 5,000 m) |
+| `cell_1km` | integer | Cell number of `cov_stack_1km_7755.tif` (a complete-case cell) |
+
+## occ_tiger_gbif_obscured_7755.gpkg  *(data/processed; Week 13 — built, task 13.3; gitignored)*
+
+Written by `scripts/08` STEP 13.2. The obscured set of Decision 21 point 4:
+the iNaturalist tiger records that step 6 removes with an uncertainty of
+25,000 m or more (`OCC_OBSCURED_MIN_UNCERT_M`). The point is the public
+position, a random point in a 0.2° cell. Policy tier T1. **Never a 1 km
+presence.** Steps 7 to 9 are not applied.
+
+**As built (2026-10-17):** 884 records in 104 cells of 0.2°.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `gbifID`, `datasetKey`, `year` | — | As in the clean layer |
+| `uncert_m` | numeric | `coordinateUncertaintyInMeters` (25,000 m or more) |
+| `cell02_lon_deg`, `cell02_lat_deg` | numeric | South-west corner (degrees, WGS 84) of the 0.2° cell that holds the public position |
+
+## effort_background_tgs_clean_7755.gpkg  *(data/processed; Week 13 — built, task 13.4; gitignored)*
+
+Written by `scripts/08` STEP 13.3. The Mammalia background after the same nine
+steps, values and order (Decision 21 point 7).
+
+**As built (2026-10-17):** 23,901 records — 20,905 with `uncert_set` `1km`
+(4,554 cells), 2,996 with `5km`; 6,082 records of the 1 km set with
+`ds_match` (417 cells).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `gbifID`, `datasetKey`, `basisOfRecord`, `year` | — | As in the clean tiger layer |
+| `order`, `family` | character | GBIF backbone order and family (can be empty) |
+| `uncert_m`, `uncert_set`, `cell_1km` | — | As in the clean tiger layer |
+| `ds_match` | logical | `TRUE` if the dataset holds one or more records of the tiger 1 km set (`OCC_BG_MATCH_MIN_TIGER`); the matched background |
+
+## osm_zoos_7755.gpkg  *(data/raw/osm; Week 13 — built, task 13.3; gitignored)*
+
+Written by `scripts/01` Block 6 (zoo block). OpenStreetMap features with
+`tourism` = zoo within 1 km of India, from the cached Geofabrik file. Input of
+Decision 21 step 8. **As built (2026-10-11):** 154 features (63 points, 91
+areas).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `osm_ref` | character | `node/<id>`, `way/<id>` or `relation/<id>` |
+| `feature` | character | `point` or `area` |
+| `name` | character | OSM name (can be empty) |
+| `tourism` | character | `zoo` |
+
+## GBIF registry cache — data/raw/gbif/dataset_meta/<datasetKey>.json  *(Week 13; gitignored)*
+
+Written by `occ_dataset_meta()` (`scripts/08` STEPs 13.2 and 13.3): the GBIF
+registry entry of each dataset with a kept record, as JSON text, read one time
+from `https://api.gbif.org/v1/dataset/<datasetKey>`. A later run reads the
+file and needs no network. Input of the dataset check (Decision 21,
+Amendment 2).
+
+## tbl_15_occ_raw_counts.csv  *(Week 13 — built, task 13.2)*
+
+Written by `scripts/08` STEP 13.1 (stage `counts`). Counts of the RAW entry
+state; no record removed. 165 rows. Long table.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `set` | character | `tiger` or `background` |
+| `field` | character | `records` (file rows and the entry-state counts), `occurrenceStatus`, `basisOfRecord`, `year` (classes by the Decision-21 window), `issue_flag_remove` / `issue_flag_report` / `issue_flag_other` (records with the flag, by its rule), `issue_summary`, `coord_test`, `uncertainty_m` (classes by the Decision-21 limits), `dataset_group`, `inat_uncertainty_m`, `datasetKey` |
+| `value` | character | The value or the class; `(none)` = no value |
+| `n` | integer | Records. For a field with one value per record, the rows add up to the entry state (checked); the flag rows do not |
+
+## tbl_15_occ_cleaning.csv  *(Week 13 — built, tasks 13.3–13.4)*
+
+Written by `scripts/08` STEP 13.2 (tiger rows) and again by STEP 13.3 (tiger
+and background rows). The attrition of Decision 21: each record is counted at
+the first step that it fails. 20 rows (10 per set).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `set` | character | `tiger` or `background` |
+| `step_order` | integer | 0 = entry state; 1–9 = `OCC_STEP_ORDER` |
+| `step` | character | `entry_state` or the step name |
+| `records_in`, `removed`, `records_out` | integer | Records before the step, removed at it, after it. The rows add up (checked) |
+
+## tbl_15_occ_cleaning_by_dataset.csv  *(Week 13 — built, tasks 13.3–13.4)*
+
+The same by GBIF dataset. Long table: 13 items per dataset; 819 rows (25 tiger
+datasets, 38 background datasets).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `set`, `datasetKey` | character | Set and GBIF dataset key |
+| `item` | character | `entry_state`; `removed_<step>` (9); `kept_1km`; `kept_5km` (records with `uncert_set` `5km`, above 1 km); `obscured` (a part of `removed_uncert`) |
+| `n` | integer | Records. Per dataset, `entry_state` = the nine `removed_` items + `kept_1km` + `kept_5km` (checked) |
+
+## tbl_15_occ_sets.csv  *(Week 13 — built, tasks 13.3–13.4; process choice s1)*
+
+One row per set and subset. 7 rows.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `set` | character | `tiger` or `background` |
+| `subset` | character | `1km`; `5km` (all kept records: the 5 km set); `matched_1km` (background only); `obscured` |
+| `records` | integer | Records |
+| `n_cells` | integer | Distinct cells: 1 km cells; for `obscured`, cells of 0.2° |
+| `point8_outcome` | character | Tiger `1km` row only: the outcome of Decision 21 point 8 (`no_1km_model` as built); empty elsewhere |
+
+## tbl_15_occ_dataset_check.csv  *(Week 13 — built, tasks 13.3–13.4; Decision 21, Amendment 2)*
+
+One row per set and dataset with a kept record. 30 rows (6 tiger, 24
+background). Titles from the GBIF registry; no position.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `set`, `datasetKey`, `title` | character | Set, dataset key, dataset title |
+| `n_1km` | integer | Kept records with `uncert_set` `1km` |
+| `n_5km` | integer | Kept records with `uncert_set` `5km` — **above 1 km only**, not the whole 5 km set |
+| `words_found` | character | Word parts of `OCC_DATASET_FLAG_WORDS` in the registry text (`; ` between) |
+| `hit`, `cleared`, `stop` | logical | One or more words; the key is in `OCC_DATASET_CLEARED`; `hit` and not `cleared` (a stop) |
+
+## tbl_15_background_taxa.csv  *(Week 13 — built, task 13.4)*
+
+The clean background by order and family: the evidence for the pending item
+"target-group scope". 46 rows. Sorted by `records_5km`.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `set` | character | `background` |
+| `order`, `family` | character | GBIF backbone names; `(none)` = no value |
+| `records_1km` | integer | Kept records with `uncert_set` `1km` |
+| `records_5km` | integer | All kept records (the 5 km set) |
+| `records_matched_1km` | integer | `1km` records with `ds_match` TRUE |
+
+## kde_<surface>_<years>_1km_7755.tif  *(data/processed; Week 13 — built, task 13.6; gitignored)*
+
+Written by `scripts/08` STEP 13.4 (Decision 22). Five single-band surfaces on
+the grid of `cov_stack_1km_7755.tif` (EPSG:7755, 1 km, 3093 × 2864).
+
+- **Method:** a complete-case 1 km cell with one or more inputs counts 1 (the
+  unit); quartic kernel with a support radius of 20 km (`KDE_RADIUS_M`;
+  standard deviation 7,071 m, `KDE_SIGMA_M`); uniform edge correction on the
+  window of the 3,067,467 complete-case cells.
+- **Value:** units per km². `NA` outside the complete-case cells. 32-bit
+  float (`FLT4S`), read back with a tolerance of 1e-8.
+- **As built (2026-10-18).** The current values are in
+  `tbl_15_kde_summary.csv`; read them there.
+
+| File | Band | Input | Units |
+|---|---|---|---|
+| `kde_effort_2006_2022_1km_7755.tif` | `effort` | clean background, 5 km set (23,901 records), 2006–2022 | 5,512 cells |
+| `kde_tiger_2006_2022_1km_7755.tif` | `tiger` | clean tiger records, 5 km set (300 records), 2006–2022. **Never published, never committed** (Decision 22 point 9) | 44 cells |
+| `kde_settlement_citytown_1km_7755.tif` | `settlement` | OpenStreetMap `place` = city or town (4,597 points) | 4,588 cells |
+| `kde_effort_2006_2010_1km_7755.tif` | `effort` | background 5 km set, 2006–2010 (5,706 records) | 623 cells |
+| `kde_effort_2018_2022_1km_7755.tif` | `effort` | background 5 km set, 2018–2022 (9,504 records) | 3,569 cells |
+
+An effort window surface is built only if its window has 100 units or more
+(`KDE_WINDOW_MIN_UNITS`); if not, STEP 13.4 removes the file of an earlier
+run.
+
+## QA surfaces and edge masses  *(data/interim; Week 13 — built, task 13.6; gitignored)*
+
+Written by `scripts/08` STEP 13.4 (process choice q2). Not an input to any
+later step.
+
+- `kde_<surface>_<years>_r10km_1km_7755.tif` and `..._r30km_...`: the three
+  surfaces of 2006–2022 (effort, tiger, settlement) at the QA radii of
+  Decision 22 c2 (`KDE_RADII_QA_M`). The tiger QA surfaces are never
+  published.
+- `kde_edgemass_r<R>km_1km_7755.tif` (R = 10, 20, 30), band `edge_mass`: the
+  kernel mass of the disc of a cell that falls on window cells, in (0, 1] on
+  the window, `NA` elsewhere. Window cells with a mass below 0.5
+  (`KDE_EDGE_FLAG_MASS`): 2,815 at 10 km, 8,843 at 20 km, 15,702 at 30 km.
+
+## tbl_15_occ_window_counts.csv  *(Week 13 — built, task 13.6)*
+
+Written by `scripts/08` STEP 13.4 (Decision 22 point 6). Six sets, three
+windows and all years: 24 rows. Counts only; no position.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `set` | character | `tiger` or `background` |
+| `subset` | character | As in `tbl_15_occ_sets.csv`: `1km`, `5km`, `obscured` (tiger), `matched_1km` (background) |
+| `window` | character | `baseline` (2006–2010), `middle` (2011–2017), `current` (2018–2022) — `KDE_WINDOWS` — or `all` |
+| `year_min`, `year_max` | integer | First and last year of the window |
+| `records` | integer | Records with a year in the window. The three windows add up to `all` (checked) |
+| `units` | integer | Distinct units of those records: 1 km cells, or cells of 0.2° for the obscured set. The units of the windows do not add up to `all` (a cell can be in two windows) |
+| `unit_type` | character | `cell_1km` or `cell_0.2deg` |
+
+The counts are not divided by the number of years of a window (5, 7 and 5).
+
+## tbl_15_kde_summary.csv  *(Week 13 — built, task 13.6)*
+
+Written by `scripts/08` STEP 13.4. One row per surface and radius: 11 rows.
+Statistics only; no position.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `surface` | character | `effort`, `tiger` or `settlement` |
+| `role` | character | `main` (20 km, `data/processed/`), `window` (effort of one window, 20 km, `data/processed/`) or `qa` (10 or 30 km, `data/interim/`) |
+| `year_min`, `year_max` | integer | Years of the inputs; `NA` for the settlement surface |
+| `radius_km` | numeric | Support radius of the kernel |
+| `units` | integer | Units (cells) |
+| `built` | logical | `FALSE` for a window surface below `KDE_WINDOW_MIN_UNITS` (none as built) |
+| `value_min`, `value_max` | numeric | Smallest and largest value, units per km² |
+| `integral` | numeric | Sum of value × cell area over the window. Near the number of units, but not equal to it, because of the edge correction |
+| `area_above0_km2` | numeric | Area of the cells with a value above 0 |
+| `cells_mass_low` | numeric | Window cells with an edge mass below `KDE_EDGE_FLAG_MASS` at this radius (the same for each surface of a radius) |
+| `file` | character | File name (no folder); empty if not built |
+
+## tbl_15_occ_qa.csv  *(Week 13 — built, task 13.7)*
+
+Written by `scripts/08` STEP 13.5 (the QA lists of Decisions 21 and 22; plan
+task 13.7). One row per check. The table is written first; then any `FALSE`
+in `pass` stops the script. No position.
+
+**As built (2026-10-18):** 171 rows, 171 pass — `test case` 27, `tiger` 16,
+`background` 18, `obscured` 8, `tables` 22, `surfaces` 65, `publish` 15.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `group` | character | `test case` (the hand-made cases: `occ_self_test()`, 11 checks; `kde_self_test()`, 16 checks), `tiger` and `background` (each rule of Decision 21 checked again on the kept records), `obscured`, `tables` (the `tbl_15` tables on disk), `surfaces` (the files of STEP 13.4), `publish` |
+| `check` | character | What is checked |
+| `value` | character | What the check found (counts and statistics only, for example "0 of 300 records fail") |
+| `pass` | logical | `TRUE` if the check holds |
+
+## tbl_15_kde_radius_compare.csv  *(Week 13 — built, task 13.7)*
+
+Written by `scripts/08` STEP 13.5 (Decision 22 point 5; process choice s2).
+One row per surface and QA radius: 6 rows. Descriptive; no rule uses it.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `surface` | character | `effort`, `tiger` or `settlement` |
+| `radius_km` | numeric | The QA radius (10 or 30) |
+| `spearman` | numeric | Spearman rank correlation with the surface at `KDE_RADIUS_M` (20 km) |
+| `cells_compared` | integer | Cells where one or both surfaces are above 0 |
+
+## tbl_15_occ_by_reserve.csv  *(Week 13 — built, task 13.8; publishable)*
+
+Written by `scripts/08` STEP 13.6 (plan task 13.8; Decision 22 point 9). One
+row per reserve: 58 rows, ordered by `unit_id`. A record is in a reserve if
+its position is in the reserve polygon of `boundary_reserves_all_7755.gpkg`
+(an edge counts). A record in two overlapping polygons counts in each
+(process choice o1; 13 background records as built, none of the tiger).
+The polygon is the core protected-area outline, so a record in a buffer zone
+is outside. No position.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `unit_id` | integer | Reserve key (naming §5) |
+| `unit_name`, `state`, `landscape_complex` | character | From the reserve layer |
+| `geometry_present` | logical | `FALSE` for the 2 reserves with no polygon (Pilibhit, Dholpur-Karauli); their counts are `NA` |
+| `tiger_1km_records`, `tiger_1km_cells` | character | Clean tiger records of the 1 km set in the polygon, and their distinct 1 km cells. **A count of 1 or 2 is the text `<3`** (Decision 22 point 9); 0 or 3 and more as a number |
+| `tiger_5km_records`, `tiger_5km_cells` | character | The same for the 5 km set (all 300 clean records) |
+| `background_5km_records`, `background_5km_cells` | integer | Clean background records (the 5 km set) in the polygon, and their distinct 1 km cells. Not suppressed (no tiger position) |
+
+The exact tiger counts are not written to any file (process choice p1).
 
 *(Further layers — sdm — documented as they are built.)*

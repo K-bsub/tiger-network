@@ -977,18 +977,25 @@ checks; docs updated; Week 12 ticked; Stage 2 complete. Ready for Week 13
 and `09_build_site.R` were deleted. Stage 3 starts a new script at the next free
 number (`08`) in Week 13; the site-build script (Stage 4) takes the number after
 that. Each is named (naming §3, `NN_verb_object.R`) when its stage starts.
+*(2026-10-17: by process choice s1 of task 13.2 (2026-10-11), Week 13 is
+`scripts/08_prepare_occurrences.R`, one script for Week 13 only. Week 14
+starts a new script at the next free number and names it then (naming §3);
+Week 14 also says whether Week 15 uses that script. The site-build script
+takes a later number.)*
 
 | Week | Focus | Exit state (deliverable) | Est. |
 |---|---|---|---|
-| **13** | Occurrence + effort | **Decisions 21–22** first; `scripts/08_<verb_object>.R` (new script, named at Week 13) outputs: cleaned occurrences, target-group background, KDE (task breakdown below) | 3–4 h planned; the task estimates add up to 4.6–6.3 h (split point after task 13.4) |
-| **14** | SDM fit | `scripts/08`: `maxnet` fitted with bias correction; model saved | 3–4 h |
-| **15** | Predict + validate | National suitability surface; validation against reserves; publish-floor gate | 3–4 h |
-| **16** | SDM visuals | `fig_05` suitability map with effort caveat | 2–3 h |
+| **13** ✅ | Occurrence + effort | **Decisions 21–22** first; `scripts/08_prepare_occurrences.R` (new script, named in task 13.2, process choice s1) outputs: cleaned occurrences, target-group background, KDE (task breakdown below) *(done 2026-10-18: Decisions 21 and 22; STEPs 13.1–13.6; 300 clean tiger records, 23,901 clean background records; 11 surfaces; QA 171 of 171; eleven `tbl_15` tables; outcome of Decision 21 point 8: `no_1km_model`. Committed 2026-10-18 (task 13.10))* | 3–4 h planned; the task estimates add up to 4.6–6.3 h (split point after task 13.4). *(Ran on 2026-10-11, 2026-10-17 and 2026-10-18; no time recorded per task)* |
+| **14** | SDM fit | A new script, named in Week 14 (process choice s1 of task 13.2: `scripts/08` holds Week 13 only): `maxnet` fitted with bias correction; model saved. *(2026-10-11: by Decision 21 point 8, the week starts with the outcome of the presence-cell count — no 1 km model, a reduced model, or the planned model — and the Decisions that follow from it.)* *(2026-10-18: the outcome is `no_1km_model`. Task breakdown below: **Decision 23** first picks branch A (no suitability model; Week 14 builds the effort result) or branch B (a model at a coarser grain; Week 14 fits it). The focus "SDM fit" applies to branch B only)* | 3–4 h *(2026-10-18: the task estimates add up to 4.1–5.7 h for branch A and 4.3–5.9 h for branch B; split point after task 14.3)* |
+| **15** | Predict + validate | National suitability surface; validation against reserves; publish-floor gate *(2026-10-18: depends on Decision 23. Branch A has no suitability surface to predict; branch B predicts at its coarse grain. Written again in task 14.7)* | 3–4 h |
+| **16** | SDM visuals | `fig_05` suitability map with effort caveat *(2026-10-18: depends on Decision 23 — a suitability map (branch B) or an effort map (branch A). `fig_04` is the next free figure number; confirm at Week 16. Written again in task 14.7)* | 2–3 h |
 
 **Pending, not yet scheduled (raised with Decision 14):** after the SDM exists,
 an SDM-based resistance surface (1 − suitability) and a circuit-theory run
 between reserves, to reproduce the national method and check the Stage-2 paths.
 Transform and tool are decided then (see `methodology.md`, Decisions pending).
+*(2026-10-18: this item needs a suitability surface. Decision 23 decides
+whether one is made, and at which grain.)*
 
 ### Week 13 — task breakdown
 
@@ -1006,7 +1013,8 @@ pushed. Stage 3 reads none of its outputs. On disk from Week 2
   10.15468/dl.2d523e).
 - `osm_settlements_7755.gpkg` — 199,800 settlement points (city 495, town
   4,102, village 195,203). Folder not verified for this plan; the OSM roads
-  are in `data/raw/osm/`.
+  are in `data/raw/osm/`. *(2026-10-17: verified in `scripts/01` Block 6:
+  `data/raw/osm/osm_settlements_7755.gpkg`.)*
 - `data/processed/cov_stack_1km_7755.tif` — 6 bands on the 1 km grid, with the
   common NA mask (Decision 10).
 
@@ -1018,6 +1026,10 @@ Week 13 starts Stage 3 with a new script, `scripts/08_<verb_object>.R`
 (named in task 13.2; naming §3). It cleans the tiger records and the
 target-group background by one rule, counts what each rule step removes, and
 builds the effort surface. Week 14 fits the SDM on these outputs.
+*(2026-10-17: the script is `scripts/08_prepare_occurrences.R`. The outcome
+of Decision 21 point 8 is `no_1km_model`, so Week 14 starts with a Decision
+between no model and a model at a coarser grain; an SDM is fitted only if
+the second is chosen.)*
 
 Naming (naming-conventions §2/§6): layers `occ_tiger_gbif_clean_7755.gpkg`
 (the dictionary has a placeholder entry) and
@@ -1032,17 +1044,44 @@ Decision, the density surfaces, QA and the docs second.
 
 | # | Task | Done when | Est. |
 |---|---|---|---|
-| 13.1 | **Occurrence-cleaning Decision (numbered — Decision 21), before any cleaned count is seen.** Research, raise the forks, record the choices: (a) the coordinate-uncertainty limit, and what to do with a record that has no uncertainty value; (b) the year window for the tiger records (the background is 2006–2022; the tiger pull is 1840–2026); (c) the record types to remove — captive and zoo records, museum specimens, fossil records, records at a country, state or institution centroid, records with zero or equal coordinates; (d) obscured records (policy tier T1): keep, or remove because the position is not good to 1 km; (e) duplicates and thinning — one record per 1 km cell, per cell and year, or none; (f) records on a cell with no covariate value (the common NA mask) or outside India; (g) whether the background takes the same rule in each point — the target-group method needs the same bias in the two sets; (h) a minimum number of clean presence cells below which the Week-14 plan changes, fixed now; (i) what was seen (the entry state above). Also the tool: base `sf`/`dplyr` rules, or the `CoordinateCleaner` package (a new dependency) | Decision 21 recorded in `methodology.md` with the date, the choices, the judgement values and what was seen; the pending item closed; `OCC_*` settings in `R/00_config.R`. No record is cleaned and no count is made before it | 45–60 min |
-| 13.2 | Process choices before code (not numbered): the script name; one script for all of Stage 3 with one STEP block per task (as `scripts/07`), or one script per week; a function file (`R/00_functions_occ.R`); the `tbl_15_*` slugs; any new package (`renv::snapshot()`, and the `scripts/00a` list); whether a data file goes to the chat for tests (the records are public GBIF data, but they hold precise tiger positions — decide it, do not default). Then the script header, the guards (inputs present, CRS 7755, PROJ check) and STEP 13.1: read the two raw layers, list the fields, and count the records by each field that Decision 21 uses — **counts of the raw state only** | Header and guards run; the raw field list and the raw counts are in the console; the fields that Decision 21 names are all present, or the Decision is amended with a dated note before any record is removed | 30–45 min |
-| 13.3 | STEP 13.2: apply Decision 21 to the tiger records, one rule step at a time, in the fixed order → `data/processed/occ_tiger_gbif_clean_7755.gpkg` (gitignored) and the attrition table `tbl_15_occ_cleaning.csv` (one row per rule step and set: records in, removed, out — **no coordinate**) | Clean layer written and read back; the attrition rows add up to the raw count; the minimum of point (h) is compared with the result and the outcome is stated | 30–45 min |
-| 13.4 | STEP 13.3: the same rule on the background → `data/processed/effort_background_tgs_clean_7755.gpkg` (gitignored), rows added to `tbl_15_occ_cleaning.csv`; a tally of the clean background by order and family → `tbl_15_background_taxa.csv` (the evidence for the pending Decision "target-group scope") | Clean background written; attrition adds up; the taxa table written; the target-group scope is decided now or the reason to wait for Week 14 is recorded | 30 min |
-| — | **Split point** (if the week is over 4 hours): commit tasks 13.1–13.4; continue with 13.5 in the next session | — | — |
-| 13.5 | **Effort-surface Decision (numbered — Decision 22), before any density surface is seen.** It closes the pending item "Settlement layer for the KDE". Record: (a) which surfaces Week 13 builds — background effort, tiger records, settlements — and what each is for (a description of effort, a bias input for the SDM, a covariate); (b) the settlement classes (all, or city and town only); (c) the kernel and the radius — the config has `KDE_RADIUS_M` 20 km with a 10/20/30 km test, and the pending item says 15 km: one of the two is wrong; (d) the time windows (`BASELINE_WINDOW` 2006–2010 and `CURRENT_WINDOW` 2018–2022 are in the config; the census baseline is 2014); (e) the edge rule at the coast and the border; (f) Getis-Ord Gi* — `methodology.md` §5.5 names it and no week of Stage 3 holds it: Week 13, a later week, or not built; (g) the published form of a tiger-record surface (see the pitfalls); (h) what was seen — the cleaned counts of tasks 13.3–13.4 | Decision 22 recorded before STEP 13.4 runs; the pending item closed; `KDE_*` settings corrected in `R/00_config.R` | 30–45 min |
-| 13.6 | STEP 13.4: the density surfaces per Decision 22 on the 1 km template → `data/processed/kde_<what>_1km_7755.tif` (through `write_processed_rast()`, read back) | Surfaces written; each has the grid of the covariate stack (`compareGeom`); value range and sum reported | 30–45 min |
-| 13.7 | STEP 13.5: QA — the cleaning functions on a hand-made case first (known records, a known count at each rule step); then: no clean record outside the complete-case footprint; no clean record fails a rule of Decision 21; the thinning rule holds (count per cell); the attrition adds up on disk; the tiger and background sets went through the same steps; each surface has the template grid and no value below zero; the publish checks (`assert_publishable_rast()`, `assert_no_raw_points()`, no coordinate column in a `tbl_15` table) → `tbl_15_occ_qa.csv`; any failure stops the script | QA passes | 20–30 min |
-| 13.8 | *(Optional)* Clean tiger records per reserve (count inside the reserve polygon, by `unit_id`) → `tbl_15_occ_by_reserve.csv`, with `warn_small_n()`; an input to the Week-15 validation and to the effort text | Table written; reserves with no clean record counted; small counts handled by the policy | 20 min |
-| 13.9 | Update `data-dictionary.md` (the two clean layers, the surfaces, `tbl_15_*`), `methodology.md` (Decisions 21–22, Week-13 change log, Limitations), `data-sources.md` (the cleaning note of the GBIF entries), `naming-conventions.md` §6, `README.md`/handoff (Week 13 status; entry point for Week 14) | Docs match as-built | 30–45 min |
-| 13.10 | Commit (`analysis:` for `08`, config, functions, outputs; `docs:` separate; `docs: update handoff after Week 13` with the plan) | Committed and pushed; `git status --short` shows no point layer staged | 10 min |
+| 13.1 ✅ | **Occurrence-cleaning Decision (numbered — Decision 21), before any cleaned count is seen.** Research, raise the forks, record the choices: (a) the coordinate-uncertainty limit, and what to do with a record that has no uncertainty value; (b) the year window for the tiger records (the background is 2006–2022; the tiger pull is 1840–2026); (c) the record types to remove — captive and zoo records, museum specimens, fossil records, records at a country, state or institution centroid, records with zero or equal coordinates; (d) obscured records (policy tier T1): keep, or remove because the position is not good to 1 km; (e) duplicates and thinning — one record per 1 km cell, per cell and year, or none; (f) records on a cell with no covariate value (the common NA mask) or outside India; (g) whether the background takes the same rule in each point — the target-group method needs the same bias in the two sets; (h) a minimum number of clean presence cells below which the Week-14 plan changes, fixed now; (i) what was seen (the entry state above). Also the tool: base `sf`/`dplyr` rules, or the `CoordinateCleaner` package (a new dependency) | Decision 21 recorded in `methodology.md` with the date, the choices, the judgement values and what was seen; the pending item closed; `OCC_*` settings in `R/00_config.R`. No record is cleaned and no count is made before it *(done 2026-10-11: Decision 21 recorded — forks a3, n1, b1, c1, z2, o2, e1, g3, h2, k2; no `CoordinateCleaner`; no record cleaned and no count made. c1 became c2 by Amendment 1 of the same day, after the names stage of task 13.2 and before any count)* | 45–60 min |
+| 13.2 ✅ | Process choices before code (not numbered): the script name; one script for all of Stage 3 with one STEP block per task (as `scripts/07`), or one script per week; a function file (`R/00_functions_occ.R`); the `tbl_15_*` slugs; any new package (`renv::snapshot()`, and the `scripts/00a` list); whether a data file goes to the chat for tests (the records are public GBIF data, but they hold precise tiger positions — decide it, do not default). Then the script header, the guards (inputs present, CRS 7755, PROJ check) and STEP 13.1: read the two raw layers, list the fields, and count the records by each field that Decision 21 uses — **counts of the raw state only** | Header and guards run; the raw field list and the raw counts are in the console; the fields that Decision 21 names are all present, or the Decision is amended with a dated note before any record is removed *(done 2026-10-11: process choices s1, f1, g1, t1, p1, q1, d1; `scripts/08_prepare_occurrences.R` and `R/00_functions_occ.R`; names stage, then Decision 21 Amendment 1 (c2, y1); counts stage — guards pass (tiger 4,606 by `gbifID`, background 39,057), `tbl_15_occ_raw_counts.csv` 165 rows; then Amendment 2 (v1))* | 30–45 min |
+| 13.3 ✅ | STEP 13.2: apply Decision 21 to the tiger records, one rule step at a time, in the fixed order → `data/processed/occ_tiger_gbif_clean_7755.gpkg` (gitignored) and the attrition table `tbl_15_occ_cleaning.csv` (one row per rule step and set: records in, removed, out — **no coordinate**) | Clean layer written and read back; the attrition rows add up to the raw count; the minimum of point (h) is compared with the result and the outcome is stated *(done 2026-10-17: zoo block of `scripts/01` (154 features); process choices w1, s1, b1; first run stopped at the dataset check, author choice k1; second run: 300 records kept (1 km set 45 records in 17 cells; 5 km set 300 in 44; obscured set 884 in 104 cells of 0.2°); layers read back; `tbl_15_occ_cleaning`, `_by_dataset`, `_sets`, `_dataset_check` written; **point 8: `no_1km_model`**)* | 30–45 min |
+| 13.4 ✅ | STEP 13.3: the same rule on the background → `data/processed/effort_background_tgs_clean_7755.gpkg` (gitignored), rows added to `tbl_15_occ_cleaning.csv`; a tally of the clean background by order and family → `tbl_15_background_taxa.csv` (the evidence for the pending Decision "target-group scope") | Clean background written; attrition adds up; the taxa table written; the target-group scope is decided now or the reason to wait for Week 14 is recorded *(done 2026-10-17: process choices d1, t1, r1; first run stopped at the dataset check on five background datasets, author choice e1; second run: 23,901 background records kept (1 km 20,905 in 4,554 cells; matched 1 km 6,082 in 417 cells); background layer read back; the four `tbl_15` tables with both sets; `tbl_15_background_taxa.csv` (46 rows); target-group scope carried to Week 14, author choice g1)* | 30 min |
+| — | **Split point** (if the week is over 4 hours): commit tasks 13.1–13.4; continue with 13.5 in the next session *(2026-10-17: reached; tasks 13.1–13.4 took two sessions, 2026-10-11 and 2026-10-17; commit, then task 13.5 in the next session)* | — | — |
+| 13.5 ✅ | **Effort-surface Decision (numbered — Decision 22), before any density surface is seen.** It closes the pending item "Settlement layer for the KDE". Record: (a) which surfaces Week 13 builds — background effort, tiger records, settlements — and what each is for (a description of effort, a bias input for the SDM, a covariate); (b) the settlement classes (all, or city and town only); (c) the kernel and the radius — the config has `KDE_RADIUS_M` 20 km with a 10/20/30 km test, and the pending item says 15 km: one of the two is wrong; (d) the time windows (`BASELINE_WINDOW` 2006–2010 and `CURRENT_WINDOW` 2018–2022 are in the config; the census baseline is 2014); (e) the edge rule at the coast and the border; (f) Getis-Ord Gi* — `methodology.md` §5.5 names it and no week of Stage 3 holds it: Week 13, a later week, or not built; (g) the published form of a tiger-record surface (see the pitfalls); (h) what was seen — the cleaned counts of tasks 13.3–13.4 | Decision 22 recorded before STEP 13.4 runs; the pending item closed; `KDE_*` settings corrected in `R/00_config.R` *(done 2026-10-17: author choices a2, p1, u2, b2, c2, d3, e2, f2, g1 — three surfaces (effort, tiger, city/town), the 5 km sets, one unit per 1 km cell, quartic 20 km with 10/30 km QA surfaces, counts by window and two effort window surfaces (100 units or more), uniform edge correction, Gi* to the Week-14 Decision, no published tiger surface; new `KDE_*` block in the config; the settlement item closed. Point (c): the 15 km and the 20 km were both correct, for two different surfaces)* | 30–45 min |
+| 13.6 ✅ | STEP 13.4: the density surfaces per Decision 22 on the 1 km template → `data/processed/kde_<what>_1km_7755.tif` (through `write_processed_rast()`, read back) | Surfaces written; each has the grid of the covariate stack (`compareGeom`); value range and sum reported *(2026-10-17, Decision 22: three surfaces at 20 km, the same three at 10 and 30 km for the QA only, the effort surfaces of 2006–2010 and 2018–2022 if each has 100 units or more, and the counts by window in one `tbl_15` table. Process choices first: the tool, the file names, where the QA surfaces are kept, the table slug, any new package. More surfaces than the plan of 2026-10-10: the estimate is probably low)* *(done 2026-10-18: process choices t1, k2, n1, q2, s1, r1, h1, v1; new `R/00_functions_kde.R`; `scripts/08` STEP 13.4 and the switch `RUN_CLEANING`; run with `RUN_CLEANING = FALSE`: hand-made case 16 of 16, guard passed, 11 surfaces written and read back (both effort window surfaces built: 623 and 3,569 units), `tbl_15_occ_window_counts.csv` and `tbl_15_kde_summary.csv` written; 6.3 min)* | 30–45 min |
+| 13.7 ✅ | STEP 13.5: QA — the cleaning functions on a hand-made case first (known records, a known count at each rule step); then: no clean record outside the complete-case footprint; no clean record fails a rule of Decision 21; the thinning rule holds (count per cell); the attrition adds up on disk; the tiger and background sets went through the same steps; each surface has the template grid and no value below zero; the publish checks (`assert_publishable_rast()`, `assert_no_raw_points()`, no coordinate column in a `tbl_15` table) → `tbl_15_occ_qa.csv`; any failure stops the script | QA passes *(2026-10-17, Decision 22 "Consequences": a hand-made case for the kernel and the edge rule first; unit counts; the count of cells with an edge mass below 0.5; the QA-radius numbers; no tiger surface under `outputs/`)* *(done 2026-10-18: process choices c1, h1, x1, t1, s2, p1; `occ_self_test()`, `kde_direct_check()`, the switch `RUN_SURFACES`; run with `RUN_CLEANING = FALSE` and `RUN_SURFACES = FALSE`: 171 of 171 checks pass; `tbl_15_occ_qa.csv` (171 rows) and `tbl_15_kde_radius_compare.csv` (6 rows))* | 20–30 min |
+| 13.8 ✅ | *(Optional)* Clean tiger records per reserve (count inside the reserve polygon, by `unit_id`) → `tbl_15_occ_by_reserve.csv`, with `warn_small_n()`; an input to the Week-15 validation and to the effort text | Table written; reserves with no clean record counted; small counts handled by the policy *(2026-10-17, Decision 22 point 9: this table is the only published tiger product of Week 13; a count of 1 or 2 is given as "fewer than 3". Still optional)* *(done 2026-10-18: process choices s1, r1, p1, w1, x1, and o1 after the first run stopped on 13 background records in two overlapping reserve polygons (6 pairs of polygons overlap, 20.7 km²); STEP 13.6; `tbl_15_occ_by_reserve.csv`, 58 rows)* | 20 min |
+| 13.9 ✅ | Update `data-dictionary.md` (the two clean layers, the surfaces, `tbl_15_*`), `methodology.md` (Decisions 21–22, Week-13 change log, Limitations), `data-sources.md` (the cleaning note of the GBIF entries), `naming-conventions.md` §6, `README.md`/handoff (Week 13 status; entry point for Week 14) | Docs match as-built *(done 2026-10-18: most docs were updated task by task. This task added 13 Week-13 items to "Limitations" in `methodology.md`, the status lines, a change-log entry, a dated note on the Week-14 model item, the Week-13 close of the handoff and `README.md` (with the Stack row: no `spatstat`), one example name of naming §2 as built, and the Week-14 task breakdown below. `proposal.md` §8 waits for Decision 23. The two checks that need a listing of `outputs/tables/` go to task 13.10)* | 30–45 min |
+| 13.10 ✅ | Commit (`analysis:` for `08`, config, functions, outputs; `docs:` separate; `docs: update handoff after Week 13` with the plan) | Committed and pushed; `git status --short` shows no point layer staged *(2026-10-18: also no tiger surface (`kde_tiger_*`) and no file of exact tiger counts staged; `diag_reserve_overlap.R` is not committed. After the push, run `list.files("outputs/tables")` and send the list (file names only): it closes two open checks — naming §6 against the files, and the stale `tbl_05_census_wide_check.csv` (to delete since Week 6))* *(done 2026-10-18: committed, as the author reported. The listing has 53 files and matches naming §6 in both directions; `tbl_05_census_wide_check.csv` is not on disk; `tbl_16` is free)* | 10 min |
+
+**Changes from Decision 21 (2026-10-11).** The task table above is the plan
+of 2026-10-10. Decision 21 changes these tasks:
+
+- **13.2 (STEP 13.1):** the raw state comes from the two GBIF zip files
+  (`data/raw/gbif/`, `data/raw/gbif_background/`), not only from the interim
+  layers. The interim layers do not hold the rule fields; they are the guard
+  for the entry state (Decision 21 point 1). The step also reads the header
+  line of each file and lists the `issue` flag names with their counts. One
+  more process choice: the file name of the obscured set.
+- **13.3 (STEP 13.2):** one more input — the OpenStreetMap zoo features, from
+  one more read of the cached Geofabrik file (the road and settlement reads
+  of Week 2 were slow). One more output — the obscured set. The clean layer
+  holds `uncert_set` (`1km`, `5km`). The count `n_cells_1km` is compared
+  with 25 and 80, and the outcome of Decision 21 point 8 is stated.
+- **13.4 (STEP 13.3):** the background comes from the zip file. Three
+  background sets: 1 km, 5 km, and matched 1 km (`ds_match`). The obscured
+  rule gives a count only.
+- **13.7:** the QA list of Decision 21 ("Consequences") is added to the
+  list of the task.
+- **13.3, by Amendment 2 (2026-10-11):** a check of the GBIF description of
+  each dataset that gives a record to the 1 km or the 5 km set; a hit stops
+  the script before the clean layers are written. The word list and the
+  record of a decision are process choices of the task.
+- **Estimates (not measured):** about 45 to 60 minutes more for tasks 13.2
+  to 13.4. The split point after task 13.4 is the probable end of the first
+  session.
 
 **Week 13 pitfalls:**
 - **Decision 21 before any cleaned count — and some figures are already
@@ -1081,7 +1120,9 @@ Decision, the density surfaces, QA and the docs second.
   and sanctuary outlines (polygon/census ratio median 0.515), so a record in
   a buffer zone is "outside". This affects task 13.8 and the Week-15
   validation. Join by `unit_id`; `unit_name` is not a unique key.
-- **A KDE over India needs a plan for the window and the run time.** A
+- **A KDE over India needs a plan for the window and the run time.** *(2026-10-17:
+  Decision 22 fixes the window — the complete-case cells — and the kernel;
+  the tool is a process choice of task 13.6.)* A
   `spatstat` window from the national polygon on a 3093 × 2864 grid is large;
   a raster method on the template can be the better tool. Decide in task
   13.5 and test on a small area first.
@@ -1102,7 +1143,173 @@ and `effort_background_tgs_clean_7755.gpkg` written (gitignored);
 `tbl_15_occ_qa.csv` written with no coordinate; the density surfaces of
 Decision 22 written and through the publish check; the minimum of Decision
 21 point (h) compared with the result; docs updated; Week 13 ticked. Ready
-for Week 14 (SDM fit).
+for Week 14 (SDM fit). *(2026-10-17: with the outcome `no_1km_model`, ready
+for the Week-14 model Decision.)* *(2026-10-18: reached; committed in task
+13.10. Decisions 21 and 22 recorded; the three clean point layers
+and the 11 surfaces on disk (gitignored); eleven `tbl_15` tables with no
+coordinate; QA 171 of 171; the minimum of point (h) compared — 17 cells,
+`no_1km_model`; docs updated. Week 13 ran on 2026-10-11, 2026-10-17 and
+2026-10-18; no time was recorded per task.)*
+
+### Week 14 — task breakdown
+
+*(Written 2026-10-18 at the Week-13 close (task 13.9), before the Week-13
+commit. This is a plan. It makes no Decision: Decisions 23 and 24 are the
+author's, in Week 14.)*
+
+Entry state (as of the Week-13 close, 2026-10-18): Week 13 is complete and
+committed (task 13.10). On disk from Week 13
+(`scripts/08`), all gitignored:
+
+- `data/processed/occ_tiger_gbif_clean_7755.gpkg` — 300 clean tiger
+  records with `uncert_set` and `cell_1km`. The 1 km set: 45 records in 17
+  cells. The 5 km set: 300 records in 44 cells. Precise positions (tier
+  T2).
+- `data/processed/occ_tiger_gbif_obscured_7755.gpkg` — 884 iNaturalist
+  records in 104 cells of 0.2° (tier T1).
+- `data/processed/effort_background_tgs_clean_7755.gpkg` — 23,901 clean
+  background records: 1 km background 20,905 records in 4,554 cells; 5 km
+  background 23,901 records in 5,512 cells; matched 1 km background 6,082
+  records in 417 cells.
+- `data/processed/kde_*_1km_7755.tif` — the five 20 km surfaces of Decision
+  22: effort, tiger (never published, never committed), settlement, and
+  the effort surfaces of 2006–2010 and 2018–2022.
+- `data/processed/cov_stack_1km_7755.tif` — 6 bands, common NA mask
+  (Decision 10); 3,067,467 complete-case cells.
+
+Committed: the eleven `tbl_15_*` tables (counts, names and statistics
+only).
+
+**Seen at the Week-13 close.** Each count of the `tbl_15` tables: the
+cleaning steps, the sets, the datasets, the taxa, the counts by window, the
+surface summaries, the QA-radius values and the counts per reserve. **Not
+computed:** a count of presence cells at a grain coarser than 1 km, a
+model, a Gi* value, a ratio. Decision 23 states this list again, and says
+whether the author has looked at a surface or a point layer on a map.
+
+**The outcome that Week 14 starts from.** Decision 21 point 8 gave
+`no_1km_model` (17 cells, below 25). By point 8, Week 14 starts with a
+numbered Decision between (i) no suitability model — Stage 3 gives the
+effort result — and (ii) a model at a coarser grain, with the 5 km set and
+the obscured set as the inputs that it can use. A 1 km model on the 5 km
+set is not an option. The model sets of Decision 21 point 9 (`main`,
+`uncert5km`, `matched`) are not run.
+
+**Two branches.** Task 14.1 (Decision 23) picks one. **Branch A** is (i),
+**branch B** is (ii). Tasks 14.1, 14.2 and 14.6 to 14.8 are the same in
+the two branches; tasks 14.3 to 14.5 are not. After Decision 23, the
+parts of the other branch get a dated note "not used".
+
+**Script.** Week 14 starts a new script at the next free number,
+`scripts/09_<verb_object>.R` (naming §3), named in task 14.2. `scripts/08`
+does not change, unless Decision 23 needs a new output from it (see the
+pitfalls: the obscured set has no background).
+
+**Size.** The estimates add up to about 4.1–5.7 hours for branch A and
+4.3–5.9 hours for branch B (estimates, not measured), above one week of
+2–4 hours. Week 13 kept no time per task. A split point is marked after
+task 14.3: the two Decisions and the process choices first (no result);
+the STEPs, the QA and the docs second.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 14.1 | **Model Decision (numbered — Decision 23), before any count at a coarser grain is made.** Research, raise the forks, record the choices: (a) (i) no suitability model — Stage 3 gives the effort result (proposal question 4), and question 3 gets no model answer (success criterion "All three tracks completed at a level the data supports") — or (ii) a model at a coarser grain; (b) for (ii): the grain and the input set — the 5 km set on a grid of 5 km or coarser (for example the 10 km publication grid, `PINCH_PUBLISH_GRID_M`), the obscured set on its 0.2° cells, or both as two models; and whether the coarse grid is an aggregate of the 1 km template; (c) for (ii): the minimum number of presence cells at that grain and what happens below it, fixed before the count (on a grid that is an aggregate of the 1 km template, the 5 km set has 44 cells or fewer); (d) for (ii): the background at that grain — the target-group scope (pending item; `tbl_15_background_taxa.csv`), a minimum size of a background set (pending item, point 3), and a background for the obscured set (see the pitfalls); (e) for (ii): a run without the Facebook dataset (273 of the 300 records of the 5 km set) — needed or not; (f) for both: Gi* and the ratio of the tiger and effort surfaces (pending points 6 and 7) — built or not, and in which week; their settings go into a later numbered Decision; (g) what was seen (the entry state above; the facts of the pitfalls below) | Decision 23 recorded in `methodology.md` with the date, the choices, the judgement values and what was seen; the pending model item updated (points 1, 3 and 4–7 closed, or carried with a reason); §5.4 written again; a `proposal.md` §8 entry; config settings if needed. No count at a coarser grain is made before it | 45–60 min |
+| 14.2 | Process choices before code (not numbered): the script name `scripts/09_<verb_object>.R`; one script for Week 14 only, or for Weeks 14–15 (as process choice s1 of task 13.2); a function file; the table group (`tbl_16`, the next number; free in the listing of task 13.10) and its slugs; switches that skip finished STEPs (as `RUN_CLEANING`); any new package — `maxnet` is not in `renv.lock` (the lock list of task 13.6), and `sfdep` (Gi*) is to be checked — with `renv::snapshot()` and the `scripts/00a` list; the rule d1 of task 13.2 stays (no data file goes to the chat; the chat tests on made-up records). Then the script header and the guards: inputs present; CRS 7755; the clean layers give the counts of `tbl_15_occ_sets.csv`; `OCC_POINT8_OUTCOME` is `no_1km_model` | Header and guards run on the project machine; no result is printed | 30–45 min |
+| 14.3 | **Second Decision (numbered — Decision 24), before its result is computed.** **Branch A — the effort result:** (a) Gi* — built or not; the grid (for example the 10 km publication grid); the value of a cell (background cells or records); the neighbours and the distance band (the Phase-1 documents give 50 km and 25 km: a new judgement value); the correction for many tests (a false discovery rate; Caldas de Castro & Singer 2006); (b) the ratio of the tiger and effort surfaces — built or not; the grid; the minimum effort for a cell to get a value; not published at 1 km (Decision 22 point 9); (c) a comparison by reserve from `tbl_15_occ_by_reserve.csv` (for example, the reserves with background records and no tiger record) and its rule; (d) the published form of the effort and settlement surfaces (grid, classes, the effort caveat of proposal §7). **Branch B — the model settings:** (a) the covariates — the collinearity check (slope and TRI), the elevation on water and coastal cells (−434.2 m; pending item), and how each band is summarised to the grain (for example a mean, or the share of each land-cover class); (b) the feature classes and the regularisation of `maxnet` (Decision 21 point 8 gives `lq` at most for 25–79 cells at 1 km; Decision 24 says what applies at the grain); (c) the background points and the bias input — the effort surface (pending point 4), the settlement surface as a bias covariate (pending point 5), or neither; (d) the evaluation — the method (for example spatial blocks), the metric, and what is reported with few presence cells; (e) the sensitivity runs and their comparison rule (pending point 2 was written for the 1 km sets); (f) where the model is saved and what the saved object holds (check it for presence and background values before a commit); the file name against the QA check of task 13.7 (see the pitfalls). For both branches: what was seen | Decision 24 recorded before STEP 14.1 runs; config settings | 45–60 min |
+| — | **Split point** (if the week is over 4 hours): commit the Decisions and the docs of tasks 14.1–14.3; continue with task 14.4 in the next session | — | — |
+| 14.4 | STEP 14.1. **Branch A:** build what Decision 24 fixes (Gi*, the ratio) on its grid → layers under `data/processed/` (gitignored) and `tbl_16_*` tables (counts and statistics only); if Decision 24 builds neither, this task has no STEP. **Branch B:** build the grain (the coarse template and the summarised covariate stack); assign the presence and background records to it; count the presence cells; compare the count with the minimum of Decision 23 and state the outcome — a stop point, as in task 13.3 | Outputs written and read back. Branch B: the outcome stated and locked in the config (as `OCC_POINT8_OUTCOME`) | 45–60 min (A) / 30–45 min (B) |
+| 14.5 | STEP 14.2. **Branch A:** the comparison by reserve of Decision 24 → a `tbl_16` table (a tiger count of 1 or 2 is `<3`, Decision 22 point 9; no tiger total). **Branch B:** if the outcome of task 14.4 allows it, fit `maxnet` with the settings of Decision 24; the evaluation; the sensitivity runs → the model file and `tbl_16_*` tables (no position) | Table written. Branch B: the model saved and read back; the evaluation table written | 20–30 min (A) / 45–60 min (B) |
+| 14.6 | STEP 14.3: QA — a hand-made case first (branch A: Gi* or the ratio on a small known grid; branch B: the aggregation and the presence count on a small known grid); each output on its grid; the small-count rule; the publish checks (no position or cell column in a `tbl_16` table; no file from the tiger records under `outputs/`, except a model file that Decision 24 allows) → `tbl_16_*_qa.csv`; a failure stops the script | QA passes | 20–30 min |
+| 14.7 | Update `data-dictionary.md`, `methodology.md` (Decisions 23–24, change log, Limitations, §5.4 and §5.5), `proposal.md` §8, `naming-conventions.md` §6, `references.md`, `README.md` (status; the track table if there is no model), handoff (Week-14 status; entry point for Week 15), `project-plan.md` (Weeks 15–16 written again for the branch) | Docs match as-built | 30–45 min |
+| 14.8 | Commit (`analysis:` for `09`, config, functions, tables; `docs:` separate; `docs: update handoff after Week 14` with the plan) | Committed and pushed; `git status --short` shows no point layer, no tiger surface and no file of exact tiger counts staged | 10 min |
+
+**Week 14 pitfalls:**
+- **Each Decision before its count.** Each `tbl_15` count is seen. The
+  count of presence cells at a coarser grain is not; Decision 23 fixes the
+  minimum before it. The chat cannot make that count (no data file, rule
+  d1); the author does not make it before the Decision.
+- **A coarser grain does not correct a position error.** In a simulation
+  study, a coarser grain did not make up for the position error (Gábor et
+  al. 2022; Decision 21, "Reason and sources"). A record of the 5 km set
+  keeps an error of up to 5 km at each grain. The public point of an
+  obscured record is about 10 km from its true position on average (two
+  random points in one 0.2° cell; Decision 22 point 1).
+- **One dataset gives most tiger records.** "Bengal Tiger (Panthera
+  tigris) Sighting based on Photographs from Facebook in India" gives 273
+  of the 300 records of the 5 km set and 20 of the 45 of the 1 km set. Its
+  GBIF entry does not say how a position was given to a photograph. It
+  gives no background record, so the matched background has nothing from
+  it.
+- **The tiger records and the background have different years.** 268 of
+  the 300 records of the tiger 5 km set are from 2018–2022 (26 of its 44
+  cells). 5,355 of the 6,082 records of the matched 1 km background are
+  from 2006–2017. The 5 km background has 9,504 of its 23,901 records in
+  2018–2022.
+- **The largest group of the tiger 1 km set is outside the reserve
+  polygons.** Its 18 records of 2018–2022 are in one cell, and each reserve
+  row of `tbl_15_occ_by_reserve.csv` has fewer. The cause is not known.
+  Before a model uses the 5 km set, the author can look at the cell on the
+  project machine and give the chat a category only (for example a buffer
+  zone, a captive or rescue site, a town) — no position. With the cell
+  unit, the cell counts 1 however many records it holds.
+- **The obscured set has no background.** Decision 21 point 4 counts the
+  obscured background and does not keep it. A model on the obscured set
+  needs a background set by the same rule: a new output of `scripts/08`
+  STEP 13.3 and a run with `RUN_CLEANING = TRUE` (STEPs 13.1–13.3 then
+  write their outputs again).
+- **A 0.2° cell is not on the 1 km grid.** It is a cell of longitude and
+  latitude; the template is EPSG:7755. A covariate value for a 0.2° cell
+  needs a summary over a polygon, not `terra::aggregate()`. In India a
+  0.2° cell is about 22 km north–south and 18–22 km east–west (computed:
+  0.2° of longitude is about 22.0 km at 8° N and 17.8 km at 37° N).
+- **The target-group scope is open.** The 23,901 background records hold
+  rodents (6,361), bats (746) and whales (140), which the methods that
+  record tigers do not record. If a model is chosen, Decision 23 fixes the
+  scope. A smaller target group needs the effort surface built again with
+  the Decision-22 settings (Decision 22 point 1).
+- **A bias correction can over-correct.** It can over-correct where the
+  effort is low (Ranc et al. 2017; Barber et al. 2022). In two simulation
+  studies, a filter of the records was the most consistent correction
+  (Fourcade et al. 2014; Kramer-Schadt et al. 2013). See Decision 22,
+  "Reason and sources".
+- **Terrain.** Slope and TRI are probably collinear, and the stack
+  elevation reaches −434.2 m (probably sea-floor depth; pending item). Read
+  the current values in `tbl_10`.
+- **The Gi\* band is a new value.** The Phase-1 documents give 50 km
+  (final report) and 25 km (method notes and story-map outline).
+- **The tiger file-name check.** The QA check of task 13.7 "no file with
+  'tiger' in its name under `outputs/`" fails on
+  `outputs/models/tiger_sdm_*.rds` (naming §6). Change the check or the
+  name in task 14.2 or 14.3, not after a failed run.
+- **A published total can give a suppressed count.** A table that uses the
+  reserve counts of `tbl_15_occ_by_reserve.csv` keeps the `<3` values and
+  holds no tiger total.
+- **`proposal.md` §8.** The doc fix pass of 2026-10-17 left §8 until the
+  model Decision. Each branch needs an entry: §5 of the proposal names a
+  `maxnet` SDM with a national prediction.
+- **Numbers.** Decision 23 is the next Decision number; `tbl_16` is the
+  next table group. `fig_04` is the next free figure number, and the
+  Week-16 row names `fig_05` — confirm at Week 16.
+- **Sensitive data.** The clean point layers, the tiger surface and each
+  layer made from the tiger records stay under `data/` (gitignored). The
+  console text that goes to a chat holds counts and names, never a
+  coordinate or a cell number.
+- **PROJ `proj.db` clash still applies** — fresh session.
+
+**Decisions due this week:** **23** (no model or a model at a coarser
+grain; for a model, the grain, the inputs, the minimum, the background and
+the target-group scope), before any count at a coarser grain; **24**
+(branch A: the effort result; branch B: the model settings), before its
+result is computed. The pending items "Model Decisions that Decision 21
+names", "Target-group scope" and "Terrain variables in the SDM" are closed
+by them or carried with a recorded reason.
+
+**Exit state:** Decisions 23 and 24 recorded; `scripts/09_<verb_object>.R`
+ran on the project machine; branch A: the outputs of Decision 24 written
+(`tbl_16_*`) and through the publish checks; branch B: the presence-cell
+outcome at the grain stated, and a model fitted and saved if the outcome
+allows it; QA passed; a `proposal.md` §8 entry; docs updated; Weeks 15–16
+written again for the branch; Week 14 ticked.
 
 ---
 
@@ -1137,7 +1344,7 @@ for Week 14 (SDM fit).
 | All-reserve census extraction is slower than 2 weeks | ~~High~~ **Retired** | Stage 1 slips | Did not materialise — the full within-reserve series was extracted in Week 4 (2014/2018/2022 is only 3 tabular rounds, not 5). Week 5 is now the join, not more extraction |
 | WII TR boundaries not public | Medium | Weaker boundary layer | KBA fallback, documented (Decision) |
 | Weeks slip due to job load | High | Calendar stretches | Expected. Each week is self-contained; no penalty for a gap |
-| SDM adds little beyond growth + connectivity | Medium | Wasted effort | Priority 3 by design — drop it if Stage 1–2 already tell the story |
+| SDM adds little beyond growth + connectivity | Medium *(2026-10-18: occurred in part — no 1 km model, Decision 21 point 8)* | Wasted effort | Priority 3 by design — drop it if Stage 1–2 already tell the story. *(2026-10-18: Decision 23, task 14.1, decides between no model and a model at a coarser grain)* |
 | Scope creep to "every possible analysis" | Medium | Never finishes | Three tracks only. New ideas go to a Phase-2 future-work list |
 
 ---
@@ -1162,5 +1369,5 @@ deliverable exists.
 | 10 | Least-cost paths + variant comparison | ✅ Complete |
 | 11 | Reserve network graph (Decision 19) | ✅ Complete |
 | 12 | Pinch points + network figure (Decision 20) | ✅ Complete |
-| 13–16 | Suitability track | ⚪ Not started |
+| 13–16 | Suitability track | In progress — Week 13 complete (Decisions 21–22; outcome `no_1km_model`; committed 2026-10-18). Week 14 next: Decision 23 (a model at a coarser grain, or no model) |
 | 17–20 | Site + close | ⚪ Not started |

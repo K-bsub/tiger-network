@@ -1,0 +1,172 @@
+"group","check","value","pass"
+"test case","rules: records with the hand-written first failed step (of 20)","expected 20, got 20",TRUE
+"test case","rules: steps with the hand-written number removed (of 9)","expected 9, got 9",TRUE
+"test case","rules: records kept","expected 5, got 5",TRUE
+"test case","rules: attrition: entry 20, last records_out = kept","expected 1, got 1",TRUE
+"test case","rules: a report flag alone removes no record (1 = kept)","expected 1, got 1",TRUE
+"test case","rules: uncertainty sets of the 5 kept records match (5 of 5)","expected 5, got 5",TRUE
+"test case","rules: cell02: a point on a cell edge -> the cell east of the edge","expected 1, got 1",TRUE
+"test case","rules: cell02: a point just west of the edge -> the cell west of it","expected 1, got 1",TRUE
+"test case","rules: point 8 outcome at min_model - 1, min_model, min_full - 1, min_full","expected 4, got 4",TRUE
+"test case","rules: occ_near, point: limit - 1 m and limit near, limit + 1 m not","expected 3, got 3",TRUE
+"test case","rules: occ_near, area: limit - 1 m and limit near, limit + 1 m not","expected 3, got 3",TRUE
+"test case","density: weights sum to 1","expected 1, got 1",TRUE
+"test case","density: weight is 0 at the radius (5 cells)","expected 0, got 0",TRUE
+"test case","density: weights are symmetric (max difference)","expected 0, got 0",TRUE
+"test case","density: cells of one disc","expected 69, got 69",TRUE
+"test case","density: A: value at the unit cell = centre weight / km2","expected 0.0381726, got 0.0381726",TRUE
+"test case","density: A: edge mass at an inner cell","expected 1, got 1",TRUE
+"test case","density: A: value 0 at 6 cells from the unit (exact)","expected 0, got 0",TRUE
+"test case","density: A: cells above 0 = cells of one disc","expected 69, got 69",TRUE
+"test case","density: A: integral = 1 unit","expected 1, got 1",TRUE
+"test case","density: B: edge mass at the grid corner (quarter disc)","expected 0.361327, got 0.361327",TRUE
+"test case","density: B: value at the grid corner = centre weight / mass / km2","expected 0.105646, got 0.105646",TRUE
+"test case","density: C: edge mass on a straight window edge (its column and the left)","expected 0.601783, got 0.601783",TRUE
+"test case","density: C: value on the edge = centre weight / mass / km2","expected 0.0634325, got 0.0634325",TRUE
+"test case","density: C: NA outside the window (1 = NA)","expected 1, got 1",TRUE
+"test case","density: D: three inputs in one cell = 1 unit","expected 1, got 1",TRUE
+"test case","density: E: a unit outside the window is refused (1 = refused)","expected 1, got 1",TRUE
+"tiger","each kept record is in the GBIF file (by gbifID)","300 of 300 records found",TRUE
+"tiger","no gbifID is in the layer two times","0 repeated",TRUE
+"tiger","step 1: occurrenceStatus in OCC_STATUS_KEEP","0 of 300 records fail",TRUE
+"tiger","step 2: basisOfRecord in OCC_BASIS_KEEP","0 of 300 records fail",TRUE
+"tiger","step 3: year in OCC_YEAR_MIN to OCC_YEAR_MAX","0 of 300 records fail",TRUE
+"tiger","step 4: no flag of OCC_ISSUE_REMOVE (GBIF file)","0 of 300 records fail",TRUE
+"tiger","step 4: coordinates not missing, not 0/0, not equal","0 of 300 records fail",TRUE
+"tiger","step 5: an uncertainty value above 0","0 of 300 records fail",TRUE
+"tiger","step 6: uncertainty <= OCC_UNCERT_WIDE_M","0 of 300 records fail",TRUE
+"tiger","step 7: more than OCC_CENTROID_DIST_M from each centroid","0 of 300 records fail",TRUE
+"tiger","step 8: more than OCC_ZOO_DIST_M from each zoo","0 of 300 records fail",TRUE
+"tiger","step 9: the cell of the position is a complete-case cell","0 of 300 records fail",TRUE
+"tiger","cell_1km is the cell of the position","0 of 300 records fail",TRUE
+"tiger","uncert_set agrees with the uncertainty (1km <= main limit)","0 of 300 records fail",TRUE
+"tiger","one presence per cell (one_per_cell): cells of the 1km set = tbl_15_occ_sets","45 records, 17 cells; table 17 cells",TRUE
+"tiger","one presence per cell (one_per_cell): cells of the 5km set = tbl_15_occ_sets","300 records, 44 cells; table 44 cells",TRUE
+"background","each kept record is in the GBIF file (by gbifID)","23901 of 23901 records found",TRUE
+"background","no gbifID is in the layer two times","0 repeated",TRUE
+"background","step 1: occurrenceStatus in OCC_STATUS_KEEP","0 of 23901 records fail",TRUE
+"background","step 2: basisOfRecord in OCC_BASIS_KEEP","0 of 23901 records fail",TRUE
+"background","step 3: year in OCC_YEAR_MIN to OCC_YEAR_MAX","0 of 23901 records fail",TRUE
+"background","step 4: no flag of OCC_ISSUE_REMOVE (GBIF file)","0 of 23901 records fail",TRUE
+"background","step 4: coordinates not missing, not 0/0, not equal","0 of 23901 records fail",TRUE
+"background","step 5: an uncertainty value above 0","0 of 23901 records fail",TRUE
+"background","step 6: uncertainty <= OCC_UNCERT_WIDE_M","0 of 23901 records fail",TRUE
+"background","step 7: more than OCC_CENTROID_DIST_M from each centroid","0 of 23901 records fail",TRUE
+"background","step 8: more than OCC_ZOO_DIST_M from each zoo","0 of 23901 records fail",TRUE
+"background","step 9: the cell of the position is a complete-case cell","0 of 23901 records fail",TRUE
+"background","cell_1km is the cell of the position","0 of 23901 records fail",TRUE
+"background","uncert_set agrees with the uncertainty (1km <= main limit)","0 of 23901 records fail",TRUE
+"background","one presence per cell (one_per_cell): cells of the 1km set = tbl_15_occ_sets","20905 records, 4554 cells; table 4554 cells",TRUE
+"background","one presence per cell (one_per_cell): cells of the 5km set = tbl_15_occ_sets","23901 records, 5512 cells; table 5512 cells",TRUE
+"background","ds_match = the dataset has a record of the tiger 1 km set","0 of 23901 records fail",TRUE
+"background","matched 1 km set = tbl_15_occ_sets","6082 records; table 6082",TRUE
+"obscured","each record is in the GBIF file (by gbifID)","884 of 884 records found",TRUE
+"obscured","each record has the iNaturalist dataset key","0 of 884 records fail",TRUE
+"obscured","each uncertainty >= OCC_OBSCURED_MIN_UNCERT_M","0 of 884 records fail",TRUE
+"obscured","steps 1 to 3 hold (status, record type, year)","0 of 884 records fail",TRUE
+"obscured","step 4 holds (no flag of OCC_ISSUE_REMOVE)","0 of 884 records fail",TRUE
+"obscured","the public position is inside its 0.2 degree cell","0 of 884 records fail",TRUE
+"obscured","no obscured record is in the clean tiger layer","0 records in both",TRUE
+"obscured","records = tbl_15_occ_sets","884; table 884",TRUE
+"tables","attrition (tiger): the steps of Decision 21 in order","9 steps",TRUE
+"tables","attrition (tiger): out = in - removed; each step starts at the last out","10 rows",TRUE
+"tables","attrition (tiger): entry = raw entry state; last out = records of the layer","entry 4606 (raw 4606); last out 300 (layer 300)",TRUE
+"tables","by dataset (tiger): the rows add up to the attrition","25 datasets",TRUE
+"tables","raw counts (tiger): the two coordinate tests of step 4 count 0","0, 0",TRUE
+"tables","attrition (background): the steps of Decision 21 in order","9 steps",TRUE
+"tables","attrition (background): out = in - removed; each step starts at the last out","10 rows",TRUE
+"tables","attrition (background): entry = raw entry state; last out = records of the layer","entry 39057 (raw 39057); last out 23901 (layer 23901)",TRUE
+"tables","by dataset (background): the rows add up to the attrition","38 datasets",TRUE
+"tables","raw counts (background): the two coordinate tests of step 4 count 0","0, 0",TRUE
+"tables","the tiger and the background went through the same steps","9 steps each",TRUE
+"tables","step 3 removes no background record","0 removed",TRUE
+"tables","dataset check (Amendment 2): no stop","0 of 30 rows with a stop",TRUE
+"tables","point 8: the table, the config and a new comparison agree","17 cells -> no_1km_model; table no_1km_model; config no_1km_model",TRUE
+"tables","window counts (tiger 1km): windows add up to all, all = tbl_15_occ_sets","45 records",TRUE
+"tables","window counts (tiger 5km): windows add up to all, all = tbl_15_occ_sets","300 records",TRUE
+"tables","window counts (tiger obscured): windows add up to all, all = tbl_15_occ_sets","884 records",TRUE
+"tables","window counts (background 1km): windows add up to all, all = tbl_15_occ_sets","20905 records",TRUE
+"tables","window counts (background 5km): windows add up to all, all = tbl_15_occ_sets","23901 records",TRUE
+"tables","window counts (background matched_1km): windows add up to all, all = tbl_15_occ_sets","6082 records",TRUE
+"tables","window counts: the six sets of Decision 22 point 6","6 sets",TRUE
+"tables","tbl_15_kde_summary.csv has one row per surface and radius","11 rows; expected 11",TRUE
+"surfaces","effort main 20 km: the grid of the covariate stack","2864 x 3093 cells",TRUE
+"surfaces","effort main 20 km: no value below 0","min 0",TRUE
+"surfaces","effort main 20 km: NA exactly on the cells that are not complete-case","0 cells differ",TRUE
+"surfaces","effort main 20 km: units = the cells of its input","5512 units; counted again 5512",TRUE
+"surfaces","effort main 20 km: the file gives the integral of the summary","5499.8273; summary 5499.8273",TRUE
+"surfaces","tiger main 20 km: the grid of the covariate stack","2864 x 3093 cells",TRUE
+"surfaces","tiger main 20 km: no value below 0","min 0",TRUE
+"surfaces","tiger main 20 km: NA exactly on the cells that are not complete-case","0 cells differ",TRUE
+"surfaces","tiger main 20 km: units = the cells of its input","44 units; counted again 44",TRUE
+"surfaces","tiger main 20 km: the file gives the integral of the summary","44.0838; summary 44.0838",TRUE
+"surfaces","settlement main 20 km: the grid of the covariate stack","2864 x 3093 cells",TRUE
+"surfaces","settlement main 20 km: no value below 0","min 0",TRUE
+"surfaces","settlement main 20 km: NA exactly on the cells that are not complete-case","0 cells differ",TRUE
+"surfaces","settlement main 20 km: units = the cells of its input","4588 units; counted again 4588",TRUE
+"surfaces","settlement main 20 km: the file gives the integral of the summary","4583.4218; summary 4583.4218",TRUE
+"surfaces","effort window 20 km 2006-2010: the grid of the covariate stack","2864 x 3093 cells",TRUE
+"surfaces","effort window 20 km 2006-2010: no value below 0","min 0",TRUE
+"surfaces","effort window 20 km 2006-2010: NA exactly on the cells that are not complete-case","0 cells differ",TRUE
+"surfaces","effort window 20 km 2006-2010: units = the cells of its input","623 units; counted again 623",TRUE
+"surfaces","effort window 20 km 2006-2010: the file gives the integral of the summary","622.5722; summary 622.5722",TRUE
+"surfaces","effort window 20 km 2018-2022: the grid of the covariate stack","2864 x 3093 cells",TRUE
+"surfaces","effort window 20 km 2018-2022: no value below 0","min 0",TRUE
+"surfaces","effort window 20 km 2018-2022: NA exactly on the cells that are not complete-case","0 cells differ",TRUE
+"surfaces","effort window 20 km 2018-2022: units = the cells of its input","3569 units; counted again 3569",TRUE
+"surfaces","effort window 20 km 2018-2022: the file gives the integral of the summary","3558.8928; summary 3558.8928",TRUE
+"surfaces","effort qa 10 km: the grid of the covariate stack","2864 x 3093 cells",TRUE
+"surfaces","effort qa 10 km: no value below 0","min 0",TRUE
+"surfaces","effort qa 10 km: NA exactly on the cells that are not complete-case","0 cells differ",TRUE
+"surfaces","effort qa 10 km: units = the cells of its input","5512 units; counted again 5512",TRUE
+"surfaces","effort qa 10 km: the file gives the integral of the summary","5517.0165; summary 5517.0165",TRUE
+"surfaces","tiger qa 10 km: the grid of the covariate stack","2864 x 3093 cells",TRUE
+"surfaces","tiger qa 10 km: no value below 0","min 0",TRUE
+"surfaces","tiger qa 10 km: NA exactly on the cells that are not complete-case","0 cells differ",TRUE
+"surfaces","tiger qa 10 km: units = the cells of its input","44 units; counted again 44",TRUE
+"surfaces","tiger qa 10 km: the file gives the integral of the summary","44.0649; summary 44.0649",TRUE
+"surfaces","settlement qa 10 km: the grid of the covariate stack","2864 x 3093 cells",TRUE
+"surfaces","settlement qa 10 km: no value below 0","min 0",TRUE
+"surfaces","settlement qa 10 km: NA exactly on the cells that are not complete-case","0 cells differ",TRUE
+"surfaces","settlement qa 10 km: units = the cells of its input","4588 units; counted again 4588",TRUE
+"surfaces","settlement qa 10 km: the file gives the integral of the summary","4588.6995; summary 4588.6995",TRUE
+"surfaces","effort qa 30 km: the grid of the covariate stack","2864 x 3093 cells",TRUE
+"surfaces","effort qa 30 km: no value below 0","min 0",TRUE
+"surfaces","effort qa 30 km: NA exactly on the cells that are not complete-case","0 cells differ",TRUE
+"surfaces","effort qa 30 km: units = the cells of its input","5512 units; counted again 5512",TRUE
+"surfaces","effort qa 30 km: the file gives the integral of the summary","5484.5335; summary 5484.5335",TRUE
+"surfaces","tiger qa 30 km: the grid of the covariate stack","2864 x 3093 cells",TRUE
+"surfaces","tiger qa 30 km: no value below 0","min 0",TRUE
+"surfaces","tiger qa 30 km: NA exactly on the cells that are not complete-case","0 cells differ",TRUE
+"surfaces","tiger qa 30 km: units = the cells of its input","44 units; counted again 44",TRUE
+"surfaces","tiger qa 30 km: the file gives the integral of the summary","44.2242; summary 44.2242",TRUE
+"surfaces","settlement qa 30 km: the grid of the covariate stack","2864 x 3093 cells",TRUE
+"surfaces","settlement qa 30 km: no value below 0","min 0",TRUE
+"surfaces","settlement qa 30 km: NA exactly on the cells that are not complete-case","0 cells differ",TRUE
+"surfaces","settlement qa 30 km: units = the cells of its input","4588 units; counted again 4588",TRUE
+"surfaces","settlement qa 30 km: the file gives the integral of the summary","4582.4461; summary 4582.4461",TRUE
+"surfaces","edge mass 20 km: above 0 and at most 1 on the window, NA elsewhere","min 0.04305, max 1",TRUE
+"surfaces","edge mass 20 km: cells below KDE_EDGE_FLAG_MASS = the summary","8843; summary 8843",TRUE
+"surfaces","edge mass 10 km: above 0 and at most 1 on the window, NA elsewhere","min 0.1266, max 1",TRUE
+"surfaces","edge mass 10 km: cells below KDE_EDGE_FLAG_MASS = the summary","2815; summary 2815",TRUE
+"surfaces","edge mass 30 km: above 0 and at most 1 on the window, NA elsewhere","min 0.02027, max 1",TRUE
+"surfaces","edge mass 30 km: cells below KDE_EDGE_FLAG_MASS = the summary","15702; summary 15702",TRUE
+"surfaces","effort main 20 km: a direct calculation at sample cells agrees (1e-5)","45 cells, max relative difference 4.7e-08",TRUE
+"surfaces","tiger main 20 km: a direct calculation at sample cells agrees (1e-5)","45 cells, max relative difference 4.7e-08",TRUE
+"surfaces","settlement main 20 km: a direct calculation at sample cells agrees (1e-5)","45 cells, max relative difference 5.3e-08",TRUE
+"surfaces","radius comparison: a Spearman value for each surface and QA radius","6 of 6 computed",TRUE
+"publish","assert_publishable_rast(): effort main","cell 1000 m; floor 1000 m",TRUE
+"publish","assert_publishable_rast(): settlement main","cell 1000 m; floor 1000 m",TRUE
+"publish","assert_publishable_rast(): effort window 2006-2010","cell 1000 m; floor 1000 m",TRUE
+"publish","assert_publishable_rast(): effort window 2018-2022","cell 1000 m; floor 1000 m",TRUE
+"publish","no file with ""tiger"" in its name under outputs/","0 of 55 files",TRUE
+"publish","each tiger surface is under data/ (gitignored), not outputs/","3 files; 0 wrong",TRUE
+"publish","tbl_15_background_taxa.csv: no position or cell column; numbers are counts or statistics","6 columns",TRUE
+"publish","tbl_15_kde_radius_compare.csv: no position or cell column; numbers are counts or statistics","4 columns",TRUE
+"publish","tbl_15_kde_summary.csv: no position or cell column; numbers are counts or statistics","13 columns",TRUE
+"publish","tbl_15_occ_cleaning.csv: no position or cell column; numbers are counts or statistics","6 columns",TRUE
+"publish","tbl_15_occ_cleaning_by_dataset.csv: no position or cell column; numbers are counts or statistics","4 columns",TRUE
+"publish","tbl_15_occ_dataset_check.csv: no position or cell column; numbers are counts or statistics","9 columns",TRUE
+"publish","tbl_15_occ_raw_counts.csv: no position or cell column; numbers are counts or statistics","4 columns",TRUE
+"publish","tbl_15_occ_sets.csv: no position or cell column; numbers are counts or statistics","5 columns",TRUE
+"publish","tbl_15_occ_window_counts.csv: no position or cell column; numbers are counts or statistics","8 columns",TRUE

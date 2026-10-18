@@ -1,0 +1,31 @@
+"set","datasetKey","title","n_1km","n_5km","words_found","hit","cleared","stop"
+"tiger","3732112e-848c-4fcc-b62d-e5acb9d12099","Mammal occurrence in rainforest fragments of the Valparai Plateau and Anamalai Tiger Reserve, Western Ghats, India (2005-06)",5,0,"approximat",TRUE,TRUE,FALSE
+"tiger","4b286126-5658-44ac-b958-cc8fc0f511e1","Mammal occurrence in Valparai Plateau and Anamalai Tiger Reserve, Tamil Nadu, India (2015-18)",6,0,"",FALSE,FALSE,FALSE
+"tiger","6ac3f774-d9fb-4796-b3e9-92bf6c81c084","NABU|naturgucker",13,0,"",FALSE,FALSE,FALSE
+"tiger","d3b6cb30-0a64-4f82-91ea-0bb14637ee17","Global Roadkill Data: a dataset on terrestrial vertebrate mortality caused by collision with vehicles (Systematic Records)",1,0,"",FALSE,FALSE,FALSE
+"tiger","f6a1c126-1719-4a8f-be6a-299b389ce86a","Mammal occurrence records (2020-23) in the Valparai Plateau and Anamalai Tiger Reserve, Western Ghats, India",0,2,"",FALSE,FALSE,FALSE
+"tiger","ff8a7785-27c8-4162-907e-658e28a09ba1","Bengal Tiger (Panthera tigris) Sighting based on Photographs from Facebook in India",20,253,"",FALSE,FALSE,FALSE
+"background","04ec8f88-c397-44e7-8cfb-8cdf5f961ca7","Faunal diversity study of Rabindra Sarobar (Dhakuria Lake), Kolkata, West Bengal, India",0,2,"",FALSE,FALSE,FALSE
+"background","3732112e-848c-4fcc-b62d-e5acb9d12099","Mammal occurrence in rainforest fragments of the Valparai Plateau and Anamalai Tiger Reserve, Western Ghats, India (2005-06)",1431,2,"approximat",TRUE,TRUE,FALSE
+"background","4b286126-5658-44ac-b958-cc8fc0f511e1","Mammal occurrence in Valparai Plateau and Anamalai Tiger Reserve, Tamil Nadu, India (2015-18)",3398,61,"",FALSE,FALSE,FALSE
+"background","50c9509d-22c7-4a22-a47d-8c48425ef4a7","iNaturalist Research-grade Observations",7238,2539,"",FALSE,FALSE,FALSE
+"background","5118b71e-6eb2-45c7-a52d-a4d61a5b9dc0","Mammal occurrence records (2022-24) from Sakleshpura, central Western Ghats, India",62,1,"",FALSE,FALSE,FALSE
+"background","57b0a989-1e6b-4b49-ab8a-8aed98b98ef0","Small Wild Cats of Eurasia",2,0,"",FALSE,FALSE,FALSE
+"background","588f99b4-9a8c-457c-8b3a-48534dcac317","Ganges river dolphin distributions in the Vikramshila Gangetic Dolphin Sanctuary, Bihar - 2008",121,0,"",FALSE,FALSE,FALSE
+"background","65830355-6c6b-4cd0-81c6-71907543ba26","Tirupati_Roadkill_Dataset",10,0,"",FALSE,FALSE,FALSE
+"background","65908f95-5ab6-48d9-bf6d-6da274ed730e","Global Roadkill Data: a dataset on terrestrial vertebrate mortality caused by collision with vehicles (Opportunistic Records)",89,0,"",FALSE,FALSE,FALSE
+"background","6ac3f774-d9fb-4796-b3e9-92bf6c81c084","NABU|naturgucker",501,0,"",FALSE,FALSE,FALSE
+"background","7528e073-dea9-4172-a1cb-27c684f2a4b5","Mammal occurrence along line transects for hornbill survey in the Western Ghats, India (2005-06)",146,10,"approximat",TRUE,TRUE,FALSE
+"background","87083cf0-d854-4592-bea3-08ed8c01d09d","Herpetofauna (amphibian and reptile) occurrences in rainforest remnants of the Valparai Plateau, Anamalai Hills, Western Ghats, India (2017)",15,0,"",FALSE,FALSE,FALSE
+"background","8a863029-f435-446a-821e-275f4f641165","Observation.org, Nature data from around the World",2203,13,"",FALSE,FALSE,FALSE
+"background","a013718d-4d97-4fea-85d4-7f976c6cbb35","Occurrence of rainforest trees and their mammal and bird visitors from a seed predation experiment, Valparai Plateau, Western Ghats, India (2020)",558,0,"",FALSE,FALSE,FALSE
+"background","a255c20a-10de-4bb7-8ba8-10ba413a9845","First DiversityIndia Meet (2022) held at Sundarbans, West Bengal, India",7,0,"",FALSE,FALSE,FALSE
+"background","b045f965-8a06-4b9c-a1b1-a9b5a1628b52","Mammal occurrence records from bird surveys and leopard study in the Anamalai Hills, Western Ghats, India (1999–2020)",3201,0,"degrad; approximat",TRUE,TRUE,FALSE
+"background","cf973c89-6819-4fc5-be56-c23f0119ff69","Fruiting trees and their bird and mammalian visitors and seed predators in the Anamalai Hills, India",111,0,"approximat",TRUE,TRUE,FALSE
+"background","d0d5ef85-71b2-4da6-b6f6-c1c3d60987d3","Roadkill",14,0,"",FALSE,FALSE,FALSE
+"background","d3b6cb30-0a64-4f82-91ea-0bb14637ee17","Global Roadkill Data: a dataset on terrestrial vertebrate mortality caused by collision with vehicles (Systematic Records)",752,0,"",FALSE,FALSE,FALSE
+"background","e7cd5566-ce5b-49a6-b514-53abb18c6cc5","Biodiversity around home: A case study for monitoring urban biodiversity at Barrackpore town, North 24 Parganas, West Bengal",1,0,"",FALSE,FALSE,FALSE
+"background","f334ae5e-0991-44bb-b64b-d602f4c8c289","India Roadkill Monitoring Project",97,0,"sensitiv",TRUE,TRUE,FALSE
+"background","f6a1c126-1719-4a8f-be6a-299b389ce86a","Mammal occurrence records (2020-23) in the Valparai Plateau and Anamalai Tiger Reserve, Western Ghats, India",556,10,"",FALSE,FALSE,FALSE
+"background","f842ea5a-e38c-4be2-924d-c065b41215b0","IISERTPT Squirrels of South Asia Database - Version1",366,358,"",FALSE,FALSE,FALSE
+"background","f896ef0c-7fad-44eb-bf56-b5dbe821fb5c","Mammal occurrence along bird survey transects in the Dampa Tiger Reserve landscape, Mizoram, northeast India (2014)",26,0,"approximat",TRUE,TRUE,FALSE

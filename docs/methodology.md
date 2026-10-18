@@ -2,21 +2,31 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** Week 12 complete — **Stage 2 (Connectivity) complete.** Road
-pinch points by **Decision 20**, recorded 2026-10-10 before any road crossing
-was computed: 556 crossings of barrier roads on 74 of the 76 in-network
-baseline paths; 365 sites; 200 pinch points (tier 1: 3, tier 2: 98, tier 3:
-99). By the Decision-20 rule the **gHM multiplier is "sensitive"** for the
-pinch points (site overlap 0.520) and the road value is "robust" (0.866 and
-0.820). Pinch-point QA 74 of 74 (`tbl_14_*`). Publishable outputs, with
-positions at a 10 km grid cell: `tbl_03_reserve_network.csv`,
-`tbl_03b_pinch_points.csv`, `tbl_03_notes.md`, `fig_03_reserve_network.png`
-(the figure text is a draft that the author keeps for now). A literature
-check of the pinch points is descriptive. The Stage-2 summary against
-proposal question 2 is in the change log (2026-10-10, "Week 12 complete").
-Next: Week 13 — Stage 3 (habitat suitability): occurrence cleaning and
-effort; Decision 21 (cleaning rule) comes first. Prior: Week 11 — reserve network (Decision 19); Week 10 — least-cost
-paths (Decisions 17–18).
+**Status:** **Week 13 complete (2026-10-11 to 2026-10-18) — Stage 3
+(habitat suitability) has started.** **Decision 21** (occurrence cleaning)
+was recorded on 2026-10-11 before any cleaned count, with Amendment 1
+(record types: c2) and Amendment 2 (a dataset check: v1). **Decision 22**
+(effort surfaces) was recorded on 2026-10-17 before any density surface.
+`scripts/08_prepare_occurrences.R` STEPs 13.1–13.6 ran on the project
+machine. Clean tiger records: 300 (1 km set: 45 records in 17 cells; 5 km
+set: 300 records in 44 cells); obscured set: 884 records in 104 cells of
+0.2°; clean background: 23,901 records. The outcome of Decision 21 point 8
+is **no 1 km suitability model**. The 11 surfaces of Decision 22 are built
+(effort, tiger records and city/town at 20 km; two effort window surfaces;
+six QA surfaces); the tiger surface is never published. QA: 171 of 171
+checks pass (`tbl_15_occ_qa.csv`). Clean records per reserve:
+`tbl_15_occ_by_reserve.csv` (a tiger count of 1 or 2 is published as
+`<3`). Thirteen Week-13 items are at the end of "Limitations". Week 13 is
+committed (task 13.10, 2026-10-18). Next: **Week 14**, which starts with
+**Decision 23**: a suitability model at a coarser grain, or no model (Stage 3 then
+gives the effort result). Prior: **Week 12 — Stage 2 (Connectivity)
+complete**: road pinch points by Decision 20 (200 pinch points; the gHM
+multiplier is "sensitive" for them); publishable `tbl_03_reserve_network.csv`,
+`tbl_03b_pinch_points.csv`, `tbl_03_notes.md` and
+`fig_03_reserve_network.png` (positions at a 10 km grid cell; the figure
+text is a draft); the Stage-2 summary against proposal question 2 is in the
+change log (2026-10-10, "Week 12 complete"). Week 11 — reserve network
+(Decision 19); Week 10 — least-cost paths (Decisions 17–18).
 
 This document is the processing log and the decision record. Every significant
 choice becomes a **numbered Decision** with a date and a justification, recorded
@@ -73,12 +83,20 @@ STEP block per task.
 target-group background for sampling-bias correction. National prediction,
 validated against reserve locations. **This is suitability, not occupancy**
 (Decision 1).
+*(2026-10-17: the outcome of Decision 21 point 8 is `no_1km_model` — the
+tiger 1 km set has 45 records in 17 cells. No `maxnet` model is fitted at
+1 km. Week 14 starts with a Decision between no model and a model at a
+coarser grain; this section is written again after that Decision.)*
 
 ### 5.5 Effort thread (cross-cutting)
 
 Target-group background (all Mammalia occurrences, tiger excluded — Decision 5)
 as the effort proxy. KDE and Getis-Ord Gi* reproduce and generalise the Phase 1
 observer-bias finding (the Ranthambore cold spot) at national scale.
+*(2026-10-17, Decision 22: Week 13 builds three density surfaces — effort,
+tiger records and city/town settlements — with a quartic kernel of 20 km
+radius. The tiger surface is not published. Gi* is not built in Week 13; the
+Week-14 model Decision decides it.)*
 
 ---
 
@@ -1885,6 +1903,829 @@ policy rule.
 
 This closes the **[Week 12] Pinch-point rule** pending item.
 
+### Decision 21 — Occurrence cleaning: record source, rule steps, uncertainty sets, obscured set, presence cells, background, minimum sample
+**Date:** 2026-10-11 (fixed **before** any record is cleaned and before any
+cleaned count is made — see "What was seen before this Decision")
+**Choice:** Settings in `R/00_config.R` (`OCC_*`). The Stage-3 script
+(`scripts/08_<verb_object>.R`, named in task 13.2) applies them. Fork codes
+as raised on 2026-10-11: a3, n1, b1, c2, z2, o2, e1, g3, h2, k2. *(c2
+replaces c1 by the amendment of 2026-10-11, made after the names stage of
+STEP 13.1 and before any count — see "Amendment 1".)*
+
+1. **Record source — the two GBIF files are read again.**
+   - The rule needs `occurrenceStatus` and `issue` for the tiger records.
+     The interim tiger layer (`occ_tiger_gbif_raw_7755.gpkg`) holds eight
+     fields and not these two. The interim background layer
+     (`effort_background_tgs_7755.gpkg`) holds `yr` only. Stage 3 therefore
+     reads the two SIMPLE_CSV files of the Week-2 downloads again
+     (`data/raw/gbif/`, `data/raw/gbif_background/`). There is no new
+     download, and the two DOIs do not change.
+   - **Entry state (step 0).** The `scripts/01` filter is repeated: a record
+     with two coordinates, inside the India polygon
+     (`boundary_india_national_7755.gpkg`). For the background also: year
+     2006 to 2022, and not the tiger (`speciesKey`).
+   - **Guard.** Tiger: the set of `gbifID` values of the entry state must be
+     the set in the interim layer. Background: the number of records must be
+     the number in the interim layer (that layer has no identifier). A
+     difference stops the script.
+   - **Fields that the rule uses:** `gbifID`, `datasetKey`,
+     `occurrenceStatus`, `basisOfRecord`, `year`, `decimalLatitude`,
+     `decimalLongitude`, `coordinateUncertaintyInMeters` and `issue`; for
+     the background also `speciesKey`, `order` and `family` (task 13.4). The
+     GBIF documentation lists each of them in the simple format. Task 13.2
+     reads the header line of each file. If a field is not there, this
+     Decision gets a dated amendment before any record is removed.
+2. **Rule steps, in one fixed order (`OCC_STEP_ORDER`).** The two sets get
+   the same steps, the same values and the same order (point 7). Each
+   record is counted at the first step that removes it.
+
+   | Step | Name | A record stays if | Fork |
+   |---|---|---|---|
+   | 1 | `status` | `occurrenceStatus` is `PRESENT` | c |
+   | 2 | `basis` | `basisOfRecord` is `HUMAN_OBSERVATION`, `MACHINE_OBSERVATION`, `OBSERVATION`, `OCCURRENCE` or `MATERIAL_SAMPLE` | c2 (amended) |
+   | 3 | `year` | `year` is 2006 to 2022 | b1 |
+   | 4 | `coord_flags` | `issue` holds no flag of `OCC_ISSUE_REMOVE`; the two coordinates are not both zero and not equal | z2 |
+   | 5 | `uncert_na` | `coordinateUncertaintyInMeters` has a value above zero | n1 |
+   | 6 | `uncert` | the value is ≤ 5,000 m (point 3) | a3 |
+   | 7 | `centroid` | the record is more than 1 km from the centroid of India, of each state and of each district | z2 |
+   | 8 | `zoo` | the record is more than 1 km from each OpenStreetMap zoo | z2 |
+   | 9 | `footprint` | the 1 km cell of the record is a complete-case cell of the covariate stack | fixed |
+
+   - **Step 1.** `ABSENT` is removed. A record with no value is removed too:
+     a missing value does not show a presence. The table counts the two
+     cases in two columns.
+   - **Step 2 (c2; amended 2026-10-11, was c1).** The kept types are
+     `OCC_BASIS_KEEP`. All other record types are removed: preserved, fossil
+     and living specimens, material citations, and a missing value. Before
+     the amendment, material samples, `OBSERVATION` and `OCCURRENCE` were
+     removed too. The two files hold no `OBSERVATION` and no `OCCURRENCE`
+     record (names stage), so the amendment changes the result for material
+     samples only.
+   - **Step 3 (b1).** The limits are `BASELINE_YEAR` and `CURRENT_YEAR`,
+     the bounds of the background download. A record with no year is
+     removed. For the background this step must remove no record (the
+     download and step 0 gave the window); the count is a check.
+   - **Step 4.** `OCC_ISSUE_REMOVE` is the list of GBIF flags that say that
+     a coordinate is wrong, or that GBIF changed it on an assumption:
+     `ZERO_COORDINATE`, `COORDINATE_OUT_OF_RANGE`, `COORDINATE_INVALID`,
+     `COUNTRY_COORDINATE_MISMATCH`, `PRESUMED_SWAPPED_COORDINATE`,
+     `PRESUMED_NEGATED_LATITUDE`, `PRESUMED_NEGATED_LONGITUDE`,
+     `COORDINATE_REPROJECTION_FAILED`, `COORDINATE_REPROJECTION_SUSPICIOUS`
+     and `COORDINATE_UNCERTAINTY_METERS_INVALID`. The flags of
+     `OCC_ISSUE_REPORT` are counted and remove no record:
+     `GEODETIC_DATUM_ASSUMED_WGS84`, `GEODETIC_DATUM_INVALID`,
+     `COORDINATE_ROUNDED`, `COORDINATE_REPROJECTED` and
+     `COORDINATE_PRECISION_INVALID`. Task 13.2 lists the flag names that are
+     in the two files (names and counts); a different spelling gets a dated
+     note here before any record is removed.
+   - **Step 4, the two coordinate tests.** A record at 0°, 0°, and a record
+     with latitude equal to longitude, cannot be inside India (latitude is
+     below 38° and longitude is above 68°). Step 0 has removed them. The two
+     tests stay as checks and must count zero.
+   - **Step 5 (n1).** A record with no uncertainty value, or with a value
+     of zero or below, is removed. The number of decimal places of a
+     coordinate is not used.
+   - **Step 7.** The centroid is the geometric centroid of the polygon in
+     EPSG:7755 (`sf::st_centroid()`), for three layers
+     (`OCC_CENTROID_LEVELS`): India (1), the states
+     (`boundary_states_7755.gpkg`, 36) and the DataMeet Census-2011
+     districts (641). The distance is `OCC_CENTROID_DIST_M` = `GRID_CELL_M`.
+   - **Step 8.** A zoo is an OpenStreetMap feature with `tourism` = `zoo`,
+     a point or an area, in the cached Geofabrik India file of Week 2
+     (`data/raw/osm/geofabrik_cache/`; no new download). The distance is
+     from the record to the feature (zero inside an area), and the limit is
+     `OCC_ZOO_DIST_M` = `GRID_CELL_M`. If the read gives no zoo feature, the
+     script stops: a read that failed is not "no zoo".
+   - **Step 9.** The cell is the cell of `cov_stack_1km_7755.tif` that
+     holds the record. The record stays if that cell has a value in each
+     band (the Decision-10 common mask). This step also removes a record
+     that is inside the India polygon on a cell with its centre outside.
+3. **Two uncertainty sets (a3).** Each record that passes all nine steps
+   gets `uncert_set`:
+   - `1km`: the value is ≤ 1,000 m (`OCC_UNCERT_MAIN_M` = `GRID_CELL_M`).
+   - `5km`: the value is above 1,000 m and ≤ 5,000 m (`OCC_UNCERT_WIDE_M`,
+     the Decision-18 distance).
+   - **The 1 km set** is the records with `1km`. It is the main set.
+   - **The 5 km set** is the records with `1km` or `5km`. It is for one
+     sensitivity run (point 9). It does not replace the main set
+     (point 8).
+4. **Obscured set (o2).** No step removes a record because it is obscured;
+   step 6 removes it because its uncertainty is above the limit. One
+   labelled set is kept from the records that step 6 removes:
+   - A record is in the obscured set if it passed steps 1 to 5, its
+     `datasetKey` is the iNaturalist dataset (`OCC_INAT_DATASET_KEY`,
+     "iNaturalist Research-grade Observations"), and its uncertainty is
+     ≥ 25,000 m (`OCC_OBSCURED_MIN_UNCERT_M`).
+   - Each record gets the 0.2° cell of its public coordinates
+     (`OCC_OBSCURED_CELL_DEG`): the cell with its south-west corner at the
+     coordinates rounded down to a multiple of 0.2°. iNaturalist puts the
+     public point in the cell that holds the true position.
+   - Steps 7 to 9 are not applied: the public point is a random point in
+     the cell, so a distance of 1 km from it has no meaning.
+   - **The obscured set is never a 1 km presence.** Its uses are an input
+     to Decision 22 (effort) and to the Decision of point 8.
+   - The script counts the iNaturalist records that step 6 removes with an
+     uncertainty below 25,000 m. They are in no set.
+   - The same rule is applied to the background, for the count only.
+5. **Presence cells (e1).** The unit of the model is the 1 km cell, not the
+   record.
+   - A presence cell of a set is a complete-case cell with one or more
+     records of that set. `n_cells_1km` and `n_cells_5km` are the two
+     counts.
+   - The number of records in a cell is kept as a count. It is not a
+     weight.
+   - There is no thinning by distance (`OCC_THIN_RULE` = `one_per_cell`).
+   - The clean layer keeps each record that passed the nine steps, with its
+     cell number, so that the count per cell and per year stays available.
+6. **Tool (z2, not z3).** Base `sf`, `terra` and `dplyr` rules. The
+   `CoordinateCleaner` package is not used. The zoo layer needs one more
+   read of the cached OpenStreetMap file with `osmextract`. No new package.
+7. **Background (g3).** The Mammalia background goes through steps 0 to 9,
+   points 3 and 5, with the same values and the same order.
+   - **1 km background:** the complete-case cells with one or more
+     background records with `uncert_set` = `1km`, from all datasets.
+   - **5 km background:** the same with `1km` or `5km`.
+   - **Matched 1 km background:** the 1 km background, with only the
+     records of a dataset that holds one or more records of the tiger 1 km
+     set (`OCC_BG_MATCH_MIN_TIGER` = 1; the match is on `datasetKey`). Each
+     background record gets `ds_match` (true or false).
+   - No matched 5 km background is built.
+   - The attrition table gives each step for the two sets, for all records
+     and by dataset.
+   - The pending item "target-group scope" (which mammals) does not change.
+     Task 13.4 gives its evidence.
+8. **Minimum number of presence cells (h2) and what changes (k2).** The
+   test value is `n_cells_1km` of the tiger records. Fixed now:
+
+   | `n_cells_1km` | Outcome for Week 14 |
+   |---|---|
+   | below 25 (`OCC_MIN_CELLS_MODEL`) | **No 1 km suitability model.** Week 14 starts with a numbered Decision between (i) no suitability model — Stage 3 gives the effort result — and (ii) a model at a coarser grain. The inputs that (ii) can use are the 5 km set and the obscured set. A 1 km model on the 5 km set is not an option |
+   | 25 to 79 | **A reduced model.** The feature classes are linear and quadratic at most (`OCC_REDUCED_MAX_CLASSES` = `lq`). Each output of the model says that the sample is small. The other settings are a Week-14 Decision; it can be more strict, not less |
+   | 80 or more (`OCC_MIN_CELLS_FULL`) | **The planned model** (`maxnet`; the settings are a Week-14 Decision) |
+
+   - Task 13.3 compares the count with the two limits and states the
+     outcome. The outcome does not change after that.
+   - No minimum is fixed here for a background set. The Week-14 Decision
+     fixes one, and it must say that the background counts were seen.
+9. **The model sets for Week 14 (`OCC_MODEL_SETS`).** One main set and two
+   sensitivity sets. Each sensitivity set changes one choice:
+
+   | Set | Tiger cells | Background | Tests |
+   |---|---|---|---|
+   | `main` | 1 km set | 1 km background, all datasets | — |
+   | `uncert5km` | 5 km set | 5 km background, all datasets | the uncertainty limit (a3) |
+   | `matched` | 1 km set | matched 1 km background | the observer group (g3) |
+
+   - The two sensitivity sets are run only if the main model is run
+     (point 8).
+   - The comparison rule and its labels are a Week-14 Decision, fixed
+     before a model is fitted.
+10. **Sensitivity and publication.**
+    - The clean tiger layer holds precise positions (policy tier T2). The
+      obscured set is tier T1. The layers stay under `data/` (gitignored).
+    - A `tbl_15_*` table holds counts. It holds no coordinate, no cell
+      number and no 0.2° cell.
+    - The console text that goes to a chat holds counts and field names
+      only.
+    - A published form of a tiger-record surface is Decision 22, point (g).
+
+**What was seen before this Decision (pre-registration, stated plainly):**
+- **In the documents:** 4,606 tiger records inside India (93 % of the pull);
+  a median coordinate uncertainty of about 30 km; years 1840 to 2026;
+  39,057 background records inside India (75 % of the pull), 2006 to 2022;
+  the Phase-1 result (about 116 clean baseline points for 7 reserves, with
+  a different rule).
+- **By the author, on the Week-2 console (`scripts/01`, Blocks 2 and 3):**
+  the record-type mix of the tiger records, the number with no uncertainty
+  value, the 90th percentile of the uncertainty, and the background records
+  per year. The author stated on 2026-10-11 that these values are not
+  remembered, and that the raw layers were not opened and the records were
+  not looked at on a map after Week 2. Forks a, n and c are
+  therefore post-seen in principle for the author.
+- **By the chat that drafted this Decision:** the documents and the scripts
+  only. No data file, no field value, and none of the three Week-2 values
+  above.
+- **Research that tells the direction of a result (2026-10-11):**
+  iNaturalist obscures the tiger, and an obscured record has an uncertainty
+  of about 28 to 31 km in India. Step 6 will therefore remove most or all
+  iNaturalist tiger records. This agrees with the 30 km median. It is an
+  inference; no record was checked.
+- **The Phase-1 count is above the two limits of point 8.** The limits are
+  from the literature and from the `maxnet` default (see Reason). They were
+  not set from a count of this project.
+- **The choices.** The chat gave one recommended option for each fork. The
+  author took it for each fork but one: the chat recommended a1 (one limit
+  of 1,000 m), and the author chose a3. a3 adds the 5 km set and takes no
+  record out of the main set. *(This was the state when the Decision was
+  recorded. For fork c, see "Amendment 1".)*
+- **Not seen by anyone:** a cleaned count, the datasets of the tiger
+  records, the GBIF flags in the two files, the number of obscured records,
+  and a zoo layer.
+
+**Amendment 1 — 2026-10-11, after the names stage of STEP 13.1, before any
+count:**
+- **What was run.** `scripts/08_prepare_occurrences.R` with `RAW_STAGE` =
+  `names`, on the project machine. It read the two GBIF files and printed
+  field names and distinct values. It printed no count of records, wrote no
+  file and removed no record.
+- **What the names showed.**
+  - Each file has the 50 fields of the GBIF simple format. Each field of
+    point 1 is there.
+  - `occurrenceStatus` holds only `PRESENT` in the two files. Step 1 will
+    remove no record.
+  - No flag of `OCC_ISSUE_REMOVE` is in the two files. The flag part of
+    step 4 will remove no record.
+  - `basisOfRecord` holds five types in each file: `HUMAN_OBSERVATION`,
+    `MACHINE_OBSERVATION`, `MATERIAL_CITATION`, `MATERIAL_SAMPLE` and
+    `PRESERVED_SPECIMEN`.
+  - The iNaturalist dataset key is in the two files. The tiger file has one
+    `speciesKey`.
+- **Flags with no rule that the stage marked for review — no amendment.**
+  `COUNTRY_DERIVED_FROM_COORDINATES`, `CONTINENT_DERIVED_FROM_COORDINATES`
+  and `COUNTRY_INVALID` (background only) are about the country and the
+  continent text. They do not say that a coordinate is wrong, and step 0
+  uses the India polygon.
+- **Date flags — no amendment (y1).** `RECORDED_DATE_MISMATCH` and
+  `RECORDED_DATE_INVALID` are in the two files, and step 3 uses `year`.
+  Step 3 stays as it is: the `year` field of GBIF, for the two sets, which
+  is the field of the 2006–2022 window of the background download. For a
+  mismatch, GBIF keeps the part of the date on which the fields agree; the
+  examples of its page keep the year. A conflict in the year is not in
+  those examples (not verified). The rejected option was y2: also remove a
+  record with one of the two flags.
+- **Record types — c2 replaces c1 (the author's choice).** Step 2 now
+  keeps `OBSERVATION`, `OCCURRENCE` and `MATERIAL_SAMPLE` too.
+  - What was seen when the choice was made: the five type names above, and
+    a flag for nucleotide sequences in the tiger file. The chat pointed to
+    the two facts and proposed no change.
+  - Not seen: a count. The number of material samples is not known.
+  - Direction, stated plainly: c2 keeps more records than c1 and never
+    fewer, so `n_cells_1km` with c2 is equal to or above its value with c1.
+    The limits of point 8 do not change. The research of this Decision had
+    shown that the clean set is probably small.
+  - The rule is the same for the background.
+
+**Amendment 2 — 2026-10-11, after the raw counts of STEP 13.1 (task 13.2),
+before any clean count:**
+- **What was seen.** The raw counts of `tbl_15_occ_raw_counts.csv` (the
+  change log of 2026-10-11 gives them). By the chat: the GBIF registry
+  entries of three tiger datasets, and the GBIF API counts of one of them.
+- **The fact.** The dataset "Camera trap database of Tiger from Rajaji
+  National Park" (305 records, all machine observations) says that its
+  positions were degraded for security. None of its records has an
+  uncertainty value, so step 5 removes all of them. A dataset can also
+  degrade its positions and give a small uncertainty value. No rule step
+  finds that.
+- **Addition (v1; a QA check, not a rule step).** For each dataset that
+  gives one or more records to the 1 km set or to the 5 km set, the script
+  reads the GBIF description of the dataset and looks for words about
+  degraded, generalised or obscured positions. A hit stops the script
+  before the clean layers are written, and the author decides: keep the
+  dataset, or a further amendment. The word list and the way to record a
+  decision are process choices of task 13.3.
+- **Direction.** The check removes no record. It can only stop the script.
+  A later removal of a dataset is a post-result amendment, and the record
+  must say so.
+- **Rejected:** v2 — no check.
+
+**Outcome of the dataset check (Amendment 2) — 2026-10-17:**
+- **First run of STEP 13.2:** the check stopped on one dataset, so nothing
+  of STEP 13.2 was written. The dataset is "Mammal occurrence in rainforest
+  fragments of the Valparai Plateau and Anamalai Tiger Reserve, Western
+  Ghats, India (2005-06)" (`3732112e-848c-4fcc-b62d-e5acb9d12099`). It gives
+  5 records to the 1 km set and none to the 5 km set only.
+- **The word:** "approximat", in this method sentence of the GBIF entry:
+  "Geographic location was chosen as the approximate midpoint of line
+  transects or, in the case of opportunistic surveys, approximately based
+  on name of locality or place with a coordinate uncertainty in metres
+  assigned to it."
+- **The author's choice: k1 — keep the dataset** (in `OCC_DATASET_CLEARED`).
+  Each record has a coordinate uncertainty, and step 6 uses that value; the
+  word describes the method and does not say that a position was degraded.
+- **What was seen when the choice was made:** the attrition, the three sets
+  and the outcome of point 8 (the console of the first run prints them
+  before the check).
+- **The choice does not change the outcome of point 8.** With k2 (remove
+  the dataset; rejected), `n_cells_1km` would be 12 to 17, which is below
+  25 as is 17.
+- **The other five datasets with a kept record** had no word of the list.
+
+**Outcome of point 8 (task 13.3, `scripts/08` STEP 13.2, 2026-10-17):**
+- `n_cells_1km` = **17** (45 records), which is below `OCC_MIN_CELLS_MODEL`
+  (25). The outcome is **`no_1km_model`**: no suitability model at 1 km.
+- By point 8, Week 14 starts with a numbered Decision between (i) no
+  suitability model — Stage 3 gives the effort result — and (ii) a model at
+  a coarser grain, with the 5 km set and the obscured set as the inputs
+  that it can use. A 1 km model on the 5 km set is not an option.
+- By point 9, the sensitivity sets `uncert5km` and `matched` are run only
+  with a main model, so they are not run.
+- The outcome does not change after this run (point 8). It is locked in
+  `R/00_config.R` (`OCC_POINT8_OUTCOME`, process choice r1, 2026-10-17):
+  `scripts/08` stops if a later run gives another outcome.
+
+**Outcome of the dataset check on the background (task 13.4, `scripts/08`
+STEP 13.3) — 2026-10-17:**
+- **First run of STEP 13.3:** the check (process choice d1: the same check,
+  word list and cleared list as for the tiger) stopped on five background
+  datasets, so nothing of STEP 13.3 was written. In each, the word is not
+  about a degraded position:
+
+  | Dataset (key) | Background 1 km / above 1 km | The word, in context |
+  |---|---|---|
+  | Bird surveys and leopard study, Anamalai Hills (1999–2020) (`b045f965-…`) | 3,201 / 0 | "degraded forest fragments" (the habitat); "approximately 2,223 point-count surveys"; positions from a place name "with a coordinate uncertainty in metres assigned to it"; the position is "the start point of line transects" |
+  | Hornbill-survey line transects, Western Ghats (2005–06) (`7528e073-…`) | 146 / 10 | "the approximate starting point or midpoint of each line transect based on GPS records"; the uncertainty is "based on transect length and positional error" |
+  | Fruiting trees and their visitors, Anamalai Hills (`cf973c89-…`) | 111 / 0 | "approximately 3000 mm annual rainfall"; no sentence about the positions |
+  | India Roadkill Monitoring Project (`f334ae5e-…`) | 97 / 0 | "ecologically sensitive landscapes"; also "Coordinate uncertainty values recorded as 0 m were adjusted to either 30 m or 100 m" |
+  | Bird-survey transects, Dampa Tiger Reserve landscape (2014) (`f896ef0c-…`) | 26 / 0 | "the approximate midpoint of line transects … with a coordinate uncertainty in metres assigned to it" (the sentence of the k1 dataset) |
+
+- **The author's choice: e1 — keep all five** (in `OCC_DATASET_CLEARED`,
+  each with the date and its reason).
+- **The roadkill note:** in GBIF an uncertainty of 0 often means "not
+  known", and step 5 removes it. This publisher replaced 0 with 30 m or
+  100 m, so such a record passes steps 5 and 6 with a value that the
+  publisher assigned.
+- **What was seen when the choice was made:** the background attrition, the
+  four background sets and the taxa (the console of the first run prints
+  them before the check).
+- **Effect:** the five datasets give 3,581 of the 20,905 records of the
+  1 km background (17 %). None of them is a matched dataset. The tiger
+  outcome does not change.
+- **Rejected:** e2 — clear some and remove the others (a post-result
+  amendment).
+- **Second run:** six hits (the k1 dataset is in the background too), all
+  cleared; the outputs were written.
+
+**Reason and sources:**
+- **1,000 m.** The covariates are on a 1 km grid. With an uncertainty of
+  1 km or less, the true position is in the cell of the record or in a
+  cell next to it. In a simulation study, model performance fell with
+  more position error and with a coarser grain, and a coarser grain did
+  not make up for the error (Gábor et al. 2022). The limit is the grid
+  size, not a value from the data.
+- **5,000 m as a second set.** It is the Decision-18 distance (about one
+  home-range radius of a resident female). A record can then be five cells
+  from its covariates, so the set is for a sensitivity run only.
+- **No value = removed.** A missing uncertainty does not show a precise
+  position, and the decimal places of a coordinate show the format, not
+  the accuracy.
+- **2006 to 2022.** The background has no record outside this window, so a
+  different window for the tiger gives the two sets a different time
+  bias. The covariates are from 2021 and 2022; a record from 1840 is from a
+  different land cover.
+- **Record types.** A specimen has the position of a collection place or a
+  museum, and often an old date. A material citation is a record from a
+  publication. A material sample can be scat or hair with a true field
+  position. By Amendment 1 it stays, and it goes through the same steps for
+  uncertainty, centroid and zoo as each other record. `OBSERVATION` and
+  `OCCURRENCE` give no method; they stay by c2 and are not in the files.
+  *(Before Amendment 1: these three types were removed, because the type
+  alone does not show the method.)*
+- **Flags.** The Week-2 downloads used `hasGeospatialIssue = FALSE`, so
+  some flags of the list are expected to count zero (not verified which).
+  The flags for an assumed datum are not removed: they are on a large part
+  of all GBIF records (as far as known), and the shift is probably small
+  against 1 km (not measured for India).
+- **Centroid and zoo.** Records are often given the centre of a country or
+  a province, or the place of an institution, and automated tests for
+  these are standard (Zizka et al. 2019). This Decision uses the same
+  ideas with layers that are on disk. A zoo record is a true record of a
+  tiger and a false record of habitat. A captive record on iNaturalist is
+  not research grade, so the iNaturalist dataset on GBIF does not have it
+  (as far as known; not verified).
+- **Obscured records.** iNaturalist gives an obscured record a random
+  point in a cell of a 0.2° grid and sets the public accuracy to the
+  diagonal of the cell; one GBIF example has 29,458 m. The diagonal is
+  about 28.4 km at 37° N and about 31.3 km at 7° N (computed for this
+  Decision). 25,000 m is below the smallest value in India and above the
+  5 km limit. The GBIF simple format has no field that says "obscured", so
+  the set is found from the dataset and the uncertainty.
+- **One presence per cell, no thinning.** Two records in one cell give the
+  model the same covariates. The background, not a thinning distance,
+  corrects the effort bias (Decision 5). A thinning distance on top of it
+  would correct the bias two times and make a small set smaller.
+- **Background by the same rule, with a matched set.** The target-group
+  method needs a background with the bias of the presence records, from
+  species "observed by similar methods" (Phillips et al. 2009). The same
+  rule can give two different observer groups: most mammals are not
+  obscured on iNaturalist and pass step 6, and the tiger does not. The
+  matched set keeps only the datasets that also gave a clean tiger record.
+  It is the nearer set to "similar methods", and it can be small, so it is
+  the sensitivity set and not the main set.
+- **25 and 80.** For simulated species in a real study area, the minimum
+  number of records for an accurate model was 14 for a narrow-ranged and
+  25 for a widespread species (van Proosdij et al. 2016); 25 is the higher
+  value. `maxnet` chooses its default feature classes from the number of
+  presences: linear below 10, plus quadratic below 15, plus hinge below
+  80, plus product from 80 (`maxnet.formula()`, read 2026-10-11). 80 is
+  therefore the count at which the default model is the full one.
+- **Below the minimum, a Decision and not an automatic drop.** The risk
+  table of the plan has "drop it" for a model that adds little. k2 keeps
+  proposal question 3 open for one more Decision, with the caution of
+  Gábor et al. (2022) about a coarser grain.
+
+**Judgement values:** 5,000 m (second set), 25,000 m (obscured), 1 km
+(centroid and zoo distance), 1 tiger record (dataset match), 25 and 80
+(presence cells), `lq` (reduced model). The flag list of step 4 is a
+judgement list.
+
+**Rejected:**
+- *a1 — one limit of 1,000 m; a2 — one limit of 5,000 m.* a3 holds a1 as
+  its main set.
+- *n2 — keep a record with four or more decimal places; n3 — keep.*
+- *b2 — 2014 to 2022; b3 — all years.*
+- *c1 — only `HUMAN_OBSERVATION` and `MACHINE_OBSERVATION`.* The first
+  choice; replaced by c2 in Amendment 1.
+- *y2 — remove a record with a date flag* (Amendment 1).
+- *z1 — no zoo rule; z3 — `CoordinateCleaner`.* z3 is a published method,
+  but it is a new dependency, and the coverage of its reference tables for
+  India is not known.
+- *A rule by land-cover class (for example, no record on built-up land).*
+  Not raised as an option: it removes presences with a covariate of the
+  model.
+- *o1 — no obscured set.*
+- *e2 — thinning at 5 km; e3 — no rule for duplicates.*
+- *g1 — the same rule only; g2 — the matched datasets as the main
+  background.*
+- *h1 — one limit of 25.*
+- *k1 — no model below the limit, with no further Decision.*
+
+**Limitations:**
+- The uncertainty value comes from the observer or the publisher. A small
+  value can be wrong, and a record with no value can be precise. A dataset
+  that gives no value loses all its records at step 5; the table by dataset
+  shows it.
+- An obscured record is found by inference. An iNaturalist record with a
+  large uncertainty for a different reason gets a 0.2° cell that is not
+  sure to hold the true position.
+- The two sets can come from different observer groups (see Reason). The
+  matched set tests this; it does not remove it.
+- The centroid is the centre of a polygon of this project. A record at the
+  centre point of a gazetteer can be more than 1 km from it.
+- The OpenStreetMap zoo layer is not complete, and the coverage for India
+  is not known. A captive animal at a place with no zoo tag stays.
+- A material sample (step 2, c2) can be tissue from a captive or a dead
+  animal, or it can have the position of a laboratory. The zoo rule finds
+  only a zoo that is on the map. The record type does not say how the
+  sample was found.
+- The year of a record with a date flag is the year that GBIF gives
+  (Amendment 1).
+- The species identification is not checked.
+- The datum of a record with an assumed datum is not checked.
+- The window is 17 years; the covariates are from 2021 and 2022.
+- A presence cell is not a count of tigers, and one cell per record set
+  drops the number of visits.
+- The limits 25 and 80 are for the number of cells, not for their spread.
+  Clean records are probably grouped in a small number of reserves (not
+  verified). The study behind 25 used simulated species with no sampling
+  bias.
+- The numbers in "Judgement values" are judgement values.
+
+**Consequences:**
+- `R/00_config.R`: new `OCC_*` settings. By Amendment 1, `OCC_BASIS_KEEP`
+  has five values.
+- `scripts/08` (task 13.2 onward): reads the two GBIF files, not the
+  interim layers (the interim layers are the guard of point 1). Outputs:
+  the clean tiger layer `occ_tiger_gbif_clean_7755.gpkg` (records, with
+  `uncert_set` and the cell number), the obscured set, the clean
+  background `effort_background_tgs_clean_7755.gpkg` (with `uncert_set`
+  and `ds_match`), and the attrition table. The file name of the obscured
+  set and the `tbl_15_*` slugs are process choices of task 13.2.
+- QA (task 13.7), with a stop on any failure: the rule functions on a
+  hand-made case first; the attrition adds up to the entry count for each
+  set; no clean record fails a step; the two coordinate tests of step 4
+  count zero; step 3 removes no background record; each obscured record
+  has the iNaturalist key and an uncertainty of 25,000 m or more; no
+  `tbl_15_*` table holds a position. By Amendment 2, also the check of the
+  dataset descriptions (it stops the script before the clean layers are
+  written).
+- `docs/data-dictionary.md` (task 13.9): the placeholder entry of the clean
+  layer has an `obscured` field. The clean layer has no such field; the
+  obscured records are a separate set.
+- `docs/project-plan.md`: task 13.1 done; a dated note on tasks 13.2 to
+  13.4 and 13.7 (the new read of the two files, the zoo read, the obscured
+  set, the three background sets).
+- Week 14 starts with the outcome of point 8, then the Decisions that
+  points 8 and 9 name.
+
+This closes the **[Week 13] Occurrence-cleaning rule** pending item.
+
+### Decision 22 — Effort surfaces: surfaces and uses, records, unit, settlement classes, kernel and radius, time windows, edge rule, Gi*, publication
+**Date:** 2026-10-17 (fixed **before** any density surface is built and
+before any count by time window is made — see "What was seen before this
+Decision")
+**Choice:** Settings in `R/00_config.R` (`KDE_*`).
+`scripts/08_prepare_occurrences.R` STEP 13.4 (task 13.6) applies them. Fork
+codes as raised on 2026-10-17: a2, p1, u2, b2, c2, d3, e2, f2, g1. *(Decision
+21 uses some of the same codes. Write the Decision with the code, for
+example "Decision 22 c2".)*
+
+1. **Surfaces and their uses (a2).** Week 13 builds three surfaces for all
+   years (2006–2022). Each surface uses the rules of points 2 to 7.
+
+   | Surface | Input | Use |
+   |---|---|---|
+   | `effort` | the clean Mammalia background (point 2) | Shows where mammals are recorded (proposal question 4). A candidate bias input if Week 14 chooses a model at a coarser grain; Week 14 decides |
+   | `tiger` | the clean tiger records (point 2) | Shows where tigers are recorded, for a comparison with the effort surface. Not a suitability surface. Not published (point 9) |
+   | `settlement` | OpenStreetMap city and town points (point 4) | An access layer for the effort result. A candidate observer-bias covariate if Week 14 fits a model (Warton et al. 2013); Week 14 decides |
+
+   - **No ratio surface** (tiger ÷ effort) in Week 13. A ratio is near to a
+     simple bias-corrected model, so it is a part of the Week-14 model
+     Decision.
+   - **The obscured set is in no surface.** There is no matching background
+     set: Decision 21 point 4 counts the obscured background and does not
+     keep it. The position error of an obscured record is about 10 km on
+     average (two random points in one 0.2° cell; computed for this
+     Decision). The set stays an input to the Week-14 Decision.
+   - **Target group:** all Mammalia (Decision 5). If Week 14 makes the
+     target group smaller, the effort surface is built again with the same
+     settings.
+   - **No road surface.** The stack has `dist_road_m`.
+2. **Records (p1).** The 5 km sets (`KDE_UNCERT_SETS`): the tiger records
+   and the background records with `uncert_set` `1km` or `5km` (tiger: 300
+   records in 44 cells; background: 23,901 records), from all datasets
+   (`ds_match` is not used). The model sets of Decision 21 point 9 do not
+   change.
+3. **Unit (u2).** A complete-case 1 km cell with one or more records of the
+   set counts 1 (`KDE_UNIT` = `cell`; the field `cell_1km`; Decision 21
+   point 5). The number of records in a cell is not a weight. The same unit
+   applies to the settlement points: a complete-case cell with one or more
+   city or town points counts 1. A settlement point on a cell that is not a
+   complete-case cell is not used; the script counts these points.
+4. **Settlement classes (b2).** The points of
+   `data/raw/osm/osm_settlements_7755.gpkg` with `place` = `city` or `town`
+   (`KDE_SETTLEMENT_CLASSES`; 4,597 points: city 495, town 4,102). Villages
+   (195,203 points) are not used.
+5. **Kernel and radius (c2).**
+   - **Kernel:** quartic (`KDE_KERNEL`), K(d) = (1 − (d / R)²)² for
+     d < R and 0 from R. This is the kernel of the ArcGIS Kernel Density
+     tool of Phase 1 (Silverman 1986, as the Esri documentation gives it).
+   - **Radius:** R = `KDE_RADIUS_M` = 20,000 m. R is the support radius:
+     the kernel is 0 from R. The standard deviation on each axis is
+     R / √8 = 7,071 m (`KDE_SIGMA_M`). A tool that takes a standard
+     deviation (the `sigma` of `spatstat`) gets 7,071 m, not 20,000 m.
+     *(Checked for this Decision in `spatstat.explore` 3.2.5:
+     `kernel = "quartic"` with `sigma` = 1 has a support radius of 2.83,
+     which is √8.)*
+   - **On the grid:** the weight of a cell is K at the distance between
+     the two cell centres. The weights are scaled to a sum of 1 over the
+     full disc.
+   - **Value:** units per km² (a cell is 1 km²), after the edge rule
+     (point 7). `NA` outside the complete-case cells. 32-bit float, on the
+     grid of `cov_stack_1km_7755.tif`.
+   - **One radius for all surfaces.** 20 km is the Phase-1 radius. Phase 1
+     tested 10, 20 and 30 km and kept 20 km.
+   - **QA radii (c2).** The three surfaces of point 1 are also built at
+     10 km and 30 km (`KDE_RADII_QA_M`). They are for a QA comparison only
+     and are not an input to any later step. For each surface and each QA
+     radius the QA gives: (a) the Spearman rank correlation with the 20 km
+     surface, on the cells where one or both surfaces are above 0; (b) the
+     area above 0, in km²; (c) the maximum value. No rule uses these
+     numbers. The radius stays 20 km whatever the result.
+6. **Time windows (d3).**
+   - The three surfaces of point 1 use all years, 2006–2022.
+   - **Counts by window.** For each clean set (tiger 1 km set, tiger 5 km
+     set, obscured set; background 1 km set, 5 km set and matched 1 km
+     set): the number of records and the number of units (1 km cells; 0.2°
+     cells for the obscured set) in each window of `KDE_WINDOWS`: 2006–2010
+     (`BASELINE_WINDOW`), 2011–2017 (the years between) and 2018–2022
+     (`CURRENT_WINDOW`). The window of a record is its `year`. One `tbl_15`
+     table; its slug is a process choice of task 13.6. Counts only.
+   - **Effort window surfaces.** The effort surface is also built for
+     2006–2010 and for 2018–2022 (`KDE_WINDOW_SURFACES`), at 20 km only, from
+     the units of the window: a cell counts if it has one or more
+     background records of that window. A window surface is built only if
+     the window has `KDE_WINDOW_MIN_UNITS` = 100 units or more. If it has
+     fewer, the count is reported and no surface is built.
+   - No tiger window surface. No settlement window surface: the settlement
+     layer has no date.
+   - Each window surface gives its unit count, its sum and its value range,
+     as each other surface does. No other comparison of the two windows is
+     fixed here.
+   - The windows are the Phase-1 windows. They are not the census series
+     (Decision 6; baseline 2014).
+7. **Edge rule (e2).** A uniform edge correction (`KDE_EDGE`; Diggle 1985;
+   the default of `spatstat` `density.ppp`).
+   - The window is the complete-case cells of `cov_stack_1km_7755.tif`.
+   - For each cell, M is the kernel mass of its disc that falls on window
+     cells (the sum of the scaled weights of those cells). The value of the
+     cell is its kernel sum divided by M. M depends on the window and the
+     radius only, so one M per radius serves the three surfaces.
+   - A cell with M below `KDE_EDGE_FLAG_MASS` = 0.5 keeps its value. The QA
+     counts these cells for each radius.
+8. **Getis-Ord Gi\* (f2).** Week 13 builds no Gi*. The Week-14 model
+   Decision decides whether Gi* is built, where and how, as a part of the
+   effort result. If it is built, its distance band is a new value: the
+   Phase-1 documents give 50 km (final report) and 25 km (method notes and
+   story-map outline).
+9. **Publication (g1).**
+   - **The tiger surface is never published and never committed**
+     (`KDE_PUBLISH_TIGER` = `FALSE`). The same applies to its QA surfaces.
+     They stay under `data/` (gitignored). With 44 units, a peak of the
+     surface is at a record cell.
+   - **The published tiger product is the count of clean records by
+     reserve** (task 13.8). A count of 1 or 2 is not published; it is given
+     as "fewer than 3" (`KDE_SMALL_N` = 3; `warn_small_n()`). Task 13.8 is
+     optional: if it is not done, Week 13 publishes no tiger product.
+   - **The effort and settlement surfaces** hold no tiger position (tier
+     T0). They can be published at 1 km or coarser, through
+     `assert_publishable_rast()`. Their published form is decided with the
+     Stage-3 figures; each published map states the effort caveat
+     (proposal §7).
+   - The console text and each `tbl_15` table hold counts and statistics
+     only: no coordinate, no cell number and no position of a maximum.
+
+**What was seen before this Decision (pre-registration, stated plainly):**
+- **In the documents (the author and the chat):** the cleaned counts of
+  tasks 13.3 and 13.4 (tiger 1 km set 45 records in 17 cells; 5 km set 300
+  records in 44 cells; obscured set 884 records in 104 cells of 0.2°;
+  background 23,901 records; 1 km background 20,905 records in 4,554
+  cells; matched 1 km background 6,082 records in 417 cells); the dataset
+  shares (one dataset gives 273 of the 300 records of the tiger 5 km set;
+  one background dataset gives 3,201 records of the 1 km background; two
+  datasets give 4,829 of the 6,082 matched records); the background counts
+  by order; the settlement classes; the Phase-1 KDE and Gi* settings and
+  results.
+- **By the author:** the Week-13 console of tasks 13.2 to 13.4. The author
+  stated on 2026-10-17 that values from that console that are not in the
+  documents are not remembered.
+- **By the chat that drafted this Decision:** the documents, the scripts,
+  the Phase-1 and Phase-2 documents of the Project, and the literature. No
+  data file.
+- **Not seen by anyone:** a density surface, a count by time window, a
+  count by reserve, a position, and the number of cells of the 5 km
+  background.
+- **Post-seen in principle:** forks p and u. The chat knew the dataset
+  shares when it recommended p1 and u2.
+- **The choices.** The chat gave one recommended option for each fork. The
+  author took it for each fork but two: c2 (the chat recommended c1, one
+  radius with no QA radii) and d3 (the chat recommended d2, the counts by
+  window with no window surface). c2 and d3 add surfaces to the
+  recommended set; they remove nothing from it.
+
+**Outcome of STEP 13.4 (task 13.6, `scripts/08`, run on the project machine
+on 2026-10-18):**
+- The hand-made case passed (16 of 16 checks). The guard passed: the clean
+  layers on disk give the counts of `tbl_15_occ_sets.csv`, and point 8 is
+  `no_1km_model`.
+- Window: 3,067,467 complete-case cells (the `tbl_10` value).
+- Units (point 3): effort 5,512 cells (the 23,901 records of the 5 km
+  background); tiger 44 cells (300 records); settlement 4,588 cells (the
+  4,597 city and town points; each point is on a complete-case cell).
+- Effort window surfaces (point 6): 2006–2010 has 623 units and 2018–2022
+  has 3,569 units. Both are above 100, so both surfaces are built.
+- Counts by window (2006–2010 / 2011–2017 / 2018–2022):
+
+  | Set | Records | Units |
+  |---|---|---|
+  | tiger 1 km set | 15 / 12 / 18 | 8 / 11 / 1 cells |
+  | tiger 5 km set | 20 / 12 / 268 | 11 / 11 / 26 cells |
+  | obscured set | 101 / 329 / 454 | 21 / 54 / 71 cells of 0.2° |
+  | background 1 km set | 5,225 / 7,597 / 8,083 | 515 / 1,893 / 2,961 cells |
+  | background 5 km set | 5,706 / 8,691 / 9,504 | 623 / 2,304 / 3,569 cells |
+  | matched 1 km background | 1,670 / 3,685 / 727 | 62 / 330 / 142 cells |
+
+- Window cells with an edge mass below 0.5: 8,843 at 20 km (2,815 at 10 km;
+  15,702 at 30 km).
+- The values of each surface (units, maximum, integral, area above 0) are
+  in `tbl_15_kde_summary.csv`.
+- No rule of this Decision changed after the run.
+
+**QA radii (point 5; task 13.7, `scripts/08` STEP 13.5, 2026-10-18;
+descriptive, no rule):** Spearman rank correlation with the 20 km surface,
+on the cells where one or both surfaces are above 0
+(`tbl_15_kde_radius_compare.csv`):
+
+| Surface | 10 km | 30 km |
+|---|---|---|
+| effort | 0.788 (1,124,852 cells) | 0.911 (1,697,516 cells) |
+| tiger | 0.791 (20,716 cells) | 0.906 (40,537 cells) |
+| settlement | 0.800 (2,360,835 cells) | 0.899 (2,799,615 cells) |
+
+The radius stays 20 km (point 5). The QA of the surfaces passed (the grid,
+no value below 0, `NA` outside the window, the units, the integrals, the
+edge masses, and a direct calculation at 45 sample cells of each 20 km
+surface).
+
+**Reason and sources:**
+- **Two surfaces side by side (a2).** Proposal question 4 asks how much of
+  the pattern is effort and how much is distribution. A description of
+  that needs the effort surface and the tiger-record surface on the same
+  rules. `maxnet` uses the target-group background points directly
+  (Phillips et al. 2009), so the target-group method does not need a
+  density surface. In two simulation studies, a filter of the records was
+  the most consistent correction (Fourcade et al. 2014; Kramer-Schadt et
+  al. 2013), and a correction can over-correct where the effort is low
+  (Ranc et al. 2017; Barber et al. 2022). The bias use of the effort
+  surface is therefore a candidate for Week 14 only.
+- **The 5 km sets (p1).** The disc of a 20 km kernel is about 1,257 km². A
+  position error of 5 km or less moves little of the mass of a unit. A
+  surface from the 17 cells of the tiger 1 km set shows only those cells.
+- **The cell as the unit (u2).** The cell is the unit of Decision 21. The
+  repeated records of one study or one observer cannot make a peak alone.
+- **City and town (b2).** OpenStreetMap holds 195,203 village points;
+  Census 2011 counts 640,932 villages, including uninhabited villages
+  (about 30 %). It holds 4,597 city and town points; Census 2011 counts
+  7,933 towns, including census towns (about 58 %). A village surface
+  would thus show the mapping effort of OpenStreetMap as well as the
+  settlements. The comparison is rough: an OpenStreetMap village point and
+  a Census village are not the same unit. The Phase-2 plan (§6.2) used
+  cities and towns as its settlement layer. Human pressure (`ghm`) and
+  road access (`dist_road_m`) are already in the stack.
+- **The 15 km and the 20 km.** Both values are correct, for two different
+  surfaces. 20 km is the search radius of the Phase-1 tiger-record KDE
+  (Phase-1 final report §3.3). 15 km is the radius of the settlement
+  density in the Phase-2 plan (§6.2; roads 10 km there). The pending item
+  and the Week-13 plan called one of the two "wrong"; that was not
+  correct.
+- **Quartic, 20 km (c2).** The kernel and the radius of Phase 1 make the
+  surfaces comparable with Phase 1. The QA radii show how much the radius
+  changes each surface. A sigma from a data rule (c3) can be very small for
+  clustered records, and the Phase-1 comparison is then lost.
+- **Windows (d3).** The counts show the change in effort with no small
+  surface. The two effort window surfaces show where the change is. Phase 1
+  called a KDE from about 100 points "marginal"; 100 units is the minimum
+  for a window surface.
+- **Edge rule (e2).** The Sundarbans and the Terai reserves are on the
+  coast or on the Nepal or Bangladesh border. The data has no record
+  outside India. With no correction, their effort looks low for that
+  reason only. The uniform correction divides by the kernel mass inside
+  the window (Diggle 1985); it is the default of `spatstat`. ArcGIS, and so
+  Phase 1, has no edge correction.
+- **Gi* in Week 14 (f2).** The form of the Stage-3 result depends on the
+  Week-14 Decision (no model, or a model at a coarser grain). Week 13 is
+  already above its time estimate, and the Phase-1 band is not clear.
+- **No tiger surface published (g1).** Sensitive-data policy §3: a
+  published occurrence product is aggregated, and a unit with few records
+  can narrow a position. A surface from 44 units shows record cells.
+
+**Judgement values:** 20 km (radius, the Phase-1 value), 10 and 30 km (QA
+radii, the Phase-1 test values), 100 units (window surface), 0.5 (edge
+mass flag), 3 (small count; the default of `warn_small_n()`).
+
+**Rejected:**
+- *a1 — the effort surface only; a3 — a2 plus a ratio surface.* See "Two
+  surfaces side by side".
+- *p2 — the 1 km sets.* 17 tiger cells.
+- *u1 — each record counts 1.* One dataset gives 273 of the 300 tiger
+  records.
+- *b1 — no settlement surface; b3 — all three classes.* b3: the village
+  coverage.
+- *c1 — 20 km with no QA radii* (the chat's recommendation); *c3 — a
+  Gaussian kernel with a sigma from a data rule.*
+- *d1 — all years only; d2 — counts by window with no window surface* (the
+  chat's recommendation); *d4 — d3 plus tiger window surfaces.*
+- *e1 — no edge correction.*
+- *f1 — Gi\* in Week 13; f3 — no Gi\*.*
+- *g2 — the tiger surface on the 10 km grid in 5 classes; g3 — the tiger
+  surface at 1 km.*
+
+**Limitations:**
+- The effort surface shows where mammal records are, not where people
+  looked: a survey with no record leaves no trace.
+- A small number of sources give most background records (iNaturalist
+  gives 21,083 of the 39,057 records of the entry state). The cell unit
+  makes this smaller; it does not remove it.
+- The tiger surface has 44 units, and one dataset gives 273 of the 300
+  records. It describes records, not tigers.
+- The OpenStreetMap city and town layer holds about 58 % of the Census
+  towns, and its coverage by region is not known.
+- The edge correction assumes that the rate outside the window is the rate
+  inside it. Small islands and thin strips get large factors; the count of
+  cells with M below 0.5 shows them.
+- 20 km is the Phase-1 value. The QA radii show its effect; they do not
+  test it.
+- A position of the 5 km sets can be up to 5 km from the true position.
+- A change between the two windows mixes a change of effort with the
+  growth of the recording platforms.
+- The window counts and the window surfaces are not corrected for the
+  number of years in a window (5, 7 and 5 years).
+
+**Consequences:**
+- `R/00_config.R`: the `KDE_*` settings of this Decision, in a new block.
+  `KDE_RADIUS_M` moves into the block; the comment "starting value; test
+  10/20/30 km" is removed.
+- `scripts/08` STEP 13.4 (task 13.6): the three surfaces at 20 km; the
+  same three at 10 and 30 km for the QA; the effort window surfaces that
+  reach the minimum; the counts by window. Process choices of task 13.6:
+  the tool (a convolution on the template grid, or `spatstat`), the file
+  names (`kde_<what>_1km_7755.tif`), where the QA surfaces are kept, the
+  slug of the window table, and any new package.
+- QA (task 13.7) adds: a hand-made case for the kernel and the edge rule
+  (a known unit, a known mass) before the real run; each surface on the
+  template grid (`compareGeom`); no value below 0; `NA` outside the
+  complete-case cells; the unit count of each surface equals the cell
+  count of its set; the count of cells with M below 0.5; the QA-radius
+  numbers of point 5; no tiger surface under `outputs/`; no position in a
+  table or in the console text.
+- `docs/project-plan.md`: task 13.5 done; dated notes on tasks 13.6 to
+  13.8.
+- The Week-14 model Decision also decides: the bias use of the effort
+  surface, the covariate use of the settlement surface, and Gi* (pending
+  item).
+
+This closes the **[Week 8–9 → Week 13] Settlement layer for the KDE**
+pending item.
+
 ### Decisions pending (raised, not yet made)
 
 These forks are open. Each is decided in the week noted in the project plan,
@@ -1897,25 +2738,58 @@ before the relevant code is written.
   1 km and find a crossing position that the tables give at 10 km. Decide:
   no path layer on the site, lines simplified to a fixed tolerance, or a
   zoom limit.
-- **[Week 13] Occurrence-cleaning rule (raised 2026-10-10; decide before any
-  cleaned count is seen — it becomes Decision 21).** The GBIF tiger pull has
-  4,606 records inside India with a median coordinate uncertainty of about
-  30 km and years from 1840 to 2026; the Mammalia background has 39,057
-  records, 2006–2022. Decide: the uncertainty limit and the rule for a
-  missing value; the year window; the record types to remove (captive,
-  specimen, fossil, centroid, zero coordinates); obscured records;
-  duplicates and thinning to the 1 km grid; records with no covariate value;
-  whether the background takes the same rule; and a minimum number of clean
-  presence cells below which the Week-14 plan changes. The raw counts, the
-  median uncertainty and the Phase-1 result (about 116 clean points) are
-  already seen; the Decision must say so.
-- **[Week 8–9 → Week 13] Settlement layer for the KDE.** The OSM settlement pull is
-  village-dominated (~195k of 199,800 points: city 495, town 4,102, village
-  195,203). A 15 km KDE over all points will near-saturate nationally. Decide
-  whether to use all city/town/village, trim to city/town (4,597), or change the
-  KDE radius, when the density surface is built. *(2026-10-10: the config
-  value is `KDE_RADIUS_M` = 20 km, not 15 km. Task 13.5 fixes the radius in
-  Decision 22, with the surfaces that Week 13 builds and the place of Gi*.)*
+- **[Week 14] Model Decisions that Decision 21 names (raised 2026-10-11;
+  decide before a model is fitted).** (1) By the outcome of Decision 21
+  point 8: below 25 presence cells, no suitability model or a model at a
+  coarser grain (inputs: the 5 km set and the obscured set); from 25 to 79,
+  the settings of the reduced model (linear and quadratic at most); from
+  80, the settings of the planned model. (2) The comparison rule and the
+  labels for the two sensitivity sets (`uncert5km`, `matched`). (3) A
+  minimum size for a background set. The cleaned counts of Week 13 will be
+  seen by then; each of these Decisions must say so.
+  *(2026-10-17, after task 13.3: the outcome is `no_1km_model` (17 cells).
+  Item (1) is the Decision between no model and a model at a coarser grain.
+  Item (2) does not apply (point 9). Item (3) applies only if a model is
+  chosen. Facts for the Decision, all seen:
+  - the 5 km set: 300 records in 44 cells of 1 km; the obscured set: 884
+    records in 104 cells of 0.2°;
+  - one dataset, "Bengal Tiger (Panthera tigris) Sighting based on
+    Photographs from Facebook in India" (`ff8a7785-…`), gives 20 of the 45
+    records of the 1 km set and 273 of the 300 records of the 5 km set
+    (91 %; 253 of them with an uncertainty above 1 km); its GBIF entry does
+    not say how a position was given to a photograph *(corrected
+    2026-10-17: this line said 253 of 300 (84 %); the dataset-check column
+    `n_5km` counts the records above 1 km only)*;
+  - the records are grouped: 45 records in 17 cells, 300 records in 44
+    cells;
+  - each obscured record is from iNaturalist (Decision 21 point 4).
+  After task 13.4, about the background, all seen: the 1 km background has
+  20,905 records in 4,554 cells; the matched 1 km background has 6,082
+  records in 417 cells, and 4,829 of them (79 %) come from the two Valparai
+  and Anamalai datasets, so it is mostly one area; the zoo step removed 517
+  background records and no tiger record.)*
+  *(2026-10-17, Decision 22: the model Decision also decides (4) whether
+  the effort surface is a bias input of a model at a coarser grain; (5)
+  whether the settlement surface is an observer-bias covariate; (6) Getis-Ord
+  Gi*: built or not, where, and its distance band (the Phase-1 documents
+  give 50 km and 25 km); (7) any ratio of the tiger and the effort surfaces.)*
+  *(2026-10-18, after task 13.6, seen — the counts by window: 268 of the 300
+  records of the tiger 5 km set are from 2018–2022 (26 of its 44 cells have
+  a record of that window); 18 of the 45 records of the tiger 1 km set are
+  from 2018–2022, all in one cell; 5,355 of the 6,082 records of the
+  matched 1 km background are from 2006–2017. The time of the matched
+  background and of the tiger records is thus not the same. Full counts in
+  `tbl_15_occ_window_counts.csv`.)*
+  *(2026-10-18, Week-13 close, seen — the counts per reserve (task 13.8,
+  `tbl_15_occ_by_reserve.csv`): reserves with one or more records — tiger
+  1 km set 6, tiger 5 km set 10, background 5 km set 45. The 18 records of
+  the tiger 1 km set from 2018–2022 are in one cell, and each reserve row
+  has fewer than 18 records of that set, so the cell is outside all
+  reserve polygons; the cause is not known. The Week-14 plan
+  (`project-plan.md`, "Week 14 — task breakdown") makes item (1)
+  **Decision 23** (task 14.1), before any count at a coarser grain. Points
+  (3) to (7) and the target-group item go into Decision 23 or into the
+  Decision 24 of the branch that it picks.)*
 - **[After Stage 3] SDM-based resistance + circuit-theory check.** Raised
   2026-09-26 (Decision 14, F1). After the SDM exists, build a resistance
   surface from 1 − suitability and run circuit theory between reserves, to
@@ -1925,10 +2799,22 @@ before the relevant code is written.
   or a negative exponential as Keeley et al. 2016 recommend for long-distance
   movers), and the tool (at ~3 million cells, probably Circuitscape or
   Omniscape outside R). Not yet in the week plan.
-- **[Week 13–14] Target-group scope.** Decision 5 pulled all Mammalia. Decide at
+- **[Week 13–14 → Week 14] Target-group scope.** Decision 5 pulled all Mammalia. Decide at
   model fit whether to narrow to a large-bodied guild (carnivores + ungulates,
   the camera-trap/sighting group that shares the tiger's detection method),
-  based on observed record volumes.
+  based on observed record volumes. *(2026-10-11: Decision 21 adds a
+  matched background, by dataset. It tests the observer group; this item is
+  about the taxa. The two are separate.)* *(2026-10-17, task 13.4, author
+  choice g1: **carried to the Week-14 model Decision**. Reason: there is no
+  1 km model (Decision 21 point 8), and the scope matters only if a
+  coarse-grain model is chosen. Evidence: `tbl_15_background_taxa.csv` (46
+  order and family rows). The 23,901 kept background records by order:
+  Artiodactyla 6,853; Rodentia 6,361; Primates 5,014; Carnivora 3,409;
+  Chiroptera 746; Proboscidea 682; Lagomorpha 362; Perissodactyla 233;
+  Cetacea 140; Soricomorpha 43; Scandentia 31; Erinaceomorpha 12; no order
+  15. Rodents, bats and whales are not observed by the methods that record
+  tigers. The rejected option was g2: decide the scope now, after the
+  background counts were seen.)*
 - **[Week 14] Terrain variables in the SDM.** Elevation, slope, and TRI are all
   acquired. Decide which enter the model after a collinearity check (slope and
   TRI are correlated; both may not be needed). **Also decide how to treat
@@ -1944,6 +2830,557 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-10-18 — Week 13 complete: task 13.9 (docs close) and the Week-14 plan (no code)
+
+- **Docs only.** No rule, value, script, data layer or table changed; no
+  run. Most Week-13 docs were updated task by task (tasks 13.1–13.8).
+- **"Limitations":** 13 Week-13 items at the end of the section — the
+  clean tiger set and its sources; the uncertainty rule; the obscured set;
+  the observers and the years of the two sets; what the rule cannot find;
+  the largest group of the tiger 1 km set; the effort surface; the
+  tiger-record surface; the kernel choices; the settlement layer; "in a
+  reserve"; the overlapping polygons; the suppressed counts. Decisions 21
+  and 22 keep their own lists.
+- **Found when the items were written (from the committed tables; no new
+  count):** the 18 records of the tiger 1 km set from 2018–2022 are in one
+  cell (`tbl_15_occ_window_counts.csv`), and no reserve row of
+  `tbl_15_occ_by_reserve.csv` has 18 or more records of that set, so the
+  cell is outside all reserve polygons. The cause is not known. Added to
+  the facts of the Week-14 model item ("Decisions pending").
+- **Week 13 against proposal questions 3 and 4 (a record, not text for
+  the site):**
+  - Question 3 (suitability): no 1 km model (Decision 21 point 8; 17
+    cells). Decision 23 (Week 14) decides between no model and a model at
+    a coarser grain.
+  - Question 4 (effort): the effort, tiger-record and settlement surfaces
+    exist (Decision 22), and the counts per reserve are in
+    `tbl_15_occ_by_reserve.csv` with no comparison rule. Gi*, a ratio of
+    the tiger and effort surfaces and a comparison rule are not built;
+    Week 14 decides them (Decisions 23 and 24).
+- **`project-plan.md`:** task 13.9 done; a note on task 13.10 (a listing of
+  `outputs/tables/` for two open checks); the Week-13 exit state; the
+  **Week-14 task breakdown** — Decision 23 first, then branch A (no model:
+  Decision 24 on the effort result) or branch B (a model at a coarser
+  grain: Decision 24 on the model settings); dated notes on the Stage-3
+  rows of Weeks 13–16, the pending SDM-resistance item, the risk "SDM adds
+  little" and the progress table. The breakdown is a plan; it makes no
+  Decision.
+- **Other docs:** `README.md` (status; the Stack row named `spatstat`,
+  which Week 13 did not use — the density surfaces use `terra::focal()`);
+  `naming-conventions.md` §2 (the example `kde_tiger_current_1km_7755.tif`
+  is replaced by the as-built name `kde_effort_2006_2022_1km_7755.tif`);
+  the handoff (Week-13 close; Week-14 entry point).
+- **Not done:** `proposal.md` §8 (after Decision 23, as the doc fix pass of
+  2026-10-17 set); the check of naming §6 against
+  `list.files("outputs/tables")` and of the stale
+  `tbl_05_census_wide_check.csv` — they need the project machine (task
+  13.10). *(2026-10-18, after the Week-13 commit: both checks closed. The
+  listing of `outputs/tables/` has 53 files, and it matches naming §6 in
+  both directions; `tbl_05_census_wide_check.csv` is not on disk. No file
+  changed; naming §6 has a dated note.)*
+
+### 2026-10-18 — Week 13, task 13.8 complete: STEP 13.6 (clean records per reserve)
+
+- **Process choices (author, 2026-10-18):** s1 — six counts per reserve:
+  the tiger 1 km set and 5 km set and the background 5 km set, records
+  and 1 km cells (the two background columns are not in the plan text:
+  the effort in each reserve, for the effort text); r1 — a record is in a
+  reserve if its position is in the polygon (an edge counts); p1 — one
+  table, `tbl_15_occ_by_reserve.csv`, with a tiger count of 1 or 2 written
+  `<3` (Decision 22 point 9) and no file of the exact tiger counts; w1 —
+  58 rows by `unit_id`, `NA` for the 2 reserves with no polygon, the
+  totals in the console only; x1 — STEP 13.6 with its own checks.
+- **First run stopped (2026-10-18):** 13 background records (no tiger
+  record) were in two reserve polygons, and the guard of the chat ("one
+  reserve per record") stopped the run; nothing was written. A one-time
+  check (names, areas and counts only) found that **6 pairs of reserve
+  polygons overlap**, 20.7 km² in total: Bandipur–Sathyamangalam 10.921
+  km², Parambikulam–Anamalai 5.530, Periyar–Srivilliputhur-Megamalai
+  3.007, Manas–Buxa 0.851, Pakke–Nameri 0.335, Bandipur–Mudumalai 0.091.
+  All 13 records are in the Parambikulam–Anamalai overlap, from one
+  dataset. Nagarjunsagar-Srisailam–Amrabad (the state split) and
+  Bandipur–Nagarhole only touch. The probable cause is that the KML
+  outlines of neighbouring protected areas overlap at their shared edge
+  (not verified). The reserve layer (`scripts/02`) is not changed in Week
+  13: the paths, the network and the pinch points of Weeks 10–12 used it.
+- **Process choice o1 (author, 2026-10-18, after the facts above):** a
+  record in two or more overlapping polygons counts in each of them (r1 as
+  written). The check became: the reserve rows add up to the records
+  inside plus the extra counts of those records. The rejected options:
+  o2 (one reserve by a fixed rule; arbitrary) and o3 (correct the reserve
+  layer first; it would need the runs of Weeks 10–12 again).
+- **New code:** `occ_reserve_index()` and `occ_reserve_overlaps()` and
+  `occ_suppress_small()` in `R/00_functions_occ.R`; STEP 13.6 in
+  `scripts/08`; the 7 number columns of the new table added to the list of
+  allowed number columns of STEP 13.5 (so that the QA can check the table
+  from the next run on: 172 checks then). No new package.
+- **Tests in the chat (made-up data):** the counts per reserve agreed with
+  a separate count, polygon by polygon; a reserve that overlaps its
+  neighbour gave the overlap table and the expected double counts; two
+  reserves with the same polygon stopped the first version as expected.
+- **Run on the project machine (2026-10-18), second run:** 58 reserves (56
+  with a polygon). Reserves with one or more records: tiger 1 km set 6,
+  tiger 5 km set 10, background 5 km set 45. Background: 5,857 of the
+  23,901 records are inside a reserve polygon (13 of them in two). Tiger
+  counts of 1 or 2 written `<3`: 3 and 5 (1 km set: records and cells), 4
+  and 6 (5 km set). No tiger column has only one suppressed count.
+- **Not written in the docs (Decision 22 point 9):** the number of tiger
+  records inside all reserve polygons. With the shown counts of the
+  table, such a total gives the sum of the suppressed counts of a column.
+  It is in the console text of the run only.
+- **Output:** `outputs/tables/tbl_15_occ_by_reserve.csv` (58 rows).
+
+### 2026-10-18 — Week 13, task 13.7 complete: STEP 13.5 (QA of Decisions 21 and 22)
+
+- **Process choices (author, 2026-10-18):** c1 — STEP 13.5 checks the rules
+  of Decision 21 again on the kept records with code of its own (not
+  `occ_step_fails()`): the fields of the clean layers, `occurrenceStatus`
+  and `issue` from the GBIF zips (by `gbifID`), the centroids and the zoos
+  by `st_nearest_feature()` and `st_distance()`, and the tables on disk;
+  h1 — a hand-made case of the rule functions, `occ_self_test()`, first;
+  x1 — a switch `RUN_SURFACES` (`FALSE`: STEP 13.4 is skipped); t1 —
+  `tbl_15_occ_qa.csv` in the Week-12 layout (group, check, value, pass),
+  written first, then any `FALSE` stops the script; s2 — the Spearman
+  values in their own table, `tbl_15_kde_radius_compare.csv`; p1 — the
+  publish checks (`assert_publishable_rast()` on the effort and settlement
+  surfaces; no file with "tiger" in its name under `outputs/`; each tiger
+  surface under `data/`; no position or cell column in a `tbl_15` table).
+- **Changes against the choices, stated at delivery:** (1) an addition: a
+  direct calculation (kernel sum and edge mass from the distances, with no
+  convolution) at 45 sample cells of each 20 km surface,
+  `kde_direct_check()`; (2) the p1 check "no value that looks like a
+  coordinate" is a list of allowed names of number columns, because a test
+  on the values gives false hits (an integral such as 44.08 looks like a
+  degree). `assert_no_raw_points()` has no object in Week 13 (no published
+  vector layer); it applies from task 13.8 or the Stage-3 figures.
+- **New code:** `occ_self_test()` in `R/00_functions_occ.R` (20 made-up
+  records; 11 checks); `kde_direct_check()` in `R/00_functions_kde.R`;
+  `scripts/08`: the switch `RUN_SURFACES` and STEP 13.5. No new package.
+- **Tests in the chat (made-up data):** the hand-made case found three
+  faults put into the rule functions on purpose (the last failed step
+  instead of the first; `<` for `<=` at the 1 km limit; `>=` at the 5 km
+  limit). On a made-up project, 170 of 170 checks passed; four faults put
+  into its data (a record near a zoo, a `lon` column in a table, a tiger
+  file under `outputs/`, a value below 0) were each found, the table was
+  written and the run stopped.
+- **Run on the project machine (2026-10-18), `RUN_CLEANING = FALSE`,
+  `RUN_SURFACES = FALSE`:** 171 of 171 checks pass — test case 27, tiger
+  16, background 18, obscured 8, tables 22, surfaces 65, publish 15; 0.3
+  minutes. The Spearman values: see Decision 22, "QA radii".
+- **Outputs:** `outputs/tables/tbl_15_occ_qa.csv` (171 rows) and
+  `tbl_15_kde_radius_compare.csv` (6 rows).
+- **Found for later:** the publish check "no file with 'tiger' in its name
+  under `outputs/`" will fail when a model is saved under the name of
+  naming §6 (`outputs/models/tiger_sdm_*.rds`). If Week 14 saves a model,
+  the check changes then.
+
+### 2026-10-18 — Week 13, task 13.6 complete: STEP 13.4 (density surfaces)
+
+- **Process choices (author, 2026-10-17):** t1 — the convolution is
+  `terra::focal()` with a quartic weight matrix and `fillvalue = 0` (no new
+  package; exact zeros); k2 — a new function file `R/00_functions_kde.R`;
+  n1 — one file per surface; q2 — the QA surfaces and the edge masses go to
+  `data/interim/`; s1 — two tables, `tbl_15_occ_window_counts.csv` and
+  `tbl_15_kde_summary.csv`; r1 — a switch `RUN_CLEANING` (`FALSE`: STEP
+  13.4 only, with a guard against stale layers); h1 — a hand-made case at
+  the start of STEP 13.4; v1 — the surfaces are read back with a tolerance
+  of 1e-8.
+- **Found while the code was written:**
+  - `terra::focal()` gives `NA` to each cell within the radius of the grid
+    edge when `fillvalue` is `NA` (the default). The grid has a 5 km margin
+    around India, so border cells would have had no value. Tested on a small
+    grid; the code uses `fillvalue = 0`, and the hand-made case checks a
+    unit at a grid corner.
+  - The read-back check of `write_processed_rast()` (1e-4 × max(1, |mean|))
+    cannot see a file of zeros when the mean is about 1e-5. The surfaces use
+    1e-8 (v1); the function does not change.
+  - `spatstat` is not in `renv.lock`; it is not used.
+- **New code:** `R/00_functions_kde.R` (10 functions: the weights, the
+  window, the units raster, the edge mass, one surface, the summary, the
+  radius comparison, the window check, the window counts, the hand-made
+  case). `scripts/08`: the switch `RUN_CLEANING`, the guards of the
+  `KDE_*` settings, the guard that no surface goes under `outputs/`, and
+  STEP 13.4. STEPs 13.1–13.3 run only with `RUN_CLEANING = TRUE`; their
+  code did not change. No new package.
+- **Tests in the chat (made-up data, 300 × 260 cells):** the full STEP
+  13.4; a direct calculation (kernel sum and edge mass from the distances)
+  at 80 cells of each surface, near the grid edge and the coast too, agreed
+  to 6e-8 (32-bit float); the guards stopped on a stale set table, a wrong
+  `cell_1km`, an edited `KDE_SIGMA_M`, a missing input and a wrong switch
+  value. STEPs 13.1–13.3 could not run in the chat (no GBIF file).
+- **Run on the project machine (2026-10-18), `RUN_CLEANING = FALSE`:**
+  16 of 16 checks of the hand-made case; guard passed; 11 surfaces written
+  and read back; the two tables written; 6.3 minutes. Results: see
+  Decision 22, "Outcome of STEP 13.4".
+- **Outputs:** `data/processed/kde_effort_2006_2022_1km_7755.tif`,
+  `kde_tiger_2006_2022_1km_7755.tif`, `kde_settlement_citytown_1km_7755.tif`,
+  `kde_effort_2006_2010_1km_7755.tif`, `kde_effort_2018_2022_1km_7755.tif`;
+  in `data/interim/` the six QA surfaces and three edge masses; all
+  gitignored. `outputs/tables/tbl_15_occ_window_counts.csv` (24 rows) and
+  `tbl_15_kde_summary.csv` (11 rows).
+
+### 2026-10-17 — Week 13, task 13.5: Decision 22 recorded (no surface, no count)
+
+- **Decision 22** (effort surfaces) recorded before any density surface is
+  built and before any count by time window is made. The chat raised nine
+  forks with one recommended option each; the author chose a2, p1, u2, b2,
+  c2, d3, e2, f2, g1 (c2 and d3 are not the chat's recommendations).
+- **Found during the research (facts for the Decision):**
+  - The 15 km and the 20 km of the pending settlement item are both
+    correct, for two different surfaces: 20 km is the Phase-1 tiger-record
+    radius, 15 km the Phase-2 settlement radius. The plan text (task 13.5,
+    point (c)) said that one of the two was wrong.
+  - The quartic kernel of `spatstat` takes a standard deviation, not a
+    radius: support radius = √8 × `sigma` (checked in
+    `spatstat.explore` 3.2.5). `KDE_SIGMA_M` holds the derived value.
+  - OpenStreetMap holds about 30 % of the Census-2011 villages and about
+    58 % of the Census-2011 towns (rough comparison).
+  - The Phase-1 documents give two Gi* bands (50 km and 25 km).
+- **`R/00_config.R`:** a new block "Stage 3: effort surfaces (Decision
+  22)" with the `KDE_*` settings. `KDE_RADIUS_M` (20,000) moves into the
+  block. No other value changes.
+- **Pending items:** "[Week 8–9 → Week 13] Settlement layer for the KDE"
+  closed by Decision 22. The Week-14 model item gets points (4) to (7): the
+  uses of the effort and settlement surfaces, Gi*, and any ratio surface.
+- **Text corrected after the Decision:** `scripts/01` (Block 6 comments),
+  `data/data_manifest.csv` (row `osm_settlements`) and `data-sources.md`
+  (OpenStreetMap entry) said that Decision 22 was not yet recorded.
+- **Not done in this task:** no surface, no count by window, no code in
+  `scripts/08`.
+
+### 2026-10-17 — Doc fix pass (Week 13, before task 13.5)
+
+A check of the Week-13 files found stale or missing text. No rule, value,
+data layer, table or script logic changed; no re-run. Historical
+change-log entries are left as written; this entry records the
+corrections.
+
+- **`R/00_functions_occ.R`.** `occ_read_header()` held a literal
+  byte-order mark in a regular expression (an invisible character). It is
+  now the escape `\ufeff`; the result is the same. The header list of
+  packages now names `dplyr` (`all_of()` in `occ_read_fields()`).
+- **`scripts/00a_setup_environment.R`.** `jsonlite` added to the package
+  list. `R/00_functions_occ.R` calls `jsonlite::fromJSON()` for the cached
+  GBIF registry entries (task 13.3, process choice w1). `jsonlite` was
+  already in `renv.lock` (`renv::status()`: consistent), so the lock does
+  not change. The 2026-10-11 entry ("no new package") is correct for the
+  lock only.
+- **`scripts/01`, comments only.** The method notes and Block 3 said that
+  the background is saved as "clean POINTS" (Block 3: "with class/year").
+  The saved points hold `yr` only and are not cleaned; `scripts/08` reads
+  the zip again and applies Decision 21. Block 6: the title now names the
+  zoos; the purpose text now gives the use as built (roads: the
+  `dist_road_m` covariate and the road barrier of Decision 15; settlements:
+  an input to the effort surfaces, not to the resistance surfaces; zoos:
+  Decision 21 step 8); the radius comment no longer says that Decision 22
+  has fixed the radius; "GGDAL" corrected to "GDAL".
+- **`data/data_manifest.csv`, row `osm_settlements`.** `required_for` was
+  `connectivity`; the resistance surfaces do not use this layer. Now
+  `effort` (a value that the manifest already uses). The note now points to
+  Decision 22 (task 13.5) and not to "Week 8-9".
+- **§5.4.** A dated note gives the outcome `no_1km_model` and the Week-14
+  Decision.
+- **Pending item "Target-group scope".** The label now shows that the item
+  was carried to Week 14 (author choice g1).
+- **`naming-conventions.md` §6.** Rows added for `tbl_01` and `tbl_06` to
+  `tbl_10`, from `data-dictionary.md` and the handoff. Not yet checked
+  against a listing of `outputs/tables/`.
+- **`references.md`.** Barber et al. (2022) added (Decision 5 cited it).
+  Gábor et al. (2022): volume, issue, pages and the article DOI added.
+  Zizka et al. (2019): volume, issue and pages added; the title starts
+  "Standardized". Both from university repository records.
+- **`project-plan.md`.** The Stage-3 table named `scripts/08_<verb_object>.R`
+  for Week 13 and `scripts/08` for Week 14. By process choice s1 of task
+  13.2, Week 13 is `scripts/08_prepare_occurrences.R` and Week 14 names a
+  new script. The settlement folder in the Week-13 entry state is now
+  verified (`data/raw/osm/`). Dated notes on the outcome `no_1km_model`.
+- **`data-sources.md`, OpenStreetMap entry.** The role line and the
+  settlement flag (the "15 km" radius) now point to Decision 22 and to the
+  config value (20 km, a starting value).
+
+### 2026-10-17 — Week 13, task 13.4 complete: STEP 13.3 (background), dataset check, target-group scope; split point
+
+- **Process choices of task 13.4 (author, 2026-10-17):** d1 — the dataset
+  check runs on the background datasets too, with the same word list and
+  cleared list; t1 — STEP 13.3 writes the four `tbl_15` tables again with
+  the tiger rows and the background rows; r1 — the outcome of point 8 is
+  locked in the config (`OCC_POINT8_OUTCOME`). The defaults of the clean
+  background layer and of the taxa table were accepted.
+- **New code:** `scripts/08_prepare_occurrences.R` STEP 13.3 and the lock in
+  STEP 13.2; `R/00_functions_occ.R` `occ_taxa_table()`. The background uses
+  the functions of STEP 13.2 (one rule for the two sets). `R/00_config.R`:
+  `OCC_POINT8_OUTCOME` (28 `OCC_*` settings) and five more entries in
+  `OCC_DATASET_CLEARED` (six in all).
+- **Tests before the run (made-up records):** a background-only dataset with
+  list words stopped STEP 13.3 (the background layer not written; the tiger
+  outputs kept); after it was cleared, the background attrition, the kept
+  set, `ds_match`, `uncert_set`, the cells, the four sets, the obscured
+  count and the taxa table equal a separate computation; a wrong recorded
+  outcome stopped STEP 13.2 before any write; no coordinate in the console
+  or a table.
+- **First run of STEP 13.3 on the project machine (2026-10-17):** the
+  dataset check stopped on five datasets; the author chose e1 (Decision 21,
+  "Outcome of the dataset check on the background").
+- **Second run on the project machine (2026-10-17), the record:**
+  - STEP 13.2 printed the same figures as on 2026-10-17 before, and
+    "outcome = the recorded outcome".
+  - **Background attrition** (each record at its first failed step):
+
+    | Step | Removed | Records out |
+    |---|---|---|
+    | 0 entry state | — | 39,057 |
+    | 1 `status` | 0 | 39,057 |
+    | 2 `basis` | 378 | 38,679 |
+    | 3 `year` | 0 | 38,679 |
+    | 4 `coord_flags` | 0 | 38,679 |
+    | 5 `uncert_na` | 5,636 | 33,043 |
+    | 6 `uncert` | 8,568 | 24,475 |
+    | 7 `centroid` | 57 | 24,418 |
+    | 8 `zoo` | 517 | 23,901 |
+    | 9 `footprint` | 0 | 23,901 |
+
+    With no order, 98 records fail step 7 and 703 fail step 8. Step 3
+    removed no record, as Decision 21 expects.
+  - **Background sets:** 1 km 20,905 records in 4,554 cells; 5 km 23,901 in
+    5,512; matched 1 km 6,082 in 417; the obscured count 7,029 records in
+    825 cells of 0.2°.
+  - **Matched datasets** (one or more records of the tiger 1 km set): the
+    Valparai and Anamalai datasets of 2005–06 (background 1 km 1,431) and
+    2015–18 (3,398), NABU|naturgucker (501), Global Roadkill Data (752), and
+    the Facebook photographs (no background record: the dataset holds tiger
+    records only).
+  - **Taxa:** 46 order and family rows; by order in the pending item
+    "Target-group scope".
+  - **Datasets with a kept background record:** 24; six hits, all cleared.
+  - **Written:** `data/processed/effort_background_tgs_clean_7755.gpkg`
+    (23,901 records, read back, gitignored); `tbl_15_occ_cleaning.csv` (20
+    rows), `tbl_15_occ_cleaning_by_dataset.csv` (819),
+    `tbl_15_occ_sets.csv` (7), `tbl_15_occ_dataset_check.csv` (30),
+    `tbl_15_background_taxa.csv` (46).
+- **Target-group scope:** author choice g1 — carried to the Week-14 model
+  Decision (pending item, dated note).
+- **Correction (an error of the chat, 2026-10-17):** the task-13.3 record
+  and the chat said that the Facebook dataset gives 253 of the 300 records
+  of the 5 km set (84 %). In `tbl_15_occ_dataset_check.csv`, `n_5km` counts
+  the records above 1 km only; the dataset gives 20 + 253 = **273 of 300
+  (91 %)**. Corrected in the pending Week-14 item and in `references.md`.
+- **Docs of the split point:** `data-dictionary.md` (the placeholder entry
+  of the clean tiger layer replaced: four layers, the registry cache and the
+  six `tbl_15` tables), `naming-conventions.md` §6 (the `tbl_15` row),
+  `data-sources.md` (the cleaning notes of the two GBIF entries),
+  `README.md` (status), `project-plan.md` (tasks 13.4 and the split point),
+  `handoff.md` (the state for the next session).
+- **Next:** task 13.5 — Decision 22 (effort surfaces), before any density
+  surface is seen.
+
+### 2026-10-17 — Week 13, task 13.3 complete: zoo read, STEP 13.2 (tiger records), dataset check, outcome of point 8
+
+- **Zoo read (`scripts/01` Block 6, new zoo block; process choice q1).** Run
+  on the project machine on 2026-10-11 (Block 1, the setup of Block 6 and
+  the zoo block only; Block 7 was not run again). OpenStreetMap features
+  with `tourism` = zoo, from the cached Geofabrik file (no new download),
+  within 1 km of India: **154 features (63 points, 91 areas)** →
+  `data/raw/osm/osm_zoos_7755.gpkg`. The GDAL read of the area layer gave 7
+  warnings "Non closed ring detected"; the STEP-13.2 run found no invalid
+  feature. The block was tested before on a made-up OSM file with
+  `osmextract` 0.6.0 (the locked version). New row `osm_zoos` in
+  `data/data_manifest.csv`; zoo entry in `docs/data-sources.md`.
+- **`scripts/01`, two comments corrected (text only; found in Week 13):**
+  `BASELINE_YEAR` is the GBIF download bound, not the census span; the
+  settlement comment no longer names a "15 km KDE".
+- **Process choices of task 13.3 (author, 2026-10-11):** w1 — the script
+  reads the GBIF registry entry of each dataset one time and keeps the JSON
+  text in `data/raw/gbif/dataset_meta/`; s1 — the set sizes go to
+  `tbl_15_occ_sets.csv`; b1 — STEP 13.2 (tiger) before STEP 13.3
+  (background).
+- **New code:** `scripts/08_prepare_occurrences.R` STEP 13.2 and 13
+  functions in `R/00_functions_occ.R` (the reference features, the nine
+  steps, the first failed step, the sets, the 0.2° cell, the attrition, the
+  table by dataset, the outcome of point 8, the dataset check).
+  `occ_assert_counts_only()` now also stops on a column name with a
+  position or a cell. `R/00_config.R`: `OCC_DATASET_FLAG_WORDS` (12 word
+  parts) and `OCC_DATASET_CLEARED` (27 `OCC_*` settings). The run switch
+  `RAW_STAGE` is `counts`.
+- **Tests before the run (made-up records, R 4.3.3 in the chat):** each
+  known case at its step (a record 300 m from a district centroid; 500 m
+  from a zoo point; inside a zoo area; on a cell with no covariate value;
+  1,500 m from a zoo, kept; a material sample, kept; two records in one
+  cell); the attrition, the kept set, the sets, the cells and the obscured
+  set equal to a separate computation; a dataset with a list word stops the
+  script and nothing is written; a missing registry entry with no network
+  stops the script; no coordinate in the console or a table.
+- **First run on the project machine (2026-10-17):** the dataset check
+  stopped on one dataset; nothing of STEP 13.2 was written. The author chose
+  k1 (Decision 21, "Outcome of the dataset check"). The attrition table of
+  the console wrapped at the console width; the second run prints it at a
+  width of 120 (no change to a rule).
+- **Second run on the project machine (2026-10-17), the record:**
+
+  | Step | Removed | Records out |
+  |---|---|---|
+  | 0 entry state | — | 4,606 |
+  | 1 `status` | 0 | 4,606 |
+  | 2 `basis` | 38 | 4,568 |
+  | 3 `year` | 1,043 | 3,525 |
+  | 4 `coord_flags` | 0 | 3,525 |
+  | 5 `uncert_na` | 313 | 3,212 |
+  | 6 `uncert` | 2,912 | 300 |
+  | 7 `centroid` | 0 | 300 |
+  | 8 `zoo` | 0 | 300 |
+  | 9 `footprint` | 0 | 300 |
+
+  - With no order, 13 records fail step 7 and 2 fail step 8; earlier steps
+    removed all of them.
+  - **Sets (`tbl_15_occ_sets.csv`):** 1 km set 45 records in **17 cells**;
+    5 km set 300 records in 44 cells; obscured set 884 records in 104 cells
+    of 0.2°. No iNaturalist record was removed at step 6 with an
+    uncertainty below 25,000 m.
+  - **Point 8: `no_1km_model`** (Decision 21, "Outcome of point 8").
+  - **Datasets with a kept record (`tbl_15_occ_dataset_check.csv`):** six.
+    1 km set: the Facebook photographs 20, NABU|naturgucker 13, Valparai
+    and Anamalai 2015–18 6, Valparai and Anamalai 2005–06 5 (cleared, k1),
+    Global Roadkill Data 1. The 5 km set adds 253 of the Facebook
+    photographs and 2 of Valparai and Anamalai 2020–23.
+  - **Written:** `data/processed/occ_tiger_gbif_clean_7755.gpkg` (300
+    records) and `data/processed/occ_tiger_gbif_obscured_7755.gpkg` (884),
+    both read back (the same records), both gitignored;
+    `tbl_15_occ_cleaning.csv` (10 rows),
+    `tbl_15_occ_cleaning_by_dataset.csv` (325 rows),
+    `tbl_15_occ_sets.csv` (3 rows), `tbl_15_occ_dataset_check.csv` (6 rows).
+- **Not done yet:** STEP 13.3 (the background, task 13.4). The docs of task
+  13.9 (`data-dictionary.md`, `naming-conventions.md` §6, the GBIF entries
+  of `data-sources.md`, the README and the handoff).
+
+### 2026-10-11 — Week 13, task 13.2 complete: script, names stage, counts stage; Decision 21 Amendments 1 and 2
+
+- **Process choices (author, 2026-10-11):** s1 — one script for Week 13,
+  `scripts/08_prepare_occurrences.R`; f1 — `R/00_functions_occ.R`; g1 —
+  STEP 13.1 in two stages with the switch `RAW_STAGE` (`names`, then
+  `counts`); t1 — the raw counts also go to `tbl_15_occ_raw_counts.csv`; p1
+  — the obscured set is `occ_tiger_gbif_obscured_7755.gpkg`; q1 — the zoo
+  read is a new block of `scripts/01` (task 13.3); d1 — no data file goes
+  to the chat. Reader: `readr`, as `scripts/01` Block 3; no new package.
+- **New code:** `scripts/08_prepare_occurrences.R` (header, guards, STEP
+  13.1) and `R/00_functions_occ.R` (the read of the two GBIF files, the
+  names report, the entry state, the raw counts). The background filter
+  takes the tiger `speciesKey` from the tiger file, so the script does not
+  use the network (`scripts/01` used the GBIF name service).
+- **`tbl_15` is free:** the listing of `outputs/tables/` on 2026-10-11 has
+  no `tbl_15_*` file.
+- **Names stage run on the project machine (2026-10-11):** all fields of
+  Decision 21 are in the two files; 25 of 27 checks `ok`; two `REVIEW`
+  lines. No count was printed. The facts and the three answers (no
+  amendment for the review flags; y1 for the date flags; c2 for the record
+  types) are in Decision 21, "Amendment 1". Amendment 2 (v1, a dataset
+  check) came after the counts stage.
+- **`R/00_config.R`:** `OCC_BASIS_KEEP` has five values (Amendment 1). The
+  number of `OCC_*` settings is 25, as before.
+- **Counts stage run on the project machine (2026-10-11).**
+  `tbl_15_occ_raw_counts.csv` written (165 rows). No record removed.
+  - **Guards PASS.** Tiger: the entry state is the record set of the
+    interim layer (4,606 by `gbifID`; 0 only in one of the two). The
+    `readr` read of this script and the `rgbif` read of Week 2 give the same
+    records. Background: 39,057 records, the count of the interim layer.
+  - **Files:** tiger 4,952 rows, all with coordinates; background 51,732
+    rows, all with coordinates and all in the year and taxon filter (the
+    download predicate had applied it).
+  - **Raw counts of the entry state** (before any rule step; limits on the
+    clean sets, not clean counts):
+
+    | Item | Tiger (4,606) | Background (39,057) |
+    |---|---|---|
+    | Uncertainty ≤ 1,000 m | 69 | 21,424 |
+    | Above 1,000 m and ≤ 5,000 m | 262 | 3,061 |
+    | Above 5,000 m and below 25,000 m | 1,139 | 1,538 |
+    | 25,000 m or more | 2,749 | 7,030 |
+    | No uncertainty value | 387 | 6,004 |
+    | Year 2006–2022 / below / above / none | 3,528 / 118 / 926 / 34 | 39,057 / 0 / 0 / 0 |
+    | Record types: human obs. / machine obs. / specimen / material sample / material citation | 4,258 / 305 / 35 / 5 / 3 | 37,541 / 672 / 198 / 466 / 180 |
+    | iNaturalist records | 1,842, all 25,000 m or more | 21,083 (7,635 ≤ 1,000 m) |
+    | Records with a "remove" flag; zero or equal coordinates | 0; 0 | 0; 0 |
+    | Datasets | 25 | 38 |
+
+  - **Decision 21 point 8:** the 1 km set has 69 records or fewer, so
+    `n_cells_1km` is 69 or fewer. The outcome is a reduced model or no 1 km
+    model; the planned model (80 or more) cannot occur. Task 13.3 states
+    the formal outcome.
+  - **Point 4:** each iNaturalist tiger record has an uncertainty of 25,000
+    m or more; none is between 5,000 m and 25,000 m.
+  - **Point 7:** the tiger 1 km set has no iNaturalist record, so the
+    matched background will have none. iNaturalist gives 7,635 of the
+    21,424 background records with an uncertainty of 1,000 m or less.
+  - **Amendment 1 (c2), in numbers:** it keeps 5 tiger and 466 background
+    material samples more than c1 at step 2 (raw state).
+- **Looked up by the chat (2026-10-11; public GBIF registry and API; counts
+  and descriptions only):**
+  - `ff8a7785-27c8-4162-907e-658e28a09ba1` (2,306 tiger records): "Bengal
+    Tiger (Panthera tigris) Sighting based on Photographs from Facebook in
+    India" (Nature Mates-Nature Club; CC0).
+  - `e61455a4-352d-4c55-83ea-dbca254e3b29` (305): "Camera trap database of
+    Tiger from Rajaji National Park, Uttarakhand" (Wildlife Institute of
+    India contacts; CC BY-NC). The description says that the positions were
+    degraded for security. The GBIF API (index of 2026-10-11, not the
+    download of 2026-09-07) gives 305 records, all `MACHINE_OBSERVATION`,
+    none with an uncertainty value.
+  - `c6b86c40-ff71-4e5e-902c-111f400d0d56` (63): "India Biodiversity Portal
+    publication grade dataset" (CC BY).
+  - The fact about the camera-trap dataset led to Amendment 2 (v1).
+- **Correction to the entry below ("the chat ... had no R installation"):**
+  later on 2026-10-11 the chat had R 4.3.3 (sf 1.0-15, readr 2.1.5).
+  `00_config.R` ran there with `source()` and no error. The task-13.2 code
+  was tested there on made-up records: the output table against a separate
+  tally, and seven cases that must stop the script. The versions are not
+  the locked versions of this project.
+- **Found and not changed:** the as-built table of `naming-conventions.md`
+  §6 has no row for `tbl_01` and for `tbl_06` to `tbl_10`; the files are in
+  `outputs/tables/`. A docs item for task 13.9.
+
+### 2026-10-11 — Week 13, task 13.1: Decision 21 recorded (no code, no count)
+
+- **Decision 21** (occurrence cleaning) is recorded. The forks were raised
+  on 2026-10-11 and the author chose a3, n1, b1, c1, z2, o2, e1, g3, h2 and
+  k2. No record is cleaned and no cleaned count is made. `scripts/08` does
+  not exist yet.
+- **`R/00_config.R`:** 25 `OCC_*` settings, after the `PINCH_*` block. The
+  chat that wrote the block had no R installation. It parsed the file with
+  an R grammar (tree-sitter) and got no error; it did not run the file. The
+  first `source()` on the project machine is the check.
+- **What the files showed (the reason for point 1 of the Decision):**
+  - `scripts/01` Block 2 writes eight fields to the interim tiger layer.
+    `occurrenceStatus` and `issue` are not among them.
+  - `scripts/01` Block 3 writes only `yr` to the interim background layer.
+    The uncertainty, the record type, the dataset and the taxon of a
+    background record are in the zip file only.
+  - Stage 3 therefore reads the two zip files again. The interim layers are
+    the guard for the entry state.
+  - A test for zero or equal coordinates can remove no record inside India.
+    It stays as a check that must count zero.
+  - `scripts/01` Block 2 printed the record-type mix, the number of records
+    with no uncertainty and the 90th percentile of the uncertainty in Week
+    2. The documents hold only the median. Decision 21 states this under
+    "What was seen".
+- **Checked on 2026-10-11:** the field list of the GBIF simple format (it
+  has `issue`, `occurrenceStatus`, `datasetKey`, `order`, `family`; it has
+  no `informationWithheld`); the GBIF flag names; the key of the
+  iNaturalist dataset in the GBIF registry; the default feature classes in
+  the `maxnet` source (`lqh` below 80 presences, `lqph` from 80).
+- **Pending list:** the item "[Week 13] Occurrence-cleaning rule" is
+  closed. New item "[Week 14] Model Decisions that Decision 21 names". A
+  dated note on the item "Target-group scope".
+- **`docs/project-plan.md`:** task 13.1 ticked; a note "Changes from
+  Decision 21" for tasks 13.2 to 13.4 and 13.7; a dated note on the Week-14
+  row; the progress row.
+- **`docs/references.md`:** new section "Occurrence cleaning (Decision
+  21)".
+- **Found and not changed (text only):**
+  - `scripts/01` Block 3 says that `BASELINE_YEAR` "matches the census
+    span". The config says that it is the GBIF download bound and not the
+    census baseline.
+  - `scripts/01` Block 6 names a "15 km KDE"; `KDE_RADIUS_M` is 20 km
+    (Decision 22 fixes the radius).
+  - Decision 5 cites Barber et al. 2022; `references.md` has no entry for
+    it.
 
 ### 2026-10-10 — Week 12 committed and pushed; Week-13 plan added (no code)
 
@@ -3636,3 +5073,94 @@ refine, but do not change, Decision 4.
   tier-1 pinch points show as 2 marks. Tier 3 is small and pale by author
   choice. The thin lines of the links that are not bridges are faint. The
   title, the subtitle and the caption are draft text.
+
+*(Week 13, added 2026-10-18 at the Week-13 close. Decisions 21 and 22 each
+keep their own list of limitations; the items below are the ones that a
+reader of the Stage-3 result needs.)*
+
+- **Few clean tiger records, from few sources (Decision 21).** Of the 4,606
+  GBIF tiger records inside India, 300 pass the rule (the 5 km set, 44
+  cells of 1 km). 45 of them have an uncertainty of 1 km or less (the 1 km
+  set, 17 cells), below the minimum of 25 cells for a 1 km model (Decision
+  21 point 8: `no_1km_model`). One dataset, "Bengal Tiger (Panthera
+  tigris) Sighting based on Photographs from Facebook in India", gives 273
+  of the 300 records; its GBIF entry does not say how a position was given
+  to a photograph. The 5 km set has records in 10 of the 56 reserve
+  polygons, the 1 km set in 6. The clean records show where tigers were
+  recorded and published on GBIF, not where tigers are, and a presence
+  cell is not a count of tigers.
+- **The uncertainty rule removes most records, and it trusts the
+  publisher.** 2,912 tiger records have an uncertainty above 5 km and 313
+  have no value. All 1,842 iNaturalist tiger records have an uncertainty of
+  25 km or more (obscured positions). The value comes from the observer or
+  the publisher: a small value can be wrong (one background publisher
+  replaced 0 m with 30 m or 100 m), and a record with no value can be
+  precise. The dataset check (Decision 21, Amendment 2) reads the GBIF
+  description of a dataset, not its records.
+- **The obscured set is not a 1 km presence.** 884 iNaturalist records in
+  104 cells of 0.2°. A record goes into the set by inference (the dataset
+  and the uncertainty value); GBIF has no field for an obscured position.
+  Two random points in one 0.2° cell are about 10 km apart on average. No
+  obscured background is kept (Decision 21 point 4), so the set has no
+  background of the same rule.
+- **The tiger records and the background do not have the same observers
+  or the same years.** Most mammal records pass the uncertainty rule; the
+  iNaturalist tiger records do not. 268 of the 300 records of the tiger
+  5 km set are from 2018–2022. 5,355 of the 6,082 records of the matched
+  1 km background are from 2006–2017, and 4,829 of the 6,082 come from two
+  Valparai and Anamalai datasets. The matched set shows the observer
+  difference; it does not remove it. The window is 17 years (2006–2022);
+  the covariates are from 2021 and 2022.
+- **The rule cannot find each wrong record.** The centroids are the
+  polygon centroids of this project, not the points of a gazetteer. The
+  OpenStreetMap zoo layer is not complete (coverage for India not known),
+  so a captive animal at a place with no zoo tag stays. A material sample
+  can be from a captive or a dead animal. The species identification and
+  the datum are not checked. Decision 21, "Limitations", gives the full
+  list.
+- **The largest group of the tiger 1 km set is outside the reserve
+  polygons.** The 18 records of the 1 km set from 2018–2022 are in one cell
+  (`tbl_15_occ_window_counts.csv`). Each reserve row of
+  `tbl_15_occ_by_reserve.csv` has fewer than 18 records of that set, so the
+  cell is outside all reserve polygons. The cause is not known; none of
+  these was checked: a buffer zone, a captive or rescue site with no zoo
+  tag, one position given to many photographs. With the cell as the unit
+  (Decision 22 point 3), the cell counts 1 in the surfaces.
+- **The effort surface shows records, not search effort (Decision 22).**
+  It shows where mammal records are, not where people looked: a survey
+  with no record leaves no trace. iNaturalist gives 21,083 of the 39,057
+  background records of the entry state; the cell unit makes the weight of
+  one source smaller and does not remove it. The windows have 5, 7 and 5
+  years, and the counts are not divided by the years. A change between the
+  windows (background 5 km set: 623, 2,304 and 3,569 cells) mixes a change
+  of effort with the growth of the recording platforms.
+- **The tiger-record surface describes 44 cells.** One dataset gives 273
+  of its 300 records, and 26 of its 44 cells have a record of 2018–2022.
+  It is not a suitability surface, and it is not published.
+- **The surfaces depend on the kernel choices.** 20 km is the Phase-1
+  radius, not a value tested on these data. Against the 20 km surfaces,
+  the Spearman rank correlation is 0.79–0.80 at 10 km and 0.90–0.91 at
+  30 km (`tbl_15_kde_radius_compare.csv`), so the order of the cells
+  changes with the radius. The edge correction assumes that the rate
+  outside the window is the rate inside it; at 20 km, 8,843 window cells
+  have less than half of the kernel mass inside the window.
+- **The settlement surface uses OpenStreetMap cities and towns.** The
+  layer holds about 58 % of the Census-2011 towns (a rough comparison), and
+  its coverage by region is not known.
+- **"In a reserve" means inside the KML polygon (task 13.8).** The
+  polygons are national-park and sanctuary outlines (polygon/census ratio
+  median 0.515), so a record in a buffer zone counts as outside. A position
+  of the 5 km sets can be up to 5 km from the true position, so a record
+  near a polygon edge can be on the wrong side of it. Pilibhit and
+  Dholpur-Karauli have no polygon, and their counts are `NA`.
+- **Reserve polygons overlap.** 6 pairs of polygons overlap, 20.7 km² in
+  total (the largest: Bandipur–Sathyamangalam, 10.9 km²). By author choice
+  o1 a record in two polygons counts in each, so the reserve rows add up
+  to more than the records inside: 13 background records (all in the
+  Parambikulam–Anamalai overlap) count two times. The reserve layer is not
+  changed; the Stage-2 results use it.
+- **Small tiger counts are suppressed.** In `tbl_15_occ_by_reserve.csv` a
+  tiger count of 1 or 2 is `<3` (Decision 22 point 9). A reader cannot add
+  the tiger columns. The number of tiger records inside all reserve
+  polygons is not published, because it would give the sum of the
+  suppressed counts.

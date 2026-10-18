@@ -9,7 +9,8 @@
 #   BLOCK 3  GBIF Mammalia target-group BACKGROUND (async; tiger excluded)
 #   BLOCK 4  ESA WorldCover 2021 land cover (windowed COG read)
 #   BLOCK 5  Global Human Modification 2022 (windowed COG read)
-#   BLOCK 6  OSM roads (major) + settlements (India, Geofabrik via osmextract)
+#   BLOCK 6  OSM roads (major) + settlements + zoos (India, Geofabrik via
+#            osmextract; the zoo read was added 2026-10-11 for Decision 21)
 #   BLOCK 7  Terrain: elevation + slope + TRI (elevatr AWS tiles -> 1 km)
 #   BLOCK 8  Admin boundaries: states (Natural Earth) + districts (DataMeet)
 # Task 2.4 scripted pulls (1-6), task 2.5 terrain (7), task 2.6 admin (8, the
@@ -29,9 +30,13 @@
 #   - Background target group is MAMMALIA ONLY (not all vertebrates). Birds and
 #     fish do not share the tiger's sampling bias, so they would model birder /
 #     aquatic effort, not mammal-observer effort. See docs/methodology.md.
-#   - This project is SDM, not occupancy, so the background is saved as clean
-#     POINTS for KDE / target-group use in Week 13 — there is no unit x year
-#     detection-history machinery here.
+#   - This project is SDM, not occupancy, so the background is saved as
+#     POINTS — there is no unit x year detection-history machinery here.
+#   - The points that this script saves are not cleaned. Week 13
+#     (scripts/08_prepare_occurrences.R, Decision 21) reads the two GBIF zips
+#     again and writes the clean layers to data/processed/. The two layers of
+#     this script are the guard of scripts/08 only. (Corrected 2026-10-17: the
+#     text said "clean POINTS for KDE / target-group use".)
 # =============================================================================
 
 # Prerequisites ----------------------------------------------------------------
@@ -189,8 +194,11 @@ tiger_in |> st_drop_geometry() |>
 # ==============================================================================
 # Sampling-effort proxy for the SDM (Week 13/14). Target group = ALL Mammalia
 # (shared observer bias with tigers), 2006-2022, national bbox -> clip to India,
-# tiger excluded. Saved as clean POINTS with class/year for KDE + target-group
-# background. NOT a unit x year detection history (this project is SDM).
+# tiger excluded. Saved as POINTS with the year (`yr`) only. The points are
+# not cleaned: the filter here removes rows with no coordinate or no year, and
+# tiger rows. scripts/08 (Week 13) reads the zip again and applies Decision 21;
+# this layer is its guard. (Corrected 2026-10-17: the text said "clean POINTS
+# with class/year".) NOT a unit x year detection history (this project is SDM).
 #
 # TWO-PART async:
 #   PART A submits the download (records the key), then continues to Part B.
@@ -200,7 +208,9 @@ tiger_in |> st_drop_geometry() |>
 rule("BLOCK 3 — GBIF Mammalia background (submit / wait / lean import)")
 
 # Parameters -------------------------------------------------------------------
-YR_MIN <- BASELINE_YEAR   # 2006  (matches the census span)
+YR_MIN <- BASELINE_YEAR   # 2006  (the GBIF download bound, not the census
+                          # baseline — see R/00_config.R; comment corrected
+                          # 2026-10-11)
 YR_MAX <- CURRENT_YEAR    # 2022
 
 bg_dir   <- here::here("data", "raw", "gbif_background")
@@ -296,7 +306,7 @@ bg_in <- bg_sf[india_7755, ]
 cat("background records inside India polygon:", nrow(bg_in),
     sprintf(" (%.0f%% of pulled)\n", 100 * nrow(bg_in) / nrow(bg_sf)))
 
-# Save clean background points -------------------------------------------------
+# Save the background points (not cleaned; see the block header) -------------
 bg_in |>
   select(yr) |>
   write_processed_vec("effort_background_tgs_7755.gpkg", dir = bound_dir)
@@ -538,25 +548,39 @@ cat("mean gHM (India):",
 rule("WorldCover + gHM done.")
 
 # ==============================================================================
-# BLOCK 6 — OSM roads (major) + settlements (India, Geofabrik via osmextract)
+# BLOCK 6 — OSM roads (major) + settlements + zoos (Geofabrik India)
 # ==============================================================================
 # Source: Geofabrik India .osm.pbf via osmextract::oe_get (downloads once,
 # converts to GPKG, reads as sf). ODbL — attribution required.
 #
-# Purpose (connectivity track): road-density and settlement-density surfaces
-# (line/point KDE at 1 km), NOT a routable network. So we keep only the classes
-# those density surfaces used in Phase 2:
+# Purpose as planned in Week 2 (connectivity track): road-density and
+# settlement-density surfaces (line/point KDE at 1 km), NOT a routable network.
+# So we keep only the classes those density surfaces used in Phase 2.
+# Use as built (corrected 2026-10-17):
+#   - Roads: the distance-to-road covariate (dist_road_m, covariate stack) and
+#     the road barrier of the resistance surfaces (Decision 15). No road KDE.
+#   - Settlements: not used by the resistance surfaces (human pressure enters
+#     them through gHM, Decision 14). The city and town points are the input
+#     of the settlement surface of Decision 22 (2026-10-17; scripts/08).
+#   - Zoos: Decision 21 step 8 (occurrence cleaning).
+# The classes kept:
 #   ROADS (lines, `highway` field): motorway, trunk, primary, secondary,
 #     tertiary (+ their _link ramps). Residential/track/path excluded — they
 #     bloat the layer and are not the barrier classes of interest.
 #   SETTLEMENTS (points, `place` field): city, town, village. hamlet /
-#     isolated_dwelling excluded — too granular for a 15 km KDE at 1 km.
+#     isolated_dwelling excluded — too granular for a KDE at 1 km. Decision 22
+#     (2026-10-17) uses city and town only (KDE_SETTLEMENT_CLASSES), with a
+#     quartic kernel of radius KDE_RADIUS_M (20 km), in R/00_config.R. The
+#     village points stay in the layer and are not used. This comment said
+#     "15 km" until 2026-10-11.
+#   ZOOS (points and areas, `tourism` = zoo; added 2026-10-11): Decision 21
+#     step 8. See the zoo block below.
 #
 # The India .osm.pbf is large (~1.5 GB). We filter SERVER-SIDE with a GDAL SQL
 # `query=` so only the wanted classes are read into R, and clip to India with
 # `boundary=`. Outputs are GeoPackage in data/raw/osm/, in EPSG:7755.
 
-rule("BLOCK 6 — OSM roads + settlements (Geofabrik India)")
+rule("BLOCK 6 — OSM roads + settlements + zoos (Geofabrik India)")
 
 osm_dir <- here::here("data", "raw", "osm")
 dir.create(osm_dir, recursive = TRUE, showWarnings = FALSE)
@@ -573,7 +597,7 @@ india_v <- terra::vect(india_7755)                     # for later use / checks
 # ---- Roads (major classes) ---------------------------------------------------
 if (!file.exists(roads_out)) {
   cat("fetching + filtering OSM roads (major classes)...\n")
-  # GGDAL SQL runs against the pbf 'lines' layer. highway classes of interest:
+  # GDAL SQL runs against the pbf 'lines' layer. highway classes of interest:
   road_q <- paste(
     "SELECT osm_id, highway, geometry FROM 'lines' WHERE highway IN",
     "('motorway','trunk','primary','secondary','tertiary',",
@@ -626,6 +650,95 @@ cat("\n--- OSM settlements (clipped to India) ---\n")
 cat("features:", nrow(setts), "| EPSG:", st_crs(setts)$epsg, "\n")
 cat("class mix (place):\n")
 print(as.data.frame(table(setts$place)), row.names = FALSE)
+
+# ---- Zoos (tourism = zoo) — Decision 21 step 8 -----------------------------
+# Added 2026-10-11 (task 13.3; process choice q1: the read is here, with the
+# other OSM reads; scripts/08 only reads the output). Decision 21 step 8
+# removes a record within OCC_ZOO_DIST_M of a zoo. A zoo is a feature with
+# OCC_ZOO_OSM_KEY = OCC_ZOO_OSM_VALUE (tourism = zoo), as a point or an area.
+#   - Source: the cached Geofabrik file of Week 2 (no new download).
+#   - Points: `tourism` is not a default field of the GDAL points layer, so it
+#     is added with extra_tags. Areas: it is a default field of the
+#     multipolygons layer.
+#   - "-where" keeps only the zoo features in the translated file. GDAL still
+#     reads the whole pbf for each layer, so each read is slow.
+#   - The India boundary is grown by OCC_ZOO_DIST_M, so that a zoo just
+#     outside India can still remove a record inside India.
+#   - No zoo feature = a failed read, not "no zoo": the block stops.
+zoos_out <- file.path(osm_dir, "osm_zoos_7755.gpkg")
+if (!file.exists(zoos_out)) {
+  cat("\nfetching + filtering OSM zoos (", OCC_ZOO_OSM_KEY, " = ",
+      OCC_ZOO_OSM_VALUE, "; points and areas)...\n", sep = "")
+  zoo_bnd   <- st_buffer(india_7755, OCC_ZOO_DIST_M)
+  zoo_where <- c("-where", paste0(OCC_ZOO_OSM_KEY, " = '", OCC_ZOO_OSM_VALUE,
+                                  "'"))
+  zoo_pts <- oe_get(
+    "India",
+    layer                   = "points",
+    extra_tags              = OCC_ZOO_OSM_KEY,
+    vectortranslate_options = zoo_where,
+    download_directory      = osm_cache,
+    max_file_size           = 2e9,
+    force_vectortranslate   = TRUE,
+    boundary                = st_transform(zoo_bnd, CRS_WGS84),
+    boundary_type           = "spat",
+    quiet                   = FALSE
+  )
+  zoo_area <- oe_get(
+    "India",
+    layer                   = "multipolygons",
+    vectortranslate_options = zoo_where,
+    download_directory      = osm_cache,
+    max_file_size           = 2e9,
+    force_vectortranslate   = TRUE,
+    boundary                = st_transform(zoo_bnd, CRS_WGS84),
+    boundary_type           = "spat",
+    quiet                   = FALSE
+  )
+  # One layer: osm_ref (node/way/relation + id), feature, name, tourism.
+  # In the multipolygons layer, a way area has osm_way_id; a relation area
+  # has osm_id. zoo_col() gives NA for a field that a read did not return
+  # (for example, a read with no feature).
+  zoo_col <- function(x, f) {
+    if (f %in% names(x)) as.character(x[[f]]) else rep(NA_character_, nrow(x))
+  }
+  zoo_pts <- st_sf(
+    osm_ref  = paste0(rep("node/", nrow(zoo_pts)), zoo_col(zoo_pts, "osm_id")),
+    feature  = rep("point", nrow(zoo_pts)),
+    name     = zoo_col(zoo_pts, "name"),
+    tourism  = zoo_col(zoo_pts, OCC_ZOO_OSM_KEY),
+    geometry = st_geometry(zoo_pts)
+  )
+  way_id   <- zoo_col(zoo_area, "osm_way_id")
+  zoo_area <- st_sf(
+    osm_ref  = ifelse(is.na(way_id),
+                      paste0("relation/", zoo_col(zoo_area, "osm_id")),
+                      paste0("way/", way_id)),
+    feature  = rep("area", nrow(zoo_area)),
+    name     = zoo_col(zoo_area, "name"),
+    tourism  = zoo_col(zoo_area, OCC_ZOO_OSM_KEY),
+    geometry = st_geometry(zoo_area)
+  )
+  zoos <- rbind(zoo_pts, zoo_area)
+  zoos <- zoos[!is.na(zoos$tourism) & zoos$tourism == OCC_ZOO_OSM_VALUE, ]
+  zoos <- st_transform(zoos, CRS_ANALYSIS)
+  # The bbox filter of "-spat" is coarse: keep the features within the
+  # distance of the India polygon.
+  near <- lengths(st_is_within_distance(zoos, india_7755,
+                                        dist = OCC_ZOO_DIST_M)) > 0
+  zoos <- zoos[near, ]
+  if (nrow(zoos) == 0) {
+    stop("The OSM read gave no zoo feature in India. A failed read is not ",
+         "'no zoo' (Decision 21 step 8). Inspect the read.", call. = FALSE)
+  }
+  st_write(zoos, zoos_out, delete_dsn = TRUE, quiet = TRUE)
+}
+zoos <- read_vec(zoos_out)
+cat("\n--- OSM zoos (", OCC_ZOO_OSM_KEY, " = ", OCC_ZOO_OSM_VALUE,
+    ", within ", OCC_ZOO_DIST_M, " m of India) ---\n", sep = "")
+cat("features:", nrow(zoos), "| EPSG:", st_crs(zoos)$epsg, "\n")
+cat("by feature type:\n")
+print(as.data.frame(table(zoos$feature)), row.names = FALSE)
 
 rule("OSM done. Log ODbL attribution in docs.")
 
