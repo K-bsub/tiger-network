@@ -662,12 +662,214 @@ KDE_EDGE           <- "uniform"
 KDE_EDGE_FLAG_MASS <- 0.5                          # judgement value
 
 # (8) Gi* (f2): not built in Week 13; the Week-14 model Decision decides it.
+# (2026-10-25: Decision 23 f2 decides it — see SDM_GISTAR_* below.)
 
 # (9) Publication (g1). The tiger surface and its QA surfaces stay under
 # data/ (gitignored). The published tiger product is the count by reserve
 # (task 13.8); a count below KDE_SMALL_N is not published.
 KDE_PUBLISH_TIGER <- FALSE
 KDE_SMALL_N       <- 3L                            # warn_small_n() default
+
+# ---- Stage 3: model at a coarser grain (Decision 23, 2026-10-25) ------------
+# Fixed BEFORE any count of presence or background cells at a coarser grain
+# and before any model. See docs/methodology.md, Decision 23, for the sources,
+# the reasons and what was seen. Fork codes: a2, b3, v1, c1, r2, s1, m1, e1,
+# f2. The Week-14 script (scripts/09, named in task 14.2) reads these; do not
+# repeat the values as literals in any script.
+#   model      = a maxnet model at a coarser grain (a2); there is no 1 km
+#                model (OCC_POINT8_OUTCOME)
+#   grain      = the cells of the iNaturalist obscuring grid: 0.2 x 0.2
+#                degrees, edges at multiples of 0.2 degrees, in EPSG:4326
+#                (b3); not an aggregate of the 1 km template
+#   presences  = the obscured set (Decision 21 point 4); one per model cell
+#   background = the clean iNaturalist Mammalia records (r2, s1): the
+#                obscured background and the iNaturalist records of the 5 km
+#                background; one per model cell
+#   minimum    = the limits of Decision 21 point 8 for the presence cells
+#                (c1), and SDM_BG_MIN_RATIO x the presence cells for the
+#                background (m1); below either limit there is no model, and
+#                Stage 3 gives the effort result
+
+# (1)-(2) Model, input set and grain (a2, b3). The cell of a record is its
+# EPSG:4326 coordinates rounded down to a multiple of SDM_GRAIN_DEG (the rule
+# of Decision 21 point 4). The value 0.2 comes from the iNaturalist code
+# (uncertainty_cell_center_latlon); it is not a judgement value.
+SDM_MODEL        <- "coarse_grain"
+SDM_PRESENCE_SET <- "obscured"
+SDM_GRAIN_DEG    <- OCC_OBSCURED_CELL_DEG   # 0.2
+SDM_GRAIN_CRS    <- CRS_WGS84               # the cells are in longitude and
+                                            # latitude
+
+# (3) Model cells (v1). A 0.2 degree cell is a model cell if the complete-case
+# 1 km cells of cov_stack_1km_7755.tif that have their centre inside the cell
+# polygon cover this share of the polygon area or more (both areas in
+# EPSG:7755 units). Only a model cell can be a presence, background or
+# prediction cell.
+SDM_CELL_MIN_COVER <- 0.5                   # judgement value
+
+# (4) Minimum number of presence cells (c1): the limits of Decision 21 point
+# 8, applied to the presence cells after point 3. No new value.
+#   below SDM_MIN_CELLS                no model; Stage 3 gives the effort
+#                                      result; no other grain is tried
+#   SDM_MIN_CELLS to FULL - 1          a reduced model: feature classes at
+#                                      most SDM_REDUCED_MAX_CLASSES
+#   SDM_MIN_CELLS_FULL or more         the planned model (Decision 24)
+SDM_MIN_CELLS           <- OCC_MIN_CELLS_MODEL      # 25
+SDM_MIN_CELLS_FULL      <- OCC_MIN_CELLS_FULL       # 80
+SDM_REDUCED_MAX_CLASSES <- OCC_REDUCED_MAX_CLASSES  # "lq"
+
+# (5) Background (r2, s1). Only records of the iNaturalist dataset; all
+# Mammalia except the tiger (Decision 5). The target group does not change,
+# so the Decision-22 effort surfaces are not built again. Two parts:
+#   obscured = the background records that pass steps 1-5 of Decision 21 and
+#              the obscured rule of its point 4 (counted in Week 13, not
+#              kept on disk: a new output, task 14.2)
+#   uncert   = the records of the clean background with these uncert_set
+#              values (the 5 km background), each in the cell of its own
+#              coordinates
+SDM_BG_DATASET_KEY <- OCC_INAT_DATASET_KEY
+SDM_BG_OBSCURED    <- TRUE
+SDM_BG_UNCERT_SETS <- c("1km", "5km")
+SDM_BG_SCOPE       <- "Mammalia"            # s1: no taxon is removed
+
+# (6) Minimum size of the background (m1): the background cells (after point
+# 3, before maxnet adds a presence cell to the background) must be at least
+# SDM_BG_MIN_RATIO x the presence cells. Below it: no model, as in point 4.
+SDM_BG_MIN_RATIO <- 10L                     # judgement value
+
+# Outcome of points 4 and 6 (point 4 is tested first). Task 14.4 states the
+# outcome and locks it in this file, as OCC_POINT8_OUTCOME. It does not
+# change after that.
+SDM_OUTCOME_VALUES <- c("no_model_presence", "no_model_background",
+                        "reduced_model", "planned_model")
+
+# The outcome lock (process choice l1 of task 14.2, 2026-10-25). NA until the
+# count of task 14.4 (scripts/09 STEP 14.1). While it is NA, scripts/09 stops
+# at the end of STEP 14.1. After it is set, scripts/09 stops if a run gives
+# another outcome, and the fit STEPs run only with "reduced_model" or
+# "planned_model". Set it only to the outcome recorded in docs/methodology.md
+# (Decision 23, "Outcome of points 4 and 6"); do not change it to test
+# alternatives.
+# 2026-10-25 (task 14.4): the STEP-14.1 run gave 104 presence cells and
+# 1,486 background cells on model cells (minimum 1,040) -> "planned_model".
+SDM_GRAIN_OUTCOME <- "planned_model"
+
+# (7) The Facebook dataset (e1). With b3 this dataset gives no record to the
+# model. The QA counts its records in the presence set and in the background;
+# each count must be 0. "Bengal Tiger (Panthera tigris) Sighting based on
+# Photographs from Facebook in India".
+SDM_CHECK_ABSENT_DATASETS <- c("ff8a7785-27c8-4162-907e-658e28a09ba1")
+
+# (8) Gi* and the ratio (f2). A Gi* of the effort and a Gi* of the tiger
+# records (the Phase-1 form) are built. Their settings are a numbered
+# Decision in Week 15 or 16, before any Gi* is computed. The tiger Gi* is
+# never published and never committed. No ratio of the tiger and effort
+# surfaces (if task 14.4 gives no model, the Gi* Decision decides the ratio).
+SDM_GISTAR_SETS          <- c("effort", "tiger")
+SDM_GISTAR_PUBLISH_TIGER <- FALSE
+SDM_RATIO                <- FALSE
+
+# ---- Stage 3: model settings (Decision 24, 2026-10-25) ----------------------
+# Fixed after the count of task 14.4 and BEFORE any covariate summary at 0.2
+# degrees, any correlation, any model and any prediction. See
+# docs/methodology.md, Decision 24, for the sources, the reasons and what was
+# seen. Fork codes: c1, z1, k1, f3, b1 (b2 as a sensitivity run), a1, v1,
+# g2, r3, s3, m1. scripts/09 STEP 14.2 (task 14.5) and STEP 14.3 (task 14.6)
+# read these; the gate and the reserve check are applied in Week 15. Do not
+# repeat the values as literals in any script.
+
+# (1) Covariates (c1): the nine candidates. Each is a summary over the
+# complete-case 1 km cells of a model cell (sdm_cellid_1km_7755.tif):
+#   ghm_mean, elev_mean, slope_mean, tri_mean  the mean of the band (point 2
+#                                              for the three terrain bands)
+#   droad_km_mean                              the mean of dist_road_m / 1000
+#   lc_*                                       the share of the cells of the
+#                                              land-cover classes below
+SDM_COVARIATES <- c("ghm_mean", "elev_mean", "slope_mean", "tri_mean",
+                    "droad_km_mean", "lc_forest", "lc_open", "lc_crop",
+                    "lc_built")
+SDM_LC_GROUPS <- list(
+  lc_forest = c(10L, 95L),        # tree cover, mangroves
+  lc_open   = c(20L, 30L, 90L),   # shrubland, grassland, herbaceous wetland
+  lc_crop   = c(40L),             # cropland
+  lc_built  = c(50L)              # built-up
+)                                 # 60, 70, 80, 100: the rest (no covariate)
+
+# (2) Water and negative elevation (z1): the terrain means do not use the
+# cells of this class; on the cells that they use, an elevation below
+# SDM_ELEV_MIN_M becomes SDM_ELEV_MIN_M. A model cell with water cells only
+# gets the means of its water cells, with the same elevation floor.
+SDM_TERRAIN_BANDS <- c("elev", "slope", "tri")
+SDM_WATER_CLASS   <- 80L          # WorldCover: permanent water bodies
+SDM_ELEV_MIN_M    <- 0            # judgement value (lowest land about -2 m)
+
+# (3) Collinearity (k1): Pearson r on all model cells; the candidates in this
+# order; a candidate is kept if its |r| with each kept candidate is
+# SDM_COR_MAX or less.
+SDM_COR_MAX      <- 0.7           # Dormann et al. 2013 (judgement value)
+SDM_COV_PRIORITY <- c("ghm_mean", "lc_forest", "elev_mean", "slope_mean",
+                      "tri_mean", "lc_crop", "lc_open", "droad_km_mean",
+                      "lc_built")
+
+# (4) Feature classes and regularisation (f3): the grid, the AICc rule
+# (Warren & Seifert 2011; raw output scaled to a sum of 1 over the model
+# cells; K = non-zero coefficients; no AICc if K >= n - 1), and the choice:
+# within SDM_AICC_DELTA of the lowest AICc, the fewest coefficients, then the
+# lower AICc.
+SDM_FC_GRID      <- c("lq", "lqh", "lqph")
+SDM_REGMULT_GRID <- c(1, 2, 3, 4)
+SDM_AICC_DELTA   <- 2             # judgement value
+
+# (5)-(6) Bias input (b1) and the background (a1).
+SDM_BIAS_MAIN   <- "none"         # b1: the target-group background only
+SDM_ADD_SAMPLES <- TRUE           # a1: maxnet addsamplestobackground
+
+# (7) Evaluation (v1): 2 x 2 degree blocks (edges at multiples of 2 degrees),
+# 5 folds by the serpentine order of Decision 24 point 7; cloglog output with
+# clamping; the continuous Boyce index (window 1/10 of the prediction range,
+# 100 points), the test AUC, OR10, AUCdiff.
+SDM_CV_BLOCK_DEG <- 2             # judgement value
+SDM_CV_K         <- 5L            # judgement value
+SDM_EVAL_TYPE    <- "cloglog"
+SDM_BOYCE_WINDOW <- 0.1           # Hirzel et al. 2006
+SDM_BOYCE_RES    <- 100L
+SDM_OR_QUANTILE  <- 0.10          # OR10
+
+# (8) The gate (g2), applied in Week 15: a mean test Boyce index of
+# SDM_BOYCE_GATE or below -> not published as a suitability map.
+SDM_BOYCE_GATE <- 0
+
+# (9) The reserve check (r3), run in Week 15: r1 the Spearman rho of the
+# reserve value and density_2022 ("agrees" if rho > 0 and p < SDM_RESERVE_P);
+# r2 the reserves with no presence cell (counts and a share only; no reserve
+# name with a presence state).
+SDM_RESERVE_CHECK <- c("census_density", "no_presence_reserves")
+SDM_RESERVE_P     <- 0.05         # judgement value
+
+# (10) Sensitivity runs (s3) and the comparison rule ("robust" if rho >=
+# SDM_SENS_RHO_MIN and the overlap of the top SDM_SENS_TOP_SHARE cells >=
+# SDM_SENS_OVERLAP_MIN; otherwise "sensitive").
+SDM_SENS_RUNS        <- c("bias_settlement", "window_2018_2022")
+SDM_SENS_BIAS_FIX    <- "median"  # the bias covariate at prediction
+SDM_SENS_WINDOW      <- CURRENT_WINDOW               # 2018-2022
+SDM_SENS_RHO_MIN     <- 0.9       # the value of Decisions 18 to 20
+SDM_SENS_TOP_SHARE   <- 0.2       # judgement value
+SDM_SENS_OVERLAP_MIN <- 2 / 3     # the value of Decisions 18 to 20
+
+# (11) Model file (m1): save_model(..., species = SDM_MODEL_NAME[["species"]],
+# model = SDM_MODEL_NAME[["model"]], dir = SDM_MODEL_DIR) ->
+# data/processed/tiger_sdm_maxnet_cell02_<date>.rds (gitignored).
+SDM_MODEL_DIR  <- DIR_PROCESSED
+SDM_MODEL_NAME <- c(species = "tiger", model = "sdm_maxnet_cell02")
+
+# ---- Stage 3: QA of the model (task 14.6, 2026-10-25) -----------------------
+# scripts/09 STEP 14.3 computes the main numbers again by a second path
+# (process choice c1). Two values agree if |a - b| <= SDM_QA_REL_TOL x
+# max(1, |b|). A point agrees with its 0.2 degree cell if it is in the cell
+# widened by SDM_QA_DEG_TOL degrees on each side (the round trip of the
+# projection EPSG:7755 -> EPSG:4326). Check tolerances, not analysis values.
+SDM_QA_REL_TOL <- 1e-9
+SDM_QA_DEG_TOL <- 1e-7
 
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a

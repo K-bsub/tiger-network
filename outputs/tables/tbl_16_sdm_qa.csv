@@ -1,0 +1,134 @@
+"group","check","value","pass"
+"test case","STEP 14.1: 1a a coordinate on an edge goes to the cell north and east of it","pass",TRUE
+"test case","STEP 14.1: 1b a coordinate just south of an edge goes to the cell south of it","pass",TRUE
+"test case","STEP 14.1: 1c a coordinate just west of an edge goes to the cell west of it","pass",TRUE
+"test case","STEP 14.1: 1d 77.0 / 11.6 is the corner of cell (385, 58)","pass",TRUE
+"test case","STEP 14.1: 2a the id is the same for two points of one cell","pass",TRUE
+"test case","STEP 14.1: 2b two different cells have two different ids","pass",TRUE
+"test case","STEP 14.1: 3a the area in the analysis CRS is within 5 % of the area on the ellipsoid","pass",TRUE
+"test case","STEP 14.1: 3b a cell at 8 N is larger than a cell at 30 N","pass",TRUE
+"test case","STEP 14.1: 4a a cell with all centres complete-case has a share of about 1","pass",TRUE
+"test case","STEP 14.1: 4b a cell with complete-case cells on its east half has a share of about 0.5","pass",TRUE
+"test case","STEP 14.1: 4c the centres of the grid add up to the complete-case cells","pass",TRUE
+"test case","STEP 14.1: 5a presence cells on model cells: 2 (a record in a non-model cell is out)","pass",TRUE
+"test case","STEP 14.1: 5b background cells on model cells: 3 (the two parts together)","pass",TRUE
+"test case","STEP 14.1: 5c background cells that are also presence cells: 2","pass",TRUE
+"test case","STEP 14.1: 5d outcome below 25 presence cells: no_model_presence","pass",TRUE
+"test case","STEP 14.1: 5e outcome with a background below 10 x: no_model_background","pass",TRUE
+"test case","STEP 14.1: 5f outcome at 30 presence cells and 300 background cells: reduced_model","pass",TRUE
+"test case","STEP 14.1: 5g outcome at 79 and 790: reduced_model; at 80 and 800: planned_model","pass",TRUE
+"test case","STEP 14.1: 5h the count table has no position or cell column","pass",TRUE
+"test case","STEP 14.2: 1a terrain means without water cells (elev 150, slope 3, TRI 20)","pass",TRUE
+"test case","STEP 14.2: 1b gHM, road (km) and settlement means over all complete-case cells","pass",TRUE
+"test case","STEP 14.2: 1c shares over all complete-case cells (forest 1/3, crop 1/3, open 0, built 0)","pass",TRUE
+"test case","STEP 14.2: 1d water-only cell: water cells used, elevation floor 0 (elev 15)","pass",TRUE
+"test case","STEP 14.2: 1e z1 counts: 1 water cell out (cell 1); 1 elevation floored (cell 2)","pass",TRUE
+"test case","STEP 14.2: 1f the cell that is not complete-case is not used (n_cc 3 and 2)","pass",TRUE
+"test case","STEP 14.2: 2a a candidate with |r| > 0.7 to a kept one is removed (x1)","pass",TRUE
+"test case","STEP 14.2: 2b the correlation table has one row per pair (3)","pass",TRUE
+"test case","STEP 14.2: 3a AICc = 2K - 2LL + 2K(K+1)/(n-K-1) on scaled raw values","pass",TRUE
+"test case","STEP 14.2: 3b no AICc if K >= n - 1","pass",TRUE
+"test case","STEP 14.2: 3c selection: within 2, the fewest coefficients (row 2)","pass",TRUE
+"test case","STEP 14.2: 4a serpentine folds 1 2 3 4 5 5 4 3 2 1 1 2","pass",TRUE
+"test case","STEP 14.2: 4b the block of a cell: 2 degree blocks from the cell index","pass",TRUE
+"test case","STEP 14.2: 5a Boyce: presence density that rises with the value gives about 1","pass",TRUE
+"test case","STEP 14.2: 5b Boyce: presence density that falls with the value gives about -1","pass",TRUE
+"test case","STEP 14.2: 5f Boyce: presences in the top 15 % only give 0.65 (ties kept)","pass",TRUE
+"test case","STEP 14.2: 5c Boyce: presences spread as all cells give no index (P/E constant)","pass",TRUE
+"test case","STEP 14.2: 5d AUC: 1, 0 and 0.5 (a tie)","pass",TRUE
+"test case","STEP 14.2: 5e OR10: training 1..10 (10th percentile 1.9), test 1, 2, 3 -> 1/3","pass",TRUE
+"test case","STEP 14.2: 6a the same prediction: rho 1, overlap 1, robust","pass",TRUE
+"test case","STEP 14.2: 6b the reverse prediction: rho -1, overlap 0, sensitive","pass",TRUE
+"test case","STEP 14.2: 7a an object with a part of the data length fails the check","pass",TRUE
+"test case","STEP 14.2: 8a maxnet fits and gets an AICc on the package example data","pass",TRUE
+"test case","STEP 14.3: 1a zonal: terrain means without water (elev 150, slope 3, TRI 20)","pass",TRUE
+"test case","STEP 14.3: 1b zonal: gHM 0.4, road 2 km, settlement 0.2, n_cc 3 and 2","pass",TRUE
+"test case","STEP 14.3: 1c zonal: shares forest 1/3, crop 1/3, open 0, built 0","pass",TRUE
+"test case","STEP 14.3: 1d zonal: water-only cell (elev 15, slope 2, TRI 10)","pass",TRUE
+"test case","STEP 14.3: 1e zonal: z1 counts (1 water cell out; 1 elevation floored)","pass",TRUE
+"test case","STEP 14.3: 2a corner check: 3 points in their cells (an edge point within tol)","pass",TRUE
+"test case","STEP 14.3: 2b corner check: a wrong corner (0.2 degrees off) is found","pass",TRUE
+"test case","STEP 14.3: 2c key: 77.0 / 11.6 is 385_58","pass",TRUE
+"test case","STEP 14.3: 3a kept: x2 and x3 (x1 has |r| > 0.7 with x2)","pass",TRUE
+"test case","STEP 14.3: 3b AICc of a hand case: -2(log 0.25 + 3 log 0.5) + 2 + 2","pass",TRUE
+"test case","STEP 14.3: 3c selection: within 2, the fewest coefficients (row 2)","pass",TRUE
+"test case","STEP 14.3: 3d AUC (Wilcoxon): 1, 0 and 0.5","pass",TRUE
+"test case","STEP 14.3: 4a walker: a small object passes; a vector, matrix or data frame of n fails","pass",TRUE
+"test case","STEP 14.3: 5a id scan: a number column and a text column with an id are found","pass",TRUE
+"test case","STEP 14.3: 5b reserve scan: a name in a text column and a unit_name column are found","pass",TRUE
+"presence","each record is of the iNaturalist dataset (OCC_INAT_DATASET_KEY)","0 of 884 records fail",TRUE
+"presence","each record has an uncertainty of OCC_OBSCURED_MIN_UNCERT_M or more","0 of 884 records fail",TRUE
+"presence","Decision 23 point 7 (e1): no record of SDM_CHECK_ABSENT_DATASETS","0 records",TRUE
+"presence","each point is in the 0.2 degree cell of its stored corner","0 of 884 records fail",TRUE
+"presence","records = tbl_16_sdm_counts (presence, records)","884; table 884",TRUE
+"presence","cells and cells on model cells, counted again = tbl_16_sdm_counts","104, 104; table 104, 104",TRUE
+"background","each record is of the iNaturalist dataset (SDM_BG_DATASET_KEY)","0 of 16806 records fail",TRUE
+"background","Decision 23 point 7 (e1): no record of SDM_CHECK_ABSENT_DATASETS","0 records",TRUE
+"background","each point is in the 0.2 degree cell of its stored corner","0 of 16806 records fail",TRUE
+"background","records of the two parts = tbl_16_sdm_counts","7029, 9777; table 7029, 9777",TRUE
+"background","cells on model cells and cells with a presence, counted again = tbl_16_sdm_counts","1486, 86; table 1486, 86",TRUE
+"background","the counted cells give the recorded outcome (Decision 23 points 4 and 6)","104 presence cells, 1486 background cells; outcome planned_model",TRUE
+"grid","the cell-id raster has the grid of the stack","compareGeom",TRUE
+"grid","grid cells and model cells = tbl_16_sdm_counts","7450, 6969; table 7450, 6969",TRUE
+"grid","the centres of the grid = the complete-case cells of tbl_10 and tbl_16","3067467; table 3067467, 3067467",TRUE
+"grid","the model flag is share >= SDM_CELL_MIN_COVER","0 of 7450 cells differ",TRUE
+"grid","the covariate table holds each model cell once, with the n_cc of the grid","6969 rows; 6969 model cells",TRUE
+"covariates","n_cc: the covariate table = terra::zonal()","largest relative difference 0.00e+00",TRUE
+"covariates","ghm_mean: the covariate table = terra::zonal()","largest relative difference 5.55e-16",TRUE
+"covariates","elev_mean: the covariate table = terra::zonal()","largest relative difference 4.67e-15",TRUE
+"covariates","slope_mean: the covariate table = terra::zonal()","largest relative difference 4.85e-15",TRUE
+"covariates","tri_mean: the covariate table = terra::zonal()","largest relative difference 4.86e-15",TRUE
+"covariates","droad_km_mean: the covariate table = terra::zonal()","largest relative difference 6.08e-15",TRUE
+"covariates","lc_forest: the covariate table = terra::zonal()","largest relative difference 5.55e-16",TRUE
+"covariates","lc_open: the covariate table = terra::zonal()","largest relative difference 5.00e-16",TRUE
+"covariates","lc_crop: the covariate table = terra::zonal()","largest relative difference 5.55e-16",TRUE
+"covariates","lc_built: the covariate table = terra::zonal()","largest relative difference 5.00e-16",TRUE
+"covariates","settl_mean: the covariate table = terra::zonal()","largest relative difference 4.86e-17",TRUE
+"covariates","z1_water_excl: the covariate table = terra::zonal()","largest relative difference 0.00e+00",TRUE
+"covariates","z1_elev_floored: the covariate table = terra::zonal()","largest relative difference 0.00e+00",TRUE
+"covariates","water_only: the covariate table = terra::zonal()","1 and 1 cells",TRUE
+"covariates","tbl_16_sdm_covariates: min, mean and max = the covariate table","largest relative difference 1.89e-15",TRUE
+"covariates","tbl_16_sdm_covariates: the z1 counts = the covariate table","46183 water, 551 floored, 1 water-only",TRUE
+"covariates","the collinearity rule again: the kept set = tbl_16_sdm_covariates","6; table 6",TRUE
+"covariates","tbl_16_sdm_covariate_cor: one row per pair; r = cor() of the covariate table","36 pairs; largest relative difference 4.58e-16",TRUE
+"covariates","tbl_16_sdm_covariate_cor: above_limit is |r| > SDM_COR_MAX","7 pairs above",TRUE
+"model","the model file of this run is on disk (m1)","tiger_sdm_maxnet_cell02_20261025.rds; 0 other dated model file(s)",TRUE
+"model","the object holds model, settings and versions","model, settings, versions",TRUE
+"model","Decision 24 point 11: no part has the length or the rows of the data rows","largest part 200; data rows 1590",TRUE
+"model","settings: the kept covariates, the selected classes and multiplier","6 covariates; lq, regmult 1",TRUE
+"model","settings: the presence and background cells counted again","104, 1486; table 104, 1486",TRUE
+"model","versions: maxnet 0.1.4","maxnet 0.1.4, glmnet 5.0",TRUE
+"model","K of the model file = k of the selected row of tbl_16_sdm_aicc","10; table 10",TRUE
+"model","AICc again from the model file = the selected row of tbl_16_sdm_aicc","largest relative difference 2.51e-15",TRUE
+"model","tbl_16_sdm_aicc: one row per model of the grid, each with a status","12 rows; 12 fitted with an AICc",TRUE
+"model","tbl_16_sdm_aicc: delta_aicc and the selection rule again","row 1 selected again; largest relative difference 6.90e-13",TRUE
+"model","training AUC again (Wilcoxon) = the row main of tbl_16_sdm_cv","largest relative difference 2.22e-16",TRUE
+"cv","rows: the folds, mean, sd and main; each fold fitted","5 folds; 5 fitted",TRUE
+"cv","the test cells of the folds add up to the cells counted again","104, 1486; table 104, 1486",TRUE
+"cv","training + test presence cells = all presence cells in each fold","5 of 5 folds",TRUE
+"cv","the blocks of the folds = the 2 degree blocks with data, counted again","98; table 98",TRUE
+"cv","the rows mean and sd = the mean and SD of the fold rows","largest relative difference 2.50e-16",TRUE
+"cv","auc_diff = auc_train - auc_test","largest relative difference 6.31e-16",TRUE
+"cv","Boyce in [-1, 1]; AUC and OR10 in [0, 1]","Boyce 0.362 to 0.796",TRUE
+"sensitivity","one row per run of SDM_SENS_RUNS","bias_settlement, window_2018_2022",TRUE
+"sensitivity","bias_settlement: the cells and the settings of the main model","104, 1486; table 104, 1486",TRUE
+"sensitivity","window_2018_2022: the cells counted again, the limits of Decision 23 and the classes","71, 1229; table 71, 1229",TRUE
+"sensitivity","the label from rho and the top share; rho in [-1, 1], share in [0, 1]","bias_settlement = robust; window_2018_2022 = robust",TRUE
+"publish","the six tbl_16 tables of STEPs 14.1 and 14.2 are on disk","6 tbl_16 files besides the QA table",TRUE
+"publish","tbl_16_sdm_aicc.csv: (a) no position or cell column; numbers are counts or statistics","8 columns",TRUE
+"publish","tbl_16_sdm_aicc.csv: (b) no value is a cell id of the grid","0 values",TRUE
+"publish","tbl_16_sdm_counts.csv: (a) no position or cell column; numbers are counts or statistics","4 columns",TRUE
+"publish","tbl_16_sdm_counts.csv: (b) no value is a cell id of the grid","0 values",TRUE
+"publish","tbl_16_sdm_covariate_cor.csv: (a) no position or cell column; numbers are counts or statistics","4 columns",TRUE
+"publish","tbl_16_sdm_covariate_cor.csv: (b) no value is a cell id of the grid","0 values",TRUE
+"publish","tbl_16_sdm_covariates.csv: (a) no position or cell column; numbers are counts or statistics","9 columns",TRUE
+"publish","tbl_16_sdm_covariates.csv: (b) no value is a cell id of the grid","0 values",TRUE
+"publish","tbl_16_sdm_cv.csv: (a) no position or cell column; numbers are counts or statistics","11 columns",TRUE
+"publish","tbl_16_sdm_cv.csv: (b) no value is a cell id of the grid","0 values",TRUE
+"publish","tbl_16_sdm_sensitivity.csv: (a) no position or cell column; numbers are counts or statistics","9 columns",TRUE
+"publish","tbl_16_sdm_sensitivity.csv: (b) no value is a cell id of the grid","0 values",TRUE
+"publish","(c) no file with ""tiger"" in its name under outputs/","0 of 62 files",TRUE
+"publish","(d) the model file and the covariate table are under data/processed/","tiger_sdm_maxnet_cell02_20261025.rds, sdm_covariates_cell02.csv",TRUE
+"publish","(d) .gitignore holds the line data/processed/**","41 lines read",TRUE
+"publish","s1: no tbl_16 table holds a reserve column or a reserve name (Decision 22 point 9)","0 hits; smallest presence count above 0: 16",TRUE
+"publish","tbl_16_sdm_qa.csv: (b) no value is a cell id of the grid","0 values",TRUE

@@ -139,3 +139,26 @@ open are documented as numbered Decisions in `docs/methodology.md`, not here.*
   sensitivity variant (k = 0, with the Decision-14 class values). Week 10
   compares it with the baseline. Two further variants (`road15`, `road50`)
   test the road value. See `docs/methodology.md` (Decisions 14–16).
+- **Habitat suitability at a coarser grain, not at 1 km (§2 Q3, §5 habitat
+  suitability).** §5 names a `maxnet` SDM with a national prediction; the
+  plan was a model at 1 km. After the cleaning rule (**Decision 21**), the
+  tiger records with a position good to 1 km are 45 records in 17 cells,
+  below the minimum of 25 cells, so there is **no 1 km model**. **Decision
+  23** (2026-10-25) chose a model at a coarser grain:
+  - the grain is the cell of the iNaturalist obscuring grid, 0.2° × 0.2°
+    (396–488 km² in India);
+  - the presences are the obscured iNaturalist tiger records (104 cells
+    before the model-cell rule);
+  - the background is the clean iNaturalist mammal records on the same
+    grid.
+
+  A model is fitted only if the Week-14 count (task 14.4) gives 25 or more
+  presence cells and a background of 10 times the presence cells or more.
+  If not, Stage 3 gives the effort result (Q4), and Q3 gets no model
+  answer. A national prediction, if there is one, is at 0.2°, not at 1 km.
+  For the effort thread (§5), Gi* is built for the effort and — for a
+  comparison with Phase 1 — for the tiger records; the tiger Gi* is not
+  published. See `docs/methodology.md` (Decisions 21 and 23). *(2026-10-25,
+  the count of task 14.4: 104 presence cells and 1,486 background cells on
+  6,969 model cells of 0.2°, so a model is fitted — the outcome is
+  `planned_model`. Decision 24 fixes its settings.)*

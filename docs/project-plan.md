@@ -986,18 +986,21 @@ takes a later number.)*
 | Week | Focus | Exit state (deliverable) | Est. |
 |---|---|---|---|
 | **13** ✅ | Occurrence + effort | **Decisions 21–22** first; `scripts/08_prepare_occurrences.R` (new script, named in task 13.2, process choice s1) outputs: cleaned occurrences, target-group background, KDE (task breakdown below) *(done 2026-10-18: Decisions 21 and 22; STEPs 13.1–13.6; 300 clean tiger records, 23,901 clean background records; 11 surfaces; QA 171 of 171; eleven `tbl_15` tables; outcome of Decision 21 point 8: `no_1km_model`. Committed 2026-10-18 (task 13.10))* | 3–4 h planned; the task estimates add up to 4.6–6.3 h (split point after task 13.4). *(Ran on 2026-10-11, 2026-10-17 and 2026-10-18; no time recorded per task)* |
-| **14** | SDM fit | A new script, named in Week 14 (process choice s1 of task 13.2: `scripts/08` holds Week 13 only): `maxnet` fitted with bias correction; model saved. *(2026-10-11: by Decision 21 point 8, the week starts with the outcome of the presence-cell count — no 1 km model, a reduced model, or the planned model — and the Decisions that follow from it.)* *(2026-10-18: the outcome is `no_1km_model`. Task breakdown below: **Decision 23** first picks branch A (no suitability model; Week 14 builds the effort result) or branch B (a model at a coarser grain; Week 14 fits it). The focus "SDM fit" applies to branch B only)* | 3–4 h *(2026-10-18: the task estimates add up to 4.1–5.7 h for branch A and 4.3–5.9 h for branch B; split point after task 14.3)* |
-| **15** | Predict + validate | National suitability surface; validation against reserves; publish-floor gate *(2026-10-18: depends on Decision 23. Branch A has no suitability surface to predict; branch B predicts at its coarse grain. Written again in task 14.7)* | 3–4 h |
-| **16** | SDM visuals | `fig_05` suitability map with effort caveat *(2026-10-18: depends on Decision 23 — a suitability map (branch B) or an effort map (branch A). `fig_04` is the next free figure number; confirm at Week 16. Written again in task 14.7)* | 2–3 h |
+| **14** ✅ | SDM fit | A new script, named in Week 14 (process choice s1 of task 13.2: `scripts/08` holds Week 13 only): `maxnet` fitted with bias correction; model saved. *(2026-10-11: by Decision 21 point 8, the week starts with the outcome of the presence-cell count — no 1 km model, a reduced model, or the planned model — and the Decisions that follow from it.)* *(2026-10-18: the outcome is `no_1km_model`. Task breakdown below: **Decision 23** first picks branch A (no suitability model; Week 14 builds the effort result) or branch B (a model at a coarser grain; Week 14 fits it). The focus "SDM fit" applies to branch B only)* *(2026-10-25: Decision 23 picks **branch B** — a `maxnet` model on the obscured iNaturalist set at the 0.2° grain (a2, b3). Task 14.4 counts the presence and background cells; below the limits of Decision 23 points 4 and 6 there is no model, and the week gives the effort result)* *(2026-10-25: task 14.4 gives `planned_model` — 104 presence cells, 1,486 background cells. A model is fitted; Weeks 15–16 predict and show it at 0.2°)* *(done 2026-10-25: Decisions 23 and 24; `scripts/09_model_suitability.R` STEPs 14.1–14.3; 6 of 9 covariates kept; `lq`, multiplier 1; mean test Boyce 0.668 over 5 spatial folds; both sensitivity runs robust; the model file under `data/processed/`; QA 133 of 133; seven `tbl_16` tables. Commit (task 14.8) by the author before the Week-15 chat)* | 3–4 h *(2026-10-18: the task estimates add up to 4.1–5.7 h for branch A and 4.3–5.9 h for branch B; split point after task 14.3)* *(2026-10-25: branch B, plus about 15–30 min for the new background output and the 0.2° cells; estimate)* |
+| **15** | Predict + validate | **Decision 25** first (the prediction: the model file, the output type and clamping, the cells, the published form and classes, the sensitive-data check of the surface, the caption content), before any prediction file is written; then the prediction of the main model over the 6,969 model cells (`scripts/09`), the gate of Decision 24 point 8 (the mean test Boyce index is 0.668, so the gate allows a map), the reserve check of point 9 (the Spearman ρ of the reserve value and `density_2022`; the reserves with no presence cell, counts only) and the QA (task breakdown below) *(written again 2026-10-25, task 14.7; the earlier dated notes said that the week depends on Decisions 23 and 24, which are now made)* | 3–4 h planned; the task estimates add up to 3.2–4.7 h (split point after task 15.2) |
+| **16** | SDM visuals + Gi* | **Decision 26** (the Gi* settings; pending item "[Week 15–16] Gi* settings") before any Gi* is computed; the Gi* of the effort and of the tiger records in the Phase-1 form (the tiger Gi* is never published or committed); the suitability figure in the form that Decision 25 fixes, with the effort caveat (proposal §7). `fig_04` is the next free figure number (the earlier row named `fig_05`). Task breakdown written in Week 15 *(written again 2026-10-25, task 14.7; the draft puts the Gi* Decision in Week 16, not Week 15)* | 2–3 h planned; probably 3–4 h with the Gi* (estimate) |
 
 **Pending, not yet scheduled (raised with Decision 14):** after the SDM exists,
 an SDM-based resistance surface (1 − suitability) and a circuit-theory run
 between reserves, to reproduce the national method and check the Stage-2 paths.
 Transform and tool are decided then (see `methodology.md`, Decisions pending).
 *(2026-10-18: this item needs a suitability surface. Decision 23 decides
-whether one is made, and at which grain.)*
+whether one is made, and at which grain.)* *(2026-10-25: Decision 23 — a
+surface at 0.2° (about 20 km), if task 14.4 allows a model. A resistance
+surface from it would have that grain; decide then whether the item still
+applies.)*
 
-### Week 13 — task breakdown
+### Week 13 — task breakdown *(complete)*
 
 *(Written 2026-10-10, after the Week-12 push.)*
 
@@ -1151,7 +1154,7 @@ coordinate; QA 171 of 171; the minimum of point (h) compared — 17 cells,
 `no_1km_model`; docs updated. Week 13 ran on 2026-10-11, 2026-10-17 and
 2026-10-18; no time was recorded per task.)*
 
-### Week 14 — task breakdown
+### Week 14 — task breakdown *(complete)*
 
 *(Written 2026-10-18 at the Week-13 close (task 13.9), before the Week-13
 commit. This is a plan. It makes no Decision: Decisions 23 and 24 are the
@@ -1213,15 +1216,64 @@ the STEPs, the QA and the docs second.
 
 | # | Task | Done when | Est. |
 |---|---|---|---|
-| 14.1 | **Model Decision (numbered — Decision 23), before any count at a coarser grain is made.** Research, raise the forks, record the choices: (a) (i) no suitability model — Stage 3 gives the effort result (proposal question 4), and question 3 gets no model answer (success criterion "All three tracks completed at a level the data supports") — or (ii) a model at a coarser grain; (b) for (ii): the grain and the input set — the 5 km set on a grid of 5 km or coarser (for example the 10 km publication grid, `PINCH_PUBLISH_GRID_M`), the obscured set on its 0.2° cells, or both as two models; and whether the coarse grid is an aggregate of the 1 km template; (c) for (ii): the minimum number of presence cells at that grain and what happens below it, fixed before the count (on a grid that is an aggregate of the 1 km template, the 5 km set has 44 cells or fewer); (d) for (ii): the background at that grain — the target-group scope (pending item; `tbl_15_background_taxa.csv`), a minimum size of a background set (pending item, point 3), and a background for the obscured set (see the pitfalls); (e) for (ii): a run without the Facebook dataset (273 of the 300 records of the 5 km set) — needed or not; (f) for both: Gi* and the ratio of the tiger and effort surfaces (pending points 6 and 7) — built or not, and in which week; their settings go into a later numbered Decision; (g) what was seen (the entry state above; the facts of the pitfalls below) | Decision 23 recorded in `methodology.md` with the date, the choices, the judgement values and what was seen; the pending model item updated (points 1, 3 and 4–7 closed, or carried with a reason); §5.4 written again; a `proposal.md` §8 entry; config settings if needed. No count at a coarser grain is made before it | 45–60 min |
-| 14.2 | Process choices before code (not numbered): the script name `scripts/09_<verb_object>.R`; one script for Week 14 only, or for Weeks 14–15 (as process choice s1 of task 13.2); a function file; the table group (`tbl_16`, the next number; free in the listing of task 13.10) and its slugs; switches that skip finished STEPs (as `RUN_CLEANING`); any new package — `maxnet` is not in `renv.lock` (the lock list of task 13.6), and `sfdep` (Gi*) is to be checked — with `renv::snapshot()` and the `scripts/00a` list; the rule d1 of task 13.2 stays (no data file goes to the chat; the chat tests on made-up records). Then the script header and the guards: inputs present; CRS 7755; the clean layers give the counts of `tbl_15_occ_sets.csv`; `OCC_POINT8_OUTCOME` is `no_1km_model` | Header and guards run on the project machine; no result is printed | 30–45 min |
-| 14.3 | **Second Decision (numbered — Decision 24), before its result is computed.** **Branch A — the effort result:** (a) Gi* — built or not; the grid (for example the 10 km publication grid); the value of a cell (background cells or records); the neighbours and the distance band (the Phase-1 documents give 50 km and 25 km: a new judgement value); the correction for many tests (a false discovery rate; Caldas de Castro & Singer 2006); (b) the ratio of the tiger and effort surfaces — built or not; the grid; the minimum effort for a cell to get a value; not published at 1 km (Decision 22 point 9); (c) a comparison by reserve from `tbl_15_occ_by_reserve.csv` (for example, the reserves with background records and no tiger record) and its rule; (d) the published form of the effort and settlement surfaces (grid, classes, the effort caveat of proposal §7). **Branch B — the model settings:** (a) the covariates — the collinearity check (slope and TRI), the elevation on water and coastal cells (−434.2 m; pending item), and how each band is summarised to the grain (for example a mean, or the share of each land-cover class); (b) the feature classes and the regularisation of `maxnet` (Decision 21 point 8 gives `lq` at most for 25–79 cells at 1 km; Decision 24 says what applies at the grain); (c) the background points and the bias input — the effort surface (pending point 4), the settlement surface as a bias covariate (pending point 5), or neither; (d) the evaluation — the method (for example spatial blocks), the metric, and what is reported with few presence cells; (e) the sensitivity runs and their comparison rule (pending point 2 was written for the 1 km sets); (f) where the model is saved and what the saved object holds (check it for presence and background values before a commit); the file name against the QA check of task 13.7 (see the pitfalls). For both branches: what was seen | Decision 24 recorded before STEP 14.1 runs; config settings | 45–60 min |
-| — | **Split point** (if the week is over 4 hours): commit the Decisions and the docs of tasks 14.1–14.3; continue with task 14.4 in the next session | — | — |
-| 14.4 | STEP 14.1. **Branch A:** build what Decision 24 fixes (Gi*, the ratio) on its grid → layers under `data/processed/` (gitignored) and `tbl_16_*` tables (counts and statistics only); if Decision 24 builds neither, this task has no STEP. **Branch B:** build the grain (the coarse template and the summarised covariate stack); assign the presence and background records to it; count the presence cells; compare the count with the minimum of Decision 23 and state the outcome — a stop point, as in task 13.3 | Outputs written and read back. Branch B: the outcome stated and locked in the config (as `OCC_POINT8_OUTCOME`) | 45–60 min (A) / 30–45 min (B) |
-| 14.5 | STEP 14.2. **Branch A:** the comparison by reserve of Decision 24 → a `tbl_16` table (a tiger count of 1 or 2 is `<3`, Decision 22 point 9; no tiger total). **Branch B:** if the outcome of task 14.4 allows it, fit `maxnet` with the settings of Decision 24; the evaluation; the sensitivity runs → the model file and `tbl_16_*` tables (no position) | Table written. Branch B: the model saved and read back; the evaluation table written | 20–30 min (A) / 45–60 min (B) |
-| 14.6 | STEP 14.3: QA — a hand-made case first (branch A: Gi* or the ratio on a small known grid; branch B: the aggregation and the presence count on a small known grid); each output on its grid; the small-count rule; the publish checks (no position or cell column in a `tbl_16` table; no file from the tiger records under `outputs/`, except a model file that Decision 24 allows) → `tbl_16_*_qa.csv`; a failure stops the script | QA passes | 20–30 min |
-| 14.7 | Update `data-dictionary.md`, `methodology.md` (Decisions 23–24, change log, Limitations, §5.4 and §5.5), `proposal.md` §8, `naming-conventions.md` §6, `references.md`, `README.md` (status; the track table if there is no model), handoff (Week-14 status; entry point for Week 15), `project-plan.md` (Weeks 15–16 written again for the branch) | Docs match as-built | 30–45 min |
-| 14.8 | Commit (`analysis:` for `09`, config, functions, tables; `docs:` separate; `docs: update handoff after Week 14` with the plan) | Committed and pushed; `git status --short` shows no point layer, no tiger surface and no file of exact tiger counts staged | 10 min |
+| 14.1 ✅ | **Model Decision (numbered — Decision 23), before any count at a coarser grain is made.** Research, raise the forks, record the choices: (a) (i) no suitability model — Stage 3 gives the effort result (proposal question 4), and question 3 gets no model answer (success criterion "All three tracks completed at a level the data supports") — or (ii) a model at a coarser grain; (b) for (ii): the grain and the input set — the 5 km set on a grid of 5 km or coarser (for example the 10 km publication grid, `PINCH_PUBLISH_GRID_M`), the obscured set on its 0.2° cells, or both as two models; and whether the coarse grid is an aggregate of the 1 km template; (c) for (ii): the minimum number of presence cells at that grain and what happens below it, fixed before the count (on a grid that is an aggregate of the 1 km template, the 5 km set has 44 cells or fewer); (d) for (ii): the background at that grain — the target-group scope (pending item; `tbl_15_background_taxa.csv`), a minimum size of a background set (pending item, point 3), and a background for the obscured set (see the pitfalls); (e) for (ii): a run without the Facebook dataset (273 of the 300 records of the 5 km set) — needed or not; (f) for both: Gi* and the ratio of the tiger and effort surfaces (pending points 6 and 7) — built or not, and in which week; their settings go into a later numbered Decision; (g) what was seen (the entry state above; the facts of the pitfalls below) | Decision 23 recorded in `methodology.md` with the date, the choices, the judgement values and what was seen; the pending model item updated (points 1, 3 and 4–7 closed, or carried with a reason); §5.4 written again; a `proposal.md` §8 entry; config settings if needed. No count at a coarser grain is made before it *(done 2026-10-25: Decision 23 recorded — forks a2, b3, v1, c1, r2, s1, m1, e1, f2: a `maxnet` model on the obscured set at the 0.2° grain; a model cell has complete-case 1 km cells on 50 % or more of it; the limits 25 and 80 of Decision 21 point 8 on the presence cells; a background of the clean iNaturalist mammal records (all Mammalia) of 10 times the presence cells or more; the Facebook dataset as a check (it gives no record to the model); a Gi* of the effort and of the tiger records (the tiger Gi* never published), settings in Week 15 or 16; no ratio. New `SDM_*` block in the config; the target-group item closed; §5.4 written again; a `proposal.md` §8 entry. No count made)* | 45–60 min |
+| 14.2 ✅ | Process choices before code (not numbered): the script name `scripts/09_<verb_object>.R`; one script for Week 14 only, or for Weeks 14–15 (as process choice s1 of task 13.2); a function file; the table group (`tbl_16`, the next number; free in the listing of task 13.10) and its slugs; switches that skip finished STEPs (as `RUN_CLEANING`); any new package — `maxnet` is not in `renv.lock` (the lock list of task 13.6), and `sfdep` (Gi*) is to be checked — with `renv::snapshot()` and the `scripts/00a` list; the rule d1 of task 13.2 stays (no data file goes to the chat; the chat tests on made-up records). Then the script header and the guards: inputs present; CRS 7755; the clean layers give the counts of `tbl_15_occ_sets.csv`; `OCC_POINT8_OUTCOME` is `no_1km_model` | Header and guards run on the project machine; no result is printed *(done 2026-10-25: process choices s1, f1, w2, g1, t1, l1, r1 and the order o2, all as the chat recommended; `scripts/08` STEP 13.3 writes `effort_background_inat_cell02_7755.gpkg` (16,806 records: obscured 7,029, uncert 9,777) in one run with `RUN_CLEANING = TRUE` — the Week-13 counts are the same again, QA 172 of 172, and only `tbl_15_occ_qa.csv` changed (one new check); `scripts/09_model_suitability.R` and `R/00_functions_sdm.R` (new): 35 of 35 guards pass; `SDM_GRAIN_OUTCOME` in the config. `maxnet` 0.1.4 is installed; it goes into `renv.lock` with the fit STEP)* | 30–45 min |
+| 14.3 ✅ | **Second Decision (numbered — Decision 24), before its result is computed.** **Branch A — the effort result:** (a) Gi* — built or not; the grid (for example the 10 km publication grid); the value of a cell (background cells or records); the neighbours and the distance band (the Phase-1 documents give 50 km and 25 km: a new judgement value); the correction for many tests (a false discovery rate; Caldas de Castro & Singer 2006); (b) the ratio of the tiger and effort surfaces — built or not; the grid; the minimum effort for a cell to get a value; not published at 1 km (Decision 22 point 9); (c) a comparison by reserve from `tbl_15_occ_by_reserve.csv` (for example, the reserves with background records and no tiger record) and its rule; (d) the published form of the effort and settlement surfaces (grid, classes, the effort caveat of proposal §7). **Branch B — the model settings:** (a) the covariates — the collinearity check (slope and TRI), the elevation on water and coastal cells (−434.2 m; pending item), and how each band is summarised to the grain (for example a mean, or the share of each land-cover class); (b) the feature classes and the regularisation of `maxnet` (Decision 21 point 8 gives `lq` at most for 25–79 cells at 1 km; Decision 24 says what applies at the grain); (c) the background points and the bias input — the effort surface (pending point 4), the settlement surface as a bias covariate (pending point 5), or neither; (d) the evaluation — the method (for example spatial blocks), the metric, and what is reported with few presence cells; (e) the sensitivity runs and their comparison rule (pending point 2 was written for the 1 km sets); (f) where the model is saved and what the saved object holds (check it for presence and background values before a commit); the file name against the QA check of task 13.7 (see the pitfalls). For both branches: what was seen | Decision 24 recorded before STEP 14.1 runs; config settings *(2026-10-25, process choice o2: Decision 24 comes after task 14.4 — after the count and before the covariate summaries and the fit. It states the counts of task 14.4 that were seen. With a no-model outcome it is not written: see "Changes from Decision 23")* *(done 2026-10-25: Decision 24 recorded — forks c1, z1, k1, f3, b1 (b2 as a sensitivity run), a1, v1, g2, r3, s3, m1, each as the chat recommended: nine candidate covariates summarised to the 0.2° cells, water cells out of the terrain means and an elevation floor of 0 m, \|r\| > 0.7 with a fixed order, AICc over 12 settings, no bias covariate, 2° blocks in 5 folds (Boyce, test AUC, OR10), the gate (mean test Boyce ≤ 0), the reserve check (census density; reserves with no presence cell), two sensitivity runs, the model file under `data/processed/`. A second `SDM_*` block in the config. The pending items "Model Decisions that Decision 21 names" and "Terrain variables" closed)* | 45–60 min |
+| — | **Split point** (if the week is over 4 hours): commit the Decisions and the docs of tasks 14.1–14.3; continue with task 14.4 in the next session *(2026-10-25, o2: the split point moves to after task 14.4 — the count and its stop point. Commit tasks 14.1, 14.2 and 14.4; Decision 24 starts the next session)* | — | — |
+| 14.4 ✅ | STEP 14.1. **Branch A:** build what Decision 24 fixes (Gi*, the ratio) on its grid → layers under `data/processed/` (gitignored) and `tbl_16_*` tables (counts and statistics only); if Decision 24 builds neither, this task has no STEP. **Branch B:** build the grain (the coarse template and the summarised covariate stack); assign the presence and background records to it; count the presence cells; compare the count with the minimum of Decision 23 and state the outcome — a stop point, as in task 13.3 | Outputs written and read back. Branch B: the outcome stated and locked in the config (as `OCC_POINT8_OUTCOME`) *(2026-10-25: task 14.4 comes before task 14.3 (o2). Process choices k1 — the grid `sdm_grid_cell02_7755.gpkg` and the 1 km cell-id raster `sdm_cellid_1km_7755.tif` under `data/processed/`, with no presence or background flag, and the switch `RUN_GRID`; h1 — a hand-made case first. No covariate summary in this task: it needs Decision 24)* *(done 2026-10-25: hand-made case 19 of 19; 7,450 cells with complete-case centres, 6,969 model cells; 104 presence cells (none removed by the 50 % rule); 1,486 background cells (minimum 1,040); **outcome `planned_model`**, locked in `SDM_GRAIN_OUTCOME`; `tbl_16_sdm_counts.csv`; STEP 14.1 took 0.1 min. `RUN_GRID <- FALSE` after the run)* | 45–60 min (A) / 30–45 min (B) |
+| 14.5 ✅ | STEP 14.2. **Branch A:** the comparison by reserve of Decision 24 → a `tbl_16` table (a tiger count of 1 or 2 is `<3`, Decision 22 point 9; no tiger total). **Branch B:** if the outcome of task 14.4 allows it, fit `maxnet` with the settings of Decision 24; the evaluation; the sensitivity runs → the model file and `tbl_16_*` tables (no position) | Table written. Branch B: the model saved and read back; the evaluation table written *(2026-10-25, Decision 24: the covariate summaries of the model cells (points 1–2), the collinearity check (point 3), the AICc grid of 12 models (point 4), the main model (points 5–6), the 5-fold block cross-validation (point 7), the two sensitivity runs (point 10) and the model file (point 11). Process choices first: the `tbl_16` slugs; whether the covariate table of the model cells is written; the Boyce function (own code or a package); run switches; `maxnet` in `renv.lock` after the first run. The estimate is probably low: 12 + 5 + 2 model fits)* *(done 2026-10-25: process choices q1, t1, y1, h1, w1 and the chat's eight implementation points, all accepted; hand-made case 23 of 23; the collinearity rule kept 6 of the 9 candidates (no slope and no TRI: both have \|r\| > 0.7 with elevation); AICc selected `lq`, multiplier 1 (10 coefficients); over 5 folds: mean test Boyce 0.668, test AUC 0.749, OR10 0.165; both sensitivity runs "robust"; the model file `data/processed/tiger_sdm_maxnet_cell02_20261025.rds`; the covariate table under `data/processed/`; five `tbl_16` tables; STEP 14.2 took 0.2 min; `maxnet` 0.1.4 and `glmnet` 5.0 in `renv.lock`. `RUN_COVARIATES <- FALSE` after the run)* | 20–30 min (A) / 45–60 min (B) |
+| 14.6 ✅ | STEP 14.3: QA — a hand-made case first (branch A: Gi* or the ratio on a small known grid; branch B: the aggregation and the presence count on a small known grid); each output on its grid; the small-count rule; the publish checks (no position or cell column in a `tbl_16` table; no file from the tiger records under `outputs/`, except a model file that Decision 24 allows) → `tbl_16_*_qa.csv`; a failure stops the script | QA passes *(2026-10-25, Decision 24 "Consequences": hand-made cases for the covariate summary (with a water cell and a cell with water only), the collinearity rule, AICc, the fold assignment and the Boyce index; the model-file check (no part of the object with the length of the data rows); no position or cell column in a `tbl_16` table; the Facebook check of Decision 23 point 7)* *(2026-10-25, task 14.5: the hand-made cases of this list already run at the start of STEP 14.2 (h1, 23 checks), and STEP 14.2 checks the model object before the save and each `tbl_16` table with `occ_assert_counts_only()`. Task 14.6 decides in its process choices which checks of the outputs on disk it adds. By w1, each run of `scripts/09` fits the models again and writes the five tables again; a run on another date writes one more model file)* *(done 2026-10-25: process choices c1, m1, h1, p1, s1; STEP 14.3 computes the main numbers again by a second path (the covariates by `terra::zonal()`; the cells, AICc and the training AUC again); QA 133 of 133 checks pass → `tbl_16_sdm_qa.csv`; the Facebook check of Decision 23 point 7: 0 records; 0.2 min. New: 12 functions in `R/00_functions_sdm.R`, two check tolerances in `R/00_config.R`)* | 20–30 min |
+| 14.7 ✅ | Update `data-dictionary.md`, `methodology.md` (Decisions 23–24, change log, Limitations, §5.4 and §5.5), `proposal.md` §8, `naming-conventions.md` §6, `references.md`, `README.md` (status; the track table if there is no model), handoff (Week-14 status; entry point for Week 15), `project-plan.md` (Weeks 15–16 written again for the branch) | Docs match as-built *(2026-10-25: also the two new pending items — "[Week 15–16] Gi* settings" and "[Week 15] Prediction and publication of the suitability surface" — into the Week-15 and Week-16 rows; the reserve check and the gate of Decision 24 (points 8–9) into Week 15)* *(done 2026-10-25: Limitations (seven Week-14 items), §5.4 and §5.5 written again, the status, the pending items, a change-log entry; `proposal.md` §8, `README.md`, the handoff; the rows of Weeks 15–16 written again and the Week-15 task breakdown below. At the author's request, `methodology.md` and the handoff were made shorter: the change-log entries of Weeks 3–13 moved to `docs/methodology-changelog-archive.md`; the handoff written again for the weeks that follow. `data-dictionary.md`, `naming-conventions.md` §6 and `references.md` were complete from tasks 14.1–14.6)* | 30–45 min |
+| 14.8 | Commit (`analysis:` for `09`, config, functions, tables; `docs:` separate; `docs: update handoff after Week 14` with the plan) | Committed and pushed; `git status --short` shows no point layer, no tiger surface and no file of exact tiger counts staged *(2026-10-25: by the author, before the Week-15 chat; nothing of Week 14 was committed before)* | 10 min |
+
+**Changes from Decision 23 (2026-10-25).** The task table above is the plan
+of 2026-10-18. Decision 23 picks branch B and changes these tasks:
+
+- **Branch A is not used** in tasks 14.3 to 14.5 (dated 2026-10-25), unless
+  task 14.4 gives a no-model outcome (Decision 23 points 4 and 6). Then
+  Decision 24 (if recorded) gets a dated note "not used", task 14.5 fits no
+  model, and the effort result (the branch-A list of task 14.3) goes into
+  the Gi* Decision of Decision 23 point 8 (Week 15 or 16).
+- **14.2:** more process choices — where the obscured background is made
+  (a new output: `scripts/08` STEP 13.3 again with `RUN_CLEANING = TRUE`,
+  which writes the outputs of STEPs 13.1–13.3 again, or a new STEP of
+  `scripts/09` that reads the GBIF background file); a guard for
+  `datasetKey` in the clean background layer (`scripts/08` STEP 13.3 writes
+  it; the obscured tiger layer already has the cell corner,
+  `cell02_lon_deg` and `cell02_lat_deg`); how the 0.2° cell polygons are made
+  (in EPSG:4326, with densified edges, projected to EPSG:7755); the name of
+  the outcome lock (as `OCC_POINT8_OUTCOME`). The guards also check the
+  `SDM_*` block.
+- **14.3 (Decision 24, branch B):** (a) the covariates are summarised from
+  the 1 km cells to the 0.2° model cells; (c) the background is the
+  iNaturalist target group of Decision 23 r2, so the fork is only whether
+  a bias input is added to it (pending points 4 and 5), and whether
+  `maxnet` adds the presences to the background (its default); (d) the
+  evaluation needs a check that is not circular (the presences are
+  probably mostly in reserves); (e) the sensitivity runs at the 0.2° grain
+  (the 1 km model sets are not run).
+- **14.4 (STEP 14.1, branch B):** the 0.2° cells; the model cells (Decision
+  23 point 3); the presence cells and the background cells; the outcome of
+  Decision 23 points 4 and 6 (`SDM_OUTCOME_VALUES`), stated and locked in
+  the config. This is the first count at the 0.2° grain after the
+  model-cell rule.
+- **14.5:** no run without the Facebook dataset: Decision 23 e1 is a check
+  in task 14.6.
+- **14.6 (QA):** the list of Decision 23 ("Consequences") is added: a
+  hand-made case for the cell of a coordinate and for the cover share; the
+  iNaturalist key and the uncertainty of each presence record; the
+  iNaturalist key of each background record; 0 records of the Facebook
+  dataset; no 0.2° cell in a `tbl_16` table.
+- **Estimates (not measured):** about 15 to 30 minutes more for tasks 14.2
+  and 14.4 (the new background output and the 0.2° cells).
+- **The order (process choice o2 of task 14.2, 2026-10-25):** 14.1, 14.2,
+  **14.4** (the count; a stop point: the outcome is recorded in Decision 23
+  and locked in `SDM_GRAIN_OUTCOME`), then **14.3** (Decision 24), then
+  14.5 to 14.8. Reason: the background test (10 times the presence cells)
+  can give no model, and the count of the background cells was not known;
+  with o2, Decision 24 is not written for nothing. Decision 24 then states
+  the two counts that were seen. The counts show no model result, and the
+  limits of the feature classes are already fixed (Decision 23 c1).
 
 **Week 14 pitfalls:**
 - **Each Decision before its count.** Each `tbl_15` count is seen. The
@@ -1239,7 +1291,8 @@ the STEPs, the QA and the docs second.
   of the 300 records of the 5 km set and 20 of the 45 of the 1 km set. Its
   GBIF entry does not say how a position was given to a photograph. It
   gives no background record, so the matched background has nothing from
-  it.
+  it. *(2026-10-25: not in the model — the obscured set and the background
+  of Decision 23 are from iNaturalist only; e1 is a check of this.)*
 - **The tiger records and the background have different years.** 268 of
   the 300 records of the tiger 5 km set are from 2018–2022 (26 of its 44
   cells). 5,355 of the 6,082 records of the matched 1 km background are
@@ -1251,22 +1304,31 @@ the STEPs, the QA and the docs second.
   Before a model uses the 5 km set, the author can look at the cell on the
   project machine and give the chat a category only (for example a buffer
   zone, a captive or rescue site, a town) — no position. With the cell
-  unit, the cell counts 1 however many records it holds.
+  unit, the cell counts 1 however many records it holds. *(2026-10-25: the
+  1 km set and the 5 km set are not model inputs (Decision 23 b3), so this
+  check is not needed for the model.)*
 - **The obscured set has no background.** Decision 21 point 4 counts the
   obscured background and does not keep it. A model on the obscured set
   needs a background set by the same rule: a new output of `scripts/08`
   STEP 13.3 and a run with `RUN_CLEANING = TRUE` (STEPs 13.1–13.3 then
-  write their outputs again).
+  write their outputs again). *(2026-10-25: Decision 23 r2 — the obscured
+  background plus the iNaturalist records of the 5 km background; where it
+  is made is a process choice of task 14.2.)*
 - **A 0.2° cell is not on the 1 km grid.** It is a cell of longitude and
   latitude; the template is EPSG:7755. A covariate value for a 0.2° cell
   needs a summary over a polygon, not `terra::aggregate()`. In India a
   0.2° cell is about 22 km north–south and 18–22 km east–west (computed:
   0.2° of longitude is about 22.0 km at 8° N and 17.8 km at 37° N).
+  *(2026-10-25: Decision 23 point 3 (model cells) and Decision 24 (the
+  summary of each band).)*
 - **The target-group scope is open.** The 23,901 background records hold
   rodents (6,361), bats (746) and whales (140), which the methods that
   record tigers do not record. If a model is chosen, Decision 23 fixes the
   scope. A smaller target group needs the effort surface built again with
-  the Decision-22 settings (Decision 22 point 1).
+  the Decision-22 settings (Decision 22 point 1). *(2026-10-25: closed —
+  Decision 23 s1, all Mammalia; the effort surfaces are not built again.
+  5,377 of the 6,361 rodent records are squirrels, which visitors
+  photograph.)*
 - **A bias correction can over-correct.** It can over-correct where the
   effort is low (Ranc et al. 2017; Barber et al. 2022). In two simulation
   studies, a filter of the records was the most consistent correction
@@ -1277,6 +1339,8 @@ the STEPs, the QA and the docs second.
   the current values in `tbl_10`.
 - **The Gi\* band is a new value.** The Phase-1 documents give 50 km
   (final report) and 25 km (method notes and story-map outline).
+  *(2026-10-25: the Gi* Decision of Week 15 or 16 fixes it (Decision 23
+  f2). The Phase-1 Gi* used the tiger records.)*
 - **The tiger file-name check.** The QA check of task 13.7 "no file with
   'tiger' in its name under `outputs/`" fails on
   `outputs/models/tiger_sdm_*.rds` (naming §6). Change the check or the
@@ -1302,7 +1366,13 @@ the target-group scope), before any count at a coarser grain; **24**
 (branch A: the effort result; branch B: the model settings), before its
 result is computed. The pending items "Model Decisions that Decision 21
 names", "Target-group scope" and "Terrain variables in the SDM" are closed
-by them or carried with a recorded reason.
+by them or carried with a recorded reason. *(2026-10-25: Decision 23
+recorded; "Target-group scope" closed; "Terrain variables in the SDM" and
+points (2), (4), (5) of the model item carried to Decision 24, the branch-B
+Decision.)*
+*(2026-10-25: Decision 24 recorded; the two pending items closed by
+Decisions 23 and 24. New pending items: "[Week 15–16] Gi* settings" and
+"[Week 15] Prediction and publication of the suitability surface".)*
 
 **Exit state:** Decisions 23 and 24 recorded; `scripts/09_<verb_object>.R`
 ran on the project machine; branch A: the outputs of Decision 24 written
@@ -1310,6 +1380,99 @@ ran on the project machine; branch A: the outputs of Decision 24 written
 outcome at the grain stated, and a model fitted and saved if the outcome
 allows it; QA passed; a `proposal.md` §8 entry; docs updated; Weeks 15–16
 written again for the branch; Week 14 ticked.
+*(2026-10-25: reached — branch B; the outcome `planned_model`; the model
+fitted and saved; QA 133 of 133; the docs updated; Weeks 15–16 written
+again. The commit (task 14.8) is by the author.)*
+
+### Week 15 — task breakdown
+
+*(Written 2026-10-25 at the Week-14 close (task 14.7). This is a draft
+plan. It makes no Decision: Decision 25 is the author's, in task 15.1.)*
+
+Entry state (as of the Week-14 close, 2026-10-25; Week 14 committed by the
+author in task 14.8). On disk, all gitignored:
+
+- `data/processed/sdm_grid_cell02_7755.gpkg` — 7,450 cells of 0.2°, 6,969
+  model cells (no presence or background flag).
+- `data/processed/sdm_cellid_1km_7755.tif` — the 0.2° cell id of each
+  complete-case 1 km cell.
+- `data/processed/sdm_covariates_cell02.csv` — the covariates of the 6,969
+  model cells (no presence or background flag).
+- `data/processed/tiger_sdm_maxnet_cell02_20261025.rds` — the main model
+  (`lq`, multiplier 1; `ghm_mean`, `lc_forest`, `elev_mean`, `lc_open`,
+  `droad_km_mean`, `lc_built`) and its settings.
+- The Week-13 layers (the clean and obscured tiger layers, the backgrounds,
+  the density surfaces) and the reserve layers
+  (`boundary_reserves_all_7755.gpkg`, `stats_reserve_census_7755.gpkg`).
+
+Committed: the seven `tbl_16_*` tables (counts and statistics only).
+`scripts/09_model_suitability.R` holds STEPs 14.1–14.3; `RUN_GRID` and
+`RUN_COVARIATES` are `FALSE`; the 19 fits run in each run (process choice
+w1 of task 14.5).
+
+**Seen at the Week-14 close.** Each value of the `tbl_16` tables: the counts
+of the grid, the presences and the background; the covariate statistics
+and correlations; the AICc table; the cross-validation metrics by fold;
+the sensitivity ρ and overlaps; the QA. **Not computed or not seen:** a
+prediction written to a file, a map, a reserve value, the reserve check, a
+Gi* value. The predictions of STEP 14.2 were made in memory only. Decision
+25 states this list again.
+
+**Size.** The estimates add up to about 3.2–4.7 hours (estimates, not
+measured). A split point is marked after task 15.2: the Decision and the
+process choices first (no result), the STEPs second.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 15.1 | **Prediction Decision (numbered — Decision 25), before any prediction surface is written or seen.** Research, raise the forks, record the choices: (a) the model file (`tiger_sdm_maxnet_cell02_20261025.rds`; process choice m1 of task 14.6) and the output type of the surface — cloglog (the type of the evaluation, Decision 24 point 7), logistic or raw — and clamping; (b) the cells: the 6,969 model cells only (Decision 23 point 3), and how a cell outside the training range of a covariate is shown (clamping only, or a flag such as MESS); (c) the published form: the classes (for example quantile classes or fixed breaks), the unit (the 0.2° cell), and whether a table of the reserve values by reserve is published; (d) sensitive data: the policy tier of a surface fitted on the obscured records, and a check that the published form does not mark the presence cells (Decision 23 point 9); (e) the caption content that the Decisions fix: the effort caveat (proposal §7), "suitability, not occupancy" (Decision 1), the tie rule of the Boyce index when the metrics are given (Decision 24 point 8: above 0, the metrics are published with the map); (f) the figure number (`fig_04` is free) and whether the two sensitivity runs are shown; (g) what was seen (the list above) | Decision 25 recorded in `methodology.md` with the date, the choices, the judgement values and what was seen; the pending item "[Week 15] Prediction and publication of the suitability surface" closed; config settings if needed | 45–60 min |
+| 15.2 | Process choices before code (not numbered): the STEP numbers of `scripts/09` and the table slugs (the `tbl_16` group; process choice t1 of task 14.2: each task names its own tables); a run switch for the fits now that the model is fixed (w2 of task 14.5), or a read of the model file; where the prediction layer goes (`data/processed/`, gitignored, until the published form of Decision 25 is made); the inputs of the reserve check (`boundary_reserves_all_7755.gpkg` for the polygons, `stats_reserve_census_7755.gpkg` for `density_2022`, both keyed on `unit_id`); a hand-made case first (as h1 of tasks 14.4–14.6) | Choices recorded; no code before them | 15–30 min |
+| — | **Split point** (if the week is over 4 hours): commit the Decision and the docs of tasks 15.1–15.2; continue with task 15.3 in the next session | — | — |
+| 15.3 | STEP 15.1 — the prediction of the main model over the 6,969 model cells with the settings of Decision 25 → a layer under `data/processed/` (gitignored) and a summary table (statistics only); **the gate of Decision 24 point 8** stated in the table and the console (the mean test Boyce index is 0.668, above 0: the gate allows a suitability map) | The layer written and read back; the gate stated | 30–45 min |
+| 15.4 | STEP 15.2 — **the reserve check of Decision 24 point 9.** r1: the reserve value (the mean of the predictions over the complete-case 1 km cells inside the reserve polygon, each 1 km cell with the value of its 0.2° cell; a cell in two overlapping polygons counts in each) and the Spearman ρ with `density_2022` over the reserves with a polygon and a value — ρ, n and the two-sided p; the reading "agrees" if ρ > 0 and p < 0.05 (`SDM_RESERVE_P`), otherwise "no agreement shown". r2: the reserves with no presence cell and the share of them above the median prediction of the model cells — counts and the share only, **no reserve name linked to a presence or no-presence state** | A `tbl_16` table (statistics only); the reading of r1 stated | 30–45 min |
+| 15.5 | STEP 15.3 — QA: a hand-made case first; the prediction again from the model file by a second path; the reserve values again (for example `terra::zonal()` on the cell-id raster); the gate and the r1 reading again from the tables; the publish checks of Decision 25 and those of task 14.6 (no position or cell column, no cell id as a value, no reserve name with a presence state, no tiger file under `outputs/`) → a `tbl_16` QA table; a failure stops the script | QA passes | 30–45 min |
+| 15.6 | Update `data-dictionary.md`, `methodology.md` (Decision 25, change log, Limitations, §5.4), `proposal.md` §8 (if a choice differs from the proposal), `naming-conventions.md` §6, `references.md`, `README.md`, the handoff, `project-plan.md` (the Week-16 task breakdown: Decision 26 on the Gi* settings, the Gi* build, the figures) | Docs match as-built | 30–45 min |
+| 15.7 | Commit (`analysis:` for `09`, config, functions, tables; `docs:` separate) | Committed and pushed; `git status --short` shows nothing under `data/` staged | 10 min |
+
+**Week 15 pitfalls:**
+- **Decision 25 before any prediction file.** The metrics are seen; a
+  prediction surface is not. Do not map the model file before the
+  Decision.
+- **The gate is known.** The mean test Boyce index (0.668) is above 0, so
+  the gate of Decision 24 point 8 allows a map. Week 15 states it; it is
+  not a new rule. The metrics are published with the map (point 8).
+- **The census density is per total notified area** (`density_2022`,
+  Decision 8), and the polygon is the core protected-area outline (Decision
+  4). r1 is partly linked to the presences (Decision 24, "Limitations").
+- **`unit_name` is not unique** (two Pench, two Rajiv Gandhi): key on
+  `unit_id`. Pilibhit and Dholpur-Karauli have no polygon; Amrabad has its
+  polygon from the state split. 6 pairs of reserve polygons overlap; a
+  cell counts in each (as o1 of task 13.8).
+- **No reserve name with a presence state (r2).** A table of the reserve
+  values by reserve is a Decision-25 question (fork c).
+- **One model file, and w1.** Each run of `scripts/09` fits the models
+  again and writes the model file with the date of the run; a run on
+  another date writes one more file. The Week-15 STEPs read the file that
+  Decision 25 names, or task 15.2 adds the switch.
+- **Clamping.** `predict.maxnet()` clamps by default; the evaluation used
+  cloglog with clamping (Decision 24 point 7).
+- **A 0.2° cell is a cell of longitude and latitude.** The grid layer holds
+  the cell polygons in EPSG:7755 (edges densified every 0.01°); the reserve
+  value uses the 1 km cells of the cell-id raster.
+- **The publish checks.** `assert_publishable_rast()` is for a raster of
+  1 km or coarser; a layer of 0.2° polygons needs the check that Decision
+  25 fixes. The clean point layers and the obscured set stay under `data/`.
+- **Numbers.** Decision 25 is the next Decision number (Decision 26 for the
+  Gi* settings in Week 16); the Week-15 tables take new slugs in the
+  `tbl_16` group; `fig_04` is the next free figure number.
+- **PROJ `proj.db` clash still applies** — fresh session.
+
+**Decisions due this week:** **25** (the prediction and its published
+form), before any prediction file. Decision 26 (the Gi* settings) is due in
+Week 16 in this draft.
+
+**Exit state:** Decision 25 recorded; the prediction layer written; the gate
+stated; the reserve check written; QA passed; docs updated; the Week-16 task
+breakdown written; Week 15 ticked.
 
 ---
 
@@ -1332,7 +1495,7 @@ written again for the branch; Week 14 ticked.
 | Data audited and gaps closed | 2 | Know exactly what must be rebuilt |
 | **Growth track complete** | 7 | ✅ Achieved Week 7 — priority-1 deliverable done and publishable (tbl_01, tbl_02, fig_01, fig_02) |
 | **Connectivity track complete** | 12 | ✅ Achieved Week 12 — priority-2 deliverable done (`tbl_03`, `tbl_03b`, `fig_03`; working tables `tbl_11`–`tbl_14`). The figure text is a draft; the path layer for the site needs its own rule (Week 18) |
-| Suitability track complete | 16 | Priority-3 deliverable done |
+| Suitability track complete | 16 | Priority-3 deliverable done *(2026-10-25: a model is fitted at the 0.2° grain (Week 14); the prediction, the reserve check, the Gi* and the figure in Weeks 15–16)* |
 | **Site published** | 20 | Full project live |
 
 ---
@@ -1344,7 +1507,7 @@ written again for the branch; Week 14 ticked.
 | All-reserve census extraction is slower than 2 weeks | ~~High~~ **Retired** | Stage 1 slips | Did not materialise — the full within-reserve series was extracted in Week 4 (2014/2018/2022 is only 3 tabular rounds, not 5). Week 5 is now the join, not more extraction |
 | WII TR boundaries not public | Medium | Weaker boundary layer | KBA fallback, documented (Decision) |
 | Weeks slip due to job load | High | Calendar stretches | Expected. Each week is self-contained; no penalty for a gap |
-| SDM adds little beyond growth + connectivity | Medium *(2026-10-18: occurred in part — no 1 km model, Decision 21 point 8)* | Wasted effort | Priority 3 by design — drop it if Stage 1–2 already tell the story. *(2026-10-18: Decision 23, task 14.1, decides between no model and a model at a coarser grain)* |
+| SDM adds little beyond growth + connectivity | Medium *(2026-10-18: occurred in part — no 1 km model, Decision 21 point 8)* | Wasted effort | Priority 3 by design — drop it if Stage 1–2 already tell the story. *(2026-10-18: Decision 23, task 14.1, decides between no model and a model at a coarser grain)* *(2026-10-25: Decision 23 chose a model at the 0.2° grain (a2, b3); the count of task 14.4 can still give no model)* *(2026-10-25, Week 14: the count gave `planned_model`; the model is fitted, and the value for the gate is above 0. The answer to question 3 is at about 20 km, not at 1 km)* |
 | Scope creep to "every possible analysis" | Medium | Never finishes | Three tracks only. New ideas go to a Phase-2 future-work list |
 
 ---
@@ -1369,5 +1532,5 @@ deliverable exists.
 | 10 | Least-cost paths + variant comparison | ✅ Complete |
 | 11 | Reserve network graph (Decision 19) | ✅ Complete |
 | 12 | Pinch points + network figure (Decision 20) | ✅ Complete |
-| 13–16 | Suitability track | In progress — Week 13 complete (Decisions 21–22; outcome `no_1km_model`; committed 2026-10-18). Week 14 next: Decision 23 (a model at a coarser grain, or no model) |
+| 13–16 | Suitability track | In progress — Week 13 complete (Decisions 21–22; outcome `no_1km_model`; committed 2026-10-18). **Week 14 complete (2026-10-25)** — Decision 23, a model at the 0.2° grain on the obscured set; `scripts/09`; the count: `planned_model` (104 presence cells, 1,486 background cells); Decision 24 (the model settings); the fit: `lq`, multiplier 1, mean test Boyce 0.668 over 5 spatial folds; QA 133 of 133; the commit by the author (task 14.8). Next: **Week 15**, task 15.1 — Decision 25 (the prediction) |
 | 17–20 | Site + close | ⚪ Not started |

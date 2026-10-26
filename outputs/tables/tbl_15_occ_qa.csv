@@ -159,11 +159,12 @@
 "publish","assert_publishable_rast(): settlement main","cell 1000 m; floor 1000 m",TRUE
 "publish","assert_publishable_rast(): effort window 2006-2010","cell 1000 m; floor 1000 m",TRUE
 "publish","assert_publishable_rast(): effort window 2018-2022","cell 1000 m; floor 1000 m",TRUE
-"publish","no file with ""tiger"" in its name under outputs/","0 of 55 files",TRUE
+"publish","no file with ""tiger"" in its name under outputs/","0 of 56 files",TRUE
 "publish","each tiger surface is under data/ (gitignored), not outputs/","3 files; 0 wrong",TRUE
 "publish","tbl_15_background_taxa.csv: no position or cell column; numbers are counts or statistics","6 columns",TRUE
 "publish","tbl_15_kde_radius_compare.csv: no position or cell column; numbers are counts or statistics","4 columns",TRUE
 "publish","tbl_15_kde_summary.csv: no position or cell column; numbers are counts or statistics","13 columns",TRUE
+"publish","tbl_15_occ_by_reserve.csv: no position or cell column; numbers are counts or statistics","11 columns",TRUE
 "publish","tbl_15_occ_cleaning.csv: no position or cell column; numbers are counts or statistics","6 columns",TRUE
 "publish","tbl_15_occ_cleaning_by_dataset.csv: no position or cell column; numbers are counts or statistics","4 columns",TRUE
 "publish","tbl_15_occ_dataset_check.csv: no position or cell column; numbers are counts or statistics","9 columns",TRUE

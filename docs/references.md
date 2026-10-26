@@ -900,6 +900,174 @@ level of bias. Decision 22: a candidate use of the settlement surface,
 decided in Week 14.)* *(From the repository record. Which bias value is
 used at prediction was not verified.)*
 
+## Model at a coarser grain (Decision 23)
+
+*All entries in this section were read on 2026-10-18 from repository
+records, abstracts, documentation pages, forum posts and one source file.
+No paper was read in full. Gábor et al. (2022), Phillips et al. (2009),
+Barber et al. (2022) and Ranc et al. (2017) are in the sections above.*
+
+Botella, C., Joly, A., Monestiez, P., Bonnet, P., & Munoz, F. (2020). Bias
+in presence-only niche models related to sampling effort and species
+niches: Lessons for background point selection. *PLoS ONE*, 15(5),
+e0232078. https://agritrop.cirad.fr/595825 · *(A target-group background is
+not affected by an uneven sampling effort, and has no bias if the summed
+density of the target-group species is constant. The user must select the
+group so that its species are "jointly abundant over the broadest
+environmental sub-area". Decision 23, reason for r2.)* *(From the
+repository record and the abstract. The DOI was not on the record and is
+not given here.)*
+
+Guisan, A., Graham, C.H., Elith, J., Huettmann, F., Dudík, M., Ferrier, S.,
+Hijmans, R., Lehmann, A., Li, J., Lohmann, L.G., Loiselle, B., Manion, G.,
+Moritz, C., Nakamura, M., Nakazawa, Y., Overton, J.McC., Peterson, A.T.,
+Phillips, S.J., Richardson, K., Scachetti-Pereira, R., Schapire, R.E.,
+Williams, S.E., Wisz, M.S., & Zimmermann, N.E. (2007). Sensitivity of
+predictive species distribution models to change in grain size.
+*Diversity and Distributions*, 13(3), 332–340.
+https://researchonline.jcu.edu.au/2333/ · *(Presence-only data of 50
+species in five regions, 10 methods. A grain 10 times coarser "does not
+severely affect predictions"; performance fell in general, and some models
+were better. Decision 23, reason for b3.)* *(From the repository record and
+the abstract. The two grains of the test are not in the abstract.)*
+
+iNaturalist. *How does iNaturalist protect the locations of sensitive
+species?* Help page.
+https://help.inaturalist.org/en/support/solutions/articles/151000233080-how-does-inaturalist-protect-the-locations-of-sensitive-species-
+· *(An obscured observation gets a random point in a 0.2 × 0.2 degree
+rectangle that includes the true location; species that location disclosure
+puts at risk are obscured automatically. The page gives no IUCN rule and
+does not say whether the grid is fixed. Decision 23 b3.)* *(Web page, read
+through a summary.)*
+
+iNaturalist. *app/models/observation.rb*. Source code of the iNaturalist web
+application. https://github.com/inaturalist/inaturalist (branch `main`,
+commit `0e15a4a4bd64b914672be1e4e6492c272a79fa9a`) · *(The constant
+`COORDINATE_UNCERTAINTY_CELL_SIZE` is 0.2. `uncertainty_cell_center_latlon`
+gives the cell centre as the coordinate minus (the coordinate modulo 0.2)
+plus 0.1; `random_neighbor_lat_lon` gives the public point as that centre
+plus a random offset of up to 0.1° on each axis;
+`uncertainty_cell_diagonal_meters` gives the public accuracy as the diagonal
+of the cell. So the public point is in the same fixed cell as the true
+point. Decision 23 b3; it confirms the cell rule of Decision 21 point 4.)*
+*(Source file of the current branch. The code of earlier years was not
+checked.)*
+
+iNaturalist community forum. "Replicating geoprivacy polygons in GIS."
+https://forum.inaturalist.org/t/replicating-geoprivacy-polygons-in-gis/36905
+· *(A user writes that obscuration uses the 0.2 × 0.2 degree grid rectangle
+that contains the true location, and that the public point is a random
+point inside it. Decision 23 b3.)* *(Forum posts by users, not staff.)*
+
+Phillips, S.J. *maxnet: Fitting 'Maxent' Species Distribution Models with
+'glmnet'*. Version 0.1.4. Reference manual, CRAN.
+https://cran.r-project.org/web/packages/maxnet/refman/maxnet.html ·
+*(Usage: `maxnet(p, data, f = maxnet.formula(p, data), regmult = 1, regfun
+= maxnet.default.regularization, addsamplestobackground = T, ...)`; with
+`T`, each presence sample that is not already in the background is added
+to it. Decision 23 points 5 and 6.)* *(Web page. The version in `renv.lock`
+is set in task 14.2.)*
+
+## Model settings (Decision 24)
+
+*All entries in this section were read on 2026-10-25 from repository
+records, abstracts, package help pages and source files, or are given as
+another source cites them (marked). No paper was read in full. Phillips et
+al. (2009) and Warton et al. (2013) are in the sections above.*
+
+Dormann, C.F., Elith, J., Bacher, S., Buchmann, C., Carl, G., Carré, G.,
+Marquéz, J.R.G., Gruber, B., Lafourcade, B., Leitão, P.J., Münkemüller, T.,
+McClean, C., Osborne, P.E., Reineking, B., Schröder, B., Skidmore, A.K.,
+Zurell, D., & Lautenbach, S. (2013). Collinearity: a review of methods to
+deal with it and a simulation study evaluating their performance.
+*Ecography*, 36(1), 27–46. https://doi.org/10.1111/j.1600-0587.2012.07348.x
+· *(Methods made for collinearity did not do better than a GLM with a
+threshold-based pre-selection; |r| > 0.7 "was an appropriate indicator for
+when collinearity begins to severely distort model estimation". Decision 24
+k1.)* *(From the repository record and the abstract.)*
+
+ecospat (R package), version 3.4. Help page `ecospat.boyce`: "Calculate
+Boyce Index". https://rdocumentation.org/packages/ecospat/versions/3.4/topics/ecospat.boyce
+and https://rdrr.io/pkg/ecospat/man/ecospat.boyce.html · *(Usage
+`ecospat.boyce(fit, obs, nclass = 0, window.w = "default", res = 100,
+PEplot = TRUE, rm.duplicate = TRUE, method = 'spearman')`; with
+`rm.duplicate = TRUE`, "only one of the successive duplicated P/E values
+are used to compute the correlation". Task 14.5: implementation point 3 of
+Decision 24 keeps the repeated values, so a Boyce value of this project is
+not the value of `ecospat.boyce()` at its default. The package is not
+used.)* *(Help page, read 2026-10-25 through a summary of the fetch tool.)*
+
+ENMeval (R package). Help page `aic.maxent`: "Calculate AICc from Maxent
+model prediction". https://rdrr.io/cran/ENMeval/man/aic.maxent.html · *(The
+raw predictions are scaled so that all cells of the study extent sum to 1;
+LL = the sum of the logs of the predictions at the occurrences; K = the
+non-zero coefficients, "an estimate of the true degrees of freedom"; no
+value if K exceeds n. Decision 24 f3.)* *(Help page.)*
+
+ENMeval (R package), version 0.1.0. Help page `ENMevaluate`.
+https://rdocumentation.org/packages/ENMeval/versions/0.1.0/topics/ENMevaluate
+· *(The "block" partition: four bins cut by lines of latitude and longitude
+with equal numbers of occurrences; OR10 and ORmin; the reference entries of
+Radosavljevic & Anderson (2014) and Warren & Seifert (2011). Decision 24 v1
+and f3.)* *(Help page, read through a summary.)*
+
+Hirzel, A.H., Le Lay, G., Helfer, V., Randin, C., & Guisan, A. (2006).
+Evaluating the ability of habitat suitability models to predict species
+presences. *Ecological Modelling*, 199, 142–152.
+https://www.unil.ch/biomapper/Download/Hirzel-EcoMod-2006.pdf · *(The
+continuous Boyce index: a predicted-to-expected ratio in a moving window
+(width 0.1 recommended); values near 0 mean that the model does not differ
+from a chance model; the most accurate presence-only evaluator of the
+study. Decision 24 v1 and g2.)* *(Paper, read through a summary.)*
+
+Phillips, S.J. *maxnet*. Source files `R/maxnet.R`, `R/maxnet.formula.R`,
+`R/maxnet.default.regularization.R`, `R/predict.maxnet.R`, master branch.
+https://github.com/mrmaxent/maxnet · *(`addsamplestobackground = T` adds
+each presence row that is not in the background to it; the background rows
+get a weight of 100; the object holds `betas`, `alpha`, `entropy`,
+`penalty.factor`, the minimum and maximum of each feature and covariate,
+`samplemeans` and `levels`, not the data rows; `predict()` clamps by
+default; the default feature classes by the number of presences. Decision
+24 points 4, 6 and 11.)* *(Source files, read 2026-10-25. The locked version
+is set when `maxnet` goes into `renv.lock`.)* *(2026-10-25, task 14.5:
+`renv.lock` holds `maxnet` 0.1.4 and `glmnet` 5.0. The source files were
+read on the master branch, not at the tag of 0.1.4.)*
+
+Radosavljevic, A., & Anderson, R.P. (2014). Making better Maxent models of
+species distributions: complexity, overfitting and evaluation. *Journal of
+Biogeography*, 41, 629–643. · *(Decision 24, reason for f3: the default
+regularisation can overfit, and a spatially independent evaluation shows
+it.)* *(Not read: the entry is as the ENMeval help page gives it, and the
+claim is from the title and its use in ENMeval. Verify before it is cited
+on the site.)*
+
+Roberts, D.R., Bahn, V., Ciuti, S., Boyce, M.S., Elith, J.,
+Guillera-Arroita, G., Hauenstein, S., Lahoz-Monfort, J.J., Schröder, B.,
+Thuiller, W., Warton, D.I., Wintle, B.A., Hartig, F., & Dormann, C.F.
+(2017). Cross-validation strategies for data with temporal, spatial,
+hierarchical, or phylogenetic structure. *Ecography*, 40(8), 913–929.
+https://pred.uni-regensburg.de/id/eprint/1455/ · *(Random cross-validation
+of structured data can cause "serious underestimation of predictive
+error"; block cross-validation is "nearly universally more appropriate";
+blocks can restrict the predictor ranges of the training data. Decision 24
+v1.)* *(From the repository record and the abstract; the DOI is not on the
+record.)*
+
+Valavi, R., Elith, J., Lahoz-Monfort, J.J., & Guillera-Arroita, G. (2019).
+blockCV: An R package for generating spatially or environmentally separated
+folds for k-fold cross-validation of species distribution models. *Methods
+in Ecology and Evolution*, 10(2), 225–232.
+https://doi.org/10.1111/2041-210X.13107 · *(Blocks of a set size are
+assigned to the folds at random, systematically or in a checkerboard; a
+block size can come from the range of spatial autocorrelation. Decision 24
+v1; the package is not used.)* *(From the package manual.)*
+
+Warren, D.L., & Seifert, S.N. (2011). Ecological niche modeling in Maxent:
+the importance of model complexity and the performance of model selection
+criteria. *Ecological Applications*, 21, 335–342. · *(The basis of the AICc
+method of ENMeval. Decision 24 f3.)* *(Not read: the entry is as the
+ENMeval help pages give it.)*
+
 ## Tiger movement and landscape resistance (Decision 14)
 
 Dutta, S., & Krishnamurthy, R. (2024). Multiphasic movement and step-selection

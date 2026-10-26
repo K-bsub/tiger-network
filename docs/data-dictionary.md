@@ -292,7 +292,7 @@ scripts index by name, never by position.
 |---|---|---|---|---|
 | `landcover` | categorical | ESA WorldCover 2021 class code (10–100; 11 classes present, modal 40 = cropland) | Since Decision 12: the 88 unmasked 1 km tiles in `data/raw/worldcover/tiles_1km/`, merged, then masked to India on the template (Week 8: `cov_landcover_worldcover2021_1km_7755.tif`) | nearest |
 | `ghm` | continuous | Global Human Modification 2022, 0–1 (India mean 0.377) | `cov_ghm2022_1km_7755.tif` | bilinear |
-| `elev` | continuous | Elevation, metres. Water cells probably carry sea-floor depths from the source tiles (minimum −434.2 m in the `d13` build — read the current value in `tbl_10`; treatment is a Week-14 decision) | Since Decision 13: raw DEM `data/raw/terrain/dem_india_aws_z7_4326.tif`, via the `scripts/01` path without its mask, then masked on the template (Week 8: `cov_terrain_1km_7755.tif`, band `elevation`) | bilinear |
+| `elev` | continuous | Elevation, metres. Water cells probably carry sea-floor depths from the source tiles (minimum −434.2 m in the `d13` build — read the current value in `tbl_10`; treatment is a Week-14 decision) *(2026-10-25, Decision 24 z1: the terrain means of the 0.2° model cells do not use water cells, and an elevation below 0 m becomes 0 m; the stack does not change)* | Since Decision 13: raw DEM `data/raw/terrain/dem_india_aws_z7_4326.tif`, via the `scripts/01` path without its mask, then masked on the template (Week 8: `cov_terrain_1km_7755.tif`, band `elevation`) | bilinear |
 | `slope` | continuous | Slope, degrees (derived on the native DEM, then 1 km) | As `elev` (band `slope`) | bilinear |
 | `tri` | continuous | Terrain Ruggedness Index (derived on the native DEM, then 1 km) | As `elev` (band `tri`) | bilinear |
 | `dist_road_m` | continuous | Distance to nearest major road, metres, after the common mask. `d13f` build: min 0, max 279,692.7 m ≈ 279.7 km, mean 2,044.3 m (read the current values in `tbl_10`) | `cov_distroad_1km_7755.tif` (this script) | derived on grid |
@@ -1144,6 +1144,110 @@ steps, values and order (Decision 21 point 7).
 | `uncert_m`, `uncert_set`, `cell_1km` | — | As in the clean tiger layer |
 | `ds_match` | logical | `TRUE` if the dataset holds one or more records of the tiger 1 km set (`OCC_BG_MATCH_MIN_TIGER`); the matched background |
 
+## effort_background_inat_cell02_7755.gpkg  *(data/processed; Week 14 — built, task 14.2; gitignored)*
+
+Written by `scripts/08` STEP 13.3 (since 2026-10-25; process choice w2 of
+task 14.2). The background of the Week-14 model (Decision 23 r2): the clean
+records of the iNaturalist dataset (`SDM_BG_DATASET_KEY`), all Mammalia
+except the tiger, in two parts, each with the 0.2° cell of its GBIF
+coordinates (`occ_cell02()`; a coordinate on an edge goes to the cell north
+or east of it). Read by `scripts/09`.
+
+**As built (2026-10-25):** 16,806 records — part `obscured` 7,029 records
+in 825 cells of 0.2°; part `uncert` 9,777 records (7,238 with `uncert_set`
+`1km`, 2,539 with `5km`).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `gbifID`, `datasetKey`, `order`, `family`, `year`, `uncert_m` | — | As in the clean background layer |
+| `part` | character | `obscured`: removed at step 6 and in the obscured set by the rule of Decision 21 point 4 (the obscured background; Week 13 only counted it). `uncert`: a record of the clean background with `uncert_set` in `SDM_BG_UNCERT_SETS` (the 5 km background). A record is in one part only |
+| `uncert_set` | character | `1km` or `5km` for part `uncert`; `NA` for part `obscured` |
+| `cell02_lon_deg`, `cell02_lat_deg` | numeric | South-west corner (degrees, WGS 84) of the 0.2° cell of the GBIF coordinates |
+
+## sdm_grid_cell02_7755.gpkg  *(data/processed; Week 14 — built, task 14.4; gitignored)*
+
+Written by `scripts/09` STEP 14.1 (Decision 23 points 2 and 3; process
+choices g1 and k1). One polygon per 0.2° cell of the iNaturalist obscuring
+grid that holds the centre of one or more complete-case 1 km cells of
+`cov_stack_1km_7755.tif`. The polygon is the 0.2° cell in WGS 84, with each
+edge cut every 0.01°, converted to EPSG:7755. **No presence or background
+flag** (no tiger position; tier T0). The switch `RUN_GRID` of `scripts/09`
+writes it again.
+
+**As built (2026-10-25):** 7,450 cells; 6,969 model cells.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `id` | integer | Cell id = `iy` × 100000 + `ix` (`sdm_cell_id()`). A position at 0.2°: never in a table |
+| `ix`, `iy` | integer | Column and row of the cell: the south-west corner is (`ix` × 0.2°, `iy` × 0.2°) |
+| `n_cc` | integer | Number of complete-case 1 km cells with their centre in the cell (the record rule, `occ_cell02()`) |
+| `area_km2` | numeric | Area of the polygon in EPSG:7755 units (km²) |
+| `share` | numeric | `n_cc` × 1 km² ÷ `area_km2` (can be a little above 1) |
+| `model` | logical | `share` ≥ `SDM_CELL_MIN_COVER` (0.5): a model cell (Decision 23 v1) |
+
+## sdm_cellid_1km_7755.tif  *(data/processed; Week 14 — built, task 14.4; gitignored)*
+
+Written by `scripts/09` STEP 14.1 (process choice k1). The grid of
+`cov_stack_1km_7755.tif`: one band `cell02_id`, INT4S. Each complete-case
+1 km cell holds the `id` of its 0.2° cell (all cells of the grid, model or
+not); `NA` elsewhere. For the covariate summaries of the model cells
+(STEP 14.2). Read back after the write; a guard checks the count of each id
+against `n_cc` of the grid.
+
+**As built (2026-10-25):** 3,067,467 cells with a value (the complete-case
+count of `tbl_10`), 7,450 different ids.
+
+## sdm_covariates_cell02.csv  *(data/processed; Week 14 — built, task 14.5; gitignored)*
+
+Written by `scripts/09` STEP 14.2 (Decision 24 points 1, 2 and 10; process
+choice q1). One row per model cell (Decision 23 point 3), ordered by `id`:
+the summaries over the complete-case 1 km cells of the cell
+(`sdm_cellid_1km_7755.tif`). **No presence or background flag** (no tiger
+position; tier T0). It holds the 0.2° cell id, so it stays under `data/`;
+no table holds a row of it. The switch `RUN_COVARIATES` of `scripts/09`
+writes it again. With `FALSE`, STEP 14.2 reads it, and a guard checks that
+each model cell is in it once and that its `n_cc` values give the count of
+STEP 14.1.
+
+**As built (2026-10-25):** 6,969 rows.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `id` | integer | Cell id, as in `sdm_grid_cell02_7755.gpkg`. A position at 0.2°: never in a table |
+| `n_cc` | integer | Complete-case 1 km cells of the model cell |
+| `ghm_mean` | numeric | Mean of `ghm` over the complete-case cells |
+| `elev_mean` | numeric | Mean of `elev` (m) over the cells that are not water (class 80), with each value below 0 m set to 0 m (Decision 24 z1) |
+| `slope_mean`, `tri_mean` | numeric | Mean of `slope` (degrees) and of `tri` over the cells that are not water |
+| `droad_km_mean` | numeric | Mean of `dist_road_m` ÷ 1,000 (km) over the complete-case cells |
+| `lc_forest`, `lc_open`, `lc_crop`, `lc_built` | numeric | Share of the complete-case cells (water included) in the land-cover groups of `SDM_LC_GROUPS`: classes 10 and 95; 20, 30 and 90; 40; 50 |
+| `settl_mean` | numeric | Mean of `kde_settlement_citytown_1km_7755.tif` over the complete-case cells. The bias covariate of the sensitivity run `bias_settlement`; not a candidate |
+| `z1_water_excl` | integer | Water 1 km cells not used in the terrain means |
+| `z1_elev_floored` | integer | 1 km cells used in `elev_mean` with a value raised to 0 m |
+| `water_only` | logical | `TRUE` if the model cell has water cells only; its terrain means then use the water cells (Decision 24 z1) |
+
+## tiger_sdm_maxnet_cell02_<date>.rds  *(data/processed; Week 14 — built, task 14.5; gitignored)*
+
+Written by `scripts/09` STEP 14.2 with `save_model(..., species = "tiger",
+model = "sdm_maxnet_cell02", dir = DIR_PROCESSED)` (Decision 24 point 11;
+naming §6). It is made from the tiger records, so it stays under `data/`
+(Decision 22 point 9). A list of three parts:
+
+- `model` — the main `maxnet` object: the coefficients and the summary
+  statistics, not the data rows;
+- `settings` — `decision`, `outcome`, `covariates` (the kept covariates),
+  `classes`, `regmult`, `aicc` (the AICc table), `eval_type`,
+  `n_presence_cells`, `n_background_cells`;
+- `versions` — `maxnet`, `glmnet`, R.
+
+Before the save, `sdm_object_ok()` stops the run if a part of the object
+(at any depth) has the length or the number of rows of the data rows. After
+the save, the file is read back and its coefficients are compared. Each run
+of `scripts/09` writes the file again (process choice w1); a run on another
+date writes one more file.
+
+**As built (2026-10-25):** `tiger_sdm_maxnet_cell02_20261025.rds`; `lq`,
+multiplier 1; 104 presence cells, 1,486 background cells.
+
 ## osm_zoos_7755.gpkg  *(data/raw/osm; Week 13 — built, task 13.3; gitignored)*
 
 Written by `scripts/01` Block 6 (zoo block). OpenStreetMap features with
@@ -1324,6 +1428,9 @@ in `pass` stops the script. No position.
 
 **As built (2026-10-18):** 171 rows, 171 pass — `test case` 27, `tiger` 16,
 `background` 18, `obscured` 8, `tables` 22, `surfaces` 65, `publish` 15.
+*(2026-10-25, the run of task 14.2: 172 rows, 172 pass — `publish` 16. The
+new row is the publish check of `tbl_15_occ_by_reserve.csv` (task 13.8); it
+runs only after a run has written that table.)*
 
 | Field | Type | Meaning |
 |---|---|---|
@@ -1364,5 +1471,134 @@ is outside. No position.
 | `background_5km_records`, `background_5km_cells` | integer | Clean background records (the 5 km set) in the polygon, and their distinct 1 km cells. Not suppressed (no tiger position) |
 
 The exact tiger counts are not written to any file (process choice p1).
+
+## tbl_16_sdm_counts.csv  *(Week 14 — built, task 14.4)*
+
+Written by `scripts/09` STEP 14.1 (Decision 23 points 3 to 6; process
+choice t1). One long table of counts: the grid, the presence cells, the
+background cells, the limits and the outcome. Counts and statistics only:
+no cell id, no corner. If `SDM_GRAIN_OUTCOME` is set and a run gives
+another outcome, the table is not written.
+
+**As built (2026-10-25):** 21 rows; outcome `planned_model`.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `group` | character | `grid`, `presence`, `background` or `test` |
+| `item` | character | What is counted. `grid`: `complete_case_1km_cells`, `cells_with_complete_case_centres`, `model_cells`, `complete_case_1km_cells_in_model_cells`. `presence`: `records`, `cells_all`, `cells_not_model`, `records_not_model`, `cells_model` (the test value of point 4). `background`: `obscured_records`, `obscured_cells_all`, `obscured_cells_model`, `uncert_records`, `uncert_cells_all`, `uncert_cells_model`, `cells_model` (the test value of point 6), `cells_model_with_presence`. `test`: `min_presence_cells`, `full_presence_cells`, `min_background_cells`, `background_to_presence_ratio` |
+| `value` | numeric | The count, or the limit, or the ratio |
+| `grain_outcome` | character | The outcome of Decision 23 points 4 and 6 on the `test` rows (`SDM_OUTCOME_VALUES`); empty on the other rows |
+
+## tbl_16_sdm_covariates.csv  *(Week 14 — built, task 14.5)*
+
+Written by `scripts/09` STEP 14.2 (Decision 24 points 1 to 3; process
+choice t1). One row per candidate covariate and one for `settl_mean`.
+Statistics over the 6,969 model cells only: no cell id, no corner.
+
+**As built (2026-10-25):** 10 rows; 6 candidates kept.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `covariate` | character | The name, as in `sdm_covariates_cell02.csv` |
+| `role` | character | `candidate` (the nine of `SDM_COVARIATES`) or `bias_run` (`settl_mean`) |
+| `kept` | logical | `TRUE` if the collinearity rule kept the candidate (point 3); `NA` for `bias_run` |
+| `min`, `mean`, `max` | numeric | Over the model cells |
+| `z1_water_1km_cells` | integer | Water 1 km cells not used in the means (the terrain covariates; 0 for the others) |
+| `z1_floored_1km_cells` | integer | 1 km cells with the elevation raised to 0 m (`elev_mean`; 0 for the others) |
+| `z1_water_only_cells` | integer | Model cells with water cells only (the terrain covariates; 0 for the others) |
+
+## tbl_16_sdm_covariate_cor.csv  *(Week 14 — built, task 14.5)*
+
+Written by `scripts/09` STEP 14.2 (Decision 24 point 3). One row per pair of
+the nine candidates, in the order of `SDM_COV_PRIORITY`: Pearson r over the
+6,969 model cells. Which candidate is kept is in
+`tbl_16_sdm_covariates.csv`.
+
+**As built (2026-10-25):** 36 rows; 7 with `above_limit`.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `var_a`, `var_b` | character | The pair; `var_a` comes first in the order |
+| `r` | numeric | Pearson r |
+| `above_limit` | logical | \|r\| > `SDM_COR_MAX` (0.7) |
+
+## tbl_16_sdm_aicc.csv  *(Week 14 — built, task 14.5)*
+
+Written by `scripts/09` STEP 14.2 (Decision 24 point 4). One row per model of
+the grid: `SDM_FC_GRID` × `SDM_REGMULT_GRID`, in the grid order.
+
+**As built (2026-10-25):** 12 rows; selected `lq`, multiplier 1.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `classes` | character | `lq`, `lqh` or `lqph` |
+| `regmult` | numeric | Regularisation multiplier, 1 to 4 |
+| `status` | character | `fitted`; `no_aicc` (K ≥ n − 1); `failed` (the fit stopped) |
+| `k` | integer | Non-zero coefficients (`betas`) |
+| `loglik` | numeric | LL of point 4: the sum of the logs of the scaled raw output at the presence cells |
+| `aicc` | numeric | AICc of point 4; `NA` if the status is not `fitted` |
+| `delta_aicc` | numeric | `aicc` − the lowest `aicc` |
+| `selected` | logical | The model of the selection rule (one row `TRUE`) |
+
+## tbl_16_sdm_cv.csv  *(Week 14 — built, task 14.5)*
+
+Written by `scripts/09` STEP 14.2 (Decision 24 point 7; implementation
+points 2 to 5). Rows: the folds `1` to `5`; `mean` and `sd` over the folds
+with the status `fitted`; `main`, the main model (its training presence
+cells and training AUC only). The table gives the test presence cells of
+each fold; it gives no position of a block or a fold.
+
+**As built (2026-10-25):** 8 rows; 5 of 5 folds fitted.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `fold` | character | `1`–`5`, `mean`, `sd` or `main` |
+| `blocks` | integer | 2° blocks in the fold (`NA` on the other rows) |
+| `test_presence_cells`, `test_background_cells` | integer | Presence and background cells of the test blocks |
+| `train_presence_cells` | integer | Presence cells of the other folds (`main`: all presence cells) |
+| `status` | character | `fitted`, `failed` or `no_presence`; on `mean` and `sd`: "n of 5 folds" |
+| `boyce` | numeric | The continuous Boyce index of the test presence cells (implementation point 3) |
+| `auc_test` | numeric | The test presence cells against the test background cells (AUC from ranks; a tie counts 1/2) |
+| `or10` | numeric | The share of the test presence cells below the 10th percentile (type 7) of the training presence cells |
+| `auc_train` | numeric | The training presence cells against the training background cells; `main`: all presence cells against all background cells |
+| `auc_diff` | numeric | `auc_train` − `auc_test` |
+
+## tbl_16_sdm_sensitivity.csv  *(Week 14 — built, task 14.5)*
+
+Written by `scripts/09` STEP 14.2 (Decision 24 point 10; implementation
+points 6 to 8). One row per sensitivity run.
+
+**As built (2026-10-25):** 2 rows; both `robust`.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `run` | character | `bias_settlement` or `window_2018_2022` |
+| `status` | character | `run`, `failed`, or `not run: <outcome>` (a limit of Decision 23 not met) |
+| `presence_cells`, `background_cells` | integer | The cells of the run on the model cells |
+| `classes` | character | The feature classes of the run |
+| `regmult` | numeric | The multiplier of the run |
+| `rho` | numeric | Spearman ρ with the main model (cloglog, the 6,969 model cells) |
+| `top_overlap` | numeric | The share of the top 1,394 cells of the main model that are also in the top 1,394 of the run (implementation point 6) |
+| `label` | character | `robust` (ρ ≥ 0.9 and the share ≥ 2/3) or `sensitive` |
+
+## tbl_16_sdm_qa.csv  *(Week 14 — built, task 14.6)*
+
+Written by `scripts/09` STEP 14.3 (Decisions 23 and 24, "Consequences";
+process choices c1, m1, h1, p1, s1). One row per check. Written first; then
+a `FALSE` in `pass` stops the script. The step reads files only: the three
+layers, the grid, the cell-id raster, the stack, the settlement surface,
+the covariate table, the model file of the run, the `tbl_16` tables,
+`tbl_10`, the reserve layer (`unit_name`, for check s1) and `.gitignore`.
+Counts, names and statistics only; check (b) scans this table for cell ids
+before it is written.
+
+**As built (2026-10-25):** 133 rows; 133 pass.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `group` | character | `test case`, `presence`, `background`, `grid`, `covariates`, `model`, `cv`, `sensitivity` or `publish` |
+| `check` | character | What is checked. For `test case`: the STEP and the name of the hand-made check |
+| `value` | character | What the check found: a count, "n of m records fail", the largest relative difference of the second path, or the names that were compared |
+| `pass` | logical | `TRUE` if the check passes. Two values agree if their difference is `SDM_QA_REL_TOL` × max(1, \|value\|) or less |
 
 *(Further layers — sdm — documented as they are built.)*

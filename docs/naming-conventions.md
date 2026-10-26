@@ -126,6 +126,16 @@ outputs/models/<species>_<model>_<date>.rds
 Examples: `fig_01_growth_ranking.png`, `tbl_01_reserve_growth.csv`,
 `tiger_sdm_maxnet_20260901.rds`
 
+*(2026-10-25, Decision 24 m1: the tiger model file is not under
+`outputs/models/`. It is `data/processed/tiger_sdm_maxnet_cell02_<date>.rds`
+(gitignored), written by `save_model(..., dir = DIR_PROCESSED)`, so each
+file made from the tiger records stays under `data/` and the QA check "no
+file with 'tiger' in its name under `outputs/`" (`scripts/08` STEP 13.5)
+stays as it is.)* *(2026-10-25, task 14.5: as built,
+`data/processed/tiger_sdm_maxnet_cell02_20261025.rds`. Each run of
+`scripts/09` writes the file again; a run on another date writes one more
+file.)*
+
 Execution-order numbers (script prefixes) and output table numbers are
 **independent counters**. A script header matches its filename; output table
 numbers are their own sequence.
@@ -150,6 +160,7 @@ suffix marks a companion table to a numbered one (`tbl_05b_…`). As built:
 | `tbl_13` | `network_links` (STEP 11.1), `network_metrics` (STEP 11.2; written again by STEP 11.3), `network_threshold_scan` (STEP 11.2), `network_variant_comparison` (STEP 11.3), `network_qa` (STEP 11.4) — all `scripts/07` |
 | `tbl_14` | `road_crossings` (STEP 12.2; written again by STEP 12.3), `pinch_points` (STEP 12.3; one row per site; written again by STEP 12.4), `pinch_link_summary` (STEP 12.3), `pinch_variant_comparison` (STEP 12.4), `pinch_qa` (STEP 12.5) — all `scripts/07` |
 | `tbl_15` | `occ_raw_counts` (STEP 13.1), `occ_cleaning`, `occ_cleaning_by_dataset`, `occ_sets`, `occ_dataset_check` (STEP 13.2; written again by STEP 13.3 with the background rows), `background_taxa` (STEP 13.3), `occ_window_counts`, `kde_summary` (STEP 13.4), `occ_qa`, `kde_radius_compare` (STEP 13.5), `occ_by_reserve` (STEP 13.6; publishable) — all `scripts/08`. Counts, names and statistics only; no position (Decision 21 point 10; Decision 22 point 9) |
+| `tbl_16` | `sdm_counts` (STEP 14.1, task 14.4); `sdm_covariates`, `sdm_covariate_cor`, `sdm_aicc`, `sdm_cv`, `sdm_sensitivity` (STEP 14.2, task 14.5, process choice t1); `sdm_qa` (STEP 14.3, task 14.6; reserved by process choice t1 of task 14.2) — all `scripts/09`. Counts and statistics only; no 0.2° cell id or corner and no data row (Decision 23 point 9). Later Week-15 and Week-16 tables of `scripts/09` take their slugs in their tasks |
 
 Before a new table is written, check that its full filename is not already in
 use. A new, unrelated table takes the next free number.
@@ -161,6 +172,8 @@ listing of `outputs/tables/`.)* *(2026-10-18: checked. A listing of
 row of this table, and each row has its files. The stale
 `tbl_05_census_wide_check.csv` is not on disk. `tbl_16` is the next free
 number.)*
+*(2026-10-25: `tbl_16` is in use (`scripts/09`, Week 14); the next free
+number is `tbl_17`.)*
 
 **Figures as built:** `fig_01_growth_ranking.png` and
 `fig_02_growth_animation.gif` (`scripts/05`); `fig_03_reserve_network.png`

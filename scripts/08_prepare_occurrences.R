@@ -22,7 +22,12 @@
 #                          the 1 km, 5 km and matched 1 km sets, the obscured
 #                          count, the dataset check (choice d1) -> the clean
 #                          background layer; the four tbl_15 tables again with
-#                          both sets (choice t1); tbl_15_background_taxa.csv
+#                          both sets (choice t1); tbl_15_background_taxa.csv.
+#                          Since 2026-10-25 (task 14.2, process choice w2):
+#                          also the iNaturalist background of Decision 23 r2
+#                          (the obscured background and the iNaturalist
+#                          records of the 5 km background, with their 0.2
+#                          degree cells) for scripts/09
 #   STEP 13.4 (task 13.6)  the density surfaces of Decision 22: the hand-made
 #                          case first (process choice h1); the effort, tiger
 #                          and settlement surfaces at KDE_RADIUS_M and at the
@@ -108,6 +113,16 @@
 #   data/processed/effort_background_tgs_clean_7755.gpkg  one row per kept
 #     record: gbifID, datasetKey, basisOfRecord, year, order, family,
 #     uncert_m, uncert_set, ds_match, cell_1km. Gitignored
+#   data/processed/effort_background_inat_cell02_7755.gpkg  (since 2026-10-25;
+#     Decision 23 r2, process choice w2 of task 14.2) the background of the
+#     Week-14 model: one row per record of the iNaturalist dataset in one of
+#     two parts. part = "obscured": removed at step 6 and in the obscured set
+#     by the rule of Decision 21 point 4 (the obscured background, which
+#     Week 13 only counted); part = "uncert": kept, with uncert_set in
+#     SDM_BG_UNCERT_SETS. Fields: gbifID, datasetKey, part, order, family,
+#     year, uncert_m, uncert_set (NA for "obscured"), cell02_lon_deg,
+#     cell02_lat_deg (south-west corner of the 0.2 degree cell of the GBIF
+#     coordinates). Gitignored. scripts/09 reads it
 #   the four tbl_15 tables of STEP 13.2, written again with set = "tiger" and
 #     set = "background" rows
 #   outputs/tables/tbl_15_background_taxa.csv  set, order, family,
@@ -185,8 +200,10 @@
 #     No position. The exact tiger counts are not written to any file.
 #
 # SETTINGS: the OCC_* values (Decision 21) and the KDE_* values (Decision 22)
-#   come from R/00_config.R. The field lists and the two GBIF vocabularies
-#   below are the structure of the GBIF file, not choices of the analysis.
+#   come from R/00_config.R; since 2026-10-25 also four SDM_* values
+#   (Decision 23) for the iNaturalist background of STEP 13.3. The field
+#   lists and the two GBIF vocabularies below are the structure of the GBIF
+#   file, not choices of the analysis.
 #
 # MACHINE TRAP: same PROJ / PostGIS proj.db clash as scripts/06. Run in a FRESH
 # session; the guard below stops if EPSG:7755 does not resolve.
@@ -224,6 +241,10 @@ RAW_STAGE <- "counts"
 #         from data/processed/; a guard compares them with
 #         tbl_15_occ_sets.csv. No GBIF zip and no network are needed.
 # STEP 13.4 always reads the clean layers from disk (both values).
+# 2026-10-25 (task 14.2, process choice w2): TRUE for ONE run, to write the
+# iNaturalist background of Decision 23 (STEP 13.3). The run writes the
+# Week-13 layers and tbl_15 tables again; after it, `git status --short` must
+# show no change under outputs/tables/. Set FALSE again after that run.
 RUN_CLEANING <- FALSE
 
 # ---- Run switch (process choice x1, task 13.7, 2026-10-18) --------------------
@@ -252,6 +273,8 @@ clean_out    <- "occ_tiger_gbif_clean_7755.gpkg"      # in DIR_PROCESSED
 obscured_out <- "occ_tiger_gbif_obscured_7755.gpkg"   # in DIR_PROCESSED
 # STEP 13.3
 bg_clean_out <- "effort_background_tgs_clean_7755.gpkg"  # in DIR_PROCESSED
+bg_inat_out  <- "effort_background_inat_cell02_7755.gpkg" # in DIR_PROCESSED;
+                                                          # Decision 23 r2
 # STEP 13.4 (the raster names are made in STEP 13.4 from the config)
 setts_in     <- file.path(DIR_RAW, "osm", "osm_settlements_7755.gpkg")
 sets_tbl_in  <- file.path(DIR_TABLES, "tbl_15_occ_sets.csv")
@@ -392,6 +415,27 @@ stopifnot(
     identical(KDE_PUBLISH_TIGER, FALSE)
 )
 kde_check_windows(KDE_WINDOWS, OCC_YEAR_MIN, OCC_YEAR_MAX)
+
+# 2c) The Decision-23 settings that STEP 13.3 uses for the iNaturalist
+#     background (task 14.2, process choice w2) must come from config.
+sdm_params <- c("SDM_BG_DATASET_KEY", "SDM_BG_OBSCURED", "SDM_BG_UNCERT_SETS",
+                "SDM_GRAIN_DEG")
+missing_sdm <- sdm_params[!vapply(sdm_params, exists, logical(1))]
+if (length(missing_sdm) > 0) {
+  stop("Decision-23 setting(s) missing from R/00_config.R: ",
+       paste(missing_sdm, collapse = ", "), call. = FALSE)
+}
+stopifnot(
+  "SDM_BG_DATASET_KEY must be OCC_INAT_DATASET_KEY (Decision 23 r2)" =
+    identical(SDM_BG_DATASET_KEY, OCC_INAT_DATASET_KEY),
+  "SDM_BG_OBSCURED must be TRUE (Decision 23 r2)" =
+    identical(SDM_BG_OBSCURED, TRUE),
+  "SDM_BG_UNCERT_SETS must hold uncert_set values of Decision 21" =
+    length(SDM_BG_UNCERT_SETS) > 0 &&
+    all(SDM_BG_UNCERT_SETS %in% c("1km", "5km")),
+  "SDM_GRAIN_DEG must be OCC_OBSCURED_CELL_DEG (Decision 23 b3)" =
+    isTRUE(all.equal(SDM_GRAIN_DEG, OCC_OBSCURED_CELL_DEG))
+)
 # The tiger surface must not be written under outputs/ (Decision 22 point 9).
 out_root <- normalizePath(here("outputs"), winslash = "/", mustWork = FALSE)
 for (d in c(DIR_PROCESSED, DIR_INTERIM)) {
@@ -1060,6 +1104,62 @@ if (nrow(back) != nrow(bg_sf) ||
 }
 cat("background layer read back: the same records.\n")
 
+# ---- Write: the iNaturalist background of Decision 23 (gitignored) -----------
+# Decision 23 r2 (2026-10-25), process choice w2 of task 14.2. Two parts, each
+# with the 0.2 degree cell of the GBIF coordinates (occ_cell02(), the rule of
+# Decision 21 point 4; a coordinate on an edge goes to the cell north or east
+# of it):
+#   "obscured" = the obscured background: removed at step 6, iNaturalist,
+#                uncertainty >= OCC_OBSCURED_MIN_UNCERT_M (bg_obscured)
+#   "uncert"   = the iNaturalist records of the clean background with
+#                uncert_set in SDM_BG_UNCERT_SETS (the 5 km background)
+# A record cannot be in the two parts: a part-"uncert" record passed step 6.
+# This block prints record counts only, not a count of 0.2 degree cells
+# (scripts/09 STEP 14.1 counts the cells after the model-cell rule).
+inat_a  <- bg_obscured
+inat_b  <- bg_kept & bg_is_inat & bg_uset %in% SDM_BG_UNCERT_SETS
+inat_ab <- inat_a | inat_b
+inat_cell <- occ_cell02(bg_d$lon[inat_ab], bg_d$lat[inat_ab],
+                        OCC_OBSCURED_CELL_DEG)
+stopifnot(
+  "the two parts of the iNaturalist background must not share a record" =
+    !any(inat_a & inat_b),
+  "each record of the two parts must be of the iNaturalist dataset" =
+    all(bg_d$datasetKey[inat_ab] == SDM_BG_DATASET_KEY),
+  "the obscured part must be the obscured row of the background sets" =
+    sum(inat_a) == bg_sets$records[bg_sets$subset == "obscured"] &&
+    nrow(unique(inat_cell[inat_a[inat_ab], , drop = FALSE])) ==
+      bg_sets$n_cells[bg_sets$subset == "obscured"],
+  "each record of the two parts must have a 0.2 degree cell" =
+    !anyNA(inat_cell$cell02_lon_deg) && !anyNA(inat_cell$cell02_lat_deg)
+)
+bg_inat <- bg[inat_ab, ]
+bg_inat <- sf::st_sf(
+  gbifID         = bg_inat$gbifID,
+  datasetKey     = bg_inat$datasetKey,
+  part           = ifelse(inat_a[inat_ab], "obscured", "uncert"),
+  order          = bg_inat$order,
+  family         = bg_inat$family,
+  year           = as.integer(bg_inat$year_num),
+  uncert_m       = bg_inat$uncert_m,
+  uncert_set     = bg_uset[inat_ab],
+  cell02_lon_deg = inat_cell$cell02_lon_deg,
+  cell02_lat_deg = inat_cell$cell02_lat_deg,
+  geometry       = sf::st_geometry(bg_inat)
+)
+write_processed_vec(bg_inat, bg_inat_out, dir = DIR_PROCESSED)
+back <- sf::st_drop_geometry(sf::st_read(file.path(DIR_PROCESSED, bg_inat_out),
+                                         quiet = TRUE))
+if (nrow(back) != nrow(bg_inat) ||
+    !setequal(occ_id_chr(back$gbifID), occ_id_chr(bg_inat$gbifID)) ||
+    sum(back$part == "obscured") != sum(inat_a) ||
+    sum(back$part == "uncert") != sum(inat_b)) {
+  stop("Read-back check failed for ", bg_inat_out, ".", call. = FALSE)
+}
+cat("iNaturalist background layer (Decision 23 r2) read back: the same",
+    "records.\n  records: obscured", sum(inat_a), "| uncert", sum(inat_b),
+    "\n")
+
 all_attr <- rbind(tg_attr, bg_attr)
 all_byds <- rbind(tg_byds, bg_byds)
 all_sets <- rbind(sets_tbl, bg_sets)
@@ -1087,7 +1187,8 @@ write_table(taxa_tbl, nn = 15, slug = "background_taxa")
 
 rule(paste0("STEP 13.3 complete: the background is cleaned by the same rule ",
             "(Decision 21 point 7).\nThe four tbl_15 tables now hold the ",
-            "tiger rows and the background rows."))
+            "tiger rows and the background rows.\nThe iNaturalist ",
+            "background of Decision 23 is written for scripts/09."))
 
 }  # end if (RUN_CLEANING && RAW_STAGE == counts), STEP 13.3
 
