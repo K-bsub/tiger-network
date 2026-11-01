@@ -1248,6 +1248,34 @@ date writes one more file.
 **As built (2026-10-25):** `tiger_sdm_maxnet_cell02_20261025.rds`; `lq`,
 multiplier 1; 104 presence cells, 1,486 background cells.
 
+*(2026-11-01, task 15.3: this file is the model file of the record
+(`SDM_PRED_MODEL_FILE`, Decision 25 a1). With the switch `RUN_FIT` =
+`FALSE` (process choice w1 of task 15.2), `scripts/09` skips STEP 14.2 and
+writes no model file; STEP 14.3 and STEP 15.1 read this file. With `TRUE`,
+STEP 14.2 writes one more dated file, and STEP 14.3 checks that its
+coefficients are those of this file.)*
+
+## sdm_prediction_cell02.csv  *(data/processed; Week 15 — built, task 15.3; gitignored)*
+
+Written by `scripts/09` STEP 15.1 (Decision 25 points 1 to 3; process
+choice l1 of task 15.2). The prediction of the model file of the record over
+the model cells: cloglog, with clamping. One row per model cell, ordered by
+`id`. No geometry; the figures join it to `sdm_grid_cell02_7755.gpkg` by
+`id`. **No presence or background field.** It holds the 0.2° cell id, so it
+stays under `data/`; no table holds a row of it. Written, then read back and
+checked (`sdm_pred_layer_checks()`). Each run of STEP 15.1 writes it again.
+
+**As built (2026-11-01):** 6,969 rows; 32 rows with `out_of_range` =
+`TRUE`.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `id` | integer | Cell id, as in `sdm_grid_cell02_7755.gpkg`. A position at 0.2°: never in a table |
+| `value` | numeric | The model output, cloglog with clamping (Decision 25 a1). Relative; not a probability of presence |
+| `rank` | integer | 1 = the highest value; a tie goes to the lower `id` first (Decision 25 point 3) |
+| `class` | integer | 1 to 5 (`SDM_PUB_N_CLASSES`): 5 − floor(5 × (`rank` − 1) / 6,969). Class 5 holds the highest 20 % (1,394 cells), the top set of the sensitivity rule |
+| `out_of_range` | logical | `TRUE` if one or more covariates of the cell is below `varmin` or above `varmax` of the model object (Decision 25 b2). A value equal to a limit is inside. By the definition, no presence or background cell is `TRUE` (a guard of STEP 15.1 checks it) |
+
 ## osm_zoos_7755.gpkg  *(data/raw/osm; Week 13 — built, task 13.3; gitignored)*
 
 Written by `scripts/01` Block 6 (zoo block). OpenStreetMap features with
@@ -1594,11 +1622,95 @@ before it is written.
 
 **As built (2026-10-25):** 133 rows; 133 pass.
 
+*(2026-11-01, task 15.3, process choices w1 and c1 of task 15.2: check m1
+reads the model file of the record (`SDM_PRED_MODEL_FILE`); with `RUN_FIT`
+= `TRUE`, one more row checks the coefficients of the fit of the run
+against that file (134 rows). The publish checks scan the six tables of
+STEPs 14.1–14.2 only. As built (2026-11-01), with `RUN_FIT` = `FALSE`: 133
+rows; 133 pass.)*
+
 | Field | Type | Meaning |
 |---|---|---|
 | `group` | character | `test case`, `presence`, `background`, `grid`, `covariates`, `model`, `cv`, `sensitivity` or `publish` |
 | `check` | character | What is checked. For `test case`: the STEP and the name of the hand-made check |
 | `value` | character | What the check found: a count, "n of m records fail", the largest relative difference of the second path, or the names that were compared |
 | `pass` | logical | `TRUE` if the check passes. Two values agree if their difference is `SDM_QA_REL_TOL` × max(1, \|value\|) or less |
+
+## tbl_16_sdm_prediction.csv  *(Week 15 — built, task 15.3)*
+
+Written by `scripts/09` STEP 15.1 (Decision 25 points 2 and 3; Decision 24
+point 8; process choice t1 of task 15.2). One long table of statistics: the
+gate, the value, the classes and the cells outside the training range.
+Statistics only: no cell id, no corner. If the gate is closed, the table
+holds the three gate rows only, and the script stops (no layer).
+
+**As built (2026-11-01):** 36 rows; the gate is open (mean test Boyce
+index 0.668).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `group` | character | `gate`, `cells`, `value`, `class` or `range` |
+| `item` | character | `gate`: `mean_test_boyce`, `gate_value`, `result`. `cells`: `model_cells`. `value`: `min`, `median` (the median of r2, Decision 24 point 9), `max`. `class`: `class_<k>_cells`, `class_<k>_value_min`, `class_<k>_value_max` for k = 5 to 1, and `cells_tied_across_breaks`. `range`: `cells_outside`, and `<covariate>_below_min`, `<covariate>_above_max` for each kept covariate |
+| `value` | numeric | The statistic: a count, a cloglog value, or the Boyce index and the gate value. `NA` on the row `result` |
+| `reading` | character | What the row is: for `result`, the reading of the gate; for a class, its share of the model cells and its ranks |
+
+## tbl_16_sdm_reserve_check.csv  *(Week 15 — built, task 15.4)*
+
+Written by `scripts/09` STEP 15.2 (Decision 24 point 9; Decision 25 points
+8 and 9; process choice t1 of task 15.2). One long table: the reserve
+counts, r1, r2 and the counts of z1. Statistics only: no reserve name, no
+reserve column, no cell id (check s1 of task 14.6; a guard of STEP 15.2).
+The r2 counts and share are in the table only if each count of the 2 × 2
+table is 3 or more (Decision 25 point 9, y1); otherwise one row says so.
+
+**As built (2026-11-01):** 14 rows; r1 "agrees"; r2 not published; z1 0.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `group` | character | `reserves`, `cells`, `r1`, `r2` or `z1` |
+| `item` | character | `reserves`: `all`, `with_polygon`, `with_value`, `with_value_and_density`. `cells`: `cells_1km_used`, `cells_1km_no_value` (summed over the reserves; a cell in two polygons counts in each). `r1`: `rho`, `n`, `p_value`, `result`. `r2`: `result`, and only if published `reserves_no_presence_cell`, `of_these_above_median`, `share`. `z1`: `kind_a`, `kind_b`, `total` |
+| `value` | numeric | The count or the statistic; `NA` on a row `result` |
+| `reading` | character | What the row is; for `result`, the reading (r1: `agrees` or `no agreement shown`; r2: published or not) |
+
+## tbl_17_reserve_suitability.csv  *(Week 15 — built, task 15.4; publishable)*
+
+Written by `scripts/09` STEP 15.2 (Decision 25 point 7; process choices n1
+and k1 of task 15.2). One row per reserve of `boundary_reserves_all_7755.gpkg`
+(58), ordered by `unit_id`. The reserve value is a mean of the published
+model output over the reserve polygon (the core protected-area outline,
+Decision 4). **No presence column**, and no column from which a presence
+state follows (Decision 25 point 9). Checked before the write
+(`sdm_reserve_table_checks()`, `assert_publishable_table()`).
+
+**As built (2026-11-01):** 58 rows; 56 with a value.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `unit_id` | integer | Reserve key (naming §5) |
+| `unit_name`, `state`, `landscape_complex` | character | From the reserve layer |
+| `cloglog_mean` | numeric | The reserve value: the mean of the model output (cloglog, with clamping) over the complete-case 1 km cells whose centre is in the polygon or on its edge, each with the value of its 0.2° cell (Decision 24 point 9; Decision 25 point 8). Relative; not a probability of presence. `NA` for a reserve with no polygon or no 1 km cell with a value |
+| `cloglog_rank` | integer | The rank of `cloglog_mean` over the reserves with a value: 1 = the highest; a tie gets the lowest rank number (`SDM_PUB_RANK_TIES`). `NA` with no value |
+| `density_2022` | numeric | Tigers per 100 km² of the notified total area (Decision 8; `stats_reserve_census_7755.gpkg`). `0` is a real zero |
+| `n_1km_cells_used` | integer | The 1 km cells of the reserve value. `NA` for a reserve with no polygon |
+| `n_1km_cells_no_value` | integer | The complete-case 1 km cells inside the polygon in a 0.2° cell that is not a model cell (left out of the mean). `NA` for a reserve with no polygon |
+
+## tbl_16_sdm_pred_qa.csv  *(Week 15 — built, task 15.5)*
+
+Written by `scripts/09` STEP 15.3 (Decision 25, "Consequences"; process
+choices q1 and c1 of task 15.2). One row per check. Written first; then a
+`FALSE` in `pass` stops the script. A second path: the `sdm_qa_*`
+functions of task 15.5, which call no function of STEPs 15.1–15.2. The
+step reads files only. Counts and statistics only: no reserve name and no
+cell id (the table checks itself before it is written); no r2 count when
+r2 is not published.
+
+**As built (2026-11-01):** 84 rows; 84 pass.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `group` | character | `test case`, `prediction`, `classes`, `reserves`, `r1`, `r2`, `z1`, `info` or `publish` |
+| `check` | character | What is checked. For `test case`: the STEP and the name of the hand-made check. The row of `info` is the information count of task 15.5 (the reserves with valued 1 km cells outside the training range) and always passes |
+| `value` | character | What the check found: a count, the largest relative difference of the second path, or the names that were compared |
+| `pass` | logical | `TRUE` if the check passes (tolerance `SDM_QA_REL_TOL`) |
 
 *(Further layers — sdm — documented as they are built.)*

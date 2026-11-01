@@ -843,6 +843,8 @@ SDM_BOYCE_GATE <- 0
 # reserve value and density_2022 ("agrees" if rho > 0 and p < SDM_RESERVE_P);
 # r2 the reserves with no presence cell (counts and a share only; no reserve
 # name with a presence state).
+# (2026-10-31: Decision 25 point 8 reads which 1 km cells are used —
+# SDM_RESERVE_CELL_RULE and SDM_RESERVE_NONMODEL below.)
 SDM_RESERVE_CHECK <- c("census_density", "no_presence_reserves")
 SDM_RESERVE_P     <- 0.05         # judgement value
 
@@ -870,6 +872,97 @@ SDM_MODEL_NAME <- c(species = "tiger", model = "sdm_maxnet_cell02")
 # projection EPSG:7755 -> EPSG:4326). Check tolerances, not analysis values.
 SDM_QA_REL_TOL <- 1e-9
 SDM_QA_DEG_TOL <- 1e-7
+
+# ---- Stage 3: prediction and publication (Decision 25, 2026-10-31) ----------
+# Fixed BEFORE any prediction is written to a file or seen. See
+# docs/methodology.md, Decision 25, for the sources, the reasons and what was
+# seen. Fork codes: a1, b2, c1 (n5), d1, e1, f3 (two figures), t1, h1;
+# point 9 (task 15.2): y1, z1. scripts/09 (Week 15) and the Week-16 figure code read these; do not repeat
+# the values as literals in any script.
+#   cells  = the 6,969 model cells only (Decision 23 point 3)
+#   value  = cloglog with clamping, from the model file named below
+#   flag   = out of range: one or more covariates below varmin or above
+#            varmax of the model object (a value at a limit is inside)
+#   class  = K - floor(K x (r - 1) / n); r = the rank of the value (1 = the
+#            highest; a tie to the lower cell id); n = the model cells
+#   output = two static figures, a reserve table and tables of statistics;
+#            no layer before the Week-18 rule (pending "Published layers")
+
+# (1) Model file, output type and clamping (a1). The file of the record, not
+# a model that a run fits again (each run of scripts/09 writes one more dated
+# file: process choice w1 of task 14.5). The file is in SDM_MODEL_DIR.
+SDM_PRED_MODEL_FILE <- "tiger_sdm_maxnet_cell02_20261025.rds"
+SDM_PRED_TYPE       <- SDM_EVAL_TYPE      # "cloglog"
+SDM_PRED_CLAMP      <- TRUE               # the predict.maxnet() default
+
+# (2) Cells outside the training range (b2). Each model cell gets the flag;
+# the counts are reported (all cells; for each covariate, below varmin and
+# above varmax). No limit on the counts. The reserve check uses the clamped
+# values of all cells.
+SDM_PRED_FLAG_RANGE <- TRUE
+
+# (3) Classes (c1, n5): equal-count classes by rank. Class K holds the
+# highest values; with n = 6,969: 1,394 cells in each of classes 5 to 2,
+# 1,393 in class 1. Class K = the top-SDM_SENS_TOP_SHARE set of
+# sdm_compare(). The legend gives the classes by rank and no value.
+SDM_PUB_N_CLASSES  <- 5L                  # judgement value (range 3 to 7)
+SDM_PUB_CLASS_RULE <- "rank_equal_count"  # the one rule that the code builds
+
+# (4) Published form (d1). No layer in Week 15: the prediction layer (cell
+# id, value, class, flag; no presence or background field) stays under
+# data/processed/ (gitignored). Tier T1 (sensitive-data policy section 2).
+SDM_PUB_LAYER <- FALSE
+
+# (5) Caption (e1): the nine items of Decision 25 point 5; drafted in Week
+# 16 and marked as a draft. No setting.
+
+# (6) Figures (f3: two figures), at national scale, with the reserve
+# outlines and the state boundaries; no presence or background mark. The
+# slugs are set in Week 16 (a slug does not hold "tiger").
+SDM_PUB_FIG_CLASS   <- 4L                 # fig_04_<slug>.png: the classes
+SDM_PUB_FIG_VALUE   <- 5L                 # fig_05_<slug>.png: the value
+SDM_PUB_VALUE_LABEL <- paste("model output (cloglog), relative;",
+                             "not a probability of presence")
+SDM_PUB_HATCH       <- TRUE               # the flag of (2), on both figures
+
+# (7) Reserve table (t1): one row for each reserve of
+# boundary_reserves_all_7755.gpkg (58 rows; key unit_id): unit_id,
+# unit_name, state, the reserve value and its rank, density_2022, the 1 km
+# cells used, the 1 km cells with no value. No presence column. Number,
+# slug, column names, rounding and the tie rule of the rank: task 15.2.
+# (2026-10-31, task 15.2: tbl_17_reserve_suitability.csv (n1); the columns
+# of k1 with landscape_complex; full precision; SDM_PUB_RANK_TIES below.)
+SDM_PUB_RESERVE_TABLE <- TRUE
+
+# (8) Cells of the reserve check (h1; a reading of Decision 24 point 9). A
+# complete-case 1 km cell is inside a polygon if its centre is inside it or
+# on its edge. A 1 km cell whose 0.2 degree cell is not a model cell has no
+# value: it is left out of the mean and counted for each reserve. A reserve
+# with no cell that has a value gets no value and is not in r1 or r2.
+SDM_RESERVE_CELL_RULE <- "centre"
+SDM_RESERVE_NONMODEL  <- "exclude_and_count"
+
+# (9) The presence state of a reserve in the published outputs (y1, z1;
+# added 2026-10-31 in task 15.2, before any result).
+#   r2  (y1): over the reserves with a value, the 2 x 2 count (value above the
+#             median of the model cells or not x with or without a presence
+#             cell). r2 is published only if each of the four counts is
+#             SDM_PUB_R2_MIN_N or more; 0 is also below the limit. Otherwise
+#             the table, the console and the docs say "r2 not published" and
+#             give no count.
+#   z1      : the reserves with a polygon whose 1 km cells with a value are
+#             all outside the training range, or that have no 1 km cell
+#             with a value. The QA count must be 0; otherwise the script
+#             stops and the author decides. No setting.
+SDM_PUB_R2_MIN_N <- KDE_SMALL_N           # 3, the value of Decision 22 point 9
+
+# Process choices of task 15.2 (2026-10-31) that set a value:
+#   k1  the rank of the reserve value in the reserve table: a tie gets the
+#       lowest rank number (base::rank(-x, ties.method = SDM_PUB_RANK_TIES))
+#   p1  the p-value of r1: stats::cor.test(method = "spearman", exact =
+#       SDM_RESERVE_P_EXACT) in each case, with or without ties
+SDM_PUB_RANK_TIES   <- "min"
+SDM_RESERVE_P_EXACT <- FALSE
 
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a

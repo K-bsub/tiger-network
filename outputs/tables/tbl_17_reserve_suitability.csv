@@ -1,0 +1,59 @@
+"unit_id","unit_name","state","landscape_complex","cloglog_mean","cloglog_rank","density_2022","n_1km_cells_used","n_1km_cells_no_value"
+1,"Nagarjunsagar-Srisailam","Andhra Pradesh","central_india_eastern",0.64273323524753,36,1.76,2380,0
+2,"Namdapha","Arunachal Pradesh","northeast_hills",0.366681798334939,53,0.05,1279,454
+3,"Pakke","Arunachal Pradesh","northeast_hills",0.552151449720467,47,0.5,621,0
+4,"Kamlang","Arunachal Pradesh","northeast_hills",0.180297627561043,56,0,682,0
+5,"Manas","Assam","northeast_hills",0.67038547246393,31,2.04,2487,260
+6,"Nameri","Assam","northeast_hills",0.752223413014164,20,0.65,369,0
+7,"Kaziranga","Assam","northeast_hills",0.797543764348521,10,8.86,402,0
+8,"Orang","Assam","northeast_hills",0.581279596339929,43,3.25,71,0
+9,"Valmiki","Bihar","shivalik_gangetic",0.763967461694296,15,6,571,203
+10,"Indravati","Chhattisgarh","central_india_eastern",0.459747121210553,50,0.04,1266,0
+11,"Udanti-Sitanadi","Chhattisgarh","central_india_eastern",0.770191318370381,14,0.05,836,0
+12,"Achanakmar","Chhattisgarh","central_india_eastern",0.774891243330989,13,0.55,531,0
+13,"Guru Ghasidas-Tamor Pingla","Chhattisgarh","central_india_eastern",0.784836016205637,11,NA,2013,0
+14,"Palamau","Jharkhand","central_india_eastern",0.754399433004367,19,0.09,1071,0
+15,"Bandipur","Karnataka","western_ghats",0.758608537511855,18,10.3,904,0
+16,"Bhadra","Karnataka","western_ghats",0.720782897116945,26,2.63,497,0
+17,"Kali","Karnataka","western_ghats",0.505310912839269,49,1.55,670,0
+18,"Nagarhole","Karnataka","western_ghats",0.733971912482788,22,11.69,712,0
+19,"Biligiri Ranganatha Temple","Karnataka","western_ghats",0.832740441200982,9,6.44,591,0
+20,"Periyar","Kerala","western_ghats",0.664961097959143,32,3.24,795,0
+21,"Parambikulam","Kerala","western_ghats",0.639917208825556,37,4.82,297,0
+22,"Kanha","Madhya Pradesh","central_india_eastern",0.922402573959856,2,5.12,904,0
+23,"Pench","Madhya Pradesh","central_india_eastern",0.916393680164655,3,6.53,124,0
+24,"Bandhavgarh","Madhya Pradesh","central_india_eastern",0.846609161858863,7,8.78,438,0
+25,"Panna","Madhya Pradesh","central_india_eastern",0.605464089906034,39,3.44,546,0
+26,"Satpura","Madhya Pradesh","central_india_eastern",0.718242559483718,27,2.34,446,0
+27,"Sanjay Dubri","Madhya Pradesh","central_india_eastern",0.852938122316478,6,0.96,774,0
+28,"Veerangana Durgavati","Madhya Pradesh","central_india_eastern",0.53214997202456,48,NA,24,0
+29,"Ratapani","Madhya Pradesh","central_india_eastern",0.735704747791567,21,NA,779,0
+30,"Madhav","Madhya Pradesh","central_india_eastern",0.410855533789887,51,NA,321,0
+31,"Melghat","Maharashtra","central_india_eastern",0.730595120748304,23,2.06,1171,0
+32,"Tadoba-Andhari","Maharashtra","central_india_eastern",0.781634649543007,12,5.61,595,0
+33,"Pench (MH)","Maharashtra","central_india_eastern",0.871868749111397,4,6.48,505,0
+34,"Sahyadri","Maharashtra","western_ghats",0.663358548111594,34,0,742,0
+35,"Nawegaon-Nagzira","Maharashtra","central_india_eastern",0.841954154608938,8,0.58,290,0
+36,"Bor","Maharashtra","central_india_eastern",0.707111813598407,28,1.1,80,0
+37,"Dampa","Mizoram","northeast_hills",0.36206438200274,54,0,281,0
+38,"Similipal","Odisha","central_india_eastern",0.728688178647564,24,0.58,2266,0
+39,"Satkosia","Odisha","central_india_eastern",0.596081937427152,40,0,633,0
+40,"Ranthambore","Rajasthan","shivalik_gangetic",0.554831424974343,46,4.04,358,0
+41,"Sariska","Rajasthan","shivalik_gangetic",0.591676994297769,41,1.57,845,0
+42,"Mukundara Hills","Rajasthan","shivalik_gangetic",0.371955394607429,52,0.13,316,0
+43,"Ramgarh Vishdhari","Rajasthan","shivalik_gangetic",0.337596181174313,55,0.07,285,0
+44,"Dholpur-Karauli","Rajasthan","shivalik_gangetic",NA,NA,NA,NA,NA
+45,"Kalakad-Mundanthurai","Tamil Nadu","western_ghats",0.763008020397092,16,0.31,460,0
+46,"Anamalai","Tamil Nadu","western_ghats",0.580426196362323,44,1.08,1009,0
+47,"Mudumalai","Tamil Nadu","western_ghats",0.628018160004537,38,16.56,352,0
+48,"Sathyamangalam","Tamil Nadu","western_ghats",0.659308213638395,35,6.04,582,0
+49,"Srivilliputhur-Megamalai","Tamil Nadu","western_ghats",0.722765794245068,25,1.18,830,0
+50,"Kawal","Telangana","central_india_eastern",0.867332287155969,5,0,945,0
+51,"Amrabad","Telangana","central_india_eastern",0.584247614879593,42,0.46,2708,0
+52,"Dudhwa","Uttar Pradesh","shivalik_gangetic",0.673223696605732,30,6.13,487,193
+53,"Pilibhit","Uttar Pradesh","shivalik_gangetic",NA,NA,8.63,NA,NA
+54,"Ranipur","Uttar Pradesh","shivalik_gangetic",0.759610278399965,17,0.76,235,0
+55,"Corbett","Uttarakhand","shivalik_gangetic",0.66483671474508,33,20.18,801,0
+56,"Rajaji","Uttarakhand","shivalik_gangetic",0.695064804337145,29,5.02,848,0
+57,"Sundarbans","West Bengal","sundarbans",0.941178711365603,1,NA,1340,445
+58,"Buxa","West Bengal","northeast_hills",0.564654067306058,45,0.13,348,9

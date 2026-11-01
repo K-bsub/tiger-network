@@ -64,8 +64,42 @@
 #              column or name in a tbl_16 table. Reads files only; runs in
 #              each run after STEP 14.2; a FALSE stops the script after the
 #              table is written (as STEP 13.5 of scripts/08)
-#   Weeks 15-16: the prediction, the validation, the Gi* of Decision 23
-#              point 8 and the figures (planned in task 14.7)
+#   Decision 25 (task 15.1, 2026-10-31): the prediction and its published
+#              form (point 9 added in task 15.2)
+#   Process choices of task 15.2 (2026-10-31): w1 the switch RUN_FIT
+#              (FALSE: STEP 14.2 is skipped; the later STEPs read the model
+#              file of the record, SDM_PRED_MODEL_FILE); l1 the layer
+#              sdm_prediction_cell02.csv; n1 the reserve table tbl_17; c1
+#              STEP 14.3 scans its six tables only, STEP 15.3 the Week-15
+#              tables; t1 the Week-15 tables; k1, e1, p1, q1 (STEPs 15.2 and
+#              15.3)
+#   STEP 15.1 (task 15.3)  the prediction of the main model (the model file
+#              of the record; cloglog with clamping) over the model cells;
+#              the cells outside the training range; the rank and the class;
+#              the gate of Decision 24 point 8 -> the layer
+#              sdm_prediction_cell02.csv and tbl_16_sdm_prediction.csv; h1 a
+#              hand-made case first (sdm_self_test_151()).
+#              Ran 2026-11-01: the gate open (mean test Boyce 0.668); 6,969
+#              model cells; classes of 1,394 (5 to 2) and 1,393 (1) cells; 32
+#              cells outside the training range; QA of STEP 14.3 133 of 133
+#              with RUN_FIT = FALSE
+#   STEP 15.2 (task 15.4)  the reserve check of Decision 24 point 9 with
+#              Decision 25 points 7 to 9: the 1 km cells of each reserve by
+#              the centre rule (e1); the reserve values; r1 (p1); r2 under
+#              the rule of point 9 (y1); the counts of the two kinds of z1
+#              -> tbl_16_sdm_reserve_check.csv and
+#              tbl_17_reserve_suitability.csv (n1, k1); h1 a hand-made case
+#              first (sdm_self_test_152()).
+#              Ran 2026-11-01: 56 of 58 reserves with a value; r1 rho 0.379,
+#              n 51, p 0.00614 -> "agrees"; r2 not published; z1 0
+#   STEP 15.3 (task 15.5)  QA of Decision 25 -> tbl_16_sdm_pred_qa.csv (q1,
+#              c1 of task 15.2): the hand-made cases of STEPs 15.1-15.3; a
+#              second path (the sdm_qa_* functions of task 15.5; no sdm_*
+#              function of STEPs 15.1-15.2); the publish scans of the Week-15
+#              tables; an information count of the hatched valued 1 km cells
+#              of the reserves (author's choice, task 15.5). Written first;
+#              then a FALSE stops the script
+#   Week 16: the Gi* of Decision 23 point 8 and the figures
 #
 # SENSITIVE DATA (docs/sensitive-data-policy.md; Decision 23 point 9):
 #   The obscured set and each layer made from it are tier T1 and stay under
@@ -127,13 +161,56 @@
 #
 # INPUTS (STEP 14.3, task 14.6): the layers, the grid, the cell-id raster,
 #   the stack and the settlement surface (as above); the covariate table; the
-#   model file of this run; the tbl_16 tables; tbl_10;
+#   model file of the record (SDM_PRED_MODEL_FILE; until task 15.3: the model
+#   file of this run); the six tbl_16 tables of STEPs 14.1-14.2; tbl_10;
 #   data/processed/boundary_reserves_all_7755.gpkg (unit_name, for check s1);
 #   .gitignore (check p1 d).
 #
 # OUTPUTS (STEP 14.3; process choices t1 of task 14.2, c1, h1, p1):
 #   outputs/tables/tbl_16_sdm_qa.csv   group, check, value, pass. One row per
 #     check. Written first; then any FALSE in `pass` stops the script.
+#
+# INPUTS (STEP 15.1, task 15.3): the model file of the record; the covariate
+#   table; the grid; the obscured layer and the iNaturalist background (for
+#   a guard only: no presence or background cell is outside the training
+#   range); outputs/tables/tbl_16_sdm_cv.csv (the row mean: the gate).
+#
+# OUTPUTS (STEP 15.1, task 15.3; process choices l1, t1 of task 15.2):
+#   data/processed/sdm_prediction_cell02.csv   one row per model cell: id,
+#     value (cloglog, with clamping), rank (1 = the highest value), class
+#     (1-5; 5 = the highest), out_of_range. No geometry, no presence or
+#     background field. Gitignored
+#   outputs/tables/tbl_16_sdm_prediction.csv   group, item, value, reading:
+#     the gate; the minimum, median and maximum of the value; each class with
+#     its size and value range; the cells outside the training range, all and
+#     by covariate. Statistics only: no cell id, no corner
+#
+# INPUTS (STEP 15.2, task 15.4): the reserve layer (boundary_reserves_all;
+#   unit_id, unit_name, state, landscape_complex, geometry_present); the
+#   census layer stats_reserve_census_7755.gpkg (density_2022, by unit_id);
+#   the prediction layer of STEP 15.1; the cell-id raster; the obscured layer
+#   (the presence cells, for r2 only).
+#
+# OUTPUTS (STEP 15.2, task 15.4; process choices n1, t1, k1 of task 15.2):
+#   outputs/tables/tbl_16_sdm_reserve_check.csv   group, item, value,
+#     reading: the reserve counts; r1 (rho, n, p, the reading); r2 (its
+#     counts and share only if each count of the 2 x 2 table is 3 or more,
+#     Decision 25 point 9); the counts of the two kinds of z1. Statistics
+#     only: no reserve name, no reserve column, no cell id
+#   outputs/tables/tbl_17_reserve_suitability.csv  publishable; one row per
+#     reserve (58), by unit_id: unit_id, unit_name, state, landscape_complex,
+#     cloglog_mean, cloglog_rank, density_2022, n_1km_cells_used,
+#     n_1km_cells_no_value. No presence column
+#
+# INPUTS (STEP 15.3, task 15.5): the model file of the record, the covariate
+#   table, the grid, the cell-id raster, the obscured layer and the
+#   iNaturalist background, the reserve and census layers, the prediction
+#   layer, tbl_16_sdm_cv.csv and the three Week-15 tables; .gitignore.
+#
+# OUTPUTS (STEP 15.3; process choices q1, c1 of task 15.2):
+#   outputs/tables/tbl_16_sdm_pred_qa.csv   group, check, value, pass. One
+#     row per check. Written first; then any FALSE in `pass` stops the
+#     script. Counts and statistics only: no reserve name, no cell id
 #
 # SETTINGS: the SDM_* values (Decision 23) and the OCC_* values that Decision
 #   23 reuses come from R/00_config.R. Do not repeat a value as a literal.
@@ -176,6 +253,17 @@ RUN_GRID <- FALSE
 # cells).
 RUN_COVARIATES <- FALSE
 
+# ---- Run switch (process choice w1, task 15.2, 2026-10-31) ---------------------
+# TRUE  : STEP 14.2 runs as in Week 14 (the 19 fits, the five STEP-14.2
+#         tables, a model file with the date of the run), and STEP 14.3 also
+#         checks that the fit of this run has the coefficients of the model
+#         file of the record.
+# FALSE : STEP 14.2 is skipped: no fit, and no STEP-14.2 table or model file
+#         is written. STEP 14.3 and the Week-15 STEPs read the model file of
+#         the record, SDM_PRED_MODEL_FILE (Decision 25 a1).
+# 2026-10-31: FALSE — the model of the record is fixed by Decision 25.
+RUN_FIT <- FALSE
+
 # ---- Paths ------------------------------------------------------------------
 stack_in    <- file.path(DIR_PROCESSED, "cov_stack_1km_7755.tif")
 obscured_in <- file.path(DIR_PROCESSED, "occ_tiger_gbif_obscured_7755.gpkg")
@@ -189,10 +277,22 @@ grid_out    <- "sdm_grid_cell02_7755.gpkg"     # in DIR_PROCESSED
 cellid_out  <- "sdm_cellid_1km_7755.tif"       # in DIR_PROCESSED
 # STEP 14.2 (q1, Decision 24 point 10)
 cov_out     <- "sdm_covariates_cell02.csv"     # in DIR_PROCESSED
+cov_path    <- file.path(DIR_PROCESSED, cov_out)
 settl_in    <- file.path(DIR_PROCESSED, "kde_settlement_citytown_1km_7755.tif")
+# The model file of the record (Decision 25 a1; w1 of task 15.2). STEP 14.3
+# and the Week-15 STEPs read it. With RUN_FIT = TRUE, STEP 14.2 writes one more
+# dated file (run_model_path).
+rec_model_path <- file.path(SDM_MODEL_DIR, SDM_PRED_MODEL_FILE)
+run_model_path <- NA_character_
 # STEP 14.3 (s1, p1)
 reserves_in  <- file.path(DIR_PROCESSED, "boundary_reserves_all_7755.gpkg")
 gitignore_in <- here(".gitignore")
+# STEP 15.1 (l1, t1 of task 15.2)
+pred_out  <- "sdm_prediction_cell02.csv"       # in DIR_PROCESSED
+pred_path <- file.path(DIR_PROCESSED, pred_out)
+cv_tbl_in <- file.path(DIR_TABLES, "tbl_16_sdm_cv.csv")
+# STEP 15.2 (n1, k1 of task 15.2)
+stats_in  <- file.path(DIR_PROCESSED, "stats_reserve_census_7755.gpkg")
 # Output table via write_table(nn = 16, slug = "sdm_counts")
 
 # Fields that the later STEPs use. The structure of the scripts/08 layers,
@@ -226,6 +326,26 @@ if (!RUN_GRID && !all(file.exists(file.path(DIR_PROCESSED,
                                              c(grid_out, cellid_out))))) {
   stop("RUN_GRID = FALSE needs ", grid_out, " and ", cellid_out, " in ",
        DIR_PROCESSED, " (a run with RUN_GRID <- TRUE writes them).",
+       call. = FALSE)
+}
+if (!is.logical(RUN_FIT) || length(RUN_FIT) != 1L || is.na(RUN_FIT)) {
+  stop("RUN_FIT must be TRUE or FALSE.", call. = FALSE)
+}
+if (RUN_COVARIATES && !RUN_FIT) {
+  stop("RUN_COVARIATES = TRUE needs RUN_FIT = TRUE (the covariate table is ",
+       "built in STEP 14.2).", call. = FALSE)
+}
+if (!file.exists(rec_model_path)) {
+  stop("The model file of the record is not on disk: ", rec_model_path,
+       " (SDM_PRED_MODEL_FILE, Decision 25 a1).", call. = FALSE)
+}
+if (RUN_FIT && identical(
+  normalizePath(file.path(SDM_MODEL_DIR, sprintf(
+    "%s_%s_%s.rds", SDM_MODEL_NAME[["species"]], SDM_MODEL_NAME[["model"]],
+    format(Sys.Date(), "%Y%m%d"))), winslash = "/", mustWork = FALSE),
+  normalizePath(rec_model_path, winslash = "/", mustWork = FALSE))) {
+  stop("RUN_FIT = TRUE today would write over the model file of the record (",
+       SDM_PRED_MODEL_FILE, "). Run on another day or keep RUN_FIT = FALSE.",
        call. = FALSE)
 }
 
@@ -484,8 +604,16 @@ if (is.na(SDM_GRAIN_OUTCOME)) {
 #   9. the model file (data/processed/, gitignored) and its check
 # The data rows are not written to any file. Console text and tables: counts
 # and statistics only (no cell id, no corner).
+# Process choice w1 of task 15.2: runs only with RUN_FIT = TRUE.
 
-if (SDM_GRAIN_OUTCOME %in% c("reduced_model", "planned_model")) {
+if (SDM_GRAIN_OUTCOME %in% c("reduced_model", "planned_model") && !RUN_FIT) {
+  rule(paste0("STEP 14.2 skipped (RUN_FIT = FALSE; w1 of task 15.2): no fit; ",
+              "the later STEPs read the model file of the record,
+",
+              SDM_PRED_MODEL_FILE, "."))
+}
+
+if (SDM_GRAIN_OUTCOME %in% c("reduced_model", "planned_model") && RUN_FIT) {
 
 rule("STEP 14.2 — covariates, AICc, main model, cross-validation, sensitivity runs (task 14.5)")
 t_step2 <- Sys.time()
@@ -506,7 +634,6 @@ if (!all(st2$pass)) {
 
 # ---- 2. Covariates of the model cells (q1, w1) ----------------------------------
 model_ids <- grid_d$id[grid_d$model]
-cov_path  <- file.path(DIR_PROCESSED, cov_out)
 if (RUN_COVARIATES) {
   settl_r <- terra::rast(settl_in)
   if (!isTRUE(terra::compareGeom(settl_r, stack_r, stopOnError = FALSE))) {
@@ -747,9 +874,9 @@ if (!sdm_object_ok(model_obj, n_min = length(p))) {
   stop("The model object has a part with the length of the data rows ",
        "(Decision 24 point 11). Nothing is saved.", call. = FALSE)
 }
-model_path <- save_model(model_obj, SDM_MODEL_NAME[["species"]],
-                         SDM_MODEL_NAME[["model"]], dir = SDM_MODEL_DIR)
-back_obj <- readRDS(model_path)
+run_model_path <- save_model(model_obj, SDM_MODEL_NAME[["species"]],
+                             SDM_MODEL_NAME[["model"]], dir = SDM_MODEL_DIR)
+back_obj <- readRDS(run_model_path)
 if (!identical(back_obj$model$betas, fit_main$betas)) {
   stop("Read-back check failed for the model file.", call. = FALSE)
 }
@@ -773,7 +900,7 @@ rule(paste0(
                          sep = " = ", collapse = " | "), "\n",
   "Model file under data/processed/ (gitignored)."))
 
-}  # end if (SDM_GRAIN_OUTCOME is a model outcome), STEP 14.2
+}  # end if (SDM_GRAIN_OUTCOME is a model outcome and RUN_FIT), STEP 14.2
 
 # =============================================================================
 # STEP 14.3 — QA (task 14.6; Decisions 23 and 24)
@@ -785,11 +912,17 @@ rule(paste0(
 # 14.3 as rows of the table; p1 the publish checks (a) to (d); s1 the
 # small-count rule of Decision 22 point 9 is for counts by reserve: no tbl_16
 # table may hold a reserve column or a reserve name.
+# Process choices of task 15.2 (2026-10-31): w1 check m1 reads the model file
+# of the record (SDM_PRED_MODEL_FILE); with RUN_FIT = TRUE, one more check:
+# the fit of this run has the coefficients of that file. c1 the publish
+# checks scan the six tables of STEPs 14.1-14.2 only; STEP 15.3 scans the
+# Week-15 tables.
 # As STEP 13.5 of scripts/08: the step reads its inputs from disk (not the
-# objects of STEP 14.2), runs in each run after STEP 14.2, and writes
-# tbl_16_sdm_qa.csv (group, check, value, pass) first; then any FALSE stops
-# the script. Groups: "test case", "presence", "background", "grid",
-# "covariates", "model", "cv", "sensitivity", "publish".
+# objects of STEP 14.2), runs in each run after STEP 14.2 (also when RUN_FIT
+# = FALSE skips STEP 14.2), and writes tbl_16_sdm_qa.csv (group, check,
+# value, pass) first; then any FALSE stops the script. Groups: "test case",
+# "presence", "background", "grid", "covariates", "model", "cv",
+# "sensitivity", "publish".
 # Console text: counts, names and statistics only.
 
 if (SDM_GRAIN_OUTCOME %in% c("reduced_model", "planned_model")) {
@@ -1013,11 +1146,21 @@ add_qa("covariates", "tbl_16_sdm_covariate_cor: above_limit is |r| > SDM_COR_MAX
 mf_all <- list.files(SDM_MODEL_DIR, pattern = paste0(
   "^", SDM_MODEL_NAME[["species"]], "_", SDM_MODEL_NAME[["model"]],
   "_[0-9]{8}\\.rds$"))
-add_qa("model", "the model file of this run is on disk (m1)",
-       sprintf("%s; %d other dated model file(s)", basename(model_path),
-               length(setdiff(mf_all, basename(model_path)))),
-       file.exists(model_path) && basename(model_path) %in% mf_all)
-mo <- readRDS(model_path)
+add_qa("model", "the model file of the record (SDM_PRED_MODEL_FILE) is on disk (m1; w1 of task 15.2)",
+       sprintf("%s; %d other dated model file(s)", SDM_PRED_MODEL_FILE,
+               length(setdiff(mf_all, SDM_PRED_MODEL_FILE))),
+       file.exists(rec_model_path) && SDM_PRED_MODEL_FILE %in% mf_all)
+mo <- readRDS(rec_model_path)
+if (RUN_FIT) {
+  mr <- readRDS(run_model_path)
+  b_same <- identical(names(mr$model$betas), names(mo$model$betas))
+  d <- if (b_same) sdm_qa_diff(as.numeric(mr$model$betas),
+                               as.numeric(mo$model$betas)) else Inf
+  add_qa("model", "RUN_FIT = TRUE: the fit of this run has the coefficients of the model file of the record (w1 of task 15.2)",
+         paste0(basename(run_model_path), "; ", diff_txt(d)),
+         b_same && agree(d))
+  rm(mr)
+}
 add_qa("model", "the object holds model, settings and versions",
        paste(names(mo), collapse = ", "),
        identical(names(mo), c("model", "settings", "versions")))
@@ -1152,14 +1295,15 @@ add_qa("sensitivity", "the label from rho and the top share; rho in [-1, 1], sha
          all(t_sen$top_overlap[ok_r] >= 0 & t_sen$top_overlap[ok_r] <= 1))
 
 # ---- 10. Publish checks (p1, s1) ---------------------------------------------------------
-f16 <- setdiff(list.files(DIR_TABLES, pattern = "^tbl_16_.*\\.csv$"),
-               "tbl_16_sdm_qa.csv")
+# c1 of task 15.2: the six tables of STEPs 14.1-14.2 only. STEP 15.3 scans
+# the Week-15 tables in the same run, after STEPs 15.1-15.2 write them.
 need16 <- paste0("tbl_16_", c("sdm_counts", "sdm_covariates",
                               "sdm_covariate_cor", "sdm_aicc", "sdm_cv",
                               "sdm_sensitivity"), ".csv")
+f16 <- need16[file.exists(file.path(DIR_TABLES, need16))]
 add_qa("publish", "the six tbl_16 tables of STEPs 14.1 and 14.2 are on disk",
-       sprintf("%d tbl_16 files besides the QA table", length(f16)),
-       all(need16 %in% f16))
+       sprintf("%d of %d tables", length(f16), length(need16)),
+       length(f16) == length(need16))
 num_ok16 <- c("value", "min", "mean", "max", "z1_water_1km_cells",
               "z1_floored_1km_cells", "z1_water_only_cells", "r", "regmult",
               "k", "loglik", "aicc", "delta_aicc", "blocks",
@@ -1192,9 +1336,10 @@ proc_root <- normalizePath(DIR_PROCESSED, winslash = "/", mustWork = FALSE)
 in_proc <- function(f) startsWith(normalizePath(f, winslash = "/",
                                                 mustWork = FALSE),
                                   paste0(proc_root, "/"))
-add_qa("publish", "(d) the model file and the covariate table are under data/processed/",
-       paste(basename(c(model_path, cov_path)), collapse = ", "),
-       in_proc(model_path) && in_proc(cov_path))
+mp_q <- c(rec_model_path, if (RUN_FIT) run_model_path)
+add_qa("publish", "(d) the model file(s) and the covariate table are under data/processed/",
+       paste(basename(c(mp_q, cov_path)), collapse = ", "),
+       all(vapply(c(mp_q, cov_path), in_proc, logical(1))))
 gi <- trimws(readLines(gitignore_in, warn = FALSE))
 add_qa("publish", "(d) .gitignore holds the line data/processed/**",
        sprintf("%d lines read", length(gi)), "data/processed/**" %in% gi)
@@ -1240,3 +1385,798 @@ rule(paste0("STEP 14.3 complete: QA ", nrow(qa_tbl), " of ", nrow(qa_tbl),
             "under data/ may be staged."))
 
 }  # end if (SDM_GRAIN_OUTCOME is a model outcome), STEP 14.3
+
+# =============================================================================
+# STEP 15.1 — the prediction, the classes, the flag and the gate (task 15.3;
+#             Decision 25 points 1 to 4; Decision 24 point 8)
+# =============================================================================
+# Process choices of task 15.2 (2026-10-31): w1 the model file of the
+# record; l1 the layer; t1 the table; h1 a hand-made case first. Runs only
+# with SDM_GRAIN_OUTCOME "reduced_model" or "planned_model", after STEP 14.3.
+#   1. maxnet 0.1.4; the settings of Decision 25; the hand-made case
+#      (sdm_self_test_151())
+#   2. the gate (Decision 24 point 8) from the row mean of tbl_16_sdm_cv.csv.
+#      Closed: the gate rows are written to tbl_16_sdm_prediction.csv and the
+#      script stops (no layer)
+#   3. the model file of the record and the covariate table of the model
+#      cells
+#   4. the prediction: cloglog with clamping (Decision 25 a1)
+#   5. the cells outside the training range (point 2); a guard: no presence
+#      or background cell is outside it
+#   6. the rank and the class (point 3)
+#   7. the layer data/processed/sdm_prediction_cell02.csv (gitignored), read
+#      back and checked
+#   8. tbl_16_sdm_prediction.csv (statistics only)
+# Console text: counts and statistics only (no cell id, no corner).
+
+if (SDM_GRAIN_OUTCOME %in% c("reduced_model", "planned_model")) {
+
+rule("STEP 15.1 — the prediction, the classes, the flag and the gate (task 15.3)")
+t_step151 <- Sys.time()
+
+# ---- 1. maxnet, the settings of Decision 25, the hand-made case (h1) ----------
+if (!requireNamespace("maxnet", quietly = TRUE) ||
+    as.character(utils::packageVersion("maxnet")) != "0.1.4") {
+  stop("STEP 15.1 needs maxnet 0.1.4 (renv::restore()).", call. = FALSE)
+}
+need25 <- c("SDM_PRED_MODEL_FILE", "SDM_PRED_TYPE", "SDM_PRED_CLAMP",
+            "SDM_PRED_FLAG_RANGE", "SDM_PUB_N_CLASSES", "SDM_PUB_CLASS_RULE",
+            "SDM_PUB_LAYER")
+miss25 <- need25[!vapply(need25, exists, logical(1))]
+if (length(miss25) > 0) {
+  stop("Setting(s) missing from R/00_config.R (Decision 25): ",
+       paste(miss25, collapse = ", "), call. = FALSE)
+}
+sdm_run_guards(list(
+  "SDM_PRED_TYPE must be SDM_EVAL_TYPE, cloglog (Decision 25 a1)" =
+    identical(SDM_PRED_TYPE, SDM_EVAL_TYPE) &&
+    identical(SDM_PRED_TYPE, "cloglog"),
+  "SDM_PRED_CLAMP must be TRUE (Decision 25 a1)" =
+    identical(SDM_PRED_CLAMP, TRUE),
+  "SDM_PRED_FLAG_RANGE must be TRUE (Decision 25 b2)" =
+    identical(SDM_PRED_FLAG_RANGE, TRUE),
+  "SDM_PUB_N_CLASSES must be 5 and SDM_PUB_CLASS_RULE rank_equal_count (Decision 25 c1, n5)" =
+    identical(SDM_PUB_N_CLASSES, 5L) &&
+    identical(SDM_PUB_CLASS_RULE, "rank_equal_count"),
+  "SDM_PUB_N_CLASSES x SDM_SENS_TOP_SHARE must be 1 (class 5 = the top set of the sensitivity rule)" =
+    isTRUE(all.equal(SDM_PUB_N_CLASSES * SDM_SENS_TOP_SHARE, 1)),
+  "SDM_PUB_LAYER must be FALSE (Decision 25 d1)" =
+    identical(SDM_PUB_LAYER, FALSE)
+), what = "the Decision-25 settings")
+st151 <- sdm_self_test_151()
+cat("hand-made case of STEP 15.1:", sum(st151$pass), "of", nrow(st151),
+    "checks pass.\n")
+if (!all(st151$pass)) {
+  stop("The hand-made case of STEP 15.1 failed:\n  ",
+       paste(st151$check[!st151$pass], collapse = "\n  "), call. = FALSE)
+}
+
+# ---- 2. The gate (Decision 24 point 8) -------------------------------------------
+if (!file.exists(cv_tbl_in)) {
+  stop("STEP 15.1 needs ", cv_tbl_in, ".", call. = FALSE)
+}
+cv_t <- utils::read.csv(cv_tbl_in, stringsAsFactors = FALSE)
+mean_boyce <- cv_t$boyce[cv_t$fold == "mean"]
+if (length(mean_boyce) != 1L) {
+  stop("tbl_16_sdm_cv.csv must have one row mean.", call. = FALSE)
+}
+gate_open <- sdm_gate_open(mean_boyce, SDM_BOYCE_GATE)
+cat("gate (Decision 24 point 8): mean test Boyce index", round(mean_boyce, 3),
+    if (gate_open) "is above" else "is at or below", SDM_BOYCE_GATE,
+    if (gate_open) "-> a suitability map is allowed.\n" else
+      "-> no suitability map.\n")
+if (!gate_open) {
+  g_tbl <- sdm_pred_summary(mean_boyce, gate = SDM_BOYCE_GATE)
+  occ_assert_counts_only(g_tbl, cols = c("group", "item", "value", "reading"),
+                         count_cols = character(0),
+                         name = "tbl_16_sdm_prediction.csv")
+  write_table(g_tbl, nn = 16, slug = "sdm_prediction")
+  stop("The gate of Decision 24 point 8 is closed: the model is not published ",
+       "as a suitability map, and no prediction layer is written. Stage 3 ",
+       "gives the effort result.", call. = FALSE)
+}
+
+# ---- 3. The model file of the record and the covariate table ---------------------
+mo_p   <- readRDS(rec_model_path)
+fit_p  <- mo_p$model
+covs_p <- mo_p$settings$covariates
+cov_p  <- utils::read.csv(cov_path)
+cov_p  <- cov_p[order(cov_p$id), ]
+rownames(cov_p) <- NULL
+model_ids_p <- sort(grid_d$id[grid_d$model])
+sdm_run_guards(list(
+  "the model file must hold model, settings and versions" =
+    identical(names(mo_p), c("model", "settings", "versions")),
+  "the model must be a maxnet fit of maxnet 0.1.4" =
+    inherits(fit_p, "maxnet") && identical(mo_p$versions$maxnet, "0.1.4"),
+  "the model must have varmin and varmax for each kept covariate (and no other)" =
+    length(covs_p) > 0 && setequal(names(fit_p$varmin), covs_p) &&
+    setequal(names(fit_p$varmax), covs_p),
+  "the covariate table must hold each model cell of the grid once" =
+    identical(as.numeric(cov_p$id), as.numeric(model_ids_p)),
+  "the covariate table must hold the kept covariates, with no NA" =
+    all(covs_p %in% names(cov_p)) && !anyNA(cov_p[, covs_p, drop = FALSE])
+), what = "the model file of the record and the covariate table")
+cat("model file:", SDM_PRED_MODEL_FILE, "|", length(covs_p), "covariates:",
+    paste(covs_p, collapse = ", "), "|", mo_p$settings$classes, "regmult",
+    mo_p$settings$regmult, "\n")
+
+# ---- 4. The prediction (Decision 25 a1) -------------------------------------------
+nd_p  <- cov_p[, covs_p, drop = FALSE]
+val_p <- sdm_pred_values(fit_p, nd_p, SDM_PRED_TYPE, SDM_PRED_CLAMP)
+
+# ---- 5. The cells outside the training range (Decision 25 b2) ---------------------
+oor_p <- sdm_out_of_range(nd_p, fit_p$varmin, fit_p$varmax)
+# The presence and background cells, for the guard only (as STEP 14.1; STEP
+# 14.2 can be skipped, w1). They are not written to any file.
+pi_p <- sdm_cell_index(obs_d$cell02_lon_deg, obs_d$cell02_lat_deg)
+bi_p <- sdm_cell_index(inat_d$cell02_lon_deg, inat_d$cell02_lat_deg)
+is_p <- cov_p$id %in% sdm_cell_id(pi_p$ix, pi_p$iy)
+is_b <- cov_p$id %in% sdm_cell_id(bi_p$ix, bi_p$iy)
+sdm_run_guards(list(
+  "one value per model cell, with no NA" =
+    length(val_p) == nrow(cov_p) && !anyNA(val_p),
+  "the presence and background cells on model cells must be the counts of STEP 14.1" =
+    sum(is_p) == cnt$n_presence && sum(is_b) == cnt$n_background,
+  "no presence or background cell may be outside the training range (Decision 25 point 2)" =
+    !any(oor_p$flag[is_p | is_b])
+), what = "the prediction")
+rm(pi_p, bi_p, is_p, is_b)
+
+# ---- 6. The rank and the class (Decision 25 c1, n5) --------------------------------
+rc_p <- sdm_rank_class(val_p, cov_p$id, SDM_PUB_N_CLASSES)
+layer_p <- data.frame(id = cov_p$id, value = val_p, rank = rc_p$rank,
+                      class = rc_p$class, out_of_range = oor_p$flag)
+sdm_run_guards(sdm_pred_layer_checks(layer_p, model_ids_p),
+               what = "the prediction layer (in memory)")
+
+# ---- 7. The layer (l1): write, read back, check ------------------------------------
+utils::write.csv(layer_p, pred_path, row.names = FALSE)
+back_p <- utils::read.csv(pred_path)
+sdm_run_guards(c(sdm_pred_layer_checks(back_p, model_ids_p), list(
+  "the file on disk must hold the ids, ranks, classes and flags in memory" =
+    identical(as.numeric(back_p$id), as.numeric(layer_p$id)) &&
+    identical(as.integer(back_p$rank), layer_p$rank) &&
+    identical(as.integer(back_p$class), layer_p$class) &&
+    identical(as.logical(back_p$out_of_range), layer_p$out_of_range),
+  "the file on disk must hold the values in memory" =
+    isTRUE(all.equal(back_p$value, layer_p$value, tolerance = 1e-12))
+)), what = "the prediction layer (read back)")
+message("Wrote ", pred_path, " (", nrow(layer_p), " model cells)")
+rm(back_p)
+
+# ---- 8. The table (t1; statistics only) --------------------------------------------
+pred_tbl <- sdm_pred_summary(mean_boyce, layer_p, oor_p, SDM_BOYCE_GATE,
+                             SDM_PUB_N_CLASSES)
+occ_assert_counts_only(pred_tbl, cols = c("group", "item", "value", "reading"),
+                       count_cols = character(0),
+                       name = "tbl_16_sdm_prediction.csv")
+assert_publishable_table(pred_tbl, prefix = NULL,
+                         name = "tbl_16_sdm_prediction.csv")
+write_table(pred_tbl, nn = 16, slug = "sdm_prediction")
+cat("\n--- tbl_16_sdm_prediction.csv (Decision 25 points 2 and 3; Decision 24 point 8) ---\n")
+show_p <- pred_tbl
+show_p$value <- ifelse(is.na(pred_tbl$value), "",
+  ifelse(pred_tbl$value == round(pred_tbl$value) & abs(pred_tbl$value) >= 1,
+         trimws(formatC(pred_tbl$value, format = "d", big.mark = ",")),
+         trimws(formatC(pred_tbl$value, digits = 4, format = "g"))))
+old_w <- options(width = 120)
+print(show_p, row.names = FALSE, right = FALSE)
+options(old_w)
+rm(show_p)
+
+rule(paste0(
+  "STEP 15.1 complete (", round(as.numeric(difftime(Sys.time(), t_step151,
+                                                  units = "mins")), 1),
+  " min).\nGate: open (mean test Boyce ", round(mean_boyce, 3), " > ",
+  SDM_BOYCE_GATE, ").\n",
+  "Prediction: ", nrow(layer_p), " model cells, cloglog with clamping, from ",
+  SDM_PRED_MODEL_FILE, ".\n",
+  "Classes 5 to 1: ", paste(vapply(rev(seq_len(SDM_PUB_N_CLASSES)),
+                                   function(j) sum(layer_p$class == j),
+                                   integer(1)), collapse = ", "),
+  " cells | outside the training range: ", sum(layer_p$out_of_range),
+  " cells.\nLayer under data/processed/ (gitignored). Check `git status ",
+  "--short` before a commit: nothing under data/ may be staged."))
+
+}  # end if (SDM_GRAIN_OUTCOME is a model outcome), STEP 15.1
+
+# =============================================================================
+# STEP 15.2 — the reserve check and the reserve table (task 15.4; Decision 24
+#             point 9; Decision 25 points 7 to 9)
+# =============================================================================
+# Process choices of task 15.2 (2026-10-31): n1, t1, k1, e1, p1; h1 a
+# hand-made case first. Runs only with SDM_GRAIN_OUTCOME "reduced_model" or
+# "planned_model", after STEP 15.1 (a closed gate stops the script in STEP
+# 15.1).
+#   1. the settings; the hand-made case (sdm_self_test_152())
+#   2. the inputs: the reserve layer, density_2022, the prediction layer of
+#      STEP 15.1 (from disk)
+#   3. the complete-case 1 km cells inside each reserve polygon (centre rule;
+#      a cell in two polygons counts in each)
+#   4. the presence cells (for r2 only); the reserve values and counts
+#   5. r1 (Spearman rho, n, p; the reading)
+#   6. r2 under the rule of Decision 25 point 9 (y1)
+#   7. the counts of the two kinds of z1 (Decision 25 point 9). STEP 15.3
+#      (task 15.5) checks that the total is 0; above 0, the console gives the
+#      names, marked "not for the docs"
+#   8. tbl_16_sdm_reserve_check.csv and tbl_17_reserve_suitability.csv
+# Console text: counts, names and statistics. No reserve name is printed with
+# a presence state; the r2 counts are printed only if they are published.
+
+if (SDM_GRAIN_OUTCOME %in% c("reduced_model", "planned_model")) {
+
+rule("STEP 15.2 — the reserve check and the reserve table (task 15.4)")
+t_step152 <- Sys.time()
+
+# ---- 1. The settings and the hand-made case (h1) ---------------------------------
+need152 <- c("SDM_RESERVE_CHECK", "SDM_RESERVE_P", "SDM_RESERVE_CELL_RULE",
+             "SDM_RESERVE_NONMODEL", "SDM_PUB_RESERVE_TABLE",
+             "SDM_PUB_R2_MIN_N", "SDM_PUB_RANK_TIES", "SDM_RESERVE_P_EXACT")
+miss152 <- need152[!vapply(need152, exists, logical(1))]
+if (length(miss152) > 0) {
+  stop("Setting(s) missing from R/00_config.R (Decisions 24 and 25): ",
+       paste(miss152, collapse = ", "), call. = FALSE)
+}
+sdm_run_guards(list(
+  "SDM_RESERVE_CELL_RULE must be centre (Decision 25 h1)" =
+    identical(SDM_RESERVE_CELL_RULE, "centre"),
+  "SDM_RESERVE_NONMODEL must be exclude_and_count (Decision 25 h1)" =
+    identical(SDM_RESERVE_NONMODEL, "exclude_and_count"),
+  "SDM_PUB_RESERVE_TABLE must be TRUE (Decision 25 t1)" =
+    identical(SDM_PUB_RESERVE_TABLE, TRUE),
+  "SDM_PUB_R2_MIN_N must be KDE_SMALL_N, 3 (Decision 25 point 9, y1)" =
+    identical(SDM_PUB_R2_MIN_N, KDE_SMALL_N) &&
+    isTRUE(SDM_PUB_R2_MIN_N == 3),
+  "SDM_PUB_RANK_TIES must be min (k1 of task 15.2)" =
+    identical(SDM_PUB_RANK_TIES, "min"),
+  "SDM_RESERVE_P_EXACT must be FALSE (p1 of task 15.2)" =
+    identical(SDM_RESERVE_P_EXACT, FALSE),
+  "SDM_RESERVE_P must be a number in (0, 1)" =
+    is.numeric(SDM_RESERVE_P) && length(SDM_RESERVE_P) == 1 &&
+    SDM_RESERVE_P > 0 && SDM_RESERVE_P < 1
+), what = "the settings of the reserve check")
+st152 <- sdm_self_test_152()
+cat("hand-made case of STEP 15.2:", sum(st152$pass), "of", nrow(st152),
+    "checks pass.\n")
+if (!all(st152$pass)) {
+  stop("The hand-made case of STEP 15.2 failed:\n  ",
+       paste(st152$check[!st152$pass], collapse = "\n  "), call. = FALSE)
+}
+
+# ---- 2. The inputs -----------------------------------------------------------------
+for (f in c(reserves_in, stats_in, pred_path)) {
+  if (!file.exists(f)) stop("STEP 15.2 needs ", f, ".", call. = FALSE)
+}
+res_sf <- sf::st_read(reserves_in, quiet = TRUE)
+res_d  <- sf::st_drop_geometry(res_sf)
+st_d   <- sf::st_drop_geometry(sf::st_read(stats_in, quiet = TRUE))
+pred_d <- utils::read.csv(pred_path)
+has_geom <- !sf::st_is_empty(res_sf)
+sdm_run_guards(list(
+  "the reserve layer must have unit_id, unit_name, state, landscape_complex and geometry_present" =
+    all(c("unit_id", "unit_name", "state", "landscape_complex",
+          "geometry_present") %in% names(res_d)),
+  "the reserve layer must be in the analysis CRS" =
+    identical(as.integer(sf::st_crs(res_sf)$epsg), as.integer(CRS_ANALYSIS)),
+  "each unit_id of the reserve layer must be a whole number, once" =
+    !anyNA(res_d$unit_id) && all(res_d$unit_id == round(res_d$unit_id)) &&
+    !anyDuplicated(res_d$unit_id),
+  "geometry_present must agree with the geometry" =
+    identical(as.logical(res_d$geometry_present), has_geom),
+  "the census layer must hold unit_id and density_2022, each reserve once" =
+    all(c("unit_id", "density_2022") %in% names(st_d)) &&
+    !anyDuplicated(st_d$unit_id) &&
+    setequal(as.integer(st_d$unit_id), as.integer(res_d$unit_id)),
+  "density_2022 must be 0 or more, or NA" =
+    all(is.na(st_d$density_2022) | st_d$density_2022 >= 0)
+), what = "the reserve and census layers")
+sdm_run_guards(sdm_pred_layer_checks(pred_d, sort(grid_d$id[grid_d$model])),
+               what = "the prediction layer of STEP 15.1 (from disk)")
+dens <- st_d$density_2022[match(as.integer(res_d$unit_id),
+                                as.integer(st_d$unit_id))]
+cat("reserves:", nrow(res_d), "| with a polygon:", sum(has_geom),
+    "| with density_2022:", sum(!is.na(dens)), "\n")
+
+# ---- 3. The 1 km cells of each reserve (e1; Decision 25 point 8) ----------------
+rc <- sdm_reserve_cells(res_sf, cellid_r)
+
+# ---- 4. Presence cells (r2 only) and the reserve values ---------------------------
+pi_r <- sdm_cell_index(obs_d$cell02_lon_deg, obs_d$cell02_lat_deg)
+pres_ids_r <- intersect(sdm_cell_id(pi_r$ix, pi_r$iy), pred_d$id)
+rv <- sdm_reserve_values(rc, pred_d, nrow(res_d), has_geom, pres_ids_r)
+sdm_run_guards(list(
+  "the presence cells on model cells must be the count of STEP 14.1" =
+    length(pres_ids_r) == cnt$n_presence,
+  "each reserve with a polygon must have its counts; a reserve with no polygon none" =
+    all(!is.na(rv$n_used[has_geom])) && all(is.na(rv$n_used[!has_geom])),
+  "the 1 km cells of the reserves must be complete-case cells of the grid" =
+    all(rc$id %in% grid_d$id)
+), what = "the reserve values")
+rm(pi_r)
+
+# ---- 5. r1 (Decision 24 point 9; p1) ---------------------------------------------
+r1 <- sdm_reserve_r1(rv$value, dens, SDM_RESERVE_P, SDM_RESERVE_P_EXACT)
+
+# ---- 6. r2 under Decision 25 point 9 (y1) ------------------------------------------
+med_p <- stats::median(pred_d$value)
+r2 <- sdm_reserve_r2(rv$value, rv$has_presence, med_p, SDM_PUB_R2_MIN_N)
+
+# ---- 7. The two kinds of z1 (Decision 25 point 9) --------------------------------
+z1 <- sdm_reserve_z1(has_geom, rv$n_used, rv$all_hatched)
+
+# ---- 8. The tables (n1, t1, k1) ----------------------------------------------------
+tbl17 <- sdm_reserve_table(res_d, rv, dens, SDM_PUB_RANK_TIES)
+sdm_run_guards(sdm_reserve_table_checks(tbl17, nrow(res_d)),
+               what = "tbl_17_reserve_suitability.csv")
+assert_publishable_table(tbl17, prefix = NULL,
+                         name = "tbl_17_reserve_suitability.csv")
+chk <- sdm_reserve_check_summary(nrow(res_d), has_geom, rv, dens, r1, r2, z1,
+                                 SDM_PUB_R2_MIN_N)
+occ_assert_counts_only(chk, cols = c("group", "item", "value", "reading"),
+                       count_cols = character(0),
+                       name = "tbl_16_sdm_reserve_check.csv")
+assert_publishable_table(chk, prefix = NULL,
+                         name = "tbl_16_sdm_reserve_check.csv")
+norm_n <- function(x) tolower(gsub("[[:space:]]+", " ", trimws(x)))
+sdm_run_guards(list(
+  "tbl_16_sdm_reserve_check.csv must hold no reserve name and no reserve column (check s1 of task 14.6)" =
+    !any(grepl("^(unit_id|unit_name|reserve.*)$", tolower(names(chk)))) &&
+    !any(norm_n(c(chk$item, chk$reading)) %in% norm_n(res_d$unit_name)),
+  "r2: no count in the table unless r2 is published (Decision 25 point 9)" =
+    r2$publish || sum(chk$group == "r2") == 1L
+), what = "tbl_16_sdm_reserve_check.csv")
+write_table(chk,   nn = 16, slug = "sdm_reserve_check")
+write_table(tbl17, nn = 17, slug = "reserve_suitability")
+
+# ---- Console (counts, names and statistics) ---------------------------------------
+fmt_v <- function(v) ifelse(is.na(v), "",
+  ifelse(v == round(v) & abs(v) >= 1,
+         trimws(formatC(v, format = "d", big.mark = ",")),
+         trimws(formatC(v, digits = 4, format = "g"))))
+cat("\n--- tbl_16_sdm_reserve_check.csv (Decision 24 point 9; Decision 25 points 8 and 9) ---\n")
+show_c <- chk
+show_c$value <- fmt_v(chk$value)
+old_w <- options(width = 120)
+print(show_c, row.names = FALSE, right = FALSE)
+cat("\n--- tbl_17_reserve_suitability.csv (Decision 25 point 7; by unit_id;",
+    "state and landscape_complex are in the file) ---\n")
+show_t <- tbl17[, c("unit_id", "unit_name", "cloglog_mean", "cloglog_rank",
+                    "density_2022", "n_1km_cells_used",
+                    "n_1km_cells_no_value")]
+show_t$cloglog_mean <- ifelse(is.na(tbl17$cloglog_mean), "NA",
+  trimws(formatC(tbl17$cloglog_mean, digits = 4, format = "g")))
+show_t$density_2022 <- ifelse(is.na(tbl17$density_2022), "NA",
+  trimws(formatC(tbl17$density_2022, digits = 4, format = "g")))
+print(show_t, row.names = FALSE, right = FALSE)
+options(old_w)
+rm(show_c, show_t)
+
+cat("\nr1:", sprintf("rho = %.3f, n = %d, p = %.3g -> %s", r1$rho, r1$n, r1$p,
+                     r1$reading), "\n")
+if (r2$publish) {
+  cat("r2: published -", r2$n_above, "of", r2$n_none,
+      "reserves with no presence cell are above the median of the model cells",
+      sprintf("(share %.3f)", r2$share), "\n")
+} else {
+  cat(paste0("r2: not published (a count of the 2 x 2 table is below ",
+             SDM_PUB_R2_MIN_N, "; Decision 25 point 9).\n"))
+}
+cat("z1 (Decision 25 point 9): kind (a)", z1$kind_a, "| kind (b)", z1$kind_b,
+    "| total", z1$total, "(STEP 15.3 checks that the total is 0)\n")
+if (z1$total > 0) {
+  cat("\n*** NOT FOR THE DOCS (Decision 25 point 9) ***\n")
+  if (z1$kind_a > 0) {
+    cat("kind (a), all valued 1 km cells outside the training range:",
+        paste(res_d$unit_name[z1$rows_a], collapse = "; "), "\n")
+  }
+  if (z1$kind_b > 0) {
+    cat("kind (b), a polygon and no 1 km cell with a value:",
+        paste(res_d$unit_name[z1$rows_b], collapse = "; "), "\n")
+  }
+  cat("STEP 15.3 (task 15.5) will fail on this check. The author decides",
+      "before the figures and before the commit of tbl_17.\n")
+  cat("*** END ***\n")
+}
+
+rule(paste0(
+  "STEP 15.2 complete (", round(as.numeric(difftime(Sys.time(), t_step152,
+                                                  units = "mins")), 1),
+  " min).\nReserves with a value: ", sum(!is.na(rv$value)), " of ",
+  nrow(res_d), " | r1: ", r1$reading, " | r2: ",
+  if (r2$publish) "published" else "not published", " | z1 total: ",
+  z1$total, ".\nCheck `git status --short` before a commit: nothing under ",
+  "data/ may be staged."))
+
+}  # end if (SDM_GRAIN_OUTCOME is a model outcome), STEP 15.2
+
+# =============================================================================
+# STEP 15.3 — QA of Decision 25 (task 15.5)
+# =============================================================================
+# Process choices of task 15.2 (2026-10-31): q1 its own table, a hand-made
+# case first, a second path that calls no sdm_* function of STEPs 15.1-15.2
+# (the sdm_qa_* functions of task 15.5); c1 the publish scans of the Week-15
+# tables in this run. Author's choice of task 15.5 (2026-11-01): an
+# information count of the valued 1 km cells of the reserves that are outside
+# the training range (a row with pass TRUE; not a check).
+# As STEP 14.3: the step reads its inputs from disk and writes
+# tbl_16_sdm_pred_qa.csv (group, check, value, pass) first; then any FALSE
+# stops the script. Groups: "test case", "prediction", "classes",
+# "reserves", "r1", "r2", "z1", "info", "publish".
+# Console: counts, names and statistics. A reserve name is printed only for
+# the information count (a share of cells, not a presence state) and, if the
+# z1 check fails, in a block marked "not for the docs". No r2 count is
+# printed or written when r2 is not published.
+
+if (SDM_GRAIN_OUTCOME %in% c("reduced_model", "planned_model")) {
+
+rule("STEP 15.3 — QA of Decision 25 (task 15.5)")
+t_step153 <- Sys.time()
+q5 <- list()
+add_q5 <- function(group, check, value, pass) {
+  q5[[length(q5) + 1L]] <<- data.frame(group = group, check = check,
+                                       value = as.character(value),
+                                       pass = isTRUE(pass),
+                                       stringsAsFactors = FALSE)
+  invisible(NULL)
+}
+agree5 <- function(d) isTRUE(d <= SDM_QA_REL_TOL)
+dtxt5  <- function(d) sprintf("largest relative difference %.2e", d)
+
+# ---- 1. Hand-made cases (h1) ------------------------------------------------------
+tests5 <- list("STEP 15.1" = sdm_self_test_151(),
+               "STEP 15.2" = sdm_self_test_152(),
+               "STEP 15.3" = sdm_self_test_153())
+for (s5 in names(tests5)) {
+  tt <- tests5[[s5]]
+  for (i in seq_len(nrow(tt))) {
+    add_q5("test case", paste0(s5, ": ", tt$check[i]),
+           if (tt$pass[i]) "pass" else "FAIL", tt$pass[i])
+  }
+}
+cat("hand-made cases:", paste(vapply(names(tests5), function(s5)
+  paste0(s5, " ", sum(tests5[[s5]]$pass), " of ", nrow(tests5[[s5]])),
+  character(1)), collapse = " | "), "\n")
+
+# ---- 2. Inputs (files on disk) -------------------------------------------------------
+tp_in  <- file.path(DIR_TABLES, "tbl_16_sdm_prediction.csv")
+tc_in  <- file.path(DIR_TABLES, "tbl_16_sdm_reserve_check.csv")
+t17_in <- file.path(DIR_TABLES, "tbl_17_reserve_suitability.csv")
+for (f in c(rec_model_path, cov_path, file.path(DIR_PROCESSED, grid_out),
+            file.path(DIR_PROCESSED, cellid_out), obscured_in, bg_inat_in,
+            reserves_in, stats_in, pred_path, cv_tbl_in, tp_in, tc_in, t17_in,
+            gitignore_in)) {
+  if (!file.exists(f)) stop("STEP 15.3 needs ", f, ".", call. = FALSE)
+}
+mo5   <- readRDS(rec_model_path)
+fit5  <- mo5$model
+covs5 <- names(fit5$varmin)
+cov5  <- utils::read.csv(cov_path)
+cov5  <- cov5[order(cov5$id), ]
+grid5 <- sf::st_drop_geometry(sf::st_read(file.path(DIR_PROCESSED, grid_out),
+                                          quiet = TRUE))
+cid5  <- terra::rast(file.path(DIR_PROCESSED, cellid_out))
+od5   <- sf::st_drop_geometry(sf::st_read(obscured_in, quiet = TRUE))
+ib5   <- sf::st_drop_geometry(sf::st_read(bg_inat_in, quiet = TRUE))
+res5  <- sf::st_read(reserves_in, quiet = TRUE)
+rd5   <- sf::st_drop_geometry(res5)
+geom5 <- !sf::st_is_empty(res5)
+st5   <- sf::st_drop_geometry(sf::st_read(stats_in, quiet = TRUE))
+pl5   <- utils::read.csv(pred_path)
+cv5   <- utils::read.csv(cv_tbl_in, stringsAsFactors = FALSE)
+tp5   <- utils::read.csv(tp_in, stringsAsFactors = FALSE)
+tc5   <- utils::read.csv(tc_in, stringsAsFactors = FALSE)
+t17   <- utils::read.csv(t17_in, stringsAsFactors = FALSE)
+mid5  <- sort(grid5$id[grid5$model])
+key5  <- stats::setNames(grid5$id, paste(grid5$ix, grid5$iy, sep = "_"))
+pres5 <- unique(unname(key5[sdm_qa_key(od5$cell02_lon_deg,
+                                       od5$cell02_lat_deg)]))
+pres5 <- pres5[!is.na(pres5) & pres5 %in% mid5]
+bg5   <- unique(unname(key5[sdm_qa_key(ib5$cell02_lon_deg,
+                                       ib5$cell02_lat_deg)]))
+bg5   <- bg5[!is.na(bg5) & bg5 %in% mid5]
+tpv <- function(item) {
+  v <- tp5$value[tp5$item == item]
+  if (length(v) == 1L) v else NA_real_
+}
+tcv <- function(group, item) {
+  v <- tc5$value[tc5$group == group & tc5$item == item]
+  if (length(v) == 1L) v else NA_real_
+}
+
+# ---- 3. The prediction (Decision 25 points 1, 2 and 4) ------------------------------
+add_q5("prediction", "the layer has the fields id, value, rank, class, out_of_range only (no presence or background field)",
+       paste(names(pl5), collapse = ", "),
+       identical(names(pl5), c("id", "value", "rank", "class",
+                               "out_of_range")))
+add_q5("prediction", "the layer and the covariate table hold each model cell of the grid once",
+       sprintf("%d and %d rows; %d model cells", nrow(pl5), nrow(cov5),
+               length(mid5)),
+       identical(as.numeric(sort(pl5$id)), as.numeric(mid5)) &&
+         !anyDuplicated(pl5$id) &&
+         identical(as.numeric(cov5$id), as.numeric(mid5)))
+pl5 <- pl5[order(pl5$id), ]
+add_q5("prediction", "the model file is the record (SDM_PRED_MODEL_FILE), of maxnet 0.1.4 (Decision 25 a1)",
+       paste0(basename(rec_model_path), "; maxnet ", mo5$versions$maxnet),
+       identical(basename(rec_model_path), SDM_PRED_MODEL_FILE) &&
+         identical(mo5$versions$maxnet, "0.1.4"))
+hv5 <- sdm_qa_cloglog(fit5, cov5[, covs5, drop = FALSE])
+d <- sdm_qa_diff(pl5$value, hv5)
+add_q5("prediction", "the values again by hand from the model file (clamping; link + alpha; cloglog) = the layer",
+       dtxt5(d), agree5(d))
+oo5 <- sdm_qa_oor(cov5[, covs5, drop = FALSE], fit5$varmin, fit5$varmax)
+add_q5("prediction", "the flag again (sweep()) = out_of_range of the layer",
+       sprintf("%d cells outside", sum(oo5$flag)),
+       identical(oo5$flag, as.logical(pl5$out_of_range)))
+pb5 <- pl5$id %in% c(pres5, bg5)
+add_q5("prediction", "no presence or background cell is outside the training range (Decision 25 point 2)",
+       sprintf("%d presence or background cells; %d outside", sum(pb5),
+               sum(oo5$flag & pb5)),
+       sum(pb5) > 0 && !any(oo5$flag & pb5))
+oor_tab <- c(tpv("cells_outside"),
+             vapply(paste0(covs5, "_below_min"), tpv, numeric(1)),
+             vapply(paste0(covs5, "_above_max"), tpv, numeric(1)))
+oor_q5 <- c(sum(oo5$flag), oo5$below[covs5], oo5$above[covs5])
+add_q5("prediction", "tbl_16_sdm_prediction: the cells outside, all and by covariate = the flag again",
+       sprintf("%d cells outside; table %s", sum(oo5$flag),
+               format(tpv("cells_outside"))),
+       identical(as.numeric(oor_q5), as.numeric(oor_tab)))
+d <- sdm_qa_diff(c(tpv("min"), tpv("median"), tpv("max")),
+                 c(min(hv5), stats::median(hv5), max(hv5)))
+add_q5("prediction", "tbl_16_sdm_prediction: min, median and max = the values again",
+       dtxt5(d), agree5(d))
+mb5 <- cv5$boyce[cv5$fold == "mean"]
+gt5 <- tp5$reading[tp5$group == "gate" & tp5$item == "result"]
+add_q5("prediction", "the gate again: the row mean of tbl_16_sdm_cv is above SDM_BOYCE_GATE, and tbl_16_sdm_prediction says so (Decision 24 point 8)",
+       sprintf("mean test Boyce %.3f; gate %s", mb5, format(SDM_BOYCE_GATE)),
+       length(mb5) == 1L && isTRUE(mb5 > SDM_BOYCE_GATE) &&
+         agree5(sdm_qa_diff(tpv("mean_test_boyce"), mb5)) &&
+         isTRUE(tpv("gate_value") == SDM_BOYCE_GATE) && length(gt5) == 1L &&
+         startsWith(gt5, "above the gate"))
+
+# ---- 4. The classes (Decision 25 point 3) ---------------------------------------
+K5 <- as.integer(SDM_PUB_N_CLASSES)
+n5 <- nrow(pl5)
+rc5 <- sdm_qa_rank_class(pl5$value, pl5$id, K5)
+add_q5("classes", "the ranks and the classes again (other code) = the layer",
+       sprintf("%d cells", n5),
+       identical(rc5$rank, as.integer(pl5$rank)) &&
+         identical(rc5$class, as.integer(pl5$class)))
+sz_exp <- diff(c(0, ceiling(seq_len(K5) * n5 / K5)))   # classes K to 1
+sz_obs <- vapply(rev(seq_len(K5)), function(j) sum(pl5$class == j), integer(1))
+add_q5("classes", "the class sizes = ceiling(j n / k) - ceiling((j - 1) n / k) (classes 5 to 1)",
+       paste(sz_obs, collapse = ", "),
+       identical(as.numeric(sz_obs), as.numeric(sz_exp)))
+top5 <- pl5$id[order(-pl5$value, pl5$id)][seq_len(
+  ceiling(SDM_SENS_TOP_SHARE * n5))]
+add_q5("classes", "class 5 = the top SDM_SENS_TOP_SHARE set of the sensitivity rule (the order of sdm_compare())",
+       sprintf("%d cells", length(top5)),
+       setequal(pl5$id[pl5$class == K5], top5))
+cls_tab <- unlist(lapply(rev(seq_len(K5)), function(j) c(
+  tpv(sprintf("class_%d_cells", j)), tpv(sprintf("class_%d_value_min", j)),
+  tpv(sprintf("class_%d_value_max", j)))))
+cls_q5 <- unlist(lapply(rev(seq_len(K5)), function(j) {
+  v <- hv5[rc5$class == j]
+  c(length(v), min(v), max(v))
+}))
+d <- sdm_qa_diff(cls_tab, cls_q5)
+add_q5("classes", "tbl_16_sdm_prediction: the class sizes and value ranges = the values and classes again",
+       dtxt5(d), agree5(d))
+nt5 <- sum(stats::ave(as.integer(pl5$class), match(pl5$value, unique(pl5$value)),
+                      FUN = function(z) length(unique(z))) > 1L)
+add_q5("classes", "tbl_16_sdm_prediction: the cells in a tie across a class break, counted again",
+       sprintf("%d cells; table %s", nt5,
+               format(tpv("cells_tied_across_breaks"))),
+       isTRUE(nt5 == tpv("cells_tied_across_breaks")))
+
+# ---- 5. The reserves (Decision 24 point 9; Decision 25 points 7 and 8) ----------
+qc5 <- sdm_qa_reserve_cells(res5, cid5)
+qv5 <- sdm_qa_reserve_values(qc5, pl5, geom5, pres5)
+m17 <- match(as.integer(rd5$unit_id), t17$unit_id)
+f17 <- c("unit_id", "unit_name", "state", "landscape_complex", "cloglog_mean",
+         "cloglog_rank", "density_2022", "n_1km_cells_used",
+         "n_1km_cells_no_value")
+add_q5("reserves", "tbl_17: the fields of k1 (no presence column); one row per reserve by unit_id; names, state and landscape from the reserve layer",
+       sprintf("%d rows; %d reserves", nrow(t17), nrow(rd5)),
+       identical(names(t17), f17) && nrow(t17) == nrow(rd5) &&
+         !anyNA(m17) && !is.unsorted(t17$unit_id) &&
+         identical(as.character(t17$unit_name[m17]),
+                   as.character(rd5$unit_name)) &&
+         identical(as.character(t17$state[m17]), as.character(rd5$state)) &&
+         identical(as.character(t17$landscape_complex[m17]),
+                   as.character(rd5$landscape_complex)))
+nu5 <- sum(qv5$n_used[geom5] != t17$n_1km_cells_used[m17][geom5], na.rm = TRUE)
+nn5 <- sum(qv5$n_no_value[geom5] != t17$n_1km_cells_no_value[m17][geom5],
+           na.rm = TRUE)
+add_q5("reserves", "the 1 km cells again by terra::extract(): the cells used and with no value = tbl_17 (reserves that differ)",
+       sprintf("%d and %d of %d reserves differ", nu5, nn5, sum(geom5)),
+       nu5 == 0L && nn5 == 0L &&
+         !anyNA(t17$n_1km_cells_used[m17][geom5]) &&
+         all(is.na(t17$n_1km_cells_used[m17][!geom5])))
+d <- sdm_qa_diff(t17$cloglog_mean[m17], qv5$value)
+add_q5("reserves", "the reserve values again = tbl_17 cloglog_mean",
+       dtxt5(d), agree5(d))
+rk5 <- as.integer(rank(-qv5$value, na.last = "keep", ties.method = "min"))
+add_q5("reserves", "the ranks again (a tie gets the lowest rank) = tbl_17 cloglog_rank",
+       sprintf("%d reserves with a rank", sum(!is.na(rk5))),
+       identical(rk5, as.integer(t17$cloglog_rank[m17])))
+dn5 <- st5$density_2022[match(as.integer(rd5$unit_id), as.integer(st5$unit_id))]
+d <- sdm_qa_diff(t17$density_2022[m17], dn5)
+add_q5("reserves", "density_2022 again from the census layer = tbl_17",
+       dtxt5(d), agree5(d))
+rcn_q5 <- c(nrow(rd5), sum(geom5), sum(!is.na(qv5$value)),
+            sum(!is.na(qv5$value) & !is.na(dn5)),
+            sum(qv5$n_used, na.rm = TRUE), sum(qv5$n_no_value, na.rm = TRUE))
+rcn_tab <- c(tcv("reserves", "all"), tcv("reserves", "with_polygon"),
+             tcv("reserves", "with_value"),
+             tcv("reserves", "with_value_and_density"),
+             tcv("cells", "cells_1km_used"), tcv("cells", "cells_1km_no_value"))
+add_q5("reserves", "tbl_16_sdm_reserve_check: the reserve and cell counts again",
+       paste(rcn_q5, collapse = ", "),
+       identical(as.numeric(rcn_q5), as.numeric(rcn_tab)))
+
+# ---- 6. r1 (Decision 24 point 9; p1) -----------------------------------------------
+sp5 <- sdm_qa_spearman(qv5$value, dn5)
+rt5 <- tc5$reading[tc5$group == "r1" & tc5$item == "result"]
+re5 <- if (isTRUE(sp5[["rho"]] > 0 && sp5[["p"]] < SDM_RESERVE_P)) "agrees" else
+  "no agreement shown"
+d <- sdm_qa_diff(c(tcv("r1", "rho"), tcv("r1", "n"), tcv("r1", "p_value")),
+                 as.numeric(sp5))
+add_q5("r1", "rho, n and p again (ranks; t approximation) = tbl_16_sdm_reserve_check",
+       dtxt5(d), agree5(d))
+add_q5("r1", "the reading again (rho > 0 and p < SDM_RESERVE_P)",
+       sprintf("%s; table: %s", re5, paste(rt5, collapse = " ")),
+       length(rt5) == 1L && identical(re5, rt5))
+
+# ---- 7. r2 under Decision 25 point 9 (y1) -------------------------------------------
+cn5  <- sdm_qa_r2_counts(qv5$value, qv5$has_presence, stats::median(pl5$value))
+pub5 <- all(cn5 >= SDM_PUB_R2_MIN_N)
+r2r5 <- tc5[tc5$group == "r2", ]
+tpub <- nrow(r2r5) > 1L
+add_q5("r2", "the rule of Decision 25 point 9 again: r2 is published only if each count of the 2 x 2 table is SDM_PUB_R2_MIN_N or more; the table follows it",
+       sprintf("the rule: %s; the table: %s",
+               if (pub5) "published" else "not published",
+               if (tpub) "published" else "not published"),
+       identical(pub5, tpub) &&
+         ((tpub && nrow(r2r5) == 4L) ||
+            (!tpub && nrow(r2r5) == 1L &&
+               startsWith(r2r5$reading[1], "r2 not published"))))
+if (pub5 && tpub) {
+  r2q <- c(cn5[["above_none"]] + cn5[["not_above_none"]], cn5[["above_none"]])
+  r2q <- c(r2q, r2q[2] / r2q[1])
+  d <- sdm_qa_diff(c(tcv("r2", "reserves_no_presence_cell"),
+                     tcv("r2", "of_these_above_median"), tcv("r2", "share")),
+                   r2q)
+  add_q5("r2", "published r2: the counts and the share again", dtxt5(d),
+         agree5(d))
+}
+
+# ---- 8. z1 (Decision 25 point 9) ----------------------------------------------------
+za5 <- which(geom5 & qv5$n_used > 0 & qv5$n_hatched == qv5$n_used)
+zb5 <- which(geom5 & qv5$n_used == 0)
+add_q5("z1", "the two kinds counted again = tbl_16_sdm_reserve_check",
+       sprintf("kind (a) %d, kind (b) %d", length(za5), length(zb5)),
+       isTRUE(length(za5) == tcv("z1", "kind_a")) &&
+         isTRUE(length(zb5) == tcv("z1", "kind_b")) &&
+         isTRUE(length(za5) + length(zb5) == tcv("z1", "total")))
+add_q5("z1", "Decision 25 point 9: no reserve whose presence state the outputs show (the total must be 0)",
+       sprintf("%d reserves", length(za5) + length(zb5)),
+       length(za5) + length(zb5) == 0L)
+
+# ---- 9. Information (author's choice, task 15.5; not a check) ---------------------
+hr5 <- which(!is.na(qv5$n_hatched) & qv5$n_hatched > 0)
+add_q5("info", "information (task 15.5): the reserves with one or more valued 1 km cells outside the training range, and those 1 km cells summed over the reserves",
+       sprintf("%d reserves; %d 1 km cells", length(hr5),
+               sum(qv5$n_hatched, na.rm = TRUE)),
+       TRUE)
+
+# ---- 10. Publish checks (c1) ------------------------------------------------------
+pos_re5 <- paste0("^(x|y|lon|lat|longitude|latitude|geom|geometry|cell|",
+                  "cells|id|ix|iy)$|^cell_|cell02|_cell$|corner")
+scan5 <- list(
+  "tbl_16_sdm_prediction.csv" = list(x = tp5, num = "value", s1 = TRUE),
+  "tbl_16_sdm_reserve_check.csv" = list(x = tc5, num = "value", s1 = TRUE),
+  "tbl_17_reserve_suitability.csv" = list(
+    x = t17, num = c("unit_id", "cloglog_mean", "cloglog_rank",
+                     "density_2022", "n_1km_cells_used",
+                     "n_1km_cells_no_value"), s1 = FALSE))
+for (f in names(scan5)) {
+  x <- scan5[[f]]$x
+  bad_pos <- names(x)[grepl(pos_re5, tolower(names(x)))]
+  bad_num <- setdiff(names(x)[vapply(x, is.numeric, logical(1))],
+                     scan5[[f]]$num)
+  add_q5("publish", paste0(f, ": (a) no position or cell column; numbers are counts or statistics"),
+         if (length(c(bad_pos, bad_num)) == 0) paste(ncol(x), "columns") else
+           paste("columns:", paste(unique(c(bad_pos, bad_num)),
+                                   collapse = ", ")),
+         length(bad_pos) == 0 && length(bad_num) == 0)
+  h <- sdm_qa_id_hits(x, grid5$id)
+  add_q5("publish", paste0(f, ": (b) no value is a cell id of the grid"),
+         sprintf("%d values", h), h == 0)
+  if (scan5[[f]]$s1) {
+    rh <- sdm_qa_reserve_hits(x, rd5$unit_name)
+    add_q5("publish", paste0(f, ": s1 no reserve column and no reserve name (a tbl_16 table)"),
+           sprintf("%d hits", rh), rh == 0)
+  }
+}
+add_q5("publish", "tbl_17_reserve_suitability.csv: no presence, record or tiger word in a field name (Decision 25 point 9)",
+       paste(ncol(t17), "columns"),
+       !any(grepl("presence|pres_|record|tiger|occ|background",
+                  tolower(names(t17)))))
+ap5 <- tryCatch({
+  assert_publishable_table(t17, prefix = NULL,
+                           name = "tbl_17_reserve_suitability.csv")
+  TRUE
+}, error = function(e) FALSE)
+add_q5("publish", "tbl_17_reserve_suitability.csv: assert_publishable_table() passes",
+       if (ap5) "pass" else "refused", ap5)
+out5 <- list.files(here("outputs"), recursive = TRUE)
+k <- sum(grepl("tiger", basename(out5), ignore.case = TRUE))
+add_q5("publish", "(c) no file with \"tiger\" in its name under outputs/",
+       sprintf("%d of %d files", k, length(out5)), k == 0)
+pr5 <- normalizePath(DIR_PROCESSED, winslash = "/", mustWork = FALSE)
+gi5 <- trimws(readLines(gitignore_in, warn = FALSE))
+add_q5("publish", "(d) the prediction layer is under data/processed/, and .gitignore holds data/processed/**",
+       basename(pred_path),
+       startsWith(normalizePath(pred_path, winslash = "/", mustWork = FALSE),
+                  paste0(pr5, "/")) && "data/processed/**" %in% gi5)
+
+# ---- 11. Write the QA table, then stop on a failure ------------------------------
+qa5_tbl <- do.call(rbind, q5)
+h  <- sdm_qa_id_hits(qa5_tbl, grid5$id)
+rh <- sdm_qa_reserve_hits(qa5_tbl, rd5$unit_name)
+add_q5("publish", "tbl_16_sdm_pred_qa.csv: (b) no value is a cell id; s1 no reserve name",
+       sprintf("%d and %d", h, rh), h == 0 && rh == 0)
+qa5_tbl <- do.call(rbind, q5)
+rownames(qa5_tbl) <- NULL
+occ_assert_counts_only(qa5_tbl, cols = c("group", "check", "value", "pass"),
+                       count_cols = character(0),
+                       name = "tbl_16_sdm_pred_qa.csv")
+write_table(qa5_tbl, nn = 16, slug = "sdm_pred_qa")
+cat("\n--- QA by group ---\n")
+grp5 <- unique(qa5_tbl$group)
+print(data.frame(group = grp5,
+                 checks = vapply(grp5, function(g) sum(qa5_tbl$group == g),
+                                 integer(1)),
+                 pass = vapply(grp5, function(g)
+                   sum(qa5_tbl$pass[qa5_tbl$group == g]), integer(1))),
+      row.names = FALSE)
+cat("\ninformation (task 15.5): reserves with one or more valued 1 km cells",
+    "outside the training range:", length(hr5), "| such 1 km cells in total:",
+    sum(qv5$n_hatched, na.rm = TRUE), "\n")
+if (length(hr5) > 0) {
+  cat("By reserve (a share of the cells of the value; not a presence state):\n")
+  hshow <- data.frame(unit_id = as.integer(rd5$unit_id[hr5]),
+                      unit_name = rd5$unit_name[hr5],
+                      cells_outside = qv5$n_hatched[hr5],
+                      cells_used = qv5$n_used[hr5])
+  print(hshow[order(hshow$unit_id), ], row.names = FALSE, right = FALSE)
+}
+if (length(za5) + length(zb5) > 0) {
+  cat("\n*** NOT FOR THE DOCS (Decision 25 point 9) ***\n")
+  if (length(za5) > 0) {
+    cat("kind (a):", paste(rd5$unit_name[za5], collapse = "; "), "\n")
+  }
+  if (length(zb5) > 0) {
+    cat("kind (b):", paste(rd5$unit_name[zb5], collapse = "; "), "\n")
+  }
+  cat("The author decides before the figures and before the commit of tbl_17.\n")
+  cat("*** END ***\n")
+}
+n_bad5 <- sum(!qa5_tbl$pass)
+if (n_bad5 > 0) {
+  cat("\n--- checks that FAIL ---\n")
+  bad5 <- qa5_tbl[!qa5_tbl$pass, ]
+  cat(paste0(bad5$group, " | ", bad5$check, " | ", bad5$value,
+             collapse = "\n"), "\n")
+  stop("QA of Decision 25: ", n_bad5, " of ", nrow(qa5_tbl), " checks fail. ",
+       "tbl_16_sdm_pred_qa.csv is written; find the cause before any commit.",
+       call. = FALSE)
+}
+rule(paste0("STEP 15.3 complete: QA ", nrow(qa5_tbl), " of ", nrow(qa5_tbl),
+            " checks pass (", round(as.numeric(difftime(Sys.time(), t_step153,
+                                                     units = "mins")), 1),
+            " min).\nCheck `git status --short` before a commit: nothing ",
+            "under data/ may be staged."))
+
+}  # end if (SDM_GRAIN_OUTCOME is a model outcome), STEP 15.3

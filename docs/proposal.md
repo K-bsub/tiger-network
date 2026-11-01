@@ -161,4 +161,11 @@ open are documented as numbered Decisions in `docs/methodology.md`, not here.*
   published. See `docs/methodology.md` (Decisions 21 and 23). *(2026-10-25,
   the count of task 14.4: 104 presence cells and 1,486 background cells on
   6,969 model cells of 0.2°, so a model is fitted — the outcome is
-  `planned_model`. Decision 24 fixes its settings.)*
+  `planned_model`. Decision 24 fixes its settings.)* *(2026-11-01, Week 15:
+  the national prediction is at 0.2° over the 6,969 model cells — relative
+  suitability (cloglog with clamping) in five classes of equal count, not
+  a probability of presence (Decision 25). The validation against reserves
+  (§5) is the reserve check of Decision 24 point 9: r1, against the 2022
+  census density, "agrees"; r2 is not published (Decision 25 point 9).
+  The published form is static figures and tables; a layer that a reader
+  can zoom waits for the Week-18 rule. Not a new deviation.)*

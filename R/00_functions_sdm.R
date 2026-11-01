@@ -49,6 +49,41 @@
 #   sdm_qa_id_hits()        values of a table that are a cell id
 #   sdm_qa_reserve_hits()   reserve names or reserve columns in a table
 #   sdm_self_test_143()     the hand-made case of STEP 14.3 (h1)
+# Task 15.3 (2026-10-31): STEP 15.1 — the prediction of Decision 25 points 1
+# to 4 (process choices w1, l1, t1 of task 15.2).
+#   sdm_pred_values()       the values of the model (output type, clamping)
+#   sdm_out_of_range()      the cells outside the training range (point 2)
+#   sdm_rank_class()        the rank and the class of each cell (point 3)
+#   sdm_class_ties()        the cells in a tie across a class break
+#   sdm_gate_open()         the gate of Decision 24 point 8
+#   sdm_pred_layer_checks() the checks of the prediction layer (l1)
+#   sdm_pred_summary()      the table tbl_16_sdm_prediction.csv (t1)
+#   sdm_self_test_151()     the hand-made case of STEP 15.1 (h1)
+# Task 15.4 (2026-11-01): STEP 15.2 — the reserve check of Decision 24 point
+# 9 with Decision 25 points 7 to 9 (process choices n1, t1, k1, e1, p1 of
+# task 15.2).
+#   sdm_reserve_cells()     the complete-case 1 km cells inside each reserve
+#                           polygon (centre rule; e1)
+#   sdm_reserve_values()    the reserve value and its counts (point 8)
+#   sdm_reserve_r1()        r1: Spearman rho, n, p and the reading (p1)
+#   sdm_reserve_r2()        r2 and the rule of Decision 25 point 9 (y1)
+#   sdm_reserve_z1()        the reserves of the two kinds of point 9 (z1)
+#   sdm_reserve_table()     the table tbl_17_reserve_suitability.csv (k1)
+#   sdm_reserve_table_checks()  the checks of that table
+#   sdm_reserve_check_summary() the table tbl_16_sdm_reserve_check.csv (t1)
+#   sdm_self_test_152()     the hand-made case of STEP 15.2 (h1)
+# Task 15.5 (2026-11-01): STEP 15.3 — the QA of Decision 25 (process choices
+# q1 and c1 of task 15.2). A second path: these functions do not call the
+# sdm_* functions of STEPs 15.1 and 15.2.
+#   sdm_qa_cloglog()        the model output again, by hand from the model
+#   sdm_qa_oor()            the cells outside the training range again
+#   sdm_qa_rank_class()     the rank and the class again
+#   sdm_qa_reserve_cells()  the 1 km cells of each reserve by terra::extract()
+#   sdm_qa_reserve_values() the reserve values, the counts and the hatched
+#                           cells again
+#   sdm_qa_spearman()       r1 again (rho of the ranks; t approximation)
+#   sdm_qa_r2_counts()      the 2 x 2 count of r2 again
+#   sdm_self_test_153()     the hand-made case of STEP 15.3 (h1)
 #
 # SENSITIVE DATA: these functions return TRUE/FALSE, names and counts, and
 # the grid (cell ids, shares, polygons). The grid holds no presence or
@@ -1168,4 +1203,906 @@ sdm_run_guards <- function(checks, what) {
          paste(names(checks)[!ok], collapse = "\n  "), call. = FALSE)
   }
   invisible(length(checks))
+}
+
+# =============================================================================
+# Task 15.3 — STEP 15.1: the prediction (Decision 25 points 1 to 4; process
+# choices w1, l1, t1 of task 15.2). The settings are the SDM_PRED_* and
+# SDM_PUB_* values of R/00_config.R.
+# =============================================================================
+
+# The fields of the prediction layer data/processed/sdm_prediction_cell02.csv
+# (process choice l1 of task 15.2), in this order. No presence or background
+# field, and no geometry.
+SDM_PRED_FIELDS <- c("id", "value", "rank", "class", "out_of_range")
+
+# The values of a maxnet model on newdata (a numeric vector), with the output
+# type and the clamping of Decision 25 a1.
+sdm_pred_values <- function(fit, newdata, type = SDM_PRED_TYPE,
+                            clamp = SDM_PRED_CLAMP) {
+  as.numeric(stats::predict(fit, newdata, type = type, clamp = clamp))
+}
+
+# The cells outside the training range (Decision 25 b2). A cell is outside if
+# one or more covariates is below the minimum or above the maximum that the
+# model object holds (varmin, varmax: over the data rows of the fit, that is
+# the presence and background cells). A value equal to a limit is inside. No
+# tolerance: the fit and the prediction read the same covariate table.
+#   newdata        : a data frame with the covariates of the model
+#   varmin, varmax : named numeric vectors (fit$varmin, fit$varmax)
+# Returns list(flag = one TRUE/FALSE per row, below = for each covariate the
+# number of rows below varmin, above = the number above varmax).
+sdm_out_of_range <- function(newdata, varmin, varmax) {
+  v <- names(varmin)
+  if (is.null(v) || !setequal(v, names(varmax)) ||
+      !all(v %in% names(newdata))) {
+    stop("sdm_out_of_range(): varmin and varmax must name the same ",
+         "covariates, and newdata must hold them.", call. = FALSE)
+  }
+  if (anyNA(newdata[, v, drop = FALSE])) {
+    stop("sdm_out_of_range(): a covariate is NA.", call. = FALSE)
+  }
+  n  <- nrow(newdata)
+  lo <- matrix(vapply(v, function(c) newdata[[c]] < varmin[[c]], logical(n)),
+               nrow = n, dimnames = list(NULL, v))
+  hi <- matrix(vapply(v, function(c) newdata[[c]] > varmax[[c]], logical(n)),
+               nrow = n, dimnames = list(NULL, v))
+  list(flag  = as.vector(rowSums(lo | hi) > 0),
+       below = stats::setNames(as.integer(colSums(lo)), v),
+       above = stats::setNames(as.integer(colSums(hi)), v))
+}
+
+# The rank and the class of each cell (Decision 25 c1, n5). Rank 1 is the
+# highest value; a tie goes to the lower id first (the order of
+# sdm_compare()). Class = k - floor(k x (rank - 1) / n), in integer
+# arithmetic: class k holds the highest values and the top ceiling(n / k)
+# cells.
+# Returns a data frame (rank, class) in the order of the input.
+sdm_rank_class <- function(value, id, k = SDM_PUB_N_CLASSES) {
+  n <- length(value)
+  if (n != length(id) || anyNA(value) || anyNA(id) || anyDuplicated(id)) {
+    stop("sdm_rank_class(): value and id must have the same length, no NA ",
+         "and no repeated id.", call. = FALSE)
+  }
+  k <- as.integer(k)
+  if (length(k) != 1L || is.na(k) || k < 2L || n < k) {
+    stop("sdm_rank_class(): k must be 2 or more and n must be k or more.",
+         call. = FALSE)
+  }
+  r <- integer(n)
+  r[order(-value, id)] <- seq_len(n)
+  cl <- k - (k * (r - 1L)) %/% n
+  data.frame(rank = r, class = as.integer(cl))
+}
+
+# The number of cells whose value is also the value of a cell in another
+# class (a tie across a class break; Decision 25 "Limitations").
+sdm_class_ties <- function(value, class) {
+  u <- match(value, unique(value))
+  n_cls <- as.vector(tapply(class, u, function(z) length(unique(z))))
+  as.integer(sum(n_cls[u] > 1L))
+}
+
+# The gate of Decision 24 point 8: TRUE if the mean test Boyce index is above
+# the gate value. NA gives FALSE.
+sdm_gate_open <- function(mean_boyce, gate = SDM_BOYCE_GATE) {
+  length(mean_boyce) == 1L && isTRUE(mean_boyce > gate)
+}
+
+# The checks of the prediction layer (Decision 25 points 1 to 4; l1). x is
+# the layer (a data frame). Returns a named list of TRUE/FALSE for
+# sdm_run_guards().
+sdm_pred_layer_checks <- function(x, model_ids, k = SDM_PUB_N_CLASSES,
+                                  type = SDM_PRED_TYPE) {
+  ok_fields <- identical(names(x), SDM_PRED_FIELDS)
+  if (!ok_fields) {
+    return(list("the layer must have the fields id, value, rank, class, out_of_range (in this order; no other field)" = FALSE))
+  }
+  by_rank <- x$value[order(x$rank)]
+  cls_ok <- all(x$class %in% seq_len(k))
+  mono <- cls_ok && all(vapply(seq_len(k - 1L), function(j) {
+    a <- x$value[x$class == j]
+    b <- x$value[x$class == j + 1L]
+    length(a) == 0L || length(b) == 0L || max(a) <= min(b)
+  }, logical(1)))
+  list(
+    "the layer must have the fields id, value, rank, class, out_of_range (in this order; no other field)" =
+      ok_fields,
+    "the layer must hold each model cell once" =
+      length(x$id) == length(model_ids) && setequal(x$id, model_ids) &&
+      !anyDuplicated(x$id),
+    "no field may be NA" = !anyNA(x),
+    "a cloglog value must be in [0, 1]" =
+      !identical(type, "cloglog") || all(x$value >= 0 & x$value <= 1),
+    "the ranks must be 1 to n, each once" =
+      setequal(x$rank, seq_len(nrow(x))) && !anyDuplicated(x$rank),
+    "the value must not rise with the rank" = all(diff(by_rank) <= 0),
+    "each class must be 1 to k, and a higher class must not hold a lower value" =
+      cls_ok && mono,
+    "out_of_range must be TRUE or FALSE" = is.logical(x$out_of_range)
+  )
+}
+
+# The table of STEP 15.1, tbl_16_sdm_prediction.csv (process choice t1 of
+# task 15.2): group, item, value, reading. Statistics only: no cell id, no
+# corner. With layer = NULL (the gate is closed), the gate rows only.
+#   mean_boyce : the mean test Boyce index (the row "mean" of tbl_16_sdm_cv)
+#   layer      : the prediction layer (SDM_PRED_FIELDS)
+#   oor        : the result of sdm_out_of_range()
+sdm_pred_summary <- function(mean_boyce, layer = NULL, oor = NULL,
+                             gate = SDM_BOYCE_GATE, k = SDM_PUB_N_CLASSES) {
+  rows <- list()
+  add <- function(group, item, value, reading = "") {
+    rows[[length(rows) + 1L]] <<- data.frame(
+      group = group, item = item, value = as.numeric(value),
+      reading = reading, stringsAsFactors = FALSE)
+  }
+  open <- sdm_gate_open(mean_boyce, gate)
+  add("gate", "mean_test_boyce", mean_boyce,
+      "the row mean of tbl_16_sdm_cv.csv (Decision 24 point 7)")
+  add("gate", "gate_value", gate, "SDM_BOYCE_GATE (Decision 24 point 8)")
+  add("gate", "result", NA,
+      if (open) "above the gate: a suitability map is allowed (Decision 24 point 8)" else
+        "at or below the gate: no suitability map (Decision 24 point 8)")
+  if (!is.null(layer)) {
+    n <- nrow(layer)
+    add("cells", "model_cells", n, "the cells of the prediction")
+    add("value", "min", min(layer$value), "cloglog, with clamping")
+    add("value", "median", stats::median(layer$value),
+        "cloglog, with clamping; the median of r2 (Decision 24 point 9)")
+    add("value", "max", max(layer$value), "cloglog, with clamping")
+    share <- 100 / k
+    for (j in rev(seq_len(k))) {
+      v <- layer$value[layer$class == j]
+      r <- layer$rank[layer$class == j]
+      where <- if (j == k) sprintf("highest %g %% of model cells", share) else
+        if (j == 1L) sprintf("lowest %g %% of model cells", share) else
+          sprintf("%g %% of model cells", share)
+      add("class", sprintf("class_%d_cells", j), length(v),
+          sprintf("%s; ranks %d to %d", where, min(r), max(r)))
+      add("class", sprintf("class_%d_value_min", j), min(v), "cloglog")
+      add("class", sprintf("class_%d_value_max", j), max(v), "cloglog")
+    }
+    add("class", "cells_tied_across_breaks",
+        sdm_class_ties(layer$value, layer$class),
+        "cells whose value is also in another class")
+    add("range", "cells_outside", sum(layer$out_of_range),
+        "one or more covariates outside the training range (Decision 25 b2)")
+    for (v in names(oor$below)) {
+      add("range", paste0(v, "_below_min"), oor$below[[v]], "cells")
+      add("range", paste0(v, "_above_max"), oor$above[[v]], "cells")
+    }
+  }
+  out <- do.call(rbind, rows)
+  rownames(out) <- NULL
+  out
+}
+
+# ---- STEP 15.1: the hand-made case (process choice h1) --------------------------
+# Made-up values only (and the example data of the maxnet package for one
+# fit). Returns a data frame (check, pass); the caller stops on a FALSE.
+sdm_self_test_151 <- function() {
+  chk <- list()
+  add <- function(name, ok) chk[[name]] <<- isTRUE(ok)
+  near <- function(a, b) isTRUE(all.equal(as.numeric(a), as.numeric(b),
+                                          tolerance = 1e-12))
+  # 1. rank and class: 7 cells, k = 5, a tie (0.5) goes to the lower id.
+  val <- c(0.9, 0.5, 0.5, 0.1, 0.7, 0.3, 0.2)
+  ids <- c(10L, 3L, 7L, 1L, 5L, 9L, 2L)
+  rc <- sdm_rank_class(val, ids, 5L)
+  add("1a ranks: 1 to 7 by value; the tie at 0.5 to the lower id (3 before 7)",
+      identical(rc$rank, c(1L, 3L, 4L, 7L, 2L, 5L, 6L)))
+  add("1b classes K - floor(K (r - 1) / n): 5, 4, 3, 1, 5, 3, 2",
+      identical(rc$class, c(5L, 4L, 3L, 1L, 5L, 3L, 2L)))
+  sz <- function(n) {
+    v <- seq_len(n) / n
+    as.vector(table(factor(sdm_rank_class(v, seq_len(n), 5L)$class,
+                           levels = 5:1)))
+  }
+  add("1c class sizes: n = 6969 gives 1394 x 4 and 1393; n = 10 gives 2 x 5",
+      identical(sz(6969L), c(1394L, 1394L, 1394L, 1394L, 1393L)) &&
+        identical(sz(10L), rep(2L, 5)))
+  # Class k = the top set of the sensitivity rule (sdm_compare(): the top
+  # ceiling(SDM_SENS_TOP_SHARE x n) cells by value, a tie to the lower id).
+  top_same <- function(n) {
+    x  <- round(((seq_len(n) * 7919L) %% 1000L) / 1000, 2)   # many ties
+    id <- (seq_len(n) * 37L) %% 100003L
+    cl <- sdm_rank_class(x, id, SDM_PUB_N_CLASSES)$class
+    top <- id[order(-x, id)][seq_len(ceiling(SDM_SENS_TOP_SHARE * n))]
+    setequal(id[cl == SDM_PUB_N_CLASSES], top)
+  }
+  add("1d the top class is the top SDM_SENS_TOP_SHARE set of sdm_compare() (n = 7, 13, 6969; with ties)",
+      top_same(7L) && top_same(13L) && top_same(6969L))
+  add("1e a tie across a class break: 2 cells (value 1 in classes 1 and 2)",
+      sdm_class_ties(c(1, 1, 2, 3), c(1L, 2L, 2L, 3L)) == 2L &&
+        sdm_class_ties(c(1, 2, 3), c(1L, 2L, 3L)) == 0L)
+  # 2. the flag (b2): limits a 0-1, b 1-2; a value at a limit is inside.
+  nd <- data.frame(a = c(0, 1, -0.1, 0.5, 1.2), b = c(1, 2, 1.5, 2.1, 0.9))
+  oor <- sdm_out_of_range(nd, c(a = 0, b = 1), c(a = 1, b = 2))
+  add("2a flag: at the limits inside; below a; above b; above a and below b",
+      identical(oor$flag, c(FALSE, FALSE, TRUE, TRUE, TRUE)))
+  add("2b counts by covariate: a 1 below, 1 above; b 1 below, 1 above",
+      identical(oor$below, c(a = 1L, b = 1L)) &&
+        identical(oor$above, c(a = 1L, b = 1L)))
+  add("2c one row works (a 2 above its maximum)",
+      identical(sdm_out_of_range(data.frame(a = 2, b = 1.5), c(a = 0, b = 1),
+                                 c(a = 1, b = 2))$flag, TRUE))
+  # 3. the gate
+  add("3a gate: 0.668 open; 0, -0.1 and NA closed",
+      sdm_gate_open(0.668, 0) && !sdm_gate_open(0, 0) &&
+        !sdm_gate_open(-0.1, 0) && !sdm_gate_open(NA_real_, 0))
+  # 4. one maxnet fit on the example data of the package (not project data)
+  ex <- new.env()
+  utils::data("bradypus", package = "maxnet", envir = ex)
+  bp <- ex$bradypus
+  dd <- bp[, c("cld6190_ann", "h_dem", "pre6190_ann")]
+  fit <- tryCatch(sdm_fit(bp$presence, dd, "lq", 1), error = function(e) NULL)
+  ok_fit <- !is.null(fit)
+  add("4a maxnet fits on the package example data", ok_fit)
+  if (ok_fit) {
+    v_all <- sdm_pred_values(fit, dd, "cloglog", TRUE)
+    add("4b cloglog values with clamping are in [0, 1], one per row",
+        length(v_all) == nrow(dd) && all(v_all >= 0 & v_all <= 1))
+    add("4c no data row of the fit is outside the training range",
+        !any(sdm_out_of_range(dd, fit$varmin, fit$varmax)$flag))
+    hi <- dd[1, , drop = FALSE]
+    hi$h_dem <- fit$varmax[["h_dem"]] + 1000
+    at <- hi
+    at$h_dem <- fit$varmax[["h_dem"]]
+    add("4d clamping: a value above the maximum gives the value at the maximum, and the flag",
+        near(sdm_pred_values(fit, hi, "cloglog", TRUE),
+             sdm_pred_values(fit, at, "cloglog", TRUE)) &&
+          isTRUE(sdm_out_of_range(hi, fit$varmin, fit$varmax)$flag))
+    add("4e cloglog = 1 - exp(-exp(entropy + link))",
+        near(sdm_pred_values(fit, dd[1:5, ], "cloglog", TRUE),
+             1 - exp(-exp(fit$entropy +
+                            sdm_pred_values(fit, dd[1:5, ], "link", TRUE)))))
+  }
+  # 5. the checks of the layer and the summary table
+  lay <- data.frame(id = ids, value = val, rank = rc$rank, class = rc$class,
+                    out_of_range = c(FALSE, FALSE, TRUE, FALSE, FALSE, FALSE,
+                                     FALSE))
+  good <- sdm_pred_layer_checks(lay, ids, 5L, "cloglog")
+  add("5a a correct layer passes each check", all(vapply(good, isTRUE, TRUE)))
+  bad1 <- lay
+  bad1$presence <- 0L
+  bad2 <- lay
+  bad2$class[bad2$id == 1L] <- 5L
+  add("5b a layer with a presence field, or with a class above a higher value, fails",
+      !all(vapply(sdm_pred_layer_checks(bad1, ids, 5L), isTRUE, TRUE)) &&
+        !all(vapply(sdm_pred_layer_checks(bad2, ids, 5L), isTRUE, TRUE)))
+  sm <- sdm_pred_summary(0.668, lay, list(below = c(a = 1L), above = c(a = 0L)),
+                         gate = 0, k = 5L)
+  cls <- sm$value[sm$group == "class" & grepl("_cells$", sm$item) &
+                    sm$item != "cells_tied_across_breaks"]
+  add("5c summary: the columns group, item, value, reading; the class sizes add up to n",
+      identical(names(sm), c("group", "item", "value", "reading")) &&
+        sum(cls) == nrow(lay) &&
+        sm$value[sm$item == "cells_outside"] == 1)
+  add("5d summary with the gate closed: the three gate rows only",
+      nrow(sdm_pred_summary(0, gate = 0)) == 3L &&
+        grepl("^at or below", sdm_pred_summary(0, gate = 0)$reading[3]))
+  data.frame(check = names(chk), pass = unlist(chk), row.names = NULL,
+             stringsAsFactors = FALSE)
+}
+
+# =============================================================================
+# Task 15.4 — STEP 15.2: the reserve check (Decision 24 point 9; Decision 25
+# points 7 to 9; process choices n1, t1, k1, e1, p1 of task 15.2). The
+# settings are SDM_RESERVE_*, SDM_PUB_R2_MIN_N and SDM_PUB_RANK_TIES of
+# R/00_config.R. A presence state of a reserve is used for the counts of r2
+# only: it is never a column of a table and is never printed with a name.
+# =============================================================================
+
+# The fields of tbl_17_reserve_suitability.csv (process choice k1 of task
+# 15.2), in this order. No presence column.
+SDM_RESERVE_TBL_FIELDS <- c("unit_id", "unit_name", "state",
+                            "landscape_complex", "cloglog_mean",
+                            "cloglog_rank", "density_2022",
+                            "n_1km_cells_used", "n_1km_cells_no_value")
+
+# The complete-case 1 km cells inside each reserve polygon (Decision 25 point
+# 8, h1; process choice e1 of task 15.2). A cell is inside if its centre is
+# in the polygon or on its edge (sf::st_intersects(), as occ_reserve_index()
+# of task 13.8). Only the cells in the bounding box of a polygon are tested.
+# A cell in two polygons is in each (Decision 24 point 9).
+#   reserves : sf polygons in the CRS of cellid_r, one row per reserve; a
+#              reserve with an empty geometry has no cell
+#   cellid_r : the 1 km cell-id raster (sdm_cellid_1km_7755.tif): the 0.2
+#              degree cell id of each complete-case cell, NA elsewhere
+# Returns a data frame: res (the row of `reserves`), cell (the 1 km cell
+# number), id (the 0.2 degree cell id). It is not written to any file.
+sdm_reserve_cells <- function(reserves, cellid_r) {
+  epsg_r <- suppressWarnings(as.integer(
+    terra::crs(cellid_r, describe = TRUE)$code))
+  if (!identical(as.integer(sf::st_crs(reserves)$epsg), epsg_r)) {
+    stop("sdm_reserve_cells(): the reserves and the cell-id raster must be ",
+         "in one CRS.", call. = FALSE)
+  }
+  geoms <- sf::st_geometry(reserves)
+  ex <- as.vector(terra::ext(cellid_r))     # xmin, xmax, ymin, ymax
+  nc <- terra::ncol(cellid_r)
+  nr <- terra::nrow(cellid_r)
+  empty <- data.frame(res = integer(0), cell = numeric(0), id = integer(0))
+  out <- vector("list", length(geoms))
+  for (i in seq_along(geoms)) {
+    g <- geoms[i]
+    if (sf::st_is_empty(g)) next
+    bb <- sf::st_bbox(g)
+    if (bb[["xmax"]] < ex[1] || bb[["xmin"]] > ex[2] ||
+        bb[["ymax"]] < ex[3] || bb[["ymin"]] > ex[4]) next
+    c1 <- terra::colFromX(cellid_r, max(bb[["xmin"]], ex[1]))
+    c2 <- terra::colFromX(cellid_r, min(bb[["xmax"]], ex[2]))
+    r1 <- terra::rowFromY(cellid_r, min(bb[["ymax"]], ex[4]))
+    r2 <- terra::rowFromY(cellid_r, max(bb[["ymin"]], ex[3]))
+    c1 <- if (is.na(c1)) 1L else c1
+    c2 <- if (is.na(c2)) nc else c2
+    r1 <- if (is.na(r1)) 1L else r1
+    r2 <- if (is.na(r2)) nr else r2
+    cells <- terra::cellFromRowColCombine(cellid_r, r1:r2, c1:c2)
+    v <- terra::extract(cellid_r, cells)[, 1]
+    keep <- !is.na(v)
+    if (!any(keep)) next
+    cells <- cells[keep]
+    v <- v[keep]
+    xy <- terra::xyFromCell(cellid_r, cells)
+    pts <- sf::st_as_sf(data.frame(x = xy[, 1], y = xy[, 2]),
+                        coords = c("x", "y"), crs = sf::st_crs(reserves))
+    hit <- lengths(sf::st_intersects(pts, g)) > 0
+    if (any(hit)) {
+      out[[i]] <- data.frame(res = i, cell = cells[hit],
+                             id = as.integer(v[hit]))
+    }
+  }
+  res <- do.call(rbind, c(list(empty), out))
+  rownames(res) <- NULL
+  res
+}
+
+# The reserve value and its counts (Decision 24 point 9; Decision 25 points 7
+# and 8). Each 1 km cell gets the value of its 0.2 degree cell; a 1 km cell
+# whose 0.2 degree cell is not in `pred` (not a model cell) has no value: it
+# is left out of the mean and counted.
+#   rc       : the result of sdm_reserve_cells()
+#   pred     : the prediction layer (SDM_PRED_FIELDS)
+#   n_res    : the number of reserves (the rows of the reserve layer)
+#   has_geom : TRUE/FALSE for each reserve
+#   pres_ids : the presence cells (0.2 degree cell ids); for r2 only
+# Returns a data frame, one row per reserve in the input order: value,
+# n_used, n_no_value, has_presence, all_hatched. A reserve with no geometry
+# is NA in each column. has_presence and all_hatched are never written to a
+# file.
+sdm_reserve_values <- function(rc, pred, n_res, has_geom, pres_ids) {
+  if (length(has_geom) != n_res) {
+    stop("sdm_reserve_values(): has_geom must have one value per reserve.",
+         call. = FALSE)
+  }
+  m <- match(rc$id, pred$id)
+  val <- pred$value[m]
+  oor <- pred$out_of_range[m]
+  out <- data.frame(value = rep(NA_real_, n_res),
+                    n_used = rep(NA_integer_, n_res),
+                    n_no_value = rep(NA_integer_, n_res),
+                    has_presence = rep(NA, n_res),
+                    all_hatched = rep(NA, n_res))
+  for (i in which(has_geom)) {
+    k <- rc$res == i
+    v <- val[k]
+    used <- !is.na(v)
+    out$n_used[i]       <- sum(used)
+    out$n_no_value[i]   <- sum(!used)
+    out$value[i]        <- if (any(used)) mean(v[used]) else NA_real_
+    out$has_presence[i] <- any(rc$id[k] %in% pres_ids)
+    out$all_hatched[i]  <- any(used) && all(oor[k][used])
+  }
+  out
+}
+
+# r1 of Decision 24 point 9: the Spearman rho of the reserve value and
+# density_2022, over the reserves with both; the two-sided p-value by
+# stats::cor.test(exact = SDM_RESERVE_P_EXACT) (process choice p1 of task
+# 15.2); the reading "agrees" if rho > 0 and p < SDM_RESERVE_P, otherwise "no
+# agreement shown". A real zero density counts.
+sdm_reserve_r1 <- function(value, density, p_max = SDM_RESERVE_P,
+                           exact = SDM_RESERVE_P_EXACT) {
+  ok <- !is.na(value) & !is.na(density)
+  n  <- sum(ok)
+  if (n < 3L) {
+    return(list(rho = NA_real_, n = n, p = NA_real_,
+                reading = "not computed (fewer than 3 reserves)"))
+  }
+  ct  <- stats::cor.test(value[ok], density[ok], method = "spearman",
+                         exact = exact)
+  rho <- unname(ct$estimate)
+  p   <- ct$p.value
+  list(rho = rho, n = n, p = p,
+       reading = if (isTRUE(rho > 0 && p < p_max)) "agrees" else
+         "no agreement shown")
+}
+
+# r2 of Decision 24 point 9 with the rule of Decision 25 point 9 (y1). Over
+# the reserves with a value: above = a value above the median of the model
+# cells (a value equal to the median is not above); the 2 x 2 count (above or
+# not x with or without a presence cell). r2 is published only if each of the
+# four counts is min_n or more (0 is also below the limit).
+# Returns list(publish, n_none = the reserves with no presence cell, n_above =
+# of these, the number above the median, share, counts = the 2 x 2 count).
+# The caller shows n_none, n_above and share only if publish is TRUE, and
+# never shows counts.
+sdm_reserve_r2 <- function(value, has_presence, median_value,
+                           min_n = SDM_PUB_R2_MIN_N) {
+  ok <- !is.na(value)
+  if (anyNA(has_presence[ok])) {
+    stop("sdm_reserve_r2(): a reserve with a value has no presence state.",
+         call. = FALSE)
+  }
+  above <- value[ok] > median_value
+  pres  <- as.logical(has_presence[ok])
+  counts <- c(above_with = sum(above & pres), above_none = sum(above & !pres),
+              not_above_with = sum(!above & pres),
+              not_above_none = sum(!above & !pres))
+  n_none <- sum(!pres)
+  n_abv  <- sum(above & !pres)
+  list(publish = all(counts >= min_n), n_none = n_none, n_above = n_abv,
+       share = if (n_none > 0) n_abv / n_none else NA_real_,
+       counts = counts)
+}
+
+# The reserves of the two kinds of Decision 25 point 9 (z1), over the
+# reserves with a polygon: (a) one or more 1 km cells with a value, each of
+# them in a cell outside the training range; (b) no 1 km cell with a value.
+# Returns list(kind_a, kind_b, total, rows_a, rows_b); the rows are for the
+# console of a failed check only.
+sdm_reserve_z1 <- function(has_geom, n_used, all_hatched) {
+  a <- has_geom & !is.na(n_used) & n_used > 0 & all_hatched %in% TRUE
+  b <- has_geom & !is.na(n_used) & n_used == 0
+  list(kind_a = sum(a), kind_b = sum(b), total = sum(a) + sum(b),
+       rows_a = which(a), rows_b = which(b))
+}
+
+# The table tbl_17_reserve_suitability.csv (Decision 25 point 7; process
+# choice k1 of task 15.2): one row per reserve, ordered by unit_id. The rank
+# is over the reserves with a value (1 = the highest; a tie gets the lowest
+# rank number with SDM_PUB_RANK_TIES = "min"). Full precision. No presence
+# column.
+#   res_d   : the reserve layer without geometry (unit_id, unit_name, state,
+#             landscape_complex)
+#   rv      : the result of sdm_reserve_values() (same row order)
+#   density : density_2022 in the row order of res_d
+sdm_reserve_table <- function(res_d, rv, density, ties = SDM_PUB_RANK_TIES) {
+  x <- data.frame(
+    unit_id = as.integer(res_d$unit_id),
+    unit_name = as.character(res_d$unit_name),
+    state = as.character(res_d$state),
+    landscape_complex = as.character(res_d$landscape_complex),
+    cloglog_mean = rv$value,
+    cloglog_rank = as.integer(rank(-rv$value, na.last = "keep",
+                                   ties.method = ties)),
+    density_2022 = as.numeric(density),
+    n_1km_cells_used = as.integer(rv$n_used),
+    n_1km_cells_no_value = as.integer(rv$n_no_value),
+    stringsAsFactors = FALSE)
+  x <- x[order(x$unit_id), ]
+  rownames(x) <- NULL
+  x
+}
+
+# The checks of the reserve table before it is written. Returns a named list
+# of TRUE/FALSE for sdm_run_guards().
+sdm_reserve_table_checks <- function(x, n_reserves) {
+  ok_f <- identical(names(x), SDM_RESERVE_TBL_FIELDS)
+  if (!ok_f) {
+    return(list("the table must have the fields of SDM_RESERVE_TBL_FIELDS (in this order; no other field)" = FALSE))
+  }
+  hv <- !is.na(x$cloglog_mean)
+  list(
+    "the table must have the fields of SDM_RESERVE_TBL_FIELDS (in this order; no other field)" =
+      ok_f,
+    "no field name may hold a presence, record or tiger word" =
+      !any(grepl("presence|pres_|record|tiger|occ|background",
+                 tolower(names(x)))),
+    "one row per reserve, ordered by unit_id, no repeated unit_id" =
+      nrow(x) == n_reserves && !anyDuplicated(x$unit_id) &&
+      !is.unsorted(x$unit_id),
+    "a value is in [0, 1] or NA; a rank only with a value" =
+      all(x$cloglog_mean[hv] >= 0 & x$cloglog_mean[hv] <= 1) &&
+      identical(!is.na(x$cloglog_rank), hv),
+    "the ranks are 1 to the number of reserves with a value" =
+      !any(hv) || (min(x$cloglog_rank[hv]) == 1L &&
+                     max(x$cloglog_rank[hv]) <= sum(hv)),
+    "a value only with 1 or more 1 km cells used" =
+      all(x$n_1km_cells_used[hv] > 0),
+    "the counts of 1 km cells are 0 or more, or NA (no polygon)" =
+      all(is.na(x$n_1km_cells_used) | x$n_1km_cells_used >= 0) &&
+      all(is.na(x$n_1km_cells_no_value) | x$n_1km_cells_no_value >= 0) &&
+      identical(is.na(x$n_1km_cells_used), is.na(x$n_1km_cells_no_value))
+  )
+}
+
+# The table of STEP 15.2, tbl_16_sdm_reserve_check.csv (process choice t1 of
+# task 15.2): group, item, value, reading. Statistics only: no reserve name,
+# no reserve column, no cell id. r2 under Decision 25 point 9 (y1).
+#   n_res, has_geom, rv, density : as for sdm_reserve_table()
+#   r1, r2, z1 : the results of sdm_reserve_r1(), sdm_reserve_r2(),
+#                sdm_reserve_z1()
+sdm_reserve_check_summary <- function(n_res, has_geom, rv, density, r1, r2,
+                                      z1, min_n = SDM_PUB_R2_MIN_N) {
+  rows <- list()
+  add <- function(group, item, value, reading = "") {
+    rows[[length(rows) + 1L]] <<- data.frame(
+      group = group, item = item, value = as.numeric(value),
+      reading = reading, stringsAsFactors = FALSE)
+  }
+  hv <- !is.na(rv$value)
+  add("reserves", "all", n_res, "rows of the reserve layer")
+  add("reserves", "with_polygon", sum(has_geom), "")
+  add("reserves", "with_value", sum(hv),
+      "one or more 1 km cells with a value (Decision 25 point 8)")
+  add("reserves", "with_value_and_density", sum(hv & !is.na(density)),
+      "the reserves of r1")
+  add("cells", "cells_1km_used", sum(rv$n_used, na.rm = TRUE),
+      "summed over the reserves; a cell in two polygons counts in each")
+  add("cells", "cells_1km_no_value", sum(rv$n_no_value, na.rm = TRUE),
+      "in a 0.2 degree cell that is not a model cell")
+  add("r1", "rho", r1$rho, "Spearman, reserve value and density_2022")
+  add("r1", "n", r1$n, "reserves")
+  add("r1", "p_value", r1$p, "two-sided; cor.test(exact = FALSE)")
+  add("r1", "result", NA, r1$reading)
+  if (isTRUE(r2$publish)) {
+    add("r2", "reserves_no_presence_cell", r2$n_none, "reserves with a value")
+    add("r2", "of_these_above_median", r2$n_above,
+        "value above the median of the model cells")
+    add("r2", "share", r2$share, "")
+    add("r2", "result", NA, sprintf(
+      "published: each count of the 2 x 2 table is %d or more (Decision 25 point 9)",
+      as.integer(min_n)))
+  } else {
+    add("r2", "result", NA, sprintf(
+      "r2 not published (a count below %d; Decision 25 point 9)",
+      as.integer(min_n)))
+  }
+  add("z1", "kind_a", z1$kind_a,
+      "valued 1 km cells all outside the training range")
+  add("z1", "kind_b", z1$kind_b, "a polygon and no 1 km cell with a value")
+  add("z1", "total", z1$total,
+      "Decision 25 point 9: must be 0; STEP 15.3 checks it")
+  out <- do.call(rbind, rows)
+  rownames(out) <- NULL
+  out
+}
+
+# ---- STEP 15.2: the hand-made case (process choice h1) --------------------------
+# Made-up values only. A 4 x 4 grid of 1 km cells (EPSG:7755) with four 0.2
+# degree cell ids (101-104; cell 6 is not complete-case) and six reserves.
+# Returns a data frame (check, pass); the caller stops on a FALSE.
+sdm_self_test_152 <- function() {
+  chk <- list()
+  add <- function(name, ok) chk[[name]] <<- isTRUE(ok)
+  near <- function(a, b) isTRUE(all.equal(as.numeric(a), as.numeric(b),
+                                          tolerance = 1e-12))
+  r <- terra::rast(nrows = 4, ncols = 4, xmin = 0, xmax = 4000, ymin = 0,
+                   ymax = 4000, crs = paste0("EPSG:", CRS_ANALYSIS))
+  terra::values(r) <- c(101L, 101L, 102L, 102L,
+                        101L, NA,   102L, 102L,
+                        103L, 103L, 104L, 104L,
+                        103L, 103L, 104L, 104L)
+  sq <- function(x0, y0, x1, y1) sf::st_polygon(list(rbind(
+    c(x0, y0), c(x1, y0), c(x1, y1), c(x0, y1), c(x0, y0))))
+  res <- sf::st_sf(
+    unit_id = 1:6,
+    geometry = sf::st_sfc(
+      sq(0, 2000, 2000, 4000),          # A: cells 1, 2, 5 (6 is NA)
+      sq(1500, 500, 4000, 1500),        # B: centres on the edges: 10-12, 14-16
+      sq(1000, 3000, 3000, 4000),       # C: cells 2, 3 (cell 2 also in A)
+      sf::st_polygon(),                 # D: no geometry
+      sq(2000, 3000, 4000, 4000),       # E: cells 3, 4 (id 102 only)
+      sq(2000, 0, 4000, 1000),          # F: cells 15, 16 (id 104 only)
+      crs = CRS_ANALYSIS))
+  rc <- sdm_reserve_cells(res, r)
+  cl <- function(i) sort(rc$cell[rc$res == i])
+  add("1a centre rule: A holds cells 1, 2, 5 (cell 6 is not complete-case)",
+      identical(cl(1), c(1, 2, 5)))
+  add("1b a centre on the edge counts: B holds cells 10, 11, 12, 14, 15, 16",
+      identical(cl(2), c(10, 11, 12, 14, 15, 16)))
+  add("1c a cell in two polygons counts in each (cell 2 in A and C)",
+      identical(cl(3), c(2, 3)))
+  add("1d no geometry: no cell", length(cl(4)) == 0L)
+  pred <- data.frame(id = c(101L, 102L, 103L), value = c(0.8, 0.4, 0.2),
+                     rank = 1:3, class = c(3L, 2L, 1L),
+                     out_of_range = c(FALSE, TRUE, FALSE))
+  has_geom <- !sf::st_is_empty(res)
+  rv <- sdm_reserve_values(rc, pred, nrow(res), has_geom, pres_ids = 101L)
+  add("2a values: A 0.8 (3 cells); B 0.2 (2 used, 4 with no value); C 0.6",
+      near(rv$value[1], 0.8) && rv$n_used[1] == 3L && rv$n_no_value[1] == 0L &&
+        near(rv$value[2], 0.2) && rv$n_used[2] == 2L &&
+        rv$n_no_value[2] == 4L && near(rv$value[3], 0.6))
+  add("2b no geometry: NA; F: no value, 0 used, 2 with no value",
+      is.na(rv$value[4]) && is.na(rv$n_used[4]) && is.na(rv$value[6]) &&
+        rv$n_used[6] == 0L && rv$n_no_value[6] == 2L)
+  add("2c presence state: A and C yes (cell id 101); B, E, F no",
+      identical(rv$has_presence, c(TRUE, FALSE, TRUE, NA, FALSE, FALSE)))
+  z <- sdm_reserve_z1(has_geom, rv$n_used, rv$all_hatched)
+  add("3a z1: kind (a) E (cells of id 102 only, outside the range); kind (b) F",
+      z$kind_a == 1L && z$kind_b == 1L && identical(z$rows_a, 5L) &&
+        identical(z$rows_b, 6L))
+  r1a <- sdm_reserve_r1(c(0.1, 0.2, 0.3, 0.4, 0.5, NA), c(1, 2, 3, 4, 5, 6),
+                        0.05, FALSE)
+  r1b <- sdm_reserve_r1(c(0.1, 0.2, 0.3, 0.4, 0.5), c(5, 4, 3, 2, 1), 0.05,
+                        FALSE)
+  ct <- stats::cor.test(c(0.1, 0.2, 0.3, 0.4, 0.5), c(1, 2, 3, 4, 5),
+                        method = "spearman", exact = FALSE)
+  add("4a r1: rho 1, n 5 (an NA left out), p of cor.test(exact = FALSE), agrees",
+      near(r1a$rho, 1) && r1a$n == 5L && near(r1a$p, ct$p.value) &&
+        r1a$reading == "agrees")
+  add("4b r1: rho -1 gives no agreement shown",
+      near(r1b$rho, -1) && r1b$reading == "no agreement shown")
+  w <- tryCatch({
+    sdm_reserve_r1(c(1, 2, 3, 4, 5, 6), c(0, 0, 1, 1, 2, 2), 0.05, FALSE)
+    "none"
+  }, warning = function(e) "warning")
+  add("4c r1 with ties in the density and a zero density: no warning (exact = FALSE)",
+      w == "none")
+  v12 <- c(0.9, 0.8, 0.7, 0.6, 0.5, 0.45, 0.1, 0.2, 0.3, 0.05, 0.15, 0.25)
+  p12 <- c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE,
+           TRUE, TRUE, TRUE, FALSE, FALSE, FALSE)
+  r2a <- sdm_reserve_r2(v12, p12, 0.4, 3L)
+  p12b <- p12
+  p12b[4] <- TRUE                      # above: 4 with, 2 none
+  r2b <- sdm_reserve_r2(v12, p12b, 0.4, 3L)
+  r2c <- sdm_reserve_r2(c(0.4, 0.5), c(FALSE, FALSE), 0.4, 1L)
+  add("5a r2: counts 3, 3, 3, 3 -> published; share 3 of 6",
+      r2a$publish && r2a$n_none == 6L && r2a$n_above == 3L &&
+        near(r2a$share, 0.5))
+  add("5b r2: a count of 2 -> not published",
+      !r2b$publish && r2b$counts[["above_none"]] == 2L)
+  add("5c r2: a value equal to the median is not above; a count of 0 -> not published",
+      r2c$n_above == 1L && !r2c$publish)
+  res_d <- data.frame(unit_id = c(3, 1, 2, 4), unit_name = c("C", "A", "B", "D"),
+                      state = "S", landscape_complex = "L")
+  rvt <- data.frame(value = c(0.5, 0.5, 0.2, NA), n_used = c(2L, 3L, 1L, NA),
+                    n_no_value = c(0L, 0L, 1L, NA))
+  tb <- sdm_reserve_table(res_d, rvt, c(1, 2, NA, 3), "min")
+  add("6a reserve table: fields of k1, ordered by unit_id; ties share the lowest rank",
+      identical(names(tb), SDM_RESERVE_TBL_FIELDS) &&
+        identical(tb$unit_id, 1:4) &&
+        identical(tb$cloglog_rank, c(1L, 3L, 1L, NA)))
+  add("6b the checks pass on this table and fail on a presence column",
+      all(vapply(sdm_reserve_table_checks(tb, 4L), isTRUE, TRUE)) &&
+        !all(vapply(sdm_reserve_table_checks(cbind(tb, has_presence = TRUE),
+                                             4L), isTRUE, TRUE)))
+  r1s <- list(rho = 0.3, n = 3L, p = 0.2, reading = "no agreement shown")
+  sm_b <- sdm_reserve_check_summary(6L, has_geom, rv, rep(1, 6), r1s, r2b, z,
+                                    3L)
+  sm_a <- sdm_reserve_check_summary(6L, has_geom, rv, rep(1, 6), r1s, r2a, z,
+                                    3L)
+  add("6c check table: r2 not published -> one r2 row, no count; published -> 4 r2 rows",
+      sum(sm_b$group == "r2") == 1L &&
+        grepl("^r2 not published", sm_b$reading[sm_b$group == "r2"]) &&
+        sum(sm_a$group == "r2") == 4L &&
+        identical(names(sm_a), c("group", "item", "value", "reading")))
+  data.frame(check = names(chk), pass = unlist(chk), row.names = NULL,
+             stringsAsFactors = FALSE)
+}
+
+# =============================================================================
+# Task 15.5 — STEP 15.3: the QA of Decision 25 (process choices q1 and c1 of
+# task 15.2). A second path for the main numbers of STEPs 15.1 and 15.2:
+# these functions do not call the sdm_* functions of those STEPs. The
+# tolerance is SDM_QA_REL_TOL (R/00_config.R).
+# =============================================================================
+
+# The model output again, by hand from the model object (no predict()): the
+# covariates are clamped to [varmin, varmax]; each feature of a coefficient
+# (a linear term "x" or a quadratic term "I(x^2)"; any other feature type
+# stops) is clamped to [featuremins, featuremaxs]; link = the sum of feature
+# x coefficient + alpha; cloglog = 1 - exp(-exp(entropy + link)).
+sdm_qa_cloglog <- function(fit, newdata) {
+  b  <- fit$betas
+  nm <- names(b)
+  v  <- names(fit$varmin)
+  if (!all(v %in% names(newdata))) {
+    stop("sdm_qa_cloglog(): newdata must hold the covariates of the model.",
+         call. = FALSE)
+  }
+  x <- list()
+  for (c in v) {
+    x[[c]] <- pmin(pmax(as.numeric(newdata[[c]]), fit$varmin[[c]]),
+                   fit$varmax[[c]])
+  }
+  link <- rep(fit$alpha, nrow(newdata))
+  for (j in seq_along(b)) {
+    if (nm[j] %in% v) {
+      f <- x[[nm[j]]]
+    } else if (grepl("^I\\((.+)\\^2\\)$", nm[j]) &&
+               sub("^I\\((.+)\\^2\\)$", "\\1", nm[j]) %in% v) {
+      f <- x[[sub("^I\\((.+)\\^2\\)$", "\\1", nm[j])]]^2
+    } else {
+      stop("sdm_qa_cloglog(): the feature ", nm[j], " is not a linear or ",
+           "quadratic term.", call. = FALSE)
+    }
+    f <- pmin(pmax(f, fit$featuremins[[nm[j]]]), fit$featuremaxs[[nm[j]]])
+    link <- link + b[[j]] * f
+  }
+  1 - exp(-exp(fit$entropy + link))
+}
+
+# The cells outside the training range again (Decision 25 b2), by a matrix
+# comparison (sweep()). Returns list(flag, below, above), as
+# sdm_out_of_range().
+sdm_qa_oor <- function(newdata, varmin, varmax) {
+  v <- names(varmin)
+  x <- as.matrix(newdata[, v, drop = FALSE])
+  lo <- sweep(x, 2, as.numeric(varmin[v]), "<")
+  hi <- sweep(x, 2, as.numeric(varmax[v]), ">")
+  list(flag  = as.vector(rowSums(lo | hi) > 0),
+       below = stats::setNames(as.integer(colSums(lo)), v),
+       above = stats::setNames(as.integer(colSums(hi)), v))
+}
+
+# The rank and the class again (Decision 25 c1, n5), by other code: the rank
+# by rank(ties.method = "first") on the cells in the order of their id (so a
+# tie goes to the lower id); the class by ceiling(k (n - rank + 1) / n) in
+# integer arithmetic, which equals k - floor(k (rank - 1) / n).
+sdm_qa_rank_class <- function(value, id, k = SDM_PUB_N_CLASSES) {
+  n <- length(value)
+  o <- order(id)
+  r <- integer(n)
+  r[o] <- as.integer(rank(-value[o], ties.method = "first"))
+  k <- as.integer(k)
+  cl <- (k * (n - r + 1L) + n - 1L) %/% n
+  data.frame(rank = r, class = as.integer(cl))
+}
+
+# The 1 km cells of each reserve again (Decision 25 point 8), by
+# terra::extract() on the polygons: the cells whose centre is in the polygon
+# (GDAL rasterize; a centre exactly on an edge can differ from the main path,
+# so the QA counts the differences). Returns a data frame: row (the row of
+# `reserves`), id (the 0.2 degree cell id; complete-case cells only).
+sdm_qa_reserve_cells <- function(reserves, cellid_r) {
+  g <- which(!sf::st_is_empty(reserves))
+  if (length(g) == 0L) return(data.frame(row = integer(0), id = integer(0)))
+  ex <- terra::extract(cellid_r, terra::vect(reserves[g, ]))
+  names(ex) <- c("ID", "id")
+  ex <- ex[!is.na(ex$id), ]
+  data.frame(row = g[ex$ID], id = as.integer(ex$id))
+}
+
+# The reserve values, the counts and the hatched cells again, by tapply().
+#   qc   : the result of sdm_qa_reserve_cells()
+#   pred : the prediction layer (id, value, out_of_range)
+#   has_geom : TRUE/FALSE for each reserve
+#   pres_ids : the presence cells (0.2 degree cell ids)
+# Returns a data frame, one row per reserve: value, n_used, n_no_value,
+# n_hatched (valued cells outside the training range), has_presence. NA for
+# a reserve with no geometry.
+sdm_qa_reserve_values <- function(qc, pred, has_geom, pres_ids) {
+  n <- length(has_geom)
+  m <- match(qc$id, pred$id)
+  val <- pred$value[m]
+  hat <- !is.na(val) & as.logical(pred$out_of_range[m])
+  f <- factor(qc$row, levels = seq_len(n))
+  cnt <- function(z) {
+    r <- as.vector(tapply(z, f, sum))
+    r[is.na(r)] <- 0
+    as.integer(r)
+  }
+  s_val <- as.vector(tapply(ifelse(is.na(val), 0, val), f, sum))
+  s_val[is.na(s_val)] <- 0
+  out <- data.frame(n_used = cnt(!is.na(val)), n_no_value = cnt(is.na(val)),
+                    n_hatched = cnt(hat),
+                    has_presence = cnt(qc$id %in% pres_ids) > 0)
+  out$value <- ifelse(out$n_used > 0, s_val / pmax(out$n_used, 1L), NA_real_)
+  out[!has_geom, ] <- NA
+  out[, c("value", "n_used", "n_no_value", "n_hatched", "has_presence")]
+}
+
+# r1 again: rho = the Pearson r of the ranks (average ranks for ties); the
+# two-sided p-value by the t approximation with n - 2 degrees of freedom (the
+# method of cor.test(method = "spearman", exact = FALSE)).
+sdm_qa_spearman <- function(x, y) {
+  ok <- !is.na(x) & !is.na(y)
+  n  <- sum(ok)
+  if (n < 3L) return(c(rho = NA_real_, n = n, p = NA_real_))
+  r  <- stats::cor(rank(x[ok]), rank(y[ok]))
+  t  <- r * sqrt((n - 2) / (1 - r^2))
+  c(rho = r, n = n, p = 2 * stats::pt(-abs(t), n - 2))
+}
+
+# The 2 x 2 count of r2 again (Decision 25 point 9): over the reserves with a
+# value, above the median (a value equal to it is not above) x with or
+# without a presence cell. Named in the order above_with, above_none,
+# not_above_with, not_above_none.
+sdm_qa_r2_counts <- function(value, has_presence, median_value) {
+  ok <- !is.na(value)
+  a  <- value[ok] > median_value
+  p  <- as.logical(has_presence[ok])
+  tb <- table(factor(a, levels = c(TRUE, FALSE)),
+              factor(p, levels = c(TRUE, FALSE)))
+  c(above_with = tb[1, 1], above_none = tb[1, 2],
+    not_above_with = tb[2, 1], not_above_none = tb[2, 2])
+}
+
+# ---- STEP 15.3: the hand-made case of the QA functions (process choice h1) ------
+# Made-up values only (and the example data of the maxnet package). Returns a
+# data frame (check, pass); the caller writes it into the QA table.
+sdm_self_test_153 <- function() {
+  chk <- list()
+  add <- function(name, ok) chk[[name]] <<- isTRUE(ok)
+  ex <- new.env()
+  utils::data("bradypus", package = "maxnet", envir = ex)
+  bp <- ex$bradypus
+  dd <- bp[, c("cld6190_ann", "h_dem", "pre6190_ann")]
+  fit <- tryCatch(maxnet::maxnet(bp$presence, dd,
+                                 f = maxnet::maxnet.formula(bp$presence, dd,
+                                                            classes = "lq")),
+                  error = function(e) NULL)
+  if (!is.null(fit)) {
+    nd <- dd[1:50, ]
+    nd$h_dem[1] <- fit$varmax[["h_dem"]] + 500        # a clamped row
+    a <- sdm_qa_cloglog(fit, nd)
+    b <- as.numeric(stats::predict(fit, nd, type = "cloglog", clamp = TRUE))
+    add("1a cloglog by hand = predict(type = cloglog, clamp = TRUE), with a clamped row",
+        max(abs(a - b)) < 1e-12)
+    fh <- tryCatch(maxnet::maxnet(bp$presence, dd,
+                                  f = maxnet::maxnet.formula(bp$presence, dd,
+                                                             classes = "lqh")),
+                   error = function(e) NULL)
+    add("1b a hinge feature stops the hand path (lq only)",
+        !is.null(fh) && inherits(tryCatch(sdm_qa_cloglog(fh, nd),
+                                          error = function(e) e), "error"))
+  } else {
+    add("1a cloglog by hand = predict(type = cloglog, clamp = TRUE), with a clamped row", FALSE)
+    add("1b a hinge feature stops the hand path (lq only)", FALSE)
+  }
+  nd2 <- data.frame(a = c(0, 1, -0.1, 0.5, 1.2), b = c(1, 2, 1.5, 2.1, 0.9))
+  o <- sdm_qa_oor(nd2, c(a = 0, b = 1), c(a = 1, b = 2))
+  add("2a flag again: at the limits inside; 3 rows outside; counts 1, 1, 1, 1",
+      identical(o$flag, c(FALSE, FALSE, TRUE, TRUE, TRUE)) &&
+        identical(o$below, c(a = 1L, b = 1L)) &&
+        identical(o$above, c(a = 1L, b = 1L)))
+  rc <- sdm_qa_rank_class(c(0.9, 0.5, 0.5, 0.1, 0.7, 0.3, 0.2),
+                          c(10L, 3L, 7L, 1L, 5L, 9L, 2L), 5L)
+  add("3a rank and class again: ranks 1 3 4 7 2 5 6; classes 5 4 3 1 5 3 2",
+      identical(rc$rank, c(1L, 3L, 4L, 7L, 2L, 5L, 6L)) &&
+        identical(rc$class, c(5L, 4L, 3L, 1L, 5L, 3L, 2L)))
+  sz <- table(sdm_qa_rank_class(seq_len(6969) / 6969, seq_len(6969), 5L)$class)
+  add("3b class sizes again for n = 6969: 1393, 1394, 1394, 1394, 1394 (classes 1 to 5)",
+      identical(as.vector(sz), c(1393L, 1394L, 1394L, 1394L, 1394L)))
+  r <- terra::rast(nrows = 4, ncols = 4, xmin = 0, xmax = 4000, ymin = 0,
+                   ymax = 4000, crs = paste0("EPSG:", CRS_ANALYSIS))
+  terra::values(r) <- c(101L, 101L, 102L, 102L, 101L, NA, 102L, 102L,
+                        103L, 103L, 104L, 104L, 103L, 103L, 104L, 104L)
+  sq <- function(x0, y0, x1, y1) sf::st_polygon(list(rbind(
+    c(x0, y0), c(x1, y0), c(x1, y1), c(x0, y1), c(x0, y0))))
+  res <- sf::st_sf(unit_id = 1:5, geometry = sf::st_sfc(
+    sq(0, 2000, 2000, 4000), sq(1000, 3000, 3000, 4000), sf::st_polygon(),
+    sq(2000, 3000, 4000, 4000), sq(2000, 0, 4000, 1000), crs = CRS_ANALYSIS))
+  qc <- sdm_qa_reserve_cells(res, r)
+  add("4a cells again by terra::extract(): A 3 cells (one NA left out), B 2 (a cell also in A), C none, D 2, E 2",
+      identical(as.vector(table(factor(qc$row, levels = 1:5))),
+                c(3L, 2L, 0L, 2L, 2L)))
+  pred <- data.frame(id = c(101L, 102L, 103L), value = c(0.8, 0.4, 0.2),
+                     out_of_range = c(FALSE, TRUE, FALSE))
+  qv <- sdm_qa_reserve_values(qc, pred, !sf::st_is_empty(res), 101L)
+  add("4b values again: A 0.8, B 0.6, D 0.4 (2 hatched), E no value (2 cells)",
+      isTRUE(all.equal(qv$value[c(1, 2, 4)], c(0.8, 0.6, 0.4))) &&
+        is.na(qv$value[5]) && qv$n_no_value[5] == 2L &&
+        qv$n_hatched[4] == 2L && qv$n_hatched[1] == 0L && is.na(qv$value[3]))
+  add("4c presence again: A and B yes (id 101); D and E no; C NA",
+      identical(qv$has_presence, c(TRUE, TRUE, NA, FALSE, FALSE)))
+  x <- c(1, 2, 3, 4, 5, 6, 7, 8)
+  y <- c(0, 0, 1, 3, 2, 5, 5, 9)
+  sp <- sdm_qa_spearman(x, y)
+  ct <- suppressWarnings(stats::cor.test(x, y, method = "spearman",
+                                         exact = FALSE))
+  add("5a r1 again (ties): rho and p = cor.test(method = spearman, exact = FALSE)",
+      abs(sp[["rho"]] - ct$estimate) < 1e-12 && abs(sp[["p"]] - ct$p.value) < 1e-12)
+  cn <- sdm_qa_r2_counts(c(0.9, 0.8, 0.5, 0.1, 0.2, 0.4, NA),
+                         c(TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE), 0.4)
+  add("6a r2 counts again: 2, 1, 1, 2 (equal to the median is not above; NA left out)",
+      identical(as.integer(cn), c(2L, 1L, 1L, 2L)) &&
+        identical(names(cn), c("above_with", "above_none", "not_above_with",
+                               "not_above_none")))
+  data.frame(check = names(chk), pass = unlist(chk), row.names = NULL,
+             stringsAsFactors = FALSE)
 }

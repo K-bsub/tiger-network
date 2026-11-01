@@ -2,7 +2,9 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** **Week 14 complete (2026-10-25).** Stage 3 (habitat
+**Status:** **Week 15 complete (2026-11-01; tasks 15.1–15.2 on 2026-10-31,
+tasks 15.3–15.6 on 2026-11-01; the commit, task 15.7, by the author);
+Week 14 complete (2026-10-25).** Stage 3 (habitat
 suitability) has a fitted model. **Decision 23:** a `maxnet` model on the
 obscured iNaturalist tiger records at the 0.2° grain of the iNaturalist
 obscuring grid, with a background of the clean iNaturalist Mammalia
@@ -12,10 +14,24 @@ fixed before any covariate summary. As run (`scripts/09_model_suitability.R`):
 6 of the 9 candidate covariates kept (the terrain as `elev_mean` only);
 `lq` with multiplier 1 by AICc; over 5 folds of 2° spatial blocks, a mean
 test Boyce index of 0.668, a mean test AUC of 0.749 and a mean OR10 of
-0.165; both sensitivity runs "robust"; QA 133 of 133. No prediction surface
-and no map exist yet. **Next: Week 15** — Decision 25 (the prediction and
-its published form), then the prediction, the gate (Decision 24 point 8)
-and the reserve check (point 9).
+0.165; both sensitivity runs "robust"; QA 133 of 133. **Week 15, task 15.1
+(2026-10-31): Decision 25** — the prediction and its published form, fixed
+before any prediction file: the model file of 2026-10-25, cloglog with
+clamping; cells outside the training range flagged and hatched; five
+equal-count classes by rank; no layer before Week 18; two static figures
+(`fig_04` classes, `fig_05` value); a reserve table; the cells of the
+reserve check; point 9 (added in task 15.2) prevents a link of a reserve
+name to a presence state. **Task 15.2 (2026-10-31):** the process choices.
+**Task 15.3 (2026-11-01):** the prediction of the 6,969 model cells (under
+`data/processed/`, gitignored); the gate of Decision 24 point 8 is open
+(mean test Boyce 0.668); classes of 1,394 and 1,393 cells; 32 cells outside
+the training range. **Task 15.4 (2026-11-01):** the reserve check — r1
+"agrees" (ρ = 0.379, n = 51, p = 0.00614); r2 not published (Decision 25
+point 9); z1 0; `tbl_17_reserve_suitability.csv` (58 rows). **Task 15.5
+(2026-11-01):** the QA of Decision 25, 84 of 84. **Task 15.6:** the docs
+of Week 15 and the Week-16 plan. No map yet. **Next:** the commit of Week
+15 (task 15.7, by the author), then **Week 16** — Decision 26 (the Gi*
+settings), the Gi*, and the figures `fig_04` and `fig_05`.
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -77,9 +93,10 @@ STEP block per task.
 
 ### 5.4 Habitat suitability (priority 3)
 
-*(Written again 2026-10-25 at the Week-14 close; the dated notes of
-Decisions 21 to 24 are in this text now. The first text named a `maxnet`
-SDM at 1 km on the cleaned occurrences.)*
+*(Written again 2026-11-01 at the Week-15 close; the dated notes of
+Decision 25 are in this text now. Earlier texts: 2026-10-25 (Week 14) and
+the first text, which named a `maxnet` SDM at 1 km on the cleaned
+occurrences.)*
 
 `maxnet` SDM at a coarser grain (Decision 23). There is no 1 km model: the
 tiger records with a position good to 1 km are 45 records in 17 cells,
@@ -100,9 +117,26 @@ below the minimum of 25 (Decision 21 point 8).
   two sensitivity runs. As run: six covariates (the mean of gHM, elevation
   and distance to road; the shares of forest, open natural and built
   land), `lq` with multiplier 1, a mean test Boyce index of 0.668.
-- **Week 15:** a numbered Decision on the prediction and its published
-  form, then the prediction over the 6,969 model cells, the gate and the
-  reserve check.
+- **Prediction (Decision 25; Week 15):** the model file of 2026-10-25,
+  cloglog with clamping, over the 6,969 model cells
+  (`data/processed/sdm_prediction_cell02.csv`, gitignored). The gate is
+  open. Five classes of equal count by rank (1,394 cells, and 1,393 in
+  class 1); the value is relative, not a probability of presence. 32 cells
+  are outside the training range of one or more covariates: they keep
+  their value and are hatched in the figures. The statistics:
+  `tbl_16_sdm_prediction.csv`.
+- **Reserve check (Decision 24 point 9; Decision 25 points 7–9):** a
+  reserve value is the mean over the complete-case 1 km cells whose centre
+  is in the core polygon; a 1 km cell outside the model cells has no value.
+  56 of 58 reserves have a value (`tbl_17_reserve_suitability.csv`, the
+  published table). r1: Spearman ρ = 0.379 with the 2022 census density
+  (n = 51, p = 0.006) → "agrees". r2 is not published (Decision 25 point
+  9). QA of Week 15: 84 of 84.
+- **Published form:** two static figures at national scale in Week 16
+  (`fig_04` the classes, `fig_05` the value, with the nine caption items of
+  Decision 25 point 5); the tables of statistics; the reserve table. No
+  layer that a reader can zoom or download before the Week-18 rule
+  (pending item "Published layers").
 
 **This is suitability, not occupancy** (Decision 1). At a grain of about
 20 km it is not habitat at the scale of a reserve.
@@ -3383,6 +3417,10 @@ project machine on 2026-10-25; facts, not a reading):**
   computed in memory only.
 - Process choices, implementation points, tests and outputs: change log,
   2026-10-25, task 14.5.
+- *(2026-11-01, Week 15: the gate (point 8) is open, and the reserve check
+  (point 9) reads "agrees" (ρ = 0.379, n = 51, p = 0.00614); r2 is not
+  published under Decision 25 point 9. The facts: Decision 25, "Result of
+  STEP 15.1" and "Result of STEP 15.2".)*
 - **QA (task 14.6, 2026-10-25):** STEP 14.3 computed the cell counts, the
   covariates of the 6,969 model cells (`terra::zonal()`), the correlations,
   AICc and K of the selected model (from the model file) and the training
@@ -3501,18 +3539,544 @@ item (point (2) by point 10; points (4) and (5) by points 5 and 10; the Gi*
 settings of point (6) go to a new pending item) and the **[Week 14] Terrain
 variables in the SDM** item (points 1 to 3).
 
+### Decision 25 — Prediction and publication: model file and output, cells outside the training range, classes, published form, caption, figures, reserve table, cells of the reserve check
+**Date:** 2026-10-31 (fixed **before** any prediction is written to a file
+or seen — see "What was seen before this Decision")
+**Choice:** Settings in `R/00_config.R` (a new block "Stage 3: prediction
+and publication (Decision 25)" after the QA block of task 14.6). `scripts/09`
+applies them in Week 15 (tasks 15.3–15.5); the two figures and the caption
+drafts are made in Week 16. Fork codes as raised and chosen on 2026-10-31:
+a1, b2, c1 (with n5), d1, e1, f3 (two figures, the legend label, the hatch
+on both), t1, h1; point 9 (added in task 15.2 on 2026-10-31, before any
+result): y1, z1. *(Earlier Decisions use some of the same letters. Write
+the Decision with the code, for example "Decision 25 b2".)*
+
+**Fixed by earlier Decisions (not forks; stated here so that the record is
+complete):**
+- The prediction cells are the 6,969 model cells only (Decision 23 point
+  3). The 481 other cells of the grid get no value.
+- The gate (Decision 24 point 8): the mean test Boyce index is 0.668, above
+  0, so the gate allows a suitability map. Week 15 states this in a table
+  and in the console.
+- The reserve check (Decision 24 point 9): r1 and r2, on the cloglog values
+  with clamping. Point 8 below is a reading of point 9. The text of
+  Decision 24 does not change.
+
+1. **Model file, output type and clamping (a1).**
+   - The prediction uses the model file of the record,
+     `data/processed/tiger_sdm_maxnet_cell02_20261025.rds`
+     (`SDM_PRED_MODEL_FILE`). It does not use a model that a later run of
+     `scripts/09` fits again.
+   - The input is the six kept covariates of the 6,969 model cells
+     (`sdm_covariates_cell02.csv`; Decision 24 points 1–3).
+   - Output type: cloglog (`SDM_PRED_TYPE` = `SDM_EVAL_TYPE`), with
+     clamping (`SDM_PRED_CLAMP` = `TRUE`, the `predict.maxnet()` default).
+   - The classes (point 3), the value figure (point 6), the reserve values
+     (points 7 and 8) and the counts of point 2 all use these values. No
+     other output type is published.
+2. **Cells outside the training range (b2).**
+   - The training range of a covariate is its minimum and its maximum over
+     the data rows of the main model (the 104 presence cells and the 1,486
+     background cells), as the model object holds them (`varmin`,
+     `varmax`). Clamping holds each covariate and each feature in its
+     training range.
+   - A model cell is **outside the training range** if one or more of its
+     six covariates is below `varmin` or above `varmax`
+     (`SDM_PRED_FLAG_RANGE` = `TRUE`). A value equal to a limit is inside.
+     - These are the cells where clamping can change the value.
+     - They are also the cells with a negative MESS when the reference set
+       is the data rows (Elith et al. 2010).
+     - The six covariates are 0 or more, so a quadratic feature is outside
+       its range only when its covariate is outside its range.
+   - **Reported** (statistics only): the number of model cells outside the
+     range; for each covariate, the number below `varmin` and the number
+     above `varmax`. No limit applies: the count is a result, not a rule.
+   - In both figures (point 6), a cell outside the range keeps its class or
+     its value and gets a hatch. The caption names the hatch and gives the
+     count.
+   - The reserve check uses the clamped values of all cells. This flag
+     removes no cell.
+   - By this definition, no presence cell and no background cell is outside
+     the range. A hatched cell is thus a cell with no record of the model.
+     The hatch does not mark a presence cell.
+3. **Classes (c1, n5).**
+   - Five classes (`SDM_PUB_N_CLASSES`) of equal count, by the rank of the
+     cloglog value over the 6,969 model cells.
+   - **Rank r:** 1 is the highest value; a tie goes to the lower cell id
+     first (the order of `sdm_compare()`, Decision 24 point 10).
+   - **Class:** K − floor(K × (r − 1) / n), with K = 5 and n = 6,969. Class
+     5 holds the highest values. With n = 6,969, classes 5, 4, 3 and 2 hold
+     1,394 cells each and class 1 holds 1,393 cells (arithmetic, not a
+     result).
+   - Class 5 is the same set of cells as the top 20 % of the sensitivity
+     rule (ceiling(0.2 × n) = 1,394 cells, in the same order).
+   - **Legend:** the classes by rank, from "highest 20 % of model cells" to
+     "lowest 20 % of model cells". The legend gives no cloglog value.
+   - 5 is a judgement value inside the range of 3 to 7 classes that the
+     cartography texts give for a simple map. No source fixes the number
+     for a suitability map.
+4. **Published form, tier and check (d1).**
+   - **Week 15 publishes no layer.** The prediction layer stays under
+     `data/processed/` (gitignored). It holds, for each model cell, the
+     cell id, the cloglog value, the class and the flag of point 2, and no
+     presence or background field. Task 15.2 names the file.
+   - The published forms are the two static figures of point 6 (national
+     scale, Week 16), the reserve table of point 7 and tables of
+     statistics.
+   - A layer that a reader can zoom or download (the Stage-4 maps) waits
+     for a rule in Week 18. The pending item "[Week 18] Published path
+     layer" becomes "[Week 18] Published layers" and includes this surface.
+   - **Tier T1** (sensitive-data policy §2: public data that the source
+     obscured; "normal use; document the obscuring"). The caption says
+     that the presences are obscured records (point 5, item 3).
+   - **Check:** the figure code reads only the prediction layer of this
+     point and the grid layer. Neither has a presence or a background field
+     (Decision 23 point 9: the published form must not mark the presence
+     cells). The check is written with the figures in Week 16.
+5. **Caption content (e1).** The caption of each figure holds all of these
+   items, as the caption of `fig_03` does. The caption text is drafted in
+   Week 16 and marked as a draft (the narrative is the author's).
+   1. Relative suitability from a `maxnet` model at the 0.2° grain (cells
+      of about 20 km; 396–488 km² in India).
+   2. Not occupancy (Decision 1), and not a probability of presence.
+   3. The presences: the obscured iNaturalist tiger records, in 104 cells
+      of 0.2° (obscured by the source; point 4). The background: the
+      iNaturalist mammal records, in 1,486 cells. The effort caveat
+      (proposal §7).
+   4. How to read the figure: for `fig_04`, the classes by rank; for
+      `fig_05`, the legend label of point 6. For both: the top-20 % overlap
+      of each sensitivity run with the main model (0.931 and 0.896).
+   5. The evaluation: a mean test Boyce index of 0.668 over 5 folds of 2°
+      blocks, with the tie rule of implementation point 3 of Decision 24
+      (not the `ecospat.boyce()` default), and a mean test AUC of 0.749.
+   6. The hatch: outside the training range of one or more covariates
+      (point 2), with the count. A blank cell: not a model cell (less than
+      50 % complete-case cover).
+   7. The reserve outlines are the core protected-area polygons (Decision
+      4), not the notified total area.
+   8. The reading of r1 of the reserve check, with ρ, n and p (Decision 24
+      point 9).
+   9. The data sources.
+6. **Figures (f3: two figures).**
+   - **`fig_04_<slug>.png`** (`SDM_PUB_FIG_CLASS` = 4): the five classes of
+     point 3.
+   - **`fig_05_<slug>.png`** (`SDM_PUB_FIG_VALUE` = 5): the cloglog value of
+     each model cell on a continuous colour scale. The legend label is
+     "model output (cloglog), relative; not a probability of presence"
+     (`SDM_PUB_VALUE_LABEL`). The caption holds the same item (point 5,
+     item 2).
+   - **Both figures:** the 0.2° model cells, the hatch of point 2
+     (`SDM_PUB_HATCH`), the reserve outlines and the state boundaries, at
+     national scale. No presence mark, no background mark, no point. The
+     sensitivity runs are numbers in the caption, not maps.
+   - The slugs, the colours and the size are set in Week 16. A slug does
+     not hold the word "tiger" (the QA check "no file with 'tiger' in its
+     name under `outputs/`").
+7. **Reserve table (t1).** One published table with one row for each
+   reserve of `boundary_reserves_all_7755.gpkg` (58 rows, as
+   `tbl_15_occ_by_reserve.csv`), keyed on `unit_id`
+   (`SDM_PUB_RESERVE_TABLE` = `TRUE`). Content:
+   - `unit_id`, `unit_name`, `state`;
+   - the reserve value (point 8) and its rank among the reserves with a
+     value (1 = the highest);
+   - `density_2022` (Decision 8; `stats_reserve_census_7755.gpkg`);
+   - the number of 1 km cells that the value uses, and the number of 1 km
+     cells inside the polygon with no value (point 8).
+   - A reserve with no polygon, or with no 1 km cell that has a value, has
+     no value and no rank.
+   - **No presence column.** r2 stays as counts and a share only (Decision
+     24 point 9), with the rule of point 9.
+   - The table number, the slug, the column names, the rounding and the
+     tie rule of the rank are process choices of task 15.2.
+8. **Cells of the reserve check (h1; a reading of Decision 24 point 9).**
+   - **Inside:** a complete-case 1 km cell is inside a reserve polygon if
+     its centre is inside the polygon or on its edge
+     (`SDM_RESERVE_CELL_RULE` = `"centre"`). This is the literal reading of
+     point 9 ("inside the reserve polygon …; an edge counts") and the rule
+     for a record of task 13.8.
+   - **A 1 km cell whose 0.2° cell is not a model cell** has no value
+     (42,467 complete-case 1 km cells are in the 481 such cells; Decision
+     23, the count of task 14.4). It is left out of the mean, and the
+     number of such cells is reported for each reserve
+     (`SDM_RESERVE_NONMODEL` = `"exclude_and_count"`).
+   - A reserve with no 1 km cell that has a value gets no reserve value. It
+     is not in r1 or r2.
+   - A cell in two overlapping polygons counts in each (Decision 24 point
+     9).
+9. **The presence state of a reserve in the published outputs (y1, z1).**
+   *(Added 2026-10-31 in task 15.2, before any result. The chat found the
+   gap after points 1–8 were recorded.)* Decision 24 point 9 says that no
+   reserve name is linked to a presence or no-presence state. Two
+   combinations of points 2, 4, 7 and 8 can make that link.
+   - **r2 and the reserve table (y1).**
+     - The reserve table gives the value of each named reserve (point 7),
+       and `tbl_16_sdm_prediction.csv` gives the median of the model cells.
+       Over the reserves with a value, take the 2 × 2 count: value above
+       the median or not (a value equal to the median is "not above") ×
+       with or without a presence cell.
+     - A count of 0 links each reserve of its row to one state. A count of
+       1 or 2 almost does.
+     - **Rule:** r2 (its counts and its share) is published only if each of
+       the four counts is 3 or more (`SDM_PUB_R2_MIN_N` = `KDE_SMALL_N`, the
+       value of Decision 22 point 9). Here 0 is also below the limit.
+     - Otherwise `tbl_16_sdm_reserve_check.csv`, the console and the docs
+       say "r2 not published (a count below 3)". They give no count of r2
+       and no count of the 2 × 2 table.
+   - **A state that follows from the figures or the table (z1).** STEP
+     15.2 counts the reserves with a polygon of two kinds:
+     - (a) one or more 1 km cells with a value, and each of them in a cell
+       outside the training range (a hatched cell has no record, point 2);
+     - (b) no 1 km cell with a value (no presence cell is outside the model
+       cells: Decision 23, the count of task 14.4).
+     - The count of each kind goes into the QA of STEP 15.3. If the total is
+       above 0, the check fails and the script stops. The author then
+       decides, before the figures and before the commit of the reserve
+       table.
+     - The QA table holds the counts only. The console gives the names of
+       these reserves only when the check fails, marked "not for the docs".
+     - This count uses the grid and the flag of point 2. It uses no
+       suitability value.
+   - The text of Decision 24 does not change.
+
+**What was seen before this Decision (pre-registration, stated plainly):**
+*(Point 9: added in task 15.2 on 2026-10-31. Nothing more was seen; no
+prediction exists.)*
+- **In the documents (the author and the chat):** each value of Decision 24
+  "Result of the run" and of the `tbl_16` tables as the documents quote
+  them: the counts (104 presence cells, 1,486 background cells, 6,969
+  model cells; 42,467 complete-case 1 km cells in the 481 other cells); the
+  kept covariates; the AICc table; the cross-validation metrics by fold
+  (mean test Boyce 0.668, mean test AUC 0.749); the sensitivity ρ and
+  top-20 % overlaps (0.988 and 0.931; 0.991 and 0.896); the QA, 133 of 133.
+- **By the author:** the consoles of Week 14. The author stated on
+  2026-10-31 (fork g of this Decision): (g1) no prediction, no covariate
+  table and no grid was looked at in a map viewer; (g2) no value from the
+  Week-14 consoles that is not in the documents is remembered.
+- **By the chat that drafted this Decision:** the documents,
+  `R/00_config.R`, the seven function files in `R/`,
+  `scripts/09_model_suitability.R`, the `maxnet` documentation and the
+  literature. The `tbl_16` files were not attached: the chat saw their
+  values only as the documents quote them. No data file and no map.
+- **Not computed or not seen by anyone:** a prediction written to a file,
+  a class break, a count of cells outside the training range, a reserve
+  value, the reserve check, a map. The predictions of STEP 14.2 (the AICc
+  grid, the folds, the sensitivity runs) were made in memory only, and the
+  console gave statistics only.
+- **Post-seen in principle:**
+  - Fork c: class 5 is the top 20 % of the sensitivity rule, and the
+    overlaps of that set (0.931 and 0.896) were known when n5 was chosen.
+  - Fork b: the chat knew that the background covers 21 % of the model
+    cells (1,486 of 6,969), and said that some model cells are probably
+    outside the training range (not checked).
+  - The gate value (0.668) was known. Each fork assumes a map.
+- **The choices.** The chat gave one recommended option for each fork.
+  - The author took it for forks a, b, c (n5), d, e, t and h, and for two
+    of the three points of f3 (the legend label; the hatch on both
+    figures).
+  - **Not the chat's recommendation:** f3 (the chat recommended f1, the
+    class map only) and the form of f3 (the chat recommended one PNG with
+    two panels; the author chose two figures).
+  - The author asked for references on the number of classes before the
+    choice n5.
+  - Point 9 (task 15.2): the author took the chat's recommendation, y1 and
+    z1, and the recording of the two forks as a point of this Decision.
+
+**Result of STEP 15.1 (task 15.3, `scripts/09`, run on the project
+machine; console text sent on 2026-11-01; facts, not a reading):**
+- `RUN_FIT` = `FALSE` (w1 of task 15.2): STEP 14.2 was skipped, and STEP
+  14.3 read the model file of the record: QA 133 of 133. The hand-made case
+  of STEP 15.1 passed (18 of 18).
+- **The gate (Decision 24 point 8):** the mean test Boyce index is 0.668,
+  above 0. The gate allows a suitability map. `tbl_16_sdm_prediction.csv`
+  and the console state it.
+- **The prediction (point 1):** `tiger_sdm_maxnet_cell02_20261025.rds`; six
+  covariates (`ghm_mean`, `lc_forest`, `elev_mean`, `lc_open`,
+  `droad_km_mean`, `lc_built`); `lq`, multiplier 1; 6,969 model cells,
+  cloglog with clamping. The values: minimum 2.139e−13, median 0.2898,
+  maximum 0.9998.
+- **The classes (point 3)** (values to 4 significant digits; the full
+  values are in `tbl_16_sdm_prediction.csv`):
+
+  | Class | Cells | Ranks | Lowest value | Highest value |
+  |---|---|---|---|---|
+  | 5 (highest 20 %) | 1,394 | 1–1,394 | 0.6037 | 0.9998 |
+  | 4 | 1,394 | 1,395–2,788 | 0.362 | 0.6032 |
+  | 3 | 1,394 | 2,789–4,182 | 0.2257 | 0.3618 |
+  | 2 | 1,394 | 4,183–5,576 | 0.09924 | 0.2255 |
+  | 1 (lowest 20 %) | 1,393 | 5,577–6,969 | 2.139e−13 | 0.09922 |
+
+  No cell is in a tie across a class break.
+- **Cells outside the training range (point 2):** 32 of 6,969. By
+  covariate: `ghm_mean` below the minimum, 20; `elev_mean` below the
+  minimum, 5, and above the maximum, 1; `lc_open` above the maximum, 7; no
+  other covariate. The counts by covariate add up to 33, so one cell is
+  outside on two covariates. No presence or background cell is outside
+  the range (the guard of STEP 15.1 passed).
+- **The layer (point 4; l1 of task 15.2):**
+  `data/processed/sdm_prediction_cell02.csv`, 6,969 rows, written and read
+  back.
+- **Seen from this run on:** the console text of STEP 15.1 (statistics
+  only), by the author and the chat. No map was made, and no reserve value
+  exists yet.
+- **For point 9 (z1), a fact and not a reading:** 32 cells are hatched, so
+  a reserve of kind (a) is possible. STEP 15.2 (task 15.4) counts it.
+
+**Result of STEP 15.2 (task 15.4, `scripts/09`, run on the project
+machine; console text sent on 2026-11-01; facts, not a reading beyond the
+rules of Decision 24 point 9):**
+- The hand-made case of STEP 15.2 passed (17 of 17).
+- **Reserves:** 58 rows; 56 with a polygon; 56 with a value (each reserve
+  with a polygon has one or more 1 km cells with a value); 52 with a
+  `density_2022`; 51 with a value and a density (Pilibhit has a density
+  and no polygon).
+- **The cells of point 8:** 42,713 1 km cells used, summed over the
+  reserves (a cell in two polygons counts in each); 1,564 1 km cells in a
+  0.2° cell that is not a model cell, in 6 reserves (Namdapha 454,
+  Sundarbans 445, Manas 260, Valmiki 203, Dudhwa 193, Buxa 9).
+- **r1 (Decision 24 point 9):** Spearman ρ = 0.379, n = 51, two-sided p =
+  0.00614 (`exact = FALSE`). The reading of the rule: **"agrees"** (ρ > 0
+  and p < 0.05).
+- **r2 (Decision 24 point 9 with point 9 of this Decision):** **not
+  published** (a count of the 2 × 2 table is below 3). The reason follows
+  from the published tables, not from a presence state: 55 of the 56
+  reserves with a value are above the median of the model cells (0.2898),
+  so the row "not above" holds 1 reserve.
+- **z1 (point 9):** kind (a) 0, kind (b) 0, total 0. No name was printed.
+- **Tables:** `tbl_16_sdm_reserve_check.csv` (14 rows) and
+  `tbl_17_reserve_suitability.csv` (58 rows; 2 with no value: Pilibhit
+  and Dholpur-Karauli, no polygon).
+- **Seen from this run on:** the console text of STEP 15.2, with the value
+  and the rank of each reserve (the content of `tbl_17`), by the author and
+  the chat. No map was made.
+
+**Result of STEP 15.3, the QA (task 15.5, `scripts/09`, run on the project
+machine; console text sent on 2026-11-01; facts):**
+- **84 of 84 checks pass** (`tbl_16_sdm_pred_qa.csv`): test case 45 (the
+  hand-made cases of STEPs 15.1–15.3: 18, 17 and 10), prediction 9,
+  classes 5, reserves 6, r1 2, r2 1, z1 2, info 1, publish 13.
+- **The second path agrees:** the values by hand from the model file; the
+  flag; the ranks, the classes and the class sizes; class 5 = the top set
+  of the sensitivity rule; the 1 km cells of each reserve by
+  `terra::extract()` (no reserve differs from the centre rule of point 8);
+  the reserve values and ranks; r1; the rule of point 9 for r2 (not
+  published); z1 total 0.
+- **The publish checks of the Week-15 tables pass** (c1 of task 15.2).
+- **Information count** (the author's choice of task 15.5; not a check):
+  1 reserve has valued 1 km cells outside the training range — Mukundara
+  Hills, 19 of its 316 1 km cells (one 0.2° cell is hatched). The other 55
+  reserves with a value use no cell outside the range; among them the
+  Sundarbans, which has the highest reserve value.
+- *(2026-11-01, task 15.6: the author chose m1 — `tbl_17` and the caption
+  items of point 5 do not change. The docs record the fact; the figures
+  show the hatch, and caption item 6 gives the count of hatched cells.
+  Rejected: m2, a column of the cells outside the range in `tbl_17`; m3,
+  one more caption item.)*
+
+**Reason and sources:**
+- **One model file and one output type (a1).**
+  - The evaluation (Decision 24 point 7) and the reserve check (point 9)
+    use cloglog with clamping. One type for each output keeps the outputs
+    the same.
+  - The Maxent output types are "monotonically related, but they are
+    scaled differently" (Phillips 2017). A class by rank is thus the same
+    with each type. A mean (the reserve value) and the colour scale of
+    `fig_05` change with the type.
+  - The record names the file that the prediction used. Each run of
+    `scripts/09` fits the models again and writes one more dated file (w1
+    of task 14.5).
+- **Clamping and the flag (b2).**
+  - With clamping, "predictors and features are restricted to the range
+    seen during model training" (`maxnet` reference manual). With no
+    clamping (b4), a quadratic term outside the data range can go far up or
+    down.
+  - A negative MESS marks a site where one or more variables are outside
+    the range of the reference set (Elith et al. 2010). The hatch shows the
+    reader where the model extrapolates. With b3, the map and the reserve
+    check would use different cells.
+- **Classes by rank, no value in the legend (c1).**
+  - Presence–background data "must be augmented with an additional datum,
+    e.g., species' prevalence, to reliably estimate absolute (rather than
+    relative) probability of presence" (Phillips & Elith 2013). From
+    presence-only data, one cannot learn the prevalence "without making
+    unjustified simplifying assumptions" (Hastie & Fithian 2013).
+  - Fixed breaks on the value (c2) or a threshold (c3) would give the value
+    a meaning that it does not have.
+- **Five quantile classes (n5).**
+  - Quantile and minimum-boundary-error classes gave the best results for
+    general map-reading tasks, and careful optimisation gave "no benefit
+    over the simpler quantile method" (Brewer & Pickle 2002).
+  - For a simple map, cartographers recommend 3 to 7 classes (Slocum et
+    al., as Lei et al. 2023 cite them). The estimates of the number of grey
+    shades that a reader can tell apart are near "seven, plus or minus two"
+    (Gilmartin & Shelton 1990).
+  - Five classes make class 5 the set of the sensitivity rule.
+  - n4 (four classes from the P/E curve of the Boyce index; Hirzel et al.
+    2006, and four classes in Hirzel et al. 2007) would set the breaks from
+    the presences, after the curve is seen (post-result), with unequal
+    counts. n7 would make the top class 14.3 % of the cells, not the set of
+    the sensitivity rule.
+- **No layer before Week 18 (d1).**
+  - As for the paths (Decision 20 point 7; policy §3): a layer that a reader
+    can zoom or download needs its own rule first.
+  - `assert_publishable_rast()` compares the cell size with 1,000 map
+    units. A 0.2° raster in EPSG:4326 has a cell size of 0.2, so the check
+    refuses it. A 0.2° layer needs a new check. With d1 the check is not
+    needed before Week 18.
+- **All items in the caption (e1).** Each published map states its effort
+  caveat (proposal §7). Above the gate, the metrics are published with the
+  map (Decision 24 point 8). The Boyce value of this project is not the
+  `ecospat.boyce()` default (Decision 24, implementation point 3). The
+  caption of `fig_03` holds all its items.
+- **A value figure next to the class figure (f3; author choice).**
+  - The value figure shows the differences inside a class.
+  - Cloglog "estimates probability of presence assuming that the sampling
+    design is such that typical presence localities have an expected
+    abundance of one individual per quadrat" (Phillips 2017). A Maxent
+    user-group answer calls cloglog "an estimate of suitability" when these
+    assumptions are not met. The legend label and the caption item tell
+    the reader this.
+  - The hatch is on both figures: in `fig_05`, a clamped value looks like
+    any other value.
+- **Reserve table (t1).** Proposal question 3 asks whether modelled
+  suitability agrees with where the reserves are; the values by reserve
+  answer it. A reserve value is a mean of the published values over a
+  public polygon. It holds no record and no presence state.
+- **Centre rule; no value outside the model cells (h1).** It needs no new
+  value, and the counts show the effect. `touches = TRUE` (h2) adds edge
+  cells that are mostly outside the polygon. A cell that is not a model
+  cell has no prediction (Decision 23 point 3).
+- **The small-count rule for r2 (y1).** A count of 1 or 2 by reserve is
+  not published (Decision 22 point 9), and "a published total can give a
+  suppressed count" (handoff). In the 2 × 2 count, a 0 is a disclosure too,
+  because it links a full row. y1 keeps r2 where it is safe; y2 would drop
+  it in each case.
+- **A check, not a rule, for the states that the outputs show (z1).** The
+  count needs only the grid and the flag, so a choice made after it does
+  not depend on a suitability value. With z2 the rule of Decision 24 point
+  9 would have an exception that nobody decided.
+
+**Judgement values:** 5 (the number of classes; inside the range of 3 to 7
+that the cartography texts give); the text of the legend label. From
+earlier Decisions: 20 % (`SDM_SENS_TOP_SHARE`, Decision 24; class 5 is that
+set).
+
+**Rejected:**
+- *a2 — the model of each run; a3 — raw (exponential) or logistic output.*
+- *b1 — the count only; b3 — no class for a cell outside the range; b4 — no
+  clamping.*
+- *c2 — fixed breaks on the cloglog value; c3 — two classes from a
+  threshold; c4 — a continuous scale as the only map (f3 adds a value
+  figure next to the classes). n4 — four classes from the P/E curve; n7 —
+  seven quantile classes.*
+- *d2 — a committed layer of the 0.2° cells with the class; d3 — a
+  committed layer with the cloglog value.*
+- *e2 — a short caption and a note file.*
+- *f1 — the class figure only (the chat's recommendation); f2 — the class
+  figure and two small maps of the sensitivity runs; one PNG with two
+  panels (the chat's recommendation for the form of f3).*
+- *t2 — statistics only.*
+- *h2 — `touches = TRUE`; h3 — no reserve value if more than a set share of
+  its 1 km cells has no value.*
+- *y2 — r2 not published; y3 — r2 published in each case, with the risk
+  recorded.*
+- *z2 — accept the states that the outputs show, and record the count.*
+- *The two forks as a new Decision 26 (the Gi* Decision would become 27).*
+
+**Limitations:**
+- The classes are relative to the 6,969 model cells. A cell in class 5 is
+  in the top 20 % of the model cells of India; this is not "suitable" in an
+  absolute sense. The classes have equal counts by construction, so the
+  map gives no share of suitable land.
+- The flag uses the range of each covariate alone. It does not show a new
+  combination of values inside the ranges. It counts a covariate outside
+  its range also when the model gives that covariate no weight.
+- A hatched cell has no record of the model (point 2). The hatch thus shows
+  cells with no presence and no background record. It does not show a
+  presence cell.
+- A legend label and a caption item cannot stop a reader from reading
+  `fig_05` as a probability map.
+- A tie at a class break puts equal values in two classes (the cell-id
+  rule).
+- A 0.2° cell can cover parts of more than one reserve and land outside
+  them. A small reserve can take its value from one or two 0.2° cells.
+- A reserve at the coast or at the national border can lose 1 km cells
+  under point 8. The count in the reserve table shows how many.
+- **y1 can hide r2.** Most reserves are probably above the median of all
+  model cells (not checked). Then a count below 3 is likely, and r2 is not
+  published.
+- **The z1 check can stop the script.** A coastal reserve can have no
+  1 km cell with a value (kind (b); not checked). The author then decides
+  with the count known.
+- The presence cells come from records that the source obscured (tier T1).
+  A reader can get the presence state of a reserve from iNaturalist. Point
+  9 follows the rule of Decision 24 point 9; it does not make that state
+  secret.
+- The number of classes and the legend text are judgement values.
+
+**Consequences:**
+- `R/00_config.R`: a new block "Stage 3: prediction and publication
+  (Decision 25)". No other value changes. *(2026-10-31, task 15.2: point 9
+  adds `SDM_PUB_R2_MIN_N`; two process choices add `SDM_PUB_RANK_TIES` and
+  `SDM_RESERVE_P_EXACT`.)*
+- **Task 15.2 (process choices, before code):**
+  - How `scripts/09` uses the named model file: a switch that skips the 19
+    fits (w2 of task 14.5), or a direct read of the file. With either,
+    STEP 14.3 check m1 ("the model file of this run") must change.
+  - The STEP numbers, the table slugs and the name of the prediction layer
+    (`data/processed/`, gitignored).
+  - The number of the reserve table. STEP 14.3 scans each `tbl_16_*.csv`
+    (except the QA table) and stops on a reserve column or name (check s1)
+    and on a number column that is not in its list (check (a)). The
+    reserve table thus needs another number (`tbl_17` is the next free) or
+    a change of the scan.
+  - The publish check of the reserve table (no presence column, no cell
+    id) and of the summary tables.
+  - A hand-made case first (as h1 of tasks 14.4–14.6).
+- **Task 15.3 (STEP 15.1):** the prediction, the classes, the flag and its
+  counts; the gate stated.
+- **Task 15.4 (STEP 15.2):** the reserve check with the cells of point 8;
+  the reserve table of point 7.
+- **Task 15.5 (STEP 15.3), QA:** hand-made cases for the class rule (a tie;
+  n not a multiple of 5), for the flag (a value at a limit is inside) and
+  for the cells of point 8 (a centre on an edge; a 1 km cell in a cell that
+  is not a model cell); the prediction again from the model file by a
+  second path; the class sizes; class 5 against the top set of
+  `sdm_compare()`; no presence or background field in the prediction
+  layer; no presence column in the reserve table. The number of cells in a
+  tie across a class break can be reported. Point 9: hand-made cases for
+  the r2 rule (a count of 0, of 2 and of 3) and for the two kinds of z1;
+  the z1 count must be 0.
+- *(2026-10-31: the process choices of task 15.2 are in the change log.)*
+- **Week 16:** `fig_04` and `fig_05`; the caption drafts with the items of
+  point 5 (marked as drafts); the check of point 4 written with the
+  figures.
+- **Week 18:** the pending item "[Week 18] Published layers" decides a
+  layer of the surface that a reader can zoom or download.
+- `naming-conventions.md` §6: `fig_04` and `fig_05` are reserved.
+
+This closes the **[Week 15] Prediction and publication of the suitability
+surface** pending item, and widens the **[Week 18] Published path layer**
+item to **[Week 18] Published layers**.
+
 ### Decisions pending (raised, not yet made)
 
 These forks are open. Each is decided in the week noted in the project plan,
 before the relevant code is written.
 
-- **[Week 18] Published path layer (raised 2026-10-10 with Decision 20;
-  decide before a path layer goes on the site).** Decision 20 point 7 allows
-  the path lines in a static figure at national scale only. An interactive
-  or downloadable path layer (the Stage-4 Leaflet maps) lets a reader zoom to
-  1 km and find a crossing position that the tables give at 10 km. Decide:
-  no path layer on the site, lines simplified to a fixed tolerance, or a
-  zoom limit.
+- **[Week 18] Published layers (raised 2026-10-10 with Decision 20 as
+  "Published path layer"; widened 2026-10-31 by Decision 25 point 4; decide
+  before a path layer or a suitability layer goes on the site).** Decision
+  20 point 7 allows the path lines in a static figure at national scale
+  only. An interactive or downloadable path layer (the Stage-4 Leaflet maps)
+  lets a reader zoom to 1 km and find a crossing position that the tables
+  give at 10 km. Decide: no path layer on the site, lines simplified to a
+  fixed tolerance, or a zoom limit.
+  *(2026-10-31, Decision 25 point 4: the item also covers the suitability
+  surface at 0.2°, which Week 15 does not publish as a layer. Decide: no
+  layer, the class only, or the class and the value; the publish check of
+  a layer of 0.2° cells (`assert_publishable_rast()` refuses a raster of
+  0.2° in EPSG:4326); how the hatch of Decision 25 point 2 and the caption
+  items of point 5 appear in an interactive map.)*
 - **[Week 15–16] Gi\* settings (raised 2026-10-25 with Decision 23 point
   8; decide before any Gi\* is computed).** A Gi* of the effort and a Gi* of
   the tiger records in the Phase-1 form are built (Decision 23 f2); the
@@ -3524,17 +4088,6 @@ before the relevant code is written.
   cold spot at Ranthambore is found again). *(This item takes point (6) of
   the closed item "Model Decisions that Decision 21 names".)* *(2026-10-25,
   task 14.7: the Week-15 plan draft puts this Decision in Week 16.)*
-- **[Week 15] Prediction and publication of the suitability surface (raised
-  2026-10-25 with Decision 24; decide before any map).** The output type
-  and clamping of the published surface, its classes and published form
-  (the effort caveat of proposal §7; the presence cells are not marked,
-  Decision 23 point 9), and the figure. The gate (Decision 24 point 8) and
-  the reserve check (point 9) are fixed already and are applied in Week 15.
-  *(2026-10-25, task 14.5: the main model is
-  `data/processed/tiger_sdm_maxnet_cell02_20261025.rds`. No prediction
-  surface is written yet. The Decision states what was seen: Decision 24,
-  "Result of the run".)* *(2026-10-25, task 14.7: Decision 25, task 15.1
-  of the Week-15 plan.)*
 - **[After Stage 3] SDM-based resistance + circuit-theory check.** Raised
   2026-09-26 (Decision 14, F1). After the SDM exists, build a resistance
   surface from 1 − suitability and run circuit theory between reserves, to
@@ -3554,6 +4107,345 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-01 — Week 15 complete: task 15.6 (docs close, the Week-16 plan)
+
+- **Docs only.** No rule, value, script, data layer or table changed; no
+  run.
+- **The author's choice m1 (task 15.6):** the reserve table and the caption
+  items do not state that the value of Mukundara Hills uses 19 of its 316
+  1 km cells outside the training range. The docs record it (Decision 25,
+  "Result of STEP 15.3"; "Limitations"); the figures show the hatch.
+- **§5.4** written again (the prediction, the reserve check and the
+  published form); **"Limitations"**: eight Week-15 items at the end of the
+  section.
+- **Week 15 against proposal question 3 (a record, not text for the
+  site):** "Where is habitat suitable for tigers across India, and does
+  modelled suitability agree with where reserves are?"
+  - A relative suitability surface exists at the 0.2° grain over 6,969
+    model cells; the gate of Decision 24 point 8 is open (mean test Boyce
+    0.668). It is not occupancy and not a probability of presence.
+  - Of the 56 reserves with a value, 55 are above the median of the model
+    cells. The reserve values agree with the 2022 census density by the
+    rule of Decision 24 point 9 (r1: ρ = 0.379, n = 51, p = 0.006). r2 has
+    no published answer (Decision 25 point 9).
+  - The effort caveat (proposal §7) applies to each of these statements.
+    The figures come in Week 16.
+- **`proposal.md` §8:** a dated note on the entry "Habitat suitability at a
+  coarser grain" (the national prediction is at 0.2°; the validation
+  against reserves is the reserve check). No new deviation.
+- **`README.md`:** the status.
+- **`project-plan.md`:** Week 15 complete (the commit, task 15.7, by the
+  author); the Week-16 row and the **Week-16 task breakdown** (a draft; a
+  plan, not a Decision): Decision 26 (the Gi* settings) first, then the
+  process choices, the Gi*, the two suitability figures with the caption
+  drafts, the QA, the docs (the Stage-3 close) and the commit.
+- **`handoff.md`:** written for Week 16 (the state, the entry point, the
+  gotchas of Week 15, the references to verify).
+- **Next:** the commit of Week 15 (task 15.7, by the author; `analysis:`
+  for `R/`, `scripts/` and `outputs/tables/`, `docs:` for the docs), then
+  Week 16, task 16.1 — Decision 26.
+
+### 2026-11-01 — Week 15, task 15.5 complete: STEP 15.3 (the QA of Decision 25)
+
+- **Author's choice (task 15.5, 2026-11-01):** the QA also counts the
+  valued 1 km cells of the reserves that are outside the training range
+  (the open question of task 15.4: the reserve table shows no hatch). An
+  information row (pass `TRUE`), not a check.
+- **New code (task 15.5, chat, 2026-11-01):**
+  - `scripts/09`: STEP 15.3 (its header lists the steps); the header lines
+    "Ran 2026-11-01" for STEP 15.2. STEPs 14.1–15.2 did not change.
+  - `R/00_functions_sdm.R`: seven QA functions — `sdm_qa_cloglog()` (the
+    model output by hand: clamping of the covariates and of the features,
+    link + `alpha`, cloglog; a feature that is not linear or quadratic
+    stops), `sdm_qa_oor()`, `sdm_qa_rank_class()` (the class by
+    ceiling(k (n − rank + 1) / n)), `sdm_qa_reserve_cells()`
+    (`terra::extract()` on the polygons), `sdm_qa_reserve_values()`,
+    `sdm_qa_spearman()` (the Pearson r of the ranks; the t approximation),
+    `sdm_qa_r2_counts()` — and `sdm_self_test_153()`. They call no
+    function of STEPs 15.1–15.2. No earlier line changed.
+  - No config change; no new package.
+- **The checks** (as built; the groups of the table): the hand-made cases
+  of STEPs 15.1–15.3; the prediction (the fields of the layer; the model
+  cells; the record file; the values by hand; the flag; no presence or
+  background cell outside the range; the counts outside, min, median and
+  max, and the gate of `tbl_16_sdm_prediction.csv`); the classes; the
+  reserves (the fields and rows of `tbl_17`; the cells used and with no
+  value; the values; the ranks; the density; the counts of
+  `tbl_16_sdm_reserve_check.csv`); r1; r2 (the rule of point 9; the
+  counts again only if published); z1 (the kinds again; the total must be
+  0); the information count; the publish scans of the three Week-15
+  tables and of the QA table.
+- **Tests in the chat** (made-up projects; no project data): the pass case
+  84 of 84. Seven errors put into the outputs between STEP 15.2 and STEP
+  15.3 (a changed reserve value; a presence column in `tbl_17`; a changed
+  value of the layer; a reserve name in the check table; a wrong count of
+  cells outside the range; r2 counts with r2 not published; a cell id as a
+  value) each fail the intended check. A set with a z1 reserve fails the
+  z1 check only and prints the block "not for the docs"; a set with r2
+  published passes the extra r2 check. Four wrong rules in the QA
+  functions each make the hand-made case fail (no `alpha`; Pearson of the
+  values; a value at a limit counted as outside; two r2 counts swapped —
+  this case first had a symmetric example, and the chat changed it).
+- **Run on the project machine** (console text sent 2026-11-01): 84 of 84;
+  as in Decision 25, "Result of STEP 15.3". The terra path found no
+  difference from the centre rule.
+- **Output (new):** `outputs/tables/tbl_16_sdm_pred_qa.csv` (84 rows).
+- **Not committed** (task 15.7).
+- **Open (for task 15.6, the author):** whether the reserve table or a
+  caption states the cells outside the range of Mukundara Hills (1
+  reserve, 19 of 316 cells). *(2026-11-01, task 15.6: m1 — no change.)*
+- **Next:** task 15.6 — the docs of Week 15 ("Limitations", §5.4,
+  `proposal.md` §8 if needed, `README.md`) and the Week-16 breakdown.
+
+### 2026-11-01 — Week 15, task 15.4 complete: STEP 15.2 (the reserve check and the reserve table)
+
+- **New code (task 15.4, chat, 2026-11-01):**
+  - `scripts/09`: STEP 15.2 (the steps 1–8 of its header); the paths of the
+    census layer and of the prediction layer; the header line "Ran
+    2026-11-01" for STEP 15.1. STEPs 14.1–15.1 did not change.
+  - `R/00_functions_sdm.R`: `SDM_RESERVE_TBL_FIELDS` and nine functions —
+    `sdm_reserve_cells()`, `sdm_reserve_values()`, `sdm_reserve_r1()`,
+    `sdm_reserve_r2()`, `sdm_reserve_z1()`, `sdm_reserve_table()`,
+    `sdm_reserve_table_checks()`, `sdm_reserve_check_summary()`,
+    `sdm_self_test_152()`. No earlier line changed.
+  - No config change; no new package.
+- **Implementation points (no rule changed):** the 1 km cells of a polygon
+  are the non-NA cells of the cell-id raster in the bounding box of the
+  polygon whose centre `sf::st_intersects()` the polygon; a reserve with
+  an empty geometry has no cell; `geometry_present` must agree with the
+  geometry; `unit_id` is read as a number (stored as real) and compared as
+  an integer. The console prints the reserve table without `state` and
+  `landscape_complex` (they are in the file). Guards stop the run if the
+  check table holds a reserve name or column, or an r2 count when r2 is
+  not published.
+- **Tests in the chat** (made-up projects; no project data):
+  - the hand-made case 17 of 17. Four wrong rules put into the code (an
+    edge that does not count; a value equal to the median counted as
+    above; publish only above 3; a cell with no value counted as 0) each
+    make it fail;
+  - a made-up project of 45 reserves (an overlap, two with no polygon, one
+    of each kind of z1): a second path by `terra::extract()` on the
+    polygons gave the same reserve values (largest difference 4e−16) and
+    the same counts of cells used; r1 again gave the same ρ and p; r2 not
+    published (a 0 in the 2 × 2 count); the z1 block printed the two
+    names;
+  - a second made-up set with 4 reserves in each cell of the 2 × 2 count:
+    r2 published (4 rows).
+- **Run on the project machine** (console text sent 2026-11-01): as in
+  Decision 25, "Result of STEP 15.2". STEP 15.1 gave the same values as in
+  task 15.3.
+- **Outputs (new):** `outputs/tables/tbl_16_sdm_reserve_check.csv` (14
+  rows), `outputs/tables/tbl_17_reserve_suitability.csv` (58 rows).
+- **Not committed** (task 15.7, at the end of the week).
+- **Docs:** Decision 25 "Result of STEP 15.2"; a dated note in the result
+  of Decision 24; `data-dictionary.md` (two entries); `naming-conventions.md`
+  §6 (`tbl_17` as built); `project-plan.md` (task 15.4 done); `handoff.md`.
+- **Next:** task 15.5 — STEP 15.3, the QA of Decision 25.
+
+### 2026-11-01 — Week 15, task 15.3 complete: STEP 15.1 (the prediction, the classes, the flag, the gate)
+
+- **New code (task 15.3, chat, 2026-10-31):**
+  - `scripts/09`: the switch `RUN_FIT` (w1 of task 15.2; `FALSE`); guards:
+    `RUN_FIT` is TRUE or FALSE, `RUN_COVARIATES` = `TRUE` needs `RUN_FIT` =
+    `TRUE`, the model file of the record must exist, and a run with
+    `RUN_FIT` = `TRUE` must not write over it (same date). The paths of the
+    covariate table and of the model file are set before STEP 14.2. STEP
+    14.2 runs only with `RUN_FIT` = `TRUE`. STEP 14.3: check m1 reads the
+    model file of the record; with `RUN_FIT` = `TRUE`, one more check of
+    the coefficients of the fit of the run; the publish scan reads its six
+    tables only (c1). STEP 15.1 (new): the steps 1–8 of its header.
+  - `R/00_functions_sdm.R`: `SDM_PRED_FIELDS` and eight functions —
+    `sdm_pred_values()`, `sdm_out_of_range()`, `sdm_rank_class()`,
+    `sdm_class_ties()`, `sdm_gate_open()`, `sdm_pred_layer_checks()`,
+    `sdm_pred_summary()`, `sdm_self_test_151()`. No earlier line changed.
+  - No config change (since task 15.2); no new package.
+- **Tests in the chat** (a made-up project; no project data; R 4.3.3,
+  `maxnet` 0.1.4 built from the GitHub tag v0.1.4, `glmnet` 4.1.8, `terra`
+  1.7.65, `sf` 1.0.15):
+  - the Week-14 script on the made-up project: QA 133 of 133;
+  - the new script, `RUN_FIT` = `FALSE`: QA 133 of 133, and STEP 15.1
+    complete; class 5 = the top set of the sensitivity rule;
+  - `RUN_FIT` = `TRUE`: QA 134 of 134 (the coefficient check passes);
+  - a closed gate (the fold values of the Boyce index made negative): the
+    three gate rows, then a stop; no layer;
+  - the guards for a missing model file of the record and for
+    `RUN_COVARIATES` = `TRUE` with `RUN_FIT` = `FALSE` stop the run;
+  - four wrong rules put into the functions (a tie to the higher id; an
+    off-by-one class; a value at a limit counted as outside; a gate of ≥)
+    each make the hand-made case fail.
+- **`maxnet` source at the tag v0.1.4** (commit `c2b9270`, read in task
+  15.3): `maxnet()` sets `varmin` and `varmax` over all data rows (the
+  presence rows, the background rows and the presence rows added to the
+  background); `predict.maxnet()` clamps the covariates, then the
+  features; link = features × coefficients + `alpha`; cloglog = 1 −
+  exp(−exp(`entropy` + link)). This agrees with the master branch read on
+  2026-10-25 and with Decision 25 point 2.
+- **Run on the project machine** (console text sent 2026-11-01): guards 35
+  of 35; the STEP-14.1 counts as before (outcome `planned_model`); STEP
+  14.2 skipped; QA 133 of 133; STEP 15.1 as expected (18 of 18; the gate;
+  6,969 cells; classes of 1,394 and 1,393 cells; 36 table rows). The
+  values: Decision 25, "Result of STEP 15.1".
+- **Outputs:** `data/processed/sdm_prediction_cell02.csv` (gitignored);
+  `outputs/tables/tbl_16_sdm_prediction.csv` (new). Written again:
+  `tbl_16_sdm_qa.csv` (the texts of three checks changed: m1, the six
+  tables, (d)) and `tbl_16_sdm_counts.csv` (the same values).
+- **Not committed.** The author commits the work of Week 15 at the end of
+  the week (task 15.7); the split commit of tasks 15.1–15.2 was not made.
+- **Docs:** Decision 25 "Result of STEP 15.1"; `data-dictionary.md` (two
+  entries, two dated notes); `references.md` (a note on the `maxnet`
+  source at the tag); `project-plan.md` (task 15.3 done); `handoff.md`.
+  The header of `scripts/09` gets the line "Ran 2026-11-01" with the code
+  of task 15.4.
+- **Next:** task 15.4 — STEP 15.2 (the reserve check, the reserve table,
+  the r2 rule and the z1 counts of Decision 25 point 9).
+
+### 2026-10-31 — Week 15, task 15.2: process choices; Decision 25 point 9 (no code, no run)
+
+- **Docs and config only.** No script, data layer or table changed; no run;
+  no prediction.
+- **Decision 25 point 9 (y1, z1), added before any result.** In task 15.2
+  the chat found two ways in which the outputs of Decision 25 can link a
+  reserve name to a presence or no-presence state (Decision 24 point 9 does
+  not allow it): r2 with the reserve table and the median, and a reserve
+  whose 1 km cells are all hatched or have no value. The author chose y1
+  (r2 only if each count of the 2 × 2 table is 3 or more) and z1 (a QA
+  check that stops the script if a reserve of these kinds exists), and to
+  record them as point 9 of Decision 25.
+- **Process choices of task 15.2 (author, 2026-10-31; each as the chat
+  recommended).** Write a choice with the task, for example "w1 of task
+  15.2".
+  - **w1 — the run switch `RUN_FIT`** in `scripts/09`, now `FALSE`.
+    - `FALSE`: STEP 14.2 is skipped: no fit, no STEP-14.2 table and no
+      model file are written. STEP 14.3 and the Week-15 STEPs read
+      `SDM_PRED_MODEL_FILE`. STEP 14.3 check m1 becomes "the model file of
+      the record is on disk" (other dated model files are counted only).
+    - `TRUE`: STEP 14.2 runs as before, and STEP 14.3 also checks that the
+      coefficients of the new fit are those of the record file (within
+      `SDM_QA_REL_TOL`); otherwise the script stops.
+    - The objects that STEP 14.3 takes from STEP 14.2 (the paths of the
+      covariate table and of the model file) are set before STEP 14.2.
+  - **l1 — the prediction layer** is `data/processed/sdm_prediction_cell02.csv`
+    (gitignored): one row per model cell with `id`, `value` (cloglog),
+    `rank`, `class` and `out_of_range`. No geometry; no presence or
+    background field. Written, then read back and checked. The figures
+    join it to `sdm_grid_cell02_7755.gpkg`.
+  - **n1 — the reserve table** is
+    `outputs/tables/tbl_17_reserve_suitability.csv` (publishable; a new
+    number, as `tbl_03`). Check s1 of STEP 14.3 does not change: no
+    `tbl_16` table holds a reserve name.
+  - **c1 — the scans.** STEP 14.3 scans only its six tables (the list
+    `need16`), not each `tbl_16` file. STEP 15.3 scans the Week-15 tables
+    in the same run, after STEPs 15.1 and 15.2 write them, so no check
+    enters one run late.
+  - **t1 — the Week-15 tables** (with the author's yes to the class value
+    ranges):
+    - `tbl_16_sdm_prediction.csv` (STEP 15.1; columns `group`, `item`,
+      `value`, `reading`): the gate; the minimum, median and maximum of the
+      value; for each class its size and its lowest and highest value; the
+      number of cells outside the training range, in total and for each
+      covariate (below and above). The class value ranges are statistics
+      in a table; the legend of `fig_04` still gives no value.
+    - `tbl_16_sdm_reserve_check.csv` (STEP 15.2): r1 (ρ, n, p, the
+      reading); r2 under point 9; the reserve counts (all, with a polygon,
+      with a value, with a value and a density).
+    - `tbl_16_sdm_pred_qa.csv` (STEP 15.3; `group`, `check`, `value`,
+      `pass`).
+  - **k1 — the columns of the reserve table:** `unit_id`, `unit_name`,
+    `state`, `landscape_complex` (the roll-up of Decision 2, as in
+    `tbl_15_occ_by_reserve.csv`), `cloglog_mean` (the reserve value),
+    `cloglog_rank`, `density_2022`, `n_1km_cells_used`,
+    `n_1km_cells_no_value`. Rows by `unit_id`; values at full precision
+    (rounding only in figures and text); a tie in the rank gets the lowest
+    rank number (`SDM_PUB_RANK_TIES` = `"min"`). *(The column names were
+    set by the chat with k1; the author can change them before task
+    15.4.)*
+  - **e1 — the centre rule in code.** Main path: for each polygon, the
+    centres of the complete-case 1 km cells in its bounding box, then
+    `sf::st_intersects()` (an edge counts; the method of
+    `occ_reserve_index()`, task 13.8). QA path: `terra::extract()` on the
+    cell-id raster; the differences are counted, and the check passes at 0.
+  - **p1 — the p-value of r1:** `stats::cor.test(method = "spearman", exact
+    = FALSE)` in each case (`SDM_RESERVE_P_EXACT` = `FALSE`). With the R
+    default, the method changes with the data (exact with no ties,
+    approximate with ties), and `density_2022` can have ties.
+  - **q1 — the QA (STEP 15.3)** has its own table. A hand-made case first.
+    A second path that calls no function of STEPs 15.1–15.2: the
+    prediction again by hand from the model file (the features, the
+    clamping of the covariates and of the features, link = features ×
+    coefficients + alpha, cloglog = 1 − exp(−exp(entropy + link))); the
+    classes again by other code; the reserve values again by the QA path
+    of e1; r1 again. Also: no presence or background cell is flagged (true
+    by construction); the z1 count is 0; the publish checks of the
+    Week-15 tables. The table is written first; then a FALSE stops the
+    script.
+- **Not forks (fixed by the plan, or implementation):** STEPs 15.1, 15.2
+  and 15.3 come after STEP 14.3, in the same model-outcome block; STEP 14.3
+  runs in each run. The gate reads the row `mean` of `tbl_16_sdm_cv.csv`;
+  at 0 or below, the script stops before the layer is written. STEP 15.2
+  finds the presence cells again from the obscured layer (STEP 14.2 can be
+  skipped). The out-of-range comparisons are exact (the fit used the same
+  CSV). r1 uses the reserves with a value and a `density_2022` that is not
+  `NA`; a real zero counts. No new package; the console gives counts and
+  statistics only.
+- **Config:** `SDM_PUB_R2_MIN_N` (point 9), `SDM_PUB_RANK_TIES` (k1),
+  `SDM_RESERVE_P_EXACT` (p1). No other value changed.
+- **Other docs:** this file (Decision 25 point 9 and its links; the
+  status); `project-plan.md` (task 15.2 done; dated notes on tasks
+  15.3–15.5); `naming-conventions.md` §6 (the Week-15 slugs, `tbl_17`);
+  `handoff.md`. `scripts/09` is not changed: its header gets the choices
+  with the code of task 15.3.
+- **Next:** the split point — the commit of tasks 15.1–15.2 (`analysis:`
+  for `R/00_config.R`, `docs:` for the docs). Then task 15.3 (STEP 15.1).
+  *(2026-11-01: the commit was not made; the author commits at the end of
+  the week.)*
+
+### 2026-10-31 — Week 15, task 15.1: Decision 25 recorded (no prediction)
+
+- **Entry state:** Week 14 committed (`30a512d`, "Week 14 complete").
+- **Docs and config only.** No script, data layer or table changed; no run.
+  No prediction was written to a file or computed.
+- **Decision 25** (the prediction and its published form): forks a1, b2,
+  c1 with n5, d1, e1, f3 (two figures; the legend label; the hatch on
+  both), t1, h1. f3 and its two-figure form are not the chat's
+  recommendation (f1; one PNG with two panels). The author answered fork
+  g: no prediction, covariate table or grid was looked at in a map viewer,
+  and no console value outside the documents is remembered.
+- **A gap in Decision 24 point 9,** found by the chat at the start of the
+  task: point 9 did not say which 1 km cells are "inside" a polygon, or
+  what value a 1 km cell gets when its 0.2° cell is not a model cell. Fork
+  h raised it before any reserve value; h1 is recorded as a reading of
+  point 9 (Decision 25 point 8). The text of Decision 24 does not change.
+- **A conflict raised before the record:** f3 adds a figure of the cloglog
+  value, and the reasons for c1 and e1 are against a reading of that value
+  as a probability. The author chose the legend label and the caption item
+  of Decision 25 point 6, and the hatch on both figures.
+- **The number of classes:** at the author's request, the chat looked for
+  a source for the number. None fixes it for a suitability map; the
+  cartography texts give a range of 3 to 7 (Decision 25, "Reason and
+  sources"). The author chose n5.
+- **The author's answer "n5, 22."** was read as n5 and the label of point
+  2 of the chat's question (not a value). The chat said so in its reply.
+- **A correction of the fork text:** d1 said that the figure reads a table
+  of cell id → class + flag. With f3, the figure also needs the cloglog
+  value, so Decision 25 point 4 puts the value in the prediction layer
+  (still no presence or background field).
+- **Pending items:** "[Week 15] Prediction and publication of the
+  suitability surface" closed; "[Week 18] Published path layer" is now
+  "[Week 18] Published layers" (it includes the suitability surface).
+- **Config:** a new block "Stage 3: prediction and publication (Decision
+  25)" in `R/00_config.R` (`SDM_PRED_*`, `SDM_PUB_*`,
+  `SDM_RESERVE_CELL_RULE`, `SDM_RESERVE_NONMODEL`). No other value
+  changed.
+- **Other docs:** the status and §5.4 (a dated note) of this file;
+  `references.md` (a new section, "Prediction and publication (Decision
+  25)"); `naming-conventions.md` §6 (`fig_04` and `fig_05` reserved);
+  `project-plan.md` (task 15.1 done; dated notes on tasks 15.2–15.5, on
+  the Week-16 row and on the pitfalls); `handoff.md`. "Limitations" is
+  updated in task 15.6, after the run.
+- **Next:** task 15.2 — the process choices (the use of the named model
+  file and STEP 14.3 check m1; the number of the reserve table and the
+  scan of STEP 14.3; the STEP numbers, the slugs and the layer name).
 
 ### 2026-10-25 — Week 14 complete: task 14.7 (docs close, the Week-15 plan, a cleanup of two docs)
 
@@ -4378,3 +5270,48 @@ come in Week 15.)*
   covariate (ρ 0.988) and the records of 2018–2022 only (71 presence cells;
   ρ 0.991). The grain, the cover rule and the covariate list were not
   tested.
+
+*(Week 15, added 2026-11-01 at the Week-15 close. Decision 25 keeps its
+own list of limitations; the items below are the ones that a reader of the
+prediction and the reserve check needs.)*
+
+- **Relative suitability, not a probability of presence (Decision 25).**
+  Presence–background data need one more datum, such as the prevalence, for
+  an absolute probability of presence. The five classes have equal counts
+  by construction: class 5 is the top 20 % of the model cells of India,
+  not "suitable land" in an absolute sense, and the map gives no share of
+  suitable land.
+- **One value for each 0.2° cell.** A 1 km cell takes the value of its 0.2°
+  cell. A small reserve takes its value from one or two 0.2° cells (for
+  example Veerangana Durgavati, 24 1 km cells; Orang, 71; Bor, 80), and
+  reserves near each other share cells.
+- **Cells outside the training range.** 32 of the 6,969 model cells (gHM
+  below the minimum: 20; elevation below the minimum: 5, above the maximum:
+  1; the open share above the maximum: 7). Their values are clamped; the
+  figures hatch them. One reserve value uses such cells: Mukundara Hills,
+  19 of its 316 1 km cells. By the author's choice m1 (task 15.6), the
+  reserve table does not show this; the figures show the hatch. The flag
+  uses each covariate alone and does not show a new combination of values.
+- **Reserves at the coast and the border lose cells.** 1,564 complete-case
+  1 km cells of 6 reserves are in 0.2° cells that are not model cells, and
+  are left out of the reserve value: Dudhwa 28 % of its cells, Namdapha
+  26 %, Valmiki 26 %, Sundarbans 25 %, Manas 9.5 %, Buxa 2.5 %.
+- **r1 "agrees", with its limits (Decision 24 point 9).** ρ = 0.379 over 51
+  reserves, p = 0.006. The census density is per notified total area,
+  while the polygon is the core protected-area outline (Decisions 4 and 8).
+  r1 is partly linked to the presences: a reserve with many tigers
+  probably has many visitors and records. Five reserves with a value have
+  no 2022 density and are not in r1 (among them the Sundarbans, which has
+  the highest reserve value). The reading is the rule of Decision 24; it is
+  not a test of the model at the scale of a reserve.
+- **r2 is not published (Decision 25 point 9).** 55 of the 56 reserves with
+  a value are above the median of the model cells, so a count of the
+  2 × 2 table is below 3. The question of r2 (does the model rate the
+  reserves with no presence cell as suitable?) has no published answer.
+- **The reserve values are high as a group.** 55 of 56 are above the
+  median of the model cells (0.2898); the lowest is Kamlang (0.180). The
+  effort caveat (proposal §7) applies: tiger photographs are probably taken
+  where visitors go, mostly in reserves, and the mammal background may not
+  correct all of that effort (not tested).
+- **Static figures only, so far.** No layer that a reader can zoom or
+  download before the Week-18 rule (pending item "Published layers").

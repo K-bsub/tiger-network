@@ -1031,7 +1031,13 @@ default; the default feature classes by the number of presences. Decision
 24 points 4, 6 and 11.)* *(Source files, read 2026-10-25. The locked version
 is set when `maxnet` goes into `renv.lock`.)* *(2026-10-25, task 14.5:
 `renv.lock` holds `maxnet` 0.1.4 and `glmnet` 5.0. The source files were
-read on the master branch, not at the tag of 0.1.4.)*
+read on the master branch, not at the tag of 0.1.4.)* *(2026-10-31, task
+15.3: `R/maxnet.R` and `R/predict.maxnet.R` read at the tag v0.1.4 (commit
+`c2b9270`): `varmin` and `varmax` over all data rows (presences, background
+and the presences added to it); `predict()` clamps the covariates, then the
+features; link = features × coefficients + `alpha`; cloglog = 1 −
+exp(−exp(`entropy` + link)). The same as on the master branch. Decision 25
+points 1 and 2.)*
 
 Radosavljevic, A., & Anderson, R.P. (2014). Making better Maxent models of
 species distributions: complexity, overfitting and evaluation. *Journal of
@@ -1067,6 +1073,135 @@ the importance of model complexity and the performance of model selection
 criteria. *Ecological Applications*, 21, 335–342. · *(The basis of the AICc
 method of ENMeval. Decision 24 f3.)* *(Not read: the entry is as the
 ENMeval help pages give it.)*
+
+## Prediction and publication (Decision 25)
+
+*All entries in this section were read on 2026-10-31 from repository
+records, abstracts, a package manual, a tutorial, a manual page, a
+user-group thread and extracts that a search tool gave, or are given as
+another source cites them (marked). No paper was read in full. Hirzel et
+al. (2006) and the `maxnet` source files are in the section "Model settings
+(Decision 24)"; the `maxnet` reference manual is in the section "Model at a
+coarser grain (Decision 23)".*
+
+Brewer, C.A., & Pickle, L. (2002). Evaluation of methods for classifying
+epidemiological data on choropleth maps in series. *Annals of the
+Association of American Geographers*, 92(4), 662–681.
+https://doi.org/10.1111/1467-8306.00310 ·
+https://pure.psu.edu/en/publications/evaluation-of-methods-for-classifying-epidemiological-data-on-cho/
+· *(Seven classing methods, 56 subjects, series of mortality maps.
+Quantile and minimum-boundary-error classes were "best suited for these
+general choropleth map-reading tasks"; natural breaks and a hybrid
+equal-interval method gave responses "less than 70 percent as accurate as
+for quantiles"; careful optimisation gave "no benefit over the simpler
+quantile method". Decision 25 c1 and n5.)* *(From the repository record and
+the abstract. The number of classes of the test was not found.)*
+
+Elith, J., Kearney, M., & Phillips, S. (2010). The art of modelling
+range-shifting species. *Methods in Ecology and Evolution*, 1(4), 330–342.
+https://doi.org/10.1111/j.2041-210X.2010.00036.x · *(The multivariate
+environmental similarity surface (MESS): the similarity of a point to a
+reference set of points over a set of predictors, as the minimum of the
+similarity for each predictor; a negative value marks a point "outside the
+range of environments over the reference set, so these are novel
+environments". Decision 25 b2.)* *(Not read: the definition is as the
+GRASS manual page of `r.mess` quotes the paper
+(https://grass.osgeo.org/grass65/manuals/addons/r.mess.html), and the
+title and year are from the university record. The volume, the pages and
+the DOI were not checked against a record; verify before the entry is
+cited on the site.)*
+
+Gilmartin, P., & Shelton, E. (1990). Choropleth maps on high resolution
+CRTs: the effects of number of classes and hue on communication.
+*Cartographica*, 26(2), 40–52. https://core.ac.uk/download/149235946.pdf ·
+*(Map-reading accuracy by the number of classes and the hue on a screen.
+Earlier estimates of the number of grey shades that people can tell apart
+"fall generally within the range of 'seven, plus or minus two'". The paper
+quotes Evans (1977: 98) on the number of classes: "Generally, it is taken
+as seven or eight (Jenks and Knos, 1961); certainly it would rarely exceed
+ten or fall below four." Decision 25 n5.)* *(From an extract of the text
+that a search tool gave; the paper was not read in full. Evans (1977) was
+not read; Lei et al. (2023) cite Evans differently, see below.)*
+
+Hastie, T., & Fithian, W. (2013). Inference from presence-only data; the
+ongoing controversy. *Ecography*, 36(8), 864–867.
+https://doi.org/10.1111/j.1600-0587.2013.00321.x · *(From presence-only
+data with a background sample, "one cannot learn the overall species
+occurrence probability, or prevalence, without making unjustified
+simplifying assumptions". Decision 25 c1.)* *(From the abstract and an
+extract of the PMC author manuscript, PMC4258395.)*
+
+Hirzel, A.H., Le Lay, G., Helfer, V., Randin, C., & Guisan, A. (2007).
+*Evaluating presence-only habitat-suitability models.* Poster, ECEM 2007.
+https://www.unil.ch/biomapper/Download/Hirzel-PresenceOnlyEvaluation-ECEM-2007.pdf
+· *(The habitat-suitability map "is reclassified into four classes (for
+instance …)", and the observed-to-expected ratio of the presences is
+computed for each class. Decision 25, the rejected option n4.)* *(Poster,
+read through an extract of the text; the layout of the poster was not
+seen. That the class boundaries come from the P/E curve is from Hirzel et
+al. (2006), section "Model settings (Decision 24)".)*
+
+Lei, F., et al. (2023). GeoLinter: a linting framework for choropleth
+maps. arXiv:2310.13707. https://arxiv.org/pdf/2310.13707 · *(For simple
+maps, "cartographers generally recommend that the number of classes is
+confined between three (3) to seven (7)", citing the textbook of Slocum et
+al.; in line with Miller's 7 ± 2; "Evans [20] recommends that five or
+fewer classes be used for novice map readers". Decision 25 n5.)* *(From
+an extract of the text that a search tool gave. The full author list was
+not recorded; the textbook of Slocum et al. and Evans (1977) were not
+read. The two readings of Evans (here and in Gilmartin & Shelton 1990) do
+not agree. Verify before the entry is cited on the site.)*
+
+Maxent user group (Google group "Maxent"). A thread on how to read the
+cloglog output. https://groups.google.com/g/maxent/c/f8t5VvHtzII ·
+*(Users ask how to read cloglog output. One answer: "refer to cloglog or logistic transformations
+as an estimate of suitability. If that sounds vague to you, it is vague for
+a reason -- because we are assuming some or all assumptions have not been
+met to call it a probability of presence." Decision 25 f3, the legend
+label.)* *(User-group posts, read through an extract; the author of the
+answer and the title of the thread were not recorded. Not a source to
+cite on the site.)*
+
+Phillips, S.J. (2017). *A Brief Tutorial on Maxent.*
+https://biodiversityinformatics.amnh.org/open_source/maxent/Maxent_tutorial2017.pdf
+· *(The four output formats "are all monotonically related, but they are
+scaled differently, and have different interpretations"; cloglog "gives an
+estimate between 0 and 1 of probability of presence", and "probability of
+presence depends strongly on details of the sampling design"; cloglog
+"estimates probability of presence assuming that the sampling design is
+such that typical presence localities have an expected abundance of one
+individual per quadrat, which results in a probability of presence of about
+0.63". Decision 25 a1 and f3.)* *(Tutorial, read through an extract of the
+text; the last quote is as a Maxent user-group post quotes the tutorial.)*
+
+Phillips, S.J., Anderson, R.P., Dudík, M., Schapire, R.E., & Blair, M.E.
+(2017). Opening the black box: an open-source release of Maxent.
+*Ecography*, 40(7), 887–893. https://doi.org/10.1111/ecog.03049 · *(The
+open-source release uses a cloglog transform "to produce an estimate of
+occurrence probability", from the reading of Maxent as an inhomogeneous
+Poisson process; the raw output is an estimate of relative abundance.
+Decision 25 a1.)* *(From the repository record and the abstract.)*
+
+Phillips, S.J., & Elith, J. (2013). On estimating probability of presence
+from use–availability or presence–background data. *Ecology*, 94(6),
+1409–1419. https://doi.org/10.1890/12-1520.1 · *(A simulation with seven
+species: methods that do not take the prevalence as an extra parameter
+"grossly under- or overestimated probability of presence" for six species;
+"Presence–background data must be augmented with an additional datum,
+e.g., species' prevalence, to reliably estimate absolute (rather than
+relative) probability of presence." Decision 25 c1.)* *(From the abstract.
+The title, the volume and the pages are not on the record that was read;
+verify before the entry is cited on the site.)*
+
+Phillips, S.J. *maxnet*, version 0.1.4. Reference manual: `predict.maxnet`
+and the model object. https://stat.ethz.ch/CRAN/web/packages/maxnet/refman/maxnet.html
+and https://atsa-es.r-universe.dev/maxnet/maxnet.pdf · *(`predict(object,
+newdata, clamp = T, type = c("link", "exponential", "cloglog",
+"logistic"))`; with `clamp`, "predictors and features are restricted to the
+range seen during model training"; cloglog is `1-exp(-exp(entropy+lp))`;
+the object holds `varmin` and `varmax` ("minimum of each predictor, to be
+used for clamping") and `featuremins` and `featuremaxs`. Decision 25 a1 and
+b2.)* *(Package manual.)*
 
 ## Tiger movement and landscape resistance (Decision 14)
 

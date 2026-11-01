@@ -160,7 +160,8 @@ suffix marks a companion table to a numbered one (`tbl_05b_…`). As built:
 | `tbl_13` | `network_links` (STEP 11.1), `network_metrics` (STEP 11.2; written again by STEP 11.3), `network_threshold_scan` (STEP 11.2), `network_variant_comparison` (STEP 11.3), `network_qa` (STEP 11.4) — all `scripts/07` |
 | `tbl_14` | `road_crossings` (STEP 12.2; written again by STEP 12.3), `pinch_points` (STEP 12.3; one row per site; written again by STEP 12.4), `pinch_link_summary` (STEP 12.3), `pinch_variant_comparison` (STEP 12.4), `pinch_qa` (STEP 12.5) — all `scripts/07` |
 | `tbl_15` | `occ_raw_counts` (STEP 13.1), `occ_cleaning`, `occ_cleaning_by_dataset`, `occ_sets`, `occ_dataset_check` (STEP 13.2; written again by STEP 13.3 with the background rows), `background_taxa` (STEP 13.3), `occ_window_counts`, `kde_summary` (STEP 13.4), `occ_qa`, `kde_radius_compare` (STEP 13.5), `occ_by_reserve` (STEP 13.6; publishable) — all `scripts/08`. Counts, names and statistics only; no position (Decision 21 point 10; Decision 22 point 9) |
-| `tbl_16` | `sdm_counts` (STEP 14.1, task 14.4); `sdm_covariates`, `sdm_covariate_cor`, `sdm_aicc`, `sdm_cv`, `sdm_sensitivity` (STEP 14.2, task 14.5, process choice t1); `sdm_qa` (STEP 14.3, task 14.6; reserved by process choice t1 of task 14.2) — all `scripts/09`. Counts and statistics only; no 0.2° cell id or corner and no data row (Decision 23 point 9). Later Week-15 and Week-16 tables of `scripts/09` take their slugs in their tasks |
+| `tbl_16` | `sdm_counts` (STEP 14.1, task 14.4); `sdm_covariates`, `sdm_covariate_cor`, `sdm_aicc`, `sdm_cv`, `sdm_sensitivity` (STEP 14.2, task 14.5, process choice t1); `sdm_qa` (STEP 14.3, task 14.6; reserved by process choice t1 of task 14.2) — all `scripts/09`. Counts and statistics only; no 0.2° cell id or corner and no data row (Decision 23 point 9). Later Week-15 and Week-16 tables of `scripts/09` take their slugs in their tasks. *(2026-10-31, process choice t1 of task 15.2: `sdm_prediction` (STEP 15.1), `sdm_reserve_check` (STEP 15.2), `sdm_pred_qa` (STEP 15.3) reserved. No `tbl_16` table holds a reserve name (check s1 of task 14.6))* *(built 2026-11-01: `sdm_prediction`, `sdm_reserve_check`, `sdm_pred_qa`)* |
+| `tbl_17` | `reserve_suitability` — the publishable table of the reserve values (Decision 25 point 7; `scripts/09` STEP 15.2, task 15.4; reserved by process choice n1 of task 15.2). One row per reserve; no presence column *(built 2026-11-01: 58 rows)* |
 
 Before a new table is written, check that its full filename is not already in
 use. A new, unrelated table takes the next free number.
@@ -178,6 +179,15 @@ number is `tbl_17`.)*
 **Figures as built:** `fig_01_growth_ranking.png` and
 `fig_02_growth_animation.gif` (`scripts/05`); `fig_03_reserve_network.png`
 (`scripts/07` STEP 12.7). `fig_04` is the next free number.
+*(2026-10-31, Decision 25 f3: `fig_04` and `fig_05` are reserved for the
+two suitability figures — `fig_04` the five classes, `fig_05` the cloglog
+value (`SDM_PUB_FIG_CLASS`, `SDM_PUB_FIG_VALUE`). Their slugs are set in
+Week 16; a slug does not hold "tiger" (the QA check "no file with 'tiger'
+in its name under `outputs/`"). `fig_06` is the next free number. The
+published reserve table of Decision 25 point 7 takes its number in task
+15.2: the `tbl_16` group, if the scan of `scripts/09` STEP 14.3 changes,
+or `tbl_17`.)* *(2026-10-31, task 15.2 (n1): `tbl_17_reserve_suitability.csv`;
+`tbl_18` is the next free table number.)*
 
 ---
 

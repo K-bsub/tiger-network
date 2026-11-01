@@ -53,6 +53,7 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   | 22 | Effort surfaces: effort, tiger records and city/town settlement; the 5 km sets; one unit per 1 km cell; quartic kernel of 20 km radius (σ 7,071 m), QA surfaces at 10 and 30 km; three time windows; the tiger surface is never published or committed; the published tiger product is the count by reserve (1 or 2 → `<3`) |
   | 23 | A `maxnet` model at the 0.2° grain on the obscured set; model cell = complete-case cover ≥ 50 %; the limits 25 and 80 presence cells; background = the clean iNaturalist Mammalia records (two parts), ≥ 10 × the presence cells; the Facebook dataset is a check (0 records); Gi* of the effort and of the tiger records (tiger Gi* never published); no ratio. Outcome `planned_model` (locked) |
   | 24 | Model settings: nine candidates summarised over the 1 km cells of a cell; no water cells in the terrain means, elevation floor 0 m; \|r\| > 0.7 removes the later candidate of a fixed order; AICc over `lq`/`lqh`/`lqph` × regmult 1–4 (fewest coefficients within ΔAICc 2); no bias covariate; presences added to the background; 2° blocks in 5 folds (Boyce, test AUC, OR10, AUCdiff; cloglog); gate: mean test Boyce ≤ 0 → no suitability map; reserve check (Week 15); two sensitivity runs; the model file under `data/processed/` |
+  | 25 | Prediction and publication: the model file of 2026-10-25, cloglog with clamping; a cell with a covariate outside the training range is flagged, counted and hatched; five equal-count classes by rank (a tie to the lower cell id; class 5 = the top-20 % set of the sensitivity rule), no value in the legend; no published layer before the Week-18 rule; tier T1; two static figures, `fig_04` (classes) and `fig_05` (value, label "model output (cloglog), relative; not a probability of presence"); nine caption items; a reserve table (58 rows, no presence column); reserve check: a 1 km cell is inside if its centre is, a 1 km cell outside the model cells has no value and is counted; point 9 (task 15.2): r2 only if each count of the 2 × 2 table is 3 or more, and a QA stop on a reserve whose presence state the outputs show |
 
 ## Ways of working (apply every chat)
 
@@ -84,69 +85,87 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ---
 
-## Current state  ·  **Week 14 complete** · 2026-10-25
+## Current state  ·  **Week 15 complete** · 2026-11-01
 
 ### Where the project is
 
 - **Stage 1 (Growth):** complete in Week 7. **Stage 2 (Connectivity):**
-  complete in Week 12. **Stage 3 (Habitat suitability):** Week 13 complete
-  and committed (2026-10-18); **Week 14 complete (2026-10-25)**. Nothing of
-  Week 14 was committed during the week; the author commits it (task 14.8)
-  before the Week-15 chat.
-- **Week 14 in short** (full record: Decisions 23 and 24 and the change log
-  in `methodology.md`):
-  - **Decision 23** (task 14.1): the model at the 0.2° grain. **The count**
-    (task 14.4): 6,969 model cells, 104 presence cells, 1,486 background
-    cells → `planned_model`, locked in `SDM_GRAIN_OUTCOME`.
-  - **Decision 24** (task 14.3): the model settings, before any covariate
-    summary.
-  - **The fit** (task 14.5): 6 of 9 covariates kept (`ghm_mean`,
-    `lc_forest`, `elev_mean`, `lc_open`, `droad_km_mean`, `lc_built`; slope
-    and TRI out by their \|r\| with elevation, crop by its \|r\| with gHM);
-    AICc → `lq`, regmult 1 (10 coefficients; no other model within 2);
-    cross-validation over 5 folds of 2° blocks — mean test Boyce **0.668**
-    (SD 0.177), test AUC 0.749, OR10 0.165, AUCdiff 0.060; training AUC of
-    the main model 0.806; sensitivity runs `bias_settlement` (ρ 0.988) and
-    `window_2018_2022` (71 presence cells, ρ 0.991), both robust.
-  - **The QA** (task 14.6): 133 of 133 checks, with a second path for the
-    main numbers; 0 records of the Facebook dataset.
-  - **Process choices:** task 14.2 — s1, f1, w2, g1, t1, l1, r1 and the
-    order o2; task 14.4 — k1, h1; task 14.5 — q1, t1, y1, h1, w1 and eight
-    implementation points; task 14.6 — c1, m1, h1, p1, s1. All as the chat
-    recommended.
-  - **Docs close** (task 14.7): Limitations, §5.4–5.5, the Week-15 plan;
-    `methodology.md` made shorter (the change log of Weeks 3–13 moved to
-    `docs/methodology-changelog-archive.md`); this file written again.
-- **`scripts/09_model_suitability.R`:** STEPs 14.1–14.3. `RUN_GRID <- FALSE`,
-  `RUN_COVARIATES <- FALSE`. The 19 fits run in each run (process choice
-  w1). In the run of task 14.6, STEPs 14.1, 14.2 and 14.3 took 0.0, 0.1
-  and 0.2 minutes.
-- **`renv.lock`:** `maxnet` 0.1.4 and `glmnet` 5.0 (with `foreach`,
-  `iterators`, `RcppEigen`, `shape`, `survival`) since task 14.5. `sfdep`
-  is in the `scripts/00a` list only (not in the lock until a script loads
-  it).
+  complete in Week 12. **Stage 3 (Habitat suitability):** Weeks 13 and 14
+  complete and committed (Week 14: `30a512d`, "Week 14 complete"); **Week
+  15 complete (2026-11-01)**. Nothing of Week 15 was committed during the
+  week; the author commits it (task 15.7) before the Week-16 chat.
+- **Week 15 in short** (full record: Decision 25 and the change log in
+  `methodology.md`):
+  - **Decision 25** (task 15.1): the prediction and its published form,
+    before any prediction file — a1, b2, c1 with n5, d1, e1, f3 (two
+    figures; not the chat's recommendation), t1, h1 (a reading of Decision
+    24 point 9). **Point 9** (task 15.2, before any result): y1 (r2 only if
+    each count of the 2 × 2 table is 3 or more) and z1 (a QA stop on a
+    reserve whose presence state the outputs show).
+  - **Process choices** (task 15.2): w1 (`RUN_FIT`), l1, n1, c1, t1, k1,
+    e1, p1, q1 — all as the chat recommended. Task 15.5: an information
+    count of the hatched valued cells (the author). Task 15.6: m1 (no note
+    on it in `tbl_17` or a caption).
+  - **STEP 15.1** (task 15.3): the gate is open (mean test Boyce 0.668);
+    6,969 model cells, cloglog 2.1e−13 to 0.9998 (median 0.290); classes of
+    1,394 (5 to 2) and 1,393 (1) cells; class 5 from 0.604; 32 cells outside
+    the training range.
+  - **STEP 15.2** (task 15.4): 56 of 58 reserves with a value; **r1: ρ =
+    0.379, n = 51, p = 0.006 → "agrees"**; r2 not published (55 of 56
+    valued reserves are above the median); z1 0; 1,564 1 km cells with no
+    value in 6 reserves at the coast or the border.
+  - **STEP 15.3** (task 15.5): QA 84 of 84. One reserve value (Mukundara
+    Hills) uses 19 of 316 cells outside the range; the Sundarbans (the
+    highest reserve value) uses none.
+  - **Docs close** (task 15.6): §5.4, Limitations, `proposal.md` §8 (a
+    dated note), `README.md`, this file, the Week-16 plan.
+- **Week 14 in short:** Decision 23 (a model at the 0.2° grain; the count:
+  104 presence cells, 1,486 background cells → `planned_model`); Decision
+  24 (the settings); the fit (6 of 9 covariates; `lq`, regmult 1; mean
+  test Boyce 0.668 over 5 folds of 2° blocks; both sensitivity runs
+  robust); QA 133 of 133.
+- **`scripts/09_model_suitability.R`:** STEPs 14.1–15.3. `RUN_GRID`,
+  `RUN_COVARIATES` and `RUN_FIT` are `FALSE`: STEP 14.2 is skipped, and the
+  later STEPs read the model file of the record (`SDM_PRED_MODEL_FILE`).
+  Each run writes the tables of STEPs 14.1, 14.3 and 15.1–15.3 again (the
+  same values). A full run takes under 1 minute on the project machine.
+- **`renv.lock`:** no change in Week 15 (`maxnet` 0.1.4, `glmnet` 5.0
+  since task 14.5). `sfdep` is in the `scripts/00a` list only.
 
-### Week-15 entry point
+### Week-16 entry point
 
-- **Next: task 15.1 — Decision 25** (the prediction and its published form),
-  before any prediction file is written or seen. The forks are in
-  `project-plan.md` → "Week 15 — task breakdown" (a draft: the model file
-  and the output type, the cells, the published form and classes, the
-  sensitive-data check of the surface, the caption content, the figure
-  number, what was seen).
-- **Then:** task 15.2 (process choices), 15.3 (the prediction and the gate),
-  15.4 (the reserve check), 15.5 (QA), 15.6 (docs; the Week-16 breakdown),
-  15.7 (commit). Split point after task 15.2.
-- **The gate is known:** the mean test Boyce index is 0.668, above 0, so the
-  gate of Decision 24 point 8 allows a map; Week 15 states it.
-- **Read before Week 15:** Decision 23 point 9 (publication), Decision 24
-  points 7–9 and "Result of the run", the Week-15 pitfalls of the plan,
-  `docs/sensitive-data-policy.md`, the Stage-3 items of "Limitations".
-- **Files for the Week-15 chat:** the docs; `R/00_config.R`,
+- **First: the commit of Week 15** (task 15.7, by the author). Changes
+  since `30a512d`: `R/00_config.R`, `R/00_functions_sdm.R`,
+  `scripts/09_model_suitability.R`; `outputs/tables/tbl_16_sdm_qa.csv`
+  (three check texts) and the new `tbl_16_sdm_prediction.csv`,
+  `tbl_16_sdm_reserve_check.csv`, `tbl_16_sdm_pred_qa.csv`,
+  `tbl_17_reserve_suitability.csv`; the docs `methodology.md`,
+  `project-plan.md`, `references.md`, `naming-conventions.md`,
+  `data-dictionary.md`, `proposal.md`, this file, and `README.md`. One
+  `analysis:` commit (`R/`, `scripts/`, `outputs/tables/`) and one
+  `docs:` commit. Nothing under `data/` may be staged.
+- **Next: task 16.1 — Decision 26** (the Gi* settings), before any Gi* is
+  computed. The forks are in `project-plan.md` → "Week 16 — task
+  breakdown" (a draft): the input set of the tiger Gi*, the input of the
+  effort Gi*, the grid and the value of a cell, the neighbours and the
+  band (a new value), the correction for many tests, the published form of
+  the effort Gi* and what the docs can state from the tiger Gi*, the code
+  (`sfdep` or own), what was seen.
+- **Then:** 16.2 (process choices), 16.3 (STEP 16.1: the Gi*), 16.4 (STEP
+  16.2: `fig_04` and `fig_05` with the caption drafts), 16.5 (STEP 16.3:
+  QA), 16.6 (docs: the Stage-3 close; the Week-17 plan), 16.7 (commit).
+  Split point after task 16.2.
+- **Read before Week 16:** Decision 23 point 8 (the Gi* and the Phase-1
+  settings), Decision 22 (the surfaces; point 9: the tiger surface is never
+  published), Decision 25 points 4–6 (the figures) and the two "Result"
+  parts, the Week-16 pitfalls of the plan, `docs/sensitive-data-policy.md`,
+  the Stage-3 items of "Limitations".
+- **Files for the Week-16 chat:** the docs; `R/00_config.R`,
   `R/00_functions_sdm.R`, `R/00_functions_io.R`, `R/00_functions_occ.R`,
-  `R/00_functions_sensitive.R`; `scripts/09_model_suitability.R`; the
-  `tbl_16_*` tables if a value is needed (committed; statistics only). No
-  data file (rule d1).
+  `R/00_functions_kde.R`, `R/00_functions_sensitive.R`;
+  `scripts/09_model_suitability.R`; the code that draws `fig_03` (for the
+  frame of the two figures); the `tbl_15` and `tbl_16` tables if a value
+  is needed. No data file (rule d1).
 
 ### Results by stage (a record for the write-up of Weeks 17–20)
 
@@ -180,6 +199,12 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   obscured set 884 records in 104 cells of 0.2°; clean background 23,901
   records. The model of Week 14 (above). The published tiger product so
   far: `tbl_15_occ_by_reserve.csv` (a count of 1 or 2 is `<3`).
+  **Week 15:** the prediction at 0.2° (the gate open); the reserve check
+  r1 "agrees" (ρ 0.379, n 51, p 0.006); r2 not published; the published
+  reserve values in `tbl_17_reserve_suitability.csv` (56 of 58 with a
+  value; 55 above the median of the model cells; the highest the
+  Sundarbans, the lowest Kamlang). Record against proposal question 3:
+  `methodology.md`, change log, 2026-11-01, Week 15 complete.
 
 ### Files that later weeks read
 
@@ -198,8 +223,10 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
 | `data/processed/kde_*_1km_7755.tif` | Effort, tiger, settlement surfaces (20 km) | `kde_tiger_*` never published or committed |
 | `data/processed/sdm_grid_cell02_7755.gpkg`, `sdm_cellid_1km_7755.tif` | 0.2° cells (7,450; 6,969 model cells); cell id of each 1 km cell | No presence flag |
 | `data/processed/sdm_covariates_cell02.csv` | Covariates of the 6,969 model cells | Holds cell ids: no table row from it |
-| `data/processed/tiger_sdm_maxnet_cell02_20261025.rds` | The main model and its settings | Under `data/` (D24 m1) |
-| `outputs/tables/tbl_00`–`tbl_16_*`, `outputs/figures/fig_01`–`fig_03` | Committed tables and figures | Counts and statistics; positions at 10 km only |
+| `data/processed/tiger_sdm_maxnet_cell02_20261025.rds` | The main model and its settings | Under `data/` (D24 m1); the file that the prediction reads (D25 a1, `SDM_PRED_MODEL_FILE`) |
+| `data/processed/sdm_prediction_cell02.csv` | The prediction: `id`, `value` (cloglog), `rank`, `class`, `out_of_range`; 6,969 rows | No presence or background field; holds cell ids: no table row from it; not published as a layer (D25 d1) |
+| `data/processed/boundary_states_7755.gpkg` | Natural Earth states (36), for the state boundaries of the figures | State and district can disagree at a border (gotcha) |
+| `outputs/tables/tbl_00`–`tbl_17_*`, `outputs/figures/fig_01`–`fig_03` | Committed tables and figures | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `fig_04` and `fig_05` reserved (D25 f3) |
 
 ### Open items (carried)
 
@@ -246,38 +273,46 @@ al. 2022 (repository page and abstract). Week 14: Botella et al. 2020 and
 Guisan et al. 2007 (repository records and abstracts; no DOI recorded); the
 iNaturalist help page (through a summary); the iNaturalist source file
 (current branch only); one more forum thread (users, not staff); the
-`maxnet` source files (master branch, not the tag of 0.1.4);
+`maxnet` source files (master branch; *2026-10-31: `maxnet.R` and
+`predict.maxnet.R` read at the tag v0.1.4, the same*);
 Radosavljevic & Anderson 2014 and Warren & Seifert 2011 (not read; as the
 ENMeval help pages give them); Dormann et al. 2013, Roberts et al. 2017 (no
 DOI on the record) and Hirzel et al. 2006 (through a summary); Valavi et
 al. 2019 (package manual); the `ecospat.boyce` help page (version 3.4,
-through a summary).
+through a summary). Week 15: Elith et al. 2010 (the volume, pages and DOI
+not checked; the MESS text through the GRASS `r.mess` page); Phillips &
+Elith 2013 (the title, volume and pages not on the record read); Lei et
+al. 2023 (the full author list not recorded); Brewer & Pickle 2002, Hastie
+& Fithian 2013 and Phillips et al. 2017 (abstracts); Gilmartin & Shelton
+1990, the Hirzel et al. 2007 poster and the Maxent tutorial 2017 (extracts);
+the Maxent user-group thread (not to be cited on the site).
 
 ### Open pending Decisions (decide in the week noted)
 
 Full text in `methodology.md` → "Decisions pending".
-- **[Week 15] Prediction and publication of the suitability surface** →
-  **Decision 25**, task 15.1: the model file and the output type with
-  clamping, the cells, the classes and the published form, the
-  sensitive-data check, the caption, the figure. The gate and the reserve
-  check are fixed already (Decision 24 points 8–9).
-- **[Week 15–16] Gi\* settings** (raised with Decision 23 point 8; Week 16 in
-  the plan draft, Decision 26): the input set of the tiger Gi* (5 km set,
-  obscured set or both), the grid, the value of a cell, the neighbours and
-  the band (a new value; Phase 1: 50 km and 25 km), the correction for many
-  tests, and what the docs can state from the tiger Gi* (never published).
-- **[Week 18] Published path layer** (raised with Decision 20): no layer,
-  simplified lines, or a zoom limit, before a path layer goes on the site.
+- **[Week 15–16] Gi\* settings** → **Decision 26**, task 16.1 (raised with
+  Decision 23 point 8): the input set of the tiger Gi* (5 km set, obscured
+  set or both), the grid, the value of a cell, the neighbours and the band
+  (a new value; Phase 1: 50 km and 25 km), the correction for many tests,
+  and what the docs can state from the tiger Gi* (never published).
+- **[Week 18] Published layers** (raised with Decision 20 as "Published
+  path layer"; widened by Decision 25 point 4): before a path layer or a
+  suitability layer goes on the site. Paths: no layer, simplified lines,
+  or a zoom limit. Suitability at 0.2°: no layer, the class only, or the
+  class and the value; a publish check for a layer of 0.2° cells
+  (`assert_publishable_rast()` refuses a raster of 0.2° in EPSG:4326); the
+  hatch and the caption items in an interactive map.
 - **[After Stage 3] SDM-based resistance + circuit-theory check.** The
-  surface will be at 0.2° (about 20 km); decide then whether the item still
-  applies.
+  surface is at 0.2° (about 20 km); decide in task 16.6 whether the item
+  still applies.
 
-_Resolved (in `methodology.md`): Decisions 7 to 24 closed the earlier
+_Resolved (in `methodology.md`): Decisions 7 to 25 closed the earlier
 items (missing years, area source, zeros, the NA policy, the gHM fill,
 resistance values, barrier roads, water and gHM, the path set-up, the
 comparison metric, the link rule, the pinch-point rule, the cleaning rule,
 the settlement layer, the target-group scope, the model Decisions, the
-uses of the effort surfaces, the terrain variables)._
+uses of the effort surfaces, the terrain variables, the prediction and its
+publication)._
 
 ### Data on disk (raw; via `scripts/01`)
 
@@ -421,6 +456,19 @@ of closed one-time work are in git history.)*
   or the model file must not change.
 - **The radius of a quartic kernel is not its sigma** (support radius =
   √8 × `sigma`; Decision 22).
+- **`RUN_FIT` is `FALSE`** (w1 of task 15.2): STEP 14.2 is skipped and the
+  later STEPs read `SDM_PRED_MODEL_FILE`. With `TRUE`, the fits run, one
+  more dated model file is written, and STEP 14.3 checks its coefficients
+  against the record file; a run on 2026-10-25 would write over the
+  record, and a guard stops it.
+- **A QA STEP uses its own `sdm_qa_*` functions** (a second path): it does
+  not call a function of the STEPs that it checks. The hand-made cases of
+  STEPs 14.2, 15.1 and 15.3 use the example data of `maxnet`
+  (`bradypus`).
+- **The centre rule of the reserve cells:** the main path is
+  `sf::st_intersects()` on the cell centres (an edge counts); the QA path is
+  `terra::extract()` on the polygons (GDAL). They agree on the real
+  reserves (task 15.5); a centre exactly on an edge would make them differ.
 
 **Process (chat)**
 - **A list of expected `git status` lines starts from the last commit.** Ask
@@ -440,6 +488,21 @@ of closed one-time work are in git history.)*
   name.
 - **A web page read through a fetch can give a summary only.** Mark such an
   entry in `references.md`.
+- **A short answer of the author can be read in two ways** (task 15.1: "n5,
+  22."). State the reading in the reply and in the change log.
+- **A chosen option can conflict with the reasons of another chosen
+  option** (task 15.1: f3, a value map, against the reasons of c1 and e1).
+  Raise it before the Decision is written.
+- **Two outputs that are safe alone can link a name to a state together**
+  (task 15.2: r2 with the reserve table and the median; the hatch with
+  the reserve outlines). Check each new published output against the
+  others, as for a total next to a `<3` value.
+- **"r2 not published" is a result, not an error.** With 55 of 56 reserves
+  above the median, a count of the 2 × 2 table is below 3 (Decision 25
+  point 9).
+- **The console of STEP 15.2 prints the reserve table** (names and values;
+  publishable). A block marked "NOT FOR THE DOCS" (z1) can come to a chat,
+  but its names go into no doc.
 
 ---
 
@@ -447,6 +510,38 @@ of closed one-time work are in git history.)*
 
 *(Weeks 0–13: git history, and the change log of `methodology.md` with its
 archive.)*
+
+### Week 15 — Stage 3: Decision 25, the prediction and the reserve check · 2026-10-31 to 2026-11-01
+- Entry state: Week 14 complete and committed (`30a512d`).
+- Did: task 15.1 Decision 25; task 15.2 the process choices and Decision
+  25 point 9; task 15.3 STEP 15.1 (the prediction, the gate open); task
+  15.4 STEP 15.2 (the reserve check: r1 "agrees", r2 not published, z1 0;
+  the reserve table); task 15.5 STEP 15.3 (QA 84 of 84; the information
+  count); task 15.6 the docs close and the Week-16 plan.
+- Decisions made: **Decision 25** (a1, b2, c1 with n5, d1, e1, f3 with two
+  figures, t1, h1; f3 and the two-figure form are not the chat's
+  recommendation; point 9, added in task 15.2: y1, z1). Process choices of
+  task 15.2: w1, l1, n1, c1, t1, k1, e1, p1, q1. The author: the
+  information count (task 15.5) and m1 (task 15.6).
+- Outputs: a Decision-25 block in `R/00_config.R`; `RUN_FIT`, STEPs
+  15.1–15.3 and the STEP-14.3 changes in `scripts/09`; 25 functions in
+  `R/00_functions_sdm.R` (8 for STEP 15.1, 9 for STEP 15.2 and 8 for the
+  QA, each set with its hand-made case) and two field lists; `data/processed/sdm_prediction_cell02.csv`;
+  `tbl_16_sdm_prediction.csv`, `tbl_16_sdm_reserve_check.csv`,
+  `tbl_16_sdm_pred_qa.csv`, `tbl_17_reserve_suitability.csv`; the docs.
+- Gotchas found: see "Known gotchas" (a short answer read in two ways; a
+  conflict between two chosen options; two outputs that link a name to a
+  state together; `RUN_FIT`; the QA second path; the centre rule; "r2 not
+  published").
+- Errors of the chat: the fork text of d1 named a table of cell id →
+  class + flag (the value was also needed; Decision 25 point 4 adds it);
+  points 1–8 of Decision 25 did not see that r2, the reserve table and the
+  hatch can link a reserve name to a presence state (point 9 closes it);
+  the first example of the r2 counts in the QA hand-made case was
+  symmetric and could not catch a swap (changed before delivery). Each is
+  in the change log.
+- Carried forward / next session: the commit of Week 15 (task 15.7, by
+  the author); then Week 16, task 16.1 — Decision 26.
 
 ### Week 14 — Stage 3: Decisions 23–24, the model and the QA · 2026-10-18 to 2026-10-25
 - Entry state: Week 13 complete and committed; outcome `no_1km_model`.

@@ -1,0 +1,85 @@
+"group","check","value","pass"
+"test case","STEP 15.1: 1a ranks: 1 to 7 by value; the tie at 0.5 to the lower id (3 before 7)","pass",TRUE
+"test case","STEP 15.1: 1b classes K - floor(K (r - 1) / n): 5, 4, 3, 1, 5, 3, 2","pass",TRUE
+"test case","STEP 15.1: 1c class sizes: n = 6969 gives 1394 x 4 and 1393; n = 10 gives 2 x 5","pass",TRUE
+"test case","STEP 15.1: 1d the top class is the top SDM_SENS_TOP_SHARE set of sdm_compare() (n = 7, 13, 6969; with ties)","pass",TRUE
+"test case","STEP 15.1: 1e a tie across a class break: 2 cells (value 1 in classes 1 and 2)","pass",TRUE
+"test case","STEP 15.1: 2a flag: at the limits inside; below a; above b; above a and below b","pass",TRUE
+"test case","STEP 15.1: 2b counts by covariate: a 1 below, 1 above; b 1 below, 1 above","pass",TRUE
+"test case","STEP 15.1: 2c one row works (a 2 above its maximum)","pass",TRUE
+"test case","STEP 15.1: 3a gate: 0.668 open; 0, -0.1 and NA closed","pass",TRUE
+"test case","STEP 15.1: 4a maxnet fits on the package example data","pass",TRUE
+"test case","STEP 15.1: 4b cloglog values with clamping are in [0, 1], one per row","pass",TRUE
+"test case","STEP 15.1: 4c no data row of the fit is outside the training range","pass",TRUE
+"test case","STEP 15.1: 4d clamping: a value above the maximum gives the value at the maximum, and the flag","pass",TRUE
+"test case","STEP 15.1: 4e cloglog = 1 - exp(-exp(entropy + link))","pass",TRUE
+"test case","STEP 15.1: 5a a correct layer passes each check","pass",TRUE
+"test case","STEP 15.1: 5b a layer with a presence field, or with a class above a higher value, fails","pass",TRUE
+"test case","STEP 15.1: 5c summary: the columns group, item, value, reading; the class sizes add up to n","pass",TRUE
+"test case","STEP 15.1: 5d summary with the gate closed: the three gate rows only","pass",TRUE
+"test case","STEP 15.2: 1a centre rule: A holds cells 1, 2, 5 (cell 6 is not complete-case)","pass",TRUE
+"test case","STEP 15.2: 1b a centre on the edge counts: B holds cells 10, 11, 12, 14, 15, 16","pass",TRUE
+"test case","STEP 15.2: 1c a cell in two polygons counts in each (cell 2 in A and C)","pass",TRUE
+"test case","STEP 15.2: 1d no geometry: no cell","pass",TRUE
+"test case","STEP 15.2: 2a values: A 0.8 (3 cells); B 0.2 (2 used, 4 with no value); C 0.6","pass",TRUE
+"test case","STEP 15.2: 2b no geometry: NA; F: no value, 0 used, 2 with no value","pass",TRUE
+"test case","STEP 15.2: 2c presence state: A and C yes (cell id 101); B, E, F no","pass",TRUE
+"test case","STEP 15.2: 3a z1: kind (a) E (cells of id 102 only, outside the range); kind (b) F","pass",TRUE
+"test case","STEP 15.2: 4a r1: rho 1, n 5 (an NA left out), p of cor.test(exact = FALSE), agrees","pass",TRUE
+"test case","STEP 15.2: 4b r1: rho -1 gives no agreement shown","pass",TRUE
+"test case","STEP 15.2: 4c r1 with ties in the density and a zero density: no warning (exact = FALSE)","pass",TRUE
+"test case","STEP 15.2: 5a r2: counts 3, 3, 3, 3 -> published; share 3 of 6","pass",TRUE
+"test case","STEP 15.2: 5b r2: a count of 2 -> not published","pass",TRUE
+"test case","STEP 15.2: 5c r2: a value equal to the median is not above; a count of 0 -> not published","pass",TRUE
+"test case","STEP 15.2: 6a reserve table: fields of k1, ordered by unit_id; ties share the lowest rank","pass",TRUE
+"test case","STEP 15.2: 6b the checks pass on this table and fail on a presence column","pass",TRUE
+"test case","STEP 15.2: 6c check table: r2 not published -> one r2 row, no count; published -> 4 r2 rows","pass",TRUE
+"test case","STEP 15.3: 1a cloglog by hand = predict(type = cloglog, clamp = TRUE), with a clamped row","pass",TRUE
+"test case","STEP 15.3: 1b a hinge feature stops the hand path (lq only)","pass",TRUE
+"test case","STEP 15.3: 2a flag again: at the limits inside; 3 rows outside; counts 1, 1, 1, 1","pass",TRUE
+"test case","STEP 15.3: 3a rank and class again: ranks 1 3 4 7 2 5 6; classes 5 4 3 1 5 3 2","pass",TRUE
+"test case","STEP 15.3: 3b class sizes again for n = 6969: 1393, 1394, 1394, 1394, 1394 (classes 1 to 5)","pass",TRUE
+"test case","STEP 15.3: 4a cells again by terra::extract(): A 3 cells (one NA left out), B 2 (a cell also in A), C none, D 2, E 2","pass",TRUE
+"test case","STEP 15.3: 4b values again: A 0.8, B 0.6, D 0.4 (2 hatched), E no value (2 cells)","pass",TRUE
+"test case","STEP 15.3: 4c presence again: A and B yes (id 101); D and E no; C NA","pass",TRUE
+"test case","STEP 15.3: 5a r1 again (ties): rho and p = cor.test(method = spearman, exact = FALSE)","pass",TRUE
+"test case","STEP 15.3: 6a r2 counts again: 2, 1, 1, 2 (equal to the median is not above; NA left out)","pass",TRUE
+"prediction","the layer has the fields id, value, rank, class, out_of_range only (no presence or background field)","id, value, rank, class, out_of_range",TRUE
+"prediction","the layer and the covariate table hold each model cell of the grid once","6969 and 6969 rows; 6969 model cells",TRUE
+"prediction","the model file is the record (SDM_PRED_MODEL_FILE), of maxnet 0.1.4 (Decision 25 a1)","tiger_sdm_maxnet_cell02_20261025.rds; maxnet 0.1.4",TRUE
+"prediction","the values again by hand from the model file (clamping; link + alpha; cloglog) = the layer","largest relative difference 1.44e-15",TRUE
+"prediction","the flag again (sweep()) = out_of_range of the layer","32 cells outside",TRUE
+"prediction","no presence or background cell is outside the training range (Decision 25 point 2)","1504 presence or background cells; 0 outside",TRUE
+"prediction","tbl_16_sdm_prediction: the cells outside, all and by covariate = the flag again","32 cells outside; table 32",TRUE
+"prediction","tbl_16_sdm_prediction: min, median and max = the values again","largest relative difference 1.11e-16",TRUE
+"prediction","the gate again: the row mean of tbl_16_sdm_cv is above SDM_BOYCE_GATE, and tbl_16_sdm_prediction says so (Decision 24 point 8)","mean test Boyce 0.668; gate 0",TRUE
+"classes","the ranks and the classes again (other code) = the layer","6969 cells",TRUE
+"classes","the class sizes = ceiling(j n / k) - ceiling((j - 1) n / k) (classes 5 to 1)","1394, 1394, 1394, 1394, 1393",TRUE
+"classes","class 5 = the top SDM_SENS_TOP_SHARE set of the sensitivity rule (the order of sdm_compare())","1394 cells",TRUE
+"classes","tbl_16_sdm_prediction: the class sizes and value ranges = the values and classes again","largest relative difference 7.22e-16",TRUE
+"classes","tbl_16_sdm_prediction: the cells in a tie across a class break, counted again","0 cells; table 0",TRUE
+"reserves","tbl_17: the fields of k1 (no presence column); one row per reserve by unit_id; names, state and landscape from the reserve layer","58 rows; 58 reserves",TRUE
+"reserves","the 1 km cells again by terra::extract(): the cells used and with no value = tbl_17 (reserves that differ)","0 and 0 of 56 reserves differ",TRUE
+"reserves","the reserve values again = tbl_17 cloglog_mean","largest relative difference 5.55e-16",TRUE
+"reserves","the ranks again (a tie gets the lowest rank) = tbl_17 cloglog_rank","56 reserves with a rank",TRUE
+"reserves","density_2022 again from the census layer = tbl_17","largest relative difference 0.00e+00",TRUE
+"reserves","tbl_16_sdm_reserve_check: the reserve and cell counts again","58, 56, 56, 51, 42713, 1564",TRUE
+"r1","rho, n and p again (ranks; t approximation) = tbl_16_sdm_reserve_check","largest relative difference 1.67e-16",TRUE
+"r1","the reading again (rho > 0 and p < SDM_RESERVE_P)","agrees; table: agrees",TRUE
+"r2","the rule of Decision 25 point 9 again: r2 is published only if each count of the 2 x 2 table is SDM_PUB_R2_MIN_N or more; the table follows it","the rule: not published; the table: not published",TRUE
+"z1","the two kinds counted again = tbl_16_sdm_reserve_check","kind (a) 0, kind (b) 0",TRUE
+"z1","Decision 25 point 9: no reserve whose presence state the outputs show (the total must be 0)","0 reserves",TRUE
+"info","information (task 15.5): the reserves with one or more valued 1 km cells outside the training range, and those 1 km cells summed over the reserves","1 reserves; 19 1 km cells",TRUE
+"publish","tbl_16_sdm_prediction.csv: (a) no position or cell column; numbers are counts or statistics","4 columns",TRUE
+"publish","tbl_16_sdm_prediction.csv: (b) no value is a cell id of the grid","0 values",TRUE
+"publish","tbl_16_sdm_prediction.csv: s1 no reserve column and no reserve name (a tbl_16 table)","0 hits",TRUE
+"publish","tbl_16_sdm_reserve_check.csv: (a) no position or cell column; numbers are counts or statistics","4 columns",TRUE
+"publish","tbl_16_sdm_reserve_check.csv: (b) no value is a cell id of the grid","0 values",TRUE
+"publish","tbl_16_sdm_reserve_check.csv: s1 no reserve column and no reserve name (a tbl_16 table)","0 hits",TRUE
+"publish","tbl_17_reserve_suitability.csv: (a) no position or cell column; numbers are counts or statistics","9 columns",TRUE
+"publish","tbl_17_reserve_suitability.csv: (b) no value is a cell id of the grid","0 values",TRUE
+"publish","tbl_17_reserve_suitability.csv: no presence, record or tiger word in a field name (Decision 25 point 9)","9 columns",TRUE
+"publish","tbl_17_reserve_suitability.csv: assert_publishable_table() passes","pass",TRUE
+"publish","(c) no file with ""tiger"" in its name under outputs/","0 of 66 files",TRUE
+"publish","(d) the prediction layer is under data/processed/, and .gitignore holds data/processed/**","sdm_prediction_cell02.csv",TRUE
+"publish","tbl_16_sdm_pred_qa.csv: (b) no value is a cell id; s1 no reserve name","0 and 0",TRUE
