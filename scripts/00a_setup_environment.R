@@ -10,6 +10,11 @@
 # 2026-10-17: jsonlite added. R/00_functions_occ.R (Week 13) reads the cached
 # GBIF registry entries with jsonlite::fromJSON(). jsonlite was already in
 # renv.lock; this list did not name it.
+# 2026-11-07 (task 16.6, author's choice S1): the list follows the code.
+# maxnet, viridisLite and codetools are used by name; spatstat.explore,
+# spatstat.geom, sfdep and predicts are taken out (not used: the density
+# surfaces use terra::focal(), Decision 22; the Gi* is own code, Decision 26
+# g1; the SDM is maxnet only). They were not in renv.lock.
 required <- c(
   # Core spatial
   "sf", "terra", "here",
@@ -20,11 +25,14 @@ required <- c(
   "dplyr", "tidyr", "readr", "stringr", "tibble", "xml2", "jsonlite",
   # Acquisition (scripts/01)
   "rgbif", "elevatr", "osmextract", "rnaturalearth",
-  # Figures (Stage 1 animation)
-  "ggplot2", "gganimate", "gifski",
+  # Figures (Stage 1 animation; the Stage-3 figures call viridisLite)
+  "ggplot2", "gganimate", "gifski", "viridisLite",
+  # SDM (Weeks 14-16)
+  "maxnet",
+  # QA of scripts/09 STEP 16.3 (codetools::findGlobals(); a recommended
+  # package of R)
+  "codetools",
   # Planned, not used yet — listed so a fresh setup has them
-  "spatstat.explore", "spatstat.geom", "sfdep",   # KDE / Gi* (Weeks 13+)
-  "maxnet", "predicts",                            # SDM (Weeks 14+)
   "leaflet", "htmlwidgets"                         # story site
 )
 
