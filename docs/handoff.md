@@ -92,7 +92,7 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ---
 
-## Current state  ·  **Week 16 in progress** (tasks 16.1–16.4 done) · 2026-11-07
+## Current state  ·  **Week 16 in progress** (tasks 16.1–16.5 done) · 2026-11-07
 
 ### Where the project is
 
@@ -117,7 +117,11 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   2026-11-07 — `fig_04` (the five classes), `fig_05` (the model output)
   and `fig_06` (the `effort_inat` Gi\*), 2,200 × 2,120 pixels each, with
   caption drafts. The author: "Looks good" (the chat's reading: the
-  readings and the start values stay; the captions stay drafts).
+  readings and the start values stay; the captions stay drafts). Task
+  16.5: STEP 16.3, the QA, run on 2026-11-07 — 113 of 113 (a second path
+  for the inputs, the neighbours, the Gi\* and each row of
+  `tbl_18_gistar.csv`; the permutation check; the read record and the
+  code of STEP 16.2); `tbl_18_gistar_qa.csv`.
 - **Stage 1 (Growth):** complete in Week 7. **Stage 2 (Connectivity):**
   complete in Week 12. **Stage 3 (Habitat suitability):** Weeks 13 and 14
   complete and committed (Week 14: `30a512d`, "Week 14 complete"); **Week
@@ -178,8 +182,9 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   `docs:` commit. Nothing under `data/` may be staged.
 - **Done: task 16.1 — Decision 26** (2026-11-07; the Gi* settings), before
   any Gi* was computed. **Done: task 16.2** (the process choices;
-  Amendment 1 of Decision 26), **task 16.3** (STEP 16.1) and **task 16.4**
-  (STEP 16.2, the figures). **Next: task 16.5** (STEP 16.3, the QA). The forks of task 16.1 were in `project-plan.md` →
+  Amendment 1 of Decision 26), **task 16.3** (STEP 16.1), **task 16.4**
+  (STEP 16.2, the figures) and **task 16.5** (STEP 16.3, the QA). **Next:
+  task 16.6** (the docs of the Stage-3 close; the Week-17 plan). The forks of task 16.1 were in `project-plan.md` →
   "Week 16 — task breakdown" (a draft): the input set of the tiger Gi*, the input of the
   effort Gi*, the grid and the value of a cell, the neighbours and the
   band (a new value), the correction for many tests, the published form of
@@ -261,7 +266,7 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
 | `data/processed/sdm_prediction_cell02.csv` | The prediction: `id`, `value` (cloglog), `rank`, `class`, `out_of_range`; 6,969 rows | No presence or background field; holds cell ids: no table row from it; not published as a layer (D25 d1) |
 | `data/processed/hot_<gistar>_cell02.csv` (4 files: `effort_inat`, `tiger_obscured`, `effort_all`, `tiger_5km`) | The Gi\* at 50 km (Decision 26): `id`, `value`, `n_nb`, `n_win`, `k`, `gistar`, `p_hot`, `p_cold`, `p_two`, `p_adj`, `class`; 6,969 rows each | No geometry; holds cell ids; the two tiger layers are never published or committed; the `fig_06` code reads `hot_effort_inat_cell02.csv` only (k1 of task 16.2) |
 | `data/processed/boundary_states_7755.gpkg` | Natural Earth states (36), for the state boundaries of the figures | State and district can disagree at a border (gotcha) |
-| `outputs/tables/tbl_00`–`tbl_18_*`, `outputs/figures/fig_01`–`fig_06` | Committed tables and figures | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `tbl_18_gistar.csv` holds only the tiger counts of D26 point 7; `fig_04`–`fig_06` (STEP 16.2) show 0.2° model cells only: no point, no presence or background mark |
+| `outputs/tables/tbl_00`–`tbl_18_*`, `outputs/figures/fig_01`–`fig_06` | Committed tables and figures | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `tbl_18_gistar.csv` holds only the tiger counts of D26 point 7; `fig_04`–`fig_06` (STEP 16.2) show 0.2° model cells only: no point, no presence or background mark; `tbl_18_gistar_qa.csv` is the QA of STEP 16.3 |
 
 ### Open items (carried)
 
@@ -332,7 +337,8 @@ the issue and the DOI not on the record); Anselin & Li 2019 and Anselin
 (through a summary; not to be cited on the site); the `sfdep` manual.
 Task 16.4: Machado et al. 2009 (the authors' page; the DOI not in the
 text read); `viridisLite` (the CRAN page of version 0.4.3; the project
-uses 0.4.2).
+uses 0.4.2). Task 16.5: Clopper & Pearson 1934 (the R help page of
+`binom.test()` and a bibliography record).
 
 ### Open pending Decisions (decide in the week noted)
 
@@ -517,13 +523,14 @@ of closed one-time work are in git history.)*
   distance must say where the distance is measured (Decision 26 Amendment
   1: on the sphere). Check a count that a rule gives in the CRS that the
   code uses, not by arithmetic on the sphere.
-- **QA check (c) of STEPs 14.3 and 15.3 counts the files under
-  `outputs/` that exist when those STEPs run**, before STEP 16.1 and STEP
-  16.2 write their files. A file that a run writes for the first time is
+- **QA check (c) of STEPs 14.3, 15.3 and 16.3 counts the files under
+  `outputs/` that exist when those STEPs run**, before the later STEPs
+  write their files. A file that a run writes for the first time is
   counted in the next run (2026-11-07: "0 of 68 files" with
-  `tbl_18_gistar.csv`; the next run "0 of 71 files" with the three
-  figures). The value text of `tbl_16_sdm_qa.csv` and
-  `tbl_16_sdm_pred_qa.csv` then changes. This is expected: commit them.
+  `tbl_18_gistar.csv`; "0 of 71 files" with the three figures; the next
+  run "0 of 72 files" with `tbl_18_gistar_qa.csv`). The value text of
+  `tbl_16_sdm_qa.csv`, `tbl_16_sdm_pred_qa.csv` and `tbl_18_gistar_qa.csv`
+  then changes. This is expected: commit them.
   *(Corrected 2026-11-07, task 16.4: the note of task 16.3 gave
   `tbl_18_gistar.csv` as the cause of "66 to 67"; it was not counted in
   that run.)*

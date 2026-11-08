@@ -1800,4 +1800,26 @@ reserve name "Sundarbans").
 | `value` | numeric | A count, a share, or a setting. `NA` for a share with no cell of the class |
 | `reading` | character | A short text on the row; it holds no name |
 
+## tbl_18_gistar_qa.csv  *(Week 16 — built, task 16.5)*
+
+Written by `scripts/09` STEP 16.3 (the QA list of Decision 26
+"Consequences"; process choices f1, t1, k1, q1 and r2 of task 16.2). One
+row per check. Written first; then a `FALSE` in `pass` stops the script. A
+second path: the `gistar_qa_*` functions of task 16.5, which call no
+`gistar_*` function of STEP 16.1. The step reads its inputs from disk;
+from memory it takes the r2 cells of STEP 16.1 (which it checks against
+the points of the clean layers) and the read record and the drawn tables
+of STEP 16.2. Counts and statistics only: no cell id, no position and no
+reserve name (the table checks itself before it is written); for a tiger
+Gi\*, no input count.
+
+**As built (2026-11-07):** 113 rows; 113 pass.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `group` | character | `test case`, `inputs`, `neighbours`, `gistar`, `permutation`, `table`, `figures`, `publish` or `info` |
+| `check` | character | What is checked. For `test case`: the STEP and the name of the hand-made check. A row of `info` is a fact (the records not on a model cell by part; the records on a cell edge; the distances nearest to each band) and always passes |
+| `value` | character | What the check found: a count, the largest relative difference of the second path, or the names of the files or the objects |
+| `pass` | logical | `TRUE` if the check passes (tolerance `SDM_QA_REL_TOL`) |
+
 *(Further layers — sdm — documented as they are built.)*

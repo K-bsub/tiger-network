@@ -41,7 +41,9 @@ cells and `effort_all` 559, no cold cell; `tiger_obscured` 200 hot cells
 (85 also hot in `effort_inat`); `tiger_5km` 52 (20). **Task 16.4
 (2026-11-07):** STEP 16.2, the figures `fig_04` (the five classes),
 `fig_05` (the model output) and `fig_06` (the `effort_inat` Gi*), with
-caption drafts. **Next:** task 16.5 (the QA).
+caption drafts. **Task 16.5 (2026-11-07):** STEP 16.3, the QA of
+Decision 26 and of the figures: 113 of 113. **Next:** task 16.6 (the docs
+of the Stage-3 close; the Week-17 plan).
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -4438,6 +4440,9 @@ machine; console text sent on 2026-11-07; facts, not a reading):**
   - The two effort inputs have the same number of records outside the
     model cells (429). The QA of task 16.5 counts the inputs again by a
     second path.
+    *(2026-11-07, task 16.5: 354 of the 429 are the same records in both
+    inputs; the other 75 of each input are different records. See "Result
+    of STEP 16.3".)*
   - No cell of a tiger Gi\* is `cold` at any band, as point 6 said.
 - **Outputs:** `data/processed/hot_effort_inat_cell02.csv`,
   `hot_tiger_obscured_cell02.csv`, `hot_effort_all_cell02.csv` and
@@ -4482,6 +4487,64 @@ project machine; console text sent on 2026-11-07; facts):**
     of task 16.2; printed under "DRAFT"). The narrative is the author's.
 - **Seen from this run on:** the console text of STEP 16.2 (the author and
   the chat) and the three figures (the author).
+
+**Result of STEP 16.3, the QA (task 16.5, `scripts/09`, run on the project
+machine; console text sent on 2026-11-07; facts):**
+- **113 of 113 rows pass** (`tbl_18_gistar_qa.csv`; 110 checks and 3
+  information rows): test case 60 (the hand-made cases of STEPs 16.1, 16.2
+  and 16.3: 26, 15 and 19), inputs 10, neighbours 3, gistar 8, permutation
+  4, table 7, figures 10, publish 8, info 3. STEP 16.3 took 0.3 minutes.
+- **The inputs again:** the value of each model cell in the four layers =
+  the second path (0 of 6,969 cells differ in each layer); the r2 cell of
+  each record of the two 5 km sets is a cell of its point in the clean
+  layer (0 of 23,901 records of `effort_all` differ; 0 records of
+  `tiger_5km`); `effort_inat` has the 1,486 background cells of
+  `tbl_16_sdm_counts.csv` and no presence cell with no mammal record;
+  `tiger_obscured` has the presence cells of the same table; no record of
+  an effort input is a tiger record; each record is of 2006–2022.
+- **The neighbours by all pairs:** each pair is there in both directions;
+  at 50 km, 5,471 model cells have all 24 cells of their 5 × 5 block among
+  the model cells, and each of them has 20 neighbours; the neighbour
+  counts = `n_nb` of the four layers.
+- **The Gi\* again:** for each Gi\* at 50 km, K, `n_nb`, `n_win` and the
+  class of each cell = the layer (0 cells differ); G\*, `p_hot`, `p_cold`,
+  `p_two` and `p_adj` agree (the largest relative difference is 4.81e-15).
+- **The permutation check (q1):** for each Gi\*, 20 of 20 sample cells
+  have the exact p inside the 99.9 % interval of 9,999 relabellings.
+- **`tbl_18_gistar.csv` again:** its 92 rows are the rows of point 7 and
+  t1 (none more, none fewer); each value = the second path (0 rows
+  differ); the 36 tiger rows hold only the counts of point 7.
+- **The figures:** the read record of STEP 16.2 (16 reads) holds only the
+  files of the lists of k1, and no tiger Gi\* layer, other Gi\* layer, or
+  occurrence or background layer. `fig_04` and `fig_05` read the
+  prediction layer, the grid layer and the geometry of the reserve and
+  state layers (Decision 25 point 4); `fig_06` read the `effort_inat` Gi\*
+  layer, the grid layer and the same geometry. The code of STEP 16.2 uses
+  no object of an earlier STEP (0 objects). No drawn table has a presence,
+  background, record, tiger or occurrence word (6 tables). The drawn
+  classes and the hatch = the second path and the prediction layer (0
+  cells differ; 32 hatched cells). The legend and the subtitle of `fig_06`
+  give the counts of the second path. The three PNG files have the names
+  of g1 and 2,200 × 2,120 pixels.
+- **The publish checks pass:** no file with "tiger" in its name under
+  `outputs/` (0 of 71 files); no Gi\* layer under `outputs/`; the four
+  layers under `data/processed/` (gitignored); the scans of
+  `tbl_18_gistar.csv` and of the QA table.
+- **Information (facts, not checks):**
+  - The records that are not on a model cell: `effort_inat` 354 (part
+    `uncert`) and 75 (part `obscured`); `effort_all` 354 (the iNaturalist
+    dataset) and 75 (other datasets). By the guard of STEP 16.1, each
+    iNaturalist record of `effort_all` is a record of part `uncert` with
+    the same cell, so the two counts of 354 are the same records. The two
+    sets of 75 are different records (different datasets). The same total
+    of 429 is a fact of the data, not an error.
+  - 14 records of `effort_all` have a point within `GISTAR_QA_EDGE_CELLS`
+    of a cell edge; for each, the r2 cell is one of its two cells.
+  - The distance between two cell centres nearest to the band: at 50 km,
+    49.624 km inside and 54.584 km outside; at 75 km, 74.943 km inside and
+    75.023 km outside (23 m from the band; Amendment 1 said 20–30 m).
+- **Seen from this run on:** the console text of STEP 16.3 (the author and
+  the chat) and `tbl_18_gistar_qa.csv` (the chat).
 
 **Reason and sources:**
 - **This project only (x1).** The author's direction of 2026-11-07.
@@ -4665,6 +4728,63 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-07 — Week 16, task 16.5 complete: STEP 16.3 (the QA of Decision 26 and of the figures)
+
+- **Code.** `R/00_functions_gistar.R`: 12 `gistar_qa_*` functions (f1 of
+  task 16.2; a second path that calls no `gistar_*` function of STEP 16.1)
+  — the neighbours by all pairs, the Benjamini–Hochberg step, K, G\* and
+  the exact p by sums of `dhyper()`, the sample cells and the permutation
+  check of q1, the cell(s) of a point, the rows of `tbl_18_gistar.csv` by
+  the rule, rule L1 again, the field-word check, the check of the objects
+  that a code text uses (`codetools`), the PNG size — and their hand-made
+  case (`gistar_qa_self_test()`, 19 checks). `R/00_config.R`:
+  `GISTAR_QA_EDGE_CELLS` (1e-6 cell; a tolerance of the QA, not a value of
+  the analysis). `scripts/09`: STEP 16.3 after STEP 16.2; the header (STEP
+  16.3, its inputs and its output).
+- **Tests in the chat (not the record):** the hand-made case 19 of 19.
+  STEPs 16.1–16.3 on the made-up project of tasks 16.3 and 16.4 (with a
+  made-up obscured layer, iNaturalist layer and cell-id raster): 113 of
+  113. Three changes made on purpose: an off-by-one p in STEP 16.1 (with
+  the stop of its hand-made case taken out) — 20 rows of the QA failed (2
+  hand-made checks of STEP 16.1, 8 gistar, 4 permutation, 4 table, 2
+  figures); three records of `effort_all` moved one cell east in STEP 16.1
+  — the point check failed (3 records); an object of an earlier STEP in
+  the code of STEP 16.2 — the code check gave its name. The second path
+  took about 15 s on 6,969 made-up cells. No data file was used.
+- **The run (project machine, 2026-11-07):** 113 of 113; the result is in
+  Decision 26, "Result of STEP 16.3".
+- **Readings of the chat (stated in its reply of 2026-11-07, before the
+  run):**
+  1. The neighbours of the second path: all pairs, with the same
+     great-circle formula as STEP 16.1 (Amendment 1: "Both QA paths use
+     the same distance formula").
+  2. r2: the cell of each record of the 5 km sets from STEP 16.1 is
+     checked against the point of the record in the clean layer
+     (EPSG:7755 to EPSG:4326); a point at a cell edge has two cells.
+  3. q1: at each sample cell, the one-sided exact p that gives `p_two`;
+     the Clopper–Pearson interval (`binom.test()`); the seed
+     `GISTAR_QA_SEED` plus the number of the Gi\* (1 to 4).
+  4. k1: the code of STEP 16.2 may use only the objects that it makes, the
+     settings (names in capital letters) and the six paths of the script
+     header.
+  5. A tiger row of the QA table holds only a count of the cells or the
+     records that differ, or a difference: no input count.
+
+  The author sent the console text with no comment on the readings; they
+  stand until the author changes them.
+- **As the chat expected:** check (c) of `tbl_16_sdm_qa.csv` and
+  `tbl_16_sdm_pred_qa.csv` went from 68 to 71 files (the three figures);
+  `tbl_18_gistar.csv` and the PNG files did not change. The next run
+  counts 72 files (`tbl_18_gistar_qa.csv`) in the three QA tables.
+- **References:** Clopper & Pearson 1934 (the interval of `binom.test()`),
+  in the section "Gi\* settings (Decision 26)" of `references.md`.
+- **Docs:** this file (the status; Decision 26, "Result of STEP 16.3" and
+  a dated note); `project-plan.md` (task 16.5 done); `data-dictionary.md`
+  (`tbl_18_gistar_qa.csv`); `naming-conventions.md` (`gistar_qa` built);
+  `references.md`; `handoff.md` (the state, the files, a gotcha, the
+  references to verify).
+- **Next:** task 16.6 (docs: the Stage-3 close; the Week-17 plan).
 
 ### 2026-11-07 — Week 16, task 16.4 complete: STEP 16.2 (the figures `fig_04`, `fig_05` and `fig_06`)
 

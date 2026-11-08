@@ -1276,6 +1276,17 @@ tests in local statistics of spatial association. *Geographical Analysis*,
 Decision 26 m1.)* *(From the PySAL reference list only; the paper was not
 read.)*
 
+Clopper, C. J., & Pearson, E. S. (1934). The use of confidence or fiducial
+limits illustrated in the case of the binomial. *Biometrika*, 26(4),
+404–413. https://doi.org/10.2307/2331986 · *(The help page of
+`stats::binom.test()`: "Confidence intervals are obtained by a procedure
+first given in Clopper and Pearson (1934). This guarantees that the
+confidence level is at least 'conf.level', but in general does not give
+the shortest-length confidence intervals." The interval of the permutation
+check of STEP 16.3 (q1 of task 16.2).)* *(From the help page of R 4.3.3 in
+the chat's workspace and a bibliography record (bibbase); the paper was not
+read.)*
+
 Esri. How Hot Spot Analysis (Getis-Ord Gi\*) works. ArcGIS Pro
 documentation.
 https://pro.arcgis.com/en/pro-app/tool-reference/spatial-statistics/h-how-hot-spot-analysis-getis-ord-gi-spatial-stati.htm
