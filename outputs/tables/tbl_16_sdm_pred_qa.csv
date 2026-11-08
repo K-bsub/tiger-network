@@ -80,6 +80,6 @@
 "publish","tbl_17_reserve_suitability.csv: (b) no value is a cell id of the grid","0 values",TRUE
 "publish","tbl_17_reserve_suitability.csv: no presence, record or tiger word in a field name (Decision 25 point 9)","9 columns",TRUE
 "publish","tbl_17_reserve_suitability.csv: assert_publishable_table() passes","pass",TRUE
-"publish","(c) no file with ""tiger"" in its name under outputs/","0 of 66 files",TRUE
+"publish","(c) no file with ""tiger"" in its name under outputs/","0 of 67 files",TRUE
 "publish","(d) the prediction layer is under data/processed/, and .gitignore holds data/processed/**","sdm_prediction_cell02.csv",TRUE
 "publish","tbl_16_sdm_pred_qa.csv: (b) no value is a cell id; s1 no reserve name","0 and 0",TRUE

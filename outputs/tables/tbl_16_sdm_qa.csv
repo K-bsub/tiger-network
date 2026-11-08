@@ -127,7 +127,7 @@
 "publish","tbl_16_sdm_cv.csv: (b) no value is a cell id of the grid","0 values",TRUE
 "publish","tbl_16_sdm_sensitivity.csv: (a) no position or cell column; numbers are counts or statistics","9 columns",TRUE
 "publish","tbl_16_sdm_sensitivity.csv: (b) no value is a cell id of the grid","0 values",TRUE
-"publish","(c) no file with ""tiger"" in its name under outputs/","0 of 66 files",TRUE
+"publish","(c) no file with ""tiger"" in its name under outputs/","0 of 67 files",TRUE
 "publish","(d) the model file(s) and the covariate table are under data/processed/","tiger_sdm_maxnet_cell02_20261025.rds, sdm_covariates_cell02.csv",TRUE
 "publish","(d) .gitignore holds the line data/processed/**","41 lines read",TRUE
 "publish","s1: no tbl_16 table holds a reserve column or a reserve name (Decision 22 point 9)","0 hits; smallest presence count above 0: 16",TRUE

@@ -12,6 +12,8 @@
 #   w2  the background of Decision 23 r2 comes from scripts/08 STEP 13.3
 #       (effort_background_inat_cell02_7755.gpkg), with the 0.2 degree cells
 #       of the GBIF coordinates; this script does not read a GBIF file
+#       (2026-11-07, r2 of task 16.2: STEP 16.1 reads the GBIF
+#       coordinates of the two download zip files)
 #   g1  model cells (task 14.4): the centre of each complete-case 1 km cell
 #       is converted to longitude and latitude and gets its 0.2 degree cell
 #       by the record rule (occ_cell02()); the share of a cell = the count of
@@ -99,13 +101,32 @@
 #              tables; an information count of the hatched valued 1 km cells
 #              of the reserves (author's choice, task 15.5). Written first;
 #              then a FALSE stops the script
-#   Week 16: the Gi* of Decision 23 point 8 and the figures
+#   Decision 26 (task 16.1, 2026-11-07): the Gi* settings; Amendment 1 (task
+#              16.2): the distance between cells on the sphere
+#   Process choices of task 16.2 (2026-11-07): s1 STEPs 16.1-16.3 after STEP
+#              15.3, no new run switch; f1 R/00_functions_gistar.R and
+#              R/00_functions_fig.R; p1 the cell centre in longitude and
+#              latitude; r2 the GBIF coordinates of the 5 km sets from the two
+#              zip files; n1 the four layers hot_*_cell02.csv; t1
+#              tbl_18_gistar.csv and tbl_18_gistar_qa.csv; g1, z1, c1, h1, k1,
+#              d1 (the figures, STEP 16.2); q1 (the QA, STEP 16.3)
+#   STEP 16.1 (task 16.3)  the four Gi* of Decision 26 (effort_inat with
+#              tiger_obscured; effort_all with tiger_5km) on the model cells,
+#              value 0/1, at GISTAR_BAND_KM and at the two QA bands; the exact
+#              p, Benjamini-Hochberg and the classes; the four layers and
+#              tbl_18_gistar.csv; h1 a hand-made case first
+#              (gistar_self_test()). The tiger Gi* are never published or
+#              committed
+#   Week 16, to come: STEP 16.2 (fig_04, fig_05, fig_06), STEP 16.3 (QA)
 #
 # SENSITIVE DATA (docs/sensitive-data-policy.md; Decision 23 point 9):
 #   The obscured set and each layer made from it are tier T1 and stay under
 #   data/ (gitignored). This script prints TRUE/FALSE, names and counts only:
 #   no coordinate, no 0.2 degree cell corner, no cell index, no cell number.
 #   A tbl_16 table holds counts and statistics only.
+#   (2026-11-07: STEP 16.1 also reads the clean tiger layer (tier T2) and
+#   the GBIF coordinates of the two zip files. No coordinate is printed or
+#   written to a table; tbl_18_gistar.csv holds counts and statistics only.)
 #
 # INPUTS (the guards; all under data/ are gitignored):
 #   data/processed/cov_stack_1km_7755.tif                 the 1 km grid and
@@ -212,6 +233,25 @@
 #     row per check. Written first; then any FALSE in `pass` stops the
 #     script. Counts and statistics only: no reserve name, no cell id
 #
+# INPUTS (STEP 16.1, task 16.3): the grid and the cell-id raster (STEP 14.1);
+#   the obscured layer and the iNaturalist background (read by the guards);
+#   data/processed/occ_tiger_gbif_clean_7755.gpkg (tier T2) and the clean
+#   background layer; the two GBIF download zip files (their key files in
+#   data/raw/gbif/ and data/raw/gbif_background/; r2); the reserve layer
+#   (rule L1); tbl_15_occ_sets.csv (the guards); .gitignore.
+#
+# OUTPUTS (STEP 16.1, task 16.3; process choices n1, t1 of task 16.2):
+#   data/processed/hot_effort_inat_cell02.csv, hot_tiger_obscured_cell02.csv,
+#     hot_effort_all_cell02.csv and hot_tiger_5km_cell02.csv (gitignored; the
+#     two tiger layers are never committed): one row per model cell: id,
+#     value, n_nb, n_win, k, gistar, p_hot, p_cold, p_two, p_adj, class. No
+#     geometry
+#   outputs/tables/tbl_18_gistar.csv   publishable; gistar, band, group, item,
+#     value, reading: the settings; the neighbours by band; for the effort
+#     Gi*, the inputs and the classes; for the tiger Gi*, only the counts of
+#     Decision 26 point 7 (s1; for tiger_5km also by landscape complex, s2).
+#     No cell id, no position, no reserve name
+#
 # SETTINGS: the SDM_* values (Decision 23) and the OCC_* values that Decision
 #   23 reuses come from R/00_config.R. Do not repeat a value as a literal.
 #
@@ -231,6 +271,7 @@ source(here("R", "00_functions_io.R"))       # read_vec, write_table
 source(here("R", "00_functions_occ.R"))      # occ_id_chr, occ_cell02
 source(here("R", "00_functions_sensitive.R"))# publish checks (later STEPs)
 source(here("R", "00_functions_sdm.R"))      # sdm_* (task 14.2)
+source(here("R", "00_functions_gistar.R"))   # gistar_* (task 16.3)
 
 rule <- function(txt) cat("\n", strrep("=", 78), "\n", txt, "\n",
                           strrep("=", 78), "\n", sep = "")
@@ -293,6 +334,11 @@ pred_path <- file.path(DIR_PROCESSED, pred_out)
 cv_tbl_in <- file.path(DIR_TABLES, "tbl_16_sdm_cv.csv")
 # STEP 15.2 (n1, k1 of task 15.2)
 stats_in  <- file.path(DIR_PROCESSED, "stats_reserve_census_7755.gpkg")
+# STEP 16.1 (r2, n1, t1 of task 16.2)
+tiger_clean_in <- file.path(DIR_PROCESSED, "occ_tiger_gbif_clean_7755.gpkg")
+tiger_key_in   <- file.path(DIR_RAW, "gbif", "gbif_tiger_download_key.txt")
+bg_key_in      <- file.path(DIR_RAW, "gbif_background",
+                            "background_download_key.txt")
 # Output table via write_table(nn = 16, slug = "sdm_counts")
 
 # Fields that the later STEPs use. The structure of the scripts/08 layers,
@@ -2180,3 +2226,329 @@ rule(paste0("STEP 15.3 complete: QA ", nrow(qa5_tbl), " of ", nrow(qa5_tbl),
             "under data/ may be staged."))
 
 }  # end if (SDM_GRAIN_OUTCOME is a model outcome), STEP 15.3
+
+# =============================================================================
+# STEP 16.1 — the four Gi* of Decision 26 (task 16.3)
+# =============================================================================
+# Decision 26 with Amendment 1; process choices s1, f1, p1, r2, n1, t1 of task
+# 16.2; h1 a hand-made case first. Runs in each run, after STEP 15.3 (the Gi*
+# do not use the model).
+#   1. the settings; the hand-made case (gistar_self_test())
+#   2. the model cells; the neighbours at GISTAR_BAND_KM and at the two QA
+#      bands (the great-circle distance between the cell centres of p1,
+#      Amendment 1; "queen" by the cell index)
+#   3. the inputs (Decision 26 point 2): effort_inat and tiger_obscured from
+#      the layers that the guards read; effort_all and tiger_5km from the
+#      clean layers, each record in the 0.2 degree cell of its GBIF
+#      coordinates (r2: the two download zip files)
+#   4. the Gi* of each input at each band; the classes (e1, m1, k1)
+#   5. the four layers at GISTAR_BAND_KM (n1): written, read back, checked
+#   6. the counts of Decision 26 point 7 (s1; s2 with rule L1 for tiger_5km;
+#      S-a) and the table tbl_18_gistar.csv (t1)
+# Console text: counts and statistics only. For the tiger Gi*, only the
+# counts of Decision 26 point 7: no input count, no position, no name.
+
+rule("STEP 16.1 — the four Gi* of Decision 26 (task 16.3)")
+t_step161 <- Sys.time()
+
+# ---- 1. The settings and the hand-made case (h1) ---------------------------------
+need161 <- c("GISTAR_RUNS", "GISTAR_UNCERT_SETS", "GISTAR_CELLS", "GISTAR_VALUE",
+             "GISTAR_BAND_KM", "GISTAR_SELF", "GISTAR_MIN_NEIGHBOURS",
+             "GISTAR_QA_BANDS", "GISTAR_TEST", "GISTAR_P_ADJUST",
+             "GISTAR_FDR_Q", "GISTAR_CLASSES", "GISTAR_TIGER_STATEMENT",
+             "GISTAR_LANDSCAPE_RULE", "GISTAR_YEARS", "GISTAR_CODE",
+             "GISTAR_DIST", "GISTAR_EARTH_RADIUS_KM", "GISTAR_CENTRE",
+             "GISTAR_LAYER_FILES", "GISTAR_TABLE_NN", "GISTAR_TABLE_SLUG",
+             "GISTAR_QA_TABLE_SLUG", "SDM_GISTAR_PUBLISH_TIGER",
+             "LANDSCAPE_COMPLEXES")
+miss161 <- need161[!vapply(need161, exists, logical(1))]
+if (length(miss161) > 0) {
+  stop("Setting(s) missing from R/00_config.R (Decision 26; task 16.2): ",
+       paste(miss161, collapse = ", "), call. = FALSE)
+}
+sdm_run_guards(gistar_check_config(), what = "the settings of Decision 26")
+st161 <- gistar_self_test()
+cat("hand-made case of STEP 16.1:", sum(st161$pass), "of", nrow(st161),
+    "checks pass.\n")
+if (!all(st161$pass)) {
+  stop("The hand-made case of STEP 16.1 failed:\n  ",
+       paste(st161$check[!st161$pass], collapse = "\n  "), call. = FALSE)
+}
+
+# ---- 2. The model cells and the neighbours (Decision 26 points 3 to 5) -----------
+gs_cells <- grid_d[grid_d$model, c("id", "ix", "iy")]
+gs_cells <- gs_cells[order(gs_cells$id), ]
+rownames(gs_cells) <- NULL
+gs_n <- nrow(gs_cells)
+gs_main <- paste0("band", GISTAR_BAND_KM, "_km")
+gs_bands <- c(gs_main, names(GISTAR_QA_BANDS))
+gs_nb <- list()
+gs_nb[[gs_main]] <- gistar_neighbours(gs_cells$ix, gs_cells$iy, "band",
+                                      GISTAR_BAND_KM)
+for (b in names(GISTAR_QA_BANDS)) {
+  gs_nb[[b]] <- if (identical(GISTAR_QA_BANDS[[b]], "queen")) {
+    gistar_neighbours(gs_cells$ix, gs_cells$iy, "queen")
+  } else {
+    gistar_neighbours(gs_cells$ix, gs_cells$iy, "band", GISTAR_QA_BANDS[[b]])
+  }
+}
+cat("model cells:", gs_n, "\n")
+cat("neighbours of a cell (the cell itself not counted), by band:\n")
+for (b in gs_bands) {
+  v <- gs_nb[[b]]$n_nb
+  cat(sprintf("  %-10s min %d, median %g, max %d; cells with fewer than %d: %d\n",
+              b, min(v), stats::median(v), max(v), GISTAR_MIN_NEIGHBOURS,
+              sum(v < GISTAR_MIN_NEIGHBOURS)))
+}
+
+# ---- 3. The inputs (Decision 26 point 2; r2 of task 16.2) ------------------------
+for (f in c(tiger_clean_in, bg_clean_in, tiger_key_in, bg_key_in)) {
+  if (!file.exists(f)) stop("STEP 16.1 needs ", f, ".", call. = FALSE)
+}
+gs_tc <- sf::st_drop_geometry(sf::st_read(tiger_clean_in, quiet = TRUE))
+gs_bc <- sf::st_drop_geometry(sf::st_read(bg_clean_in, quiet = TRUE))
+gs_tc <- gs_tc[gs_tc$uncert_set %in% GISTAR_UNCERT_SETS, ]
+gs_bc <- gs_bc[gs_bc$uncert_set %in% GISTAR_UNCERT_SETS, ]
+gs_zf <- c("gbifID", "decimalLatitude", "decimalLongitude")
+gs_zt <- occ_read_fields(occ_zip_path(tiger_key_in), gs_zf)
+gs_zb <- occ_read_fields(occ_zip_path(bg_key_in), gs_zf)
+gs_t5 <- gistar_record_cells(gs_tc$gbifID, gs_zt)
+gs_ea <- gistar_record_cells(gs_bc$gbifID, gs_zb)
+rm(gs_zt, gs_zb)
+
+gs_ei_idx <- sdm_cell_index(inat_d$cell02_lon_deg, inat_d$cell02_lat_deg)
+gs_to_idx <- sdm_cell_index(obs_d$cell02_lon_deg, obs_d$cell02_lat_deg)
+gs_ids <- list(
+  effort_inat    = sdm_cell_id(gs_ei_idx$ix, gs_ei_idx$iy),
+  tiger_obscured = sdm_cell_id(gs_to_idx$ix, gs_to_idx$iy),
+  effort_all     = gs_ea$id,
+  tiger_5km      = gs_t5$id
+)
+rm(gs_ei_idx, gs_to_idx)
+gs_count <- function(ids) {
+  u <- unique(ids)
+  c(records = length(ids), records_not_model = sum(!ids %in% gs_cells$id),
+    cells_model = sum(u %in% gs_cells$id),
+    cells_not_model = sum(!u %in% gs_cells$id))
+}
+gs_cnt <- lapply(gs_ids, gs_count)
+# The iNaturalist records of effort_all: their cell must be the cell of the
+# iNaturalist layer (part "uncert"; r2 gives the same input to occ_cell02()).
+gs_inat_rows <- which(gs_bc$datasetKey == SDM_BG_DATASET_KEY)
+gs_m <- match(occ_id_chr(gs_bc$gbifID[gs_inat_rows]), occ_id_chr(inat_d$gbifID))
+gs_eff_ids <- occ_id_chr(c(inat_d$gbifID, gs_bc$gbifID))
+gs_tig_ids <- occ_id_chr(c(obs_d$gbifID, gs_tc$gbifID))
+gs_yr_ok <- function(y) !anyNA(y) && all(y >= GISTAR_YEARS[1] &
+                                           y <= GISTAR_YEARS[2])
+sdm_run_guards(list(
+  "the clean tiger layer must give the records of the tiger 5km row of tbl_15_occ_sets.csv" =
+    nrow(gs_tc) == set_val("tiger", "5km", "records"),
+  "the clean background layer must give the records of the background 5km row" =
+    nrow(gs_bc) == set_val("background", "5km", "records"),
+  "each record of the two clean layers must have its GBIF coordinates, once (r2)" =
+    gs_t5$n_missing == 0 && gs_t5$n_repeat == 0 &&
+    gs_ea$n_missing == 0 && gs_ea$n_repeat == 0,
+  "an iNaturalist record of effort_all must have the cell of the iNaturalist layer (r2)" =
+    length(gs_inat_rows) > 0 && !anyNA(gs_m) &&
+    all(inat_d$part[gs_m] == "uncert") &&
+    identical(gs_ea$id[gs_inat_rows], gs_ids$effort_inat[gs_m]),
+  "no record of an effort input may be a tiger record (gbifID)" =
+    length(intersect(gs_eff_ids, gs_tig_ids)) == 0,
+  "each record must be of GISTAR_YEARS (w1)" =
+    gs_yr_ok(obs_d$year) && gs_yr_ok(inat_d$year) && gs_yr_ok(gs_tc$year) &&
+    gs_yr_ok(gs_bc$year),
+  "effort_inat must have the background cells of STEP 14.1 (before maxnet adds a presence cell)" =
+    gs_cnt$effort_inat[["cells_model"]] == cnt$n_background,
+  "tiger_obscured must have the presence cells of STEP 14.1" =
+    gs_cnt$tiger_obscured[["cells_model"]] == cnt$n_presence,
+  "tiger_5km must have 1 or more model cells, and no more than its 1 km cells" =
+    gs_cnt$tiger_5km[["cells_model"]] >= 1 &&
+    gs_cnt$tiger_5km[["cells_model"]] <= set_val("tiger", "5km", "n_cells"),
+  "effort_all must have 1 or more model cells and fewer than all model cells" =
+    gs_cnt$effort_all[["cells_model"]] >= 1 &&
+    gs_cnt$effort_all[["cells_model"]] < gs_n
+), what = "the inputs of the Gi*")
+rm(gs_m, gs_eff_ids, gs_tig_ids)
+cat("inputs of the effort Gi* (records; records not on a model cell; model",
+    "cells with a record):\n")
+for (g in GISTAR_RUNS$gistar[!GISTAR_RUNS$tiger]) {
+  cat(sprintf("  %-12s %s records; %s not on a model cell; %s model cells\n",
+              g, format(gs_cnt[[g]][["records"]], big.mark = ","),
+              format(gs_cnt[[g]][["records_not_model"]], big.mark = ","),
+              format(gs_cnt[[g]][["cells_model"]], big.mark = ",")))
+}
+
+# ---- 4. The Gi* (Decision 26 point 6; e1, m1, k1) --------------------------------
+gs_x <- lapply(gs_ids, function(ids) as.integer(gs_cells$id %in% ids))
+gs_res <- list()
+for (g in GISTAR_RUNS$gistar) {
+  gs_res[[g]] <- lapply(gs_nb, function(nb) gistar_run(gs_x[[g]], nb))
+}
+
+# ---- 5. The four layers at the main band (n1) ------------------------------------
+gs_pr <- normalizePath(DIR_PROCESSED, winslash = "/", mustWork = FALSE)
+gs_gi <- trimws(readLines(gitignore_in, warn = FALSE))
+if (!"data/processed/**" %in% gs_gi) {
+  stop(".gitignore must hold data/processed/** before a Gi* layer is written.",
+       call. = FALSE)
+}
+for (g in GISTAR_RUNS$gistar) {
+  lay <- data.frame(id = gs_cells$id, gs_res[[g]][[gs_main]],
+                    stringsAsFactors = FALSE)
+  sdm_run_guards(gistar_layer_checks(lay, gs_cells$id),
+                 what = paste0("the Gi* layer of ", g, " (in memory)"))
+  out <- file.path(DIR_PROCESSED, GISTAR_LAYER_FILES[[g]])
+  if (!startsWith(normalizePath(out, winslash = "/", mustWork = FALSE),
+                  paste0(gs_pr, "/"))) {
+    stop("A Gi* layer must be under data/processed/.", call. = FALSE)
+  }
+  utils::write.csv(lay, out, row.names = FALSE)
+  back <- utils::read.csv(out, stringsAsFactors = FALSE)
+  sdm_run_guards(c(gistar_layer_checks(back, gs_cells$id), list(
+    "the layer on disk must hold the classes, K and p_two of the run" =
+      identical(back$class, lay$class) &&
+      identical(as.integer(back$k), lay$k) &&
+      isTRUE(all.equal(back$p_two, lay$p_two, tolerance = 1e-12))
+  )), what = paste0("the Gi* layer ", basename(out), " (read back)"))
+}
+rm(lay, back, out)
+cat("layers written and read back:", length(GISTAR_LAYER_FILES), "\n")
+
+# ---- 6. The counts of Decision 26 point 7 and tbl_18_gistar.csv (t1) -------------
+gs_row <- function(gistar, band, group, item, value, reading = "") {
+  data.frame(gistar = gistar, band = band, group = group, item = item,
+             value = as.numeric(value), reading = reading,
+             stringsAsFactors = FALSE)
+}
+gs_cls <- function(g, b) gs_res[[g]][[b]]$class
+gs_rows <- list(
+  gs_row("all", "-", "settings", "model_cells", gs_n,
+         "the 0.2 degree model cells (Decision 23 point 3)"),
+  gs_row("all", "-", "settings", "band_km", GISTAR_BAND_KM,
+         "great-circle distance between cell centres (Decision 26 Amendment 1)"),
+  gs_row("all", "-", "settings", "min_neighbours", GISTAR_MIN_NEIGHBOURS,
+         "a cell with fewer neighbours has no class (k1)"),
+  gs_row("all", "-", "settings", "fdr_q", GISTAR_FDR_Q,
+         "Benjamini-Hochberg, for each Gi* and band (m1)"))
+for (b in gs_bands) {
+  v <- gs_nb[[b]]$n_nb
+  gs_rows <- c(gs_rows, list(
+    gs_row("all", b, "neighbours", "min", min(v), "the cell itself not counted"),
+    gs_row("all", b, "neighbours", "median", stats::median(v)),
+    gs_row("all", b, "neighbours", "max", max(v)),
+    gs_row("all", b, "neighbours", "cells_below_min",
+           sum(v < GISTAR_MIN_NEIGHBOURS), "class few_neighbours")))
+}
+gs_qa <- setdiff(gs_bands, gs_main)
+for (i in seq_len(nrow(GISTAR_RUNS))) {
+  g <- GISTAR_RUNS$gistar[i]
+  tig <- GISTAR_RUNS$tiger[i]
+  if (!tig) {
+    for (it in c("records", "records_not_model", "cells_model",
+                 "cells_not_model")) {
+      gs_rows <- c(gs_rows, list(gs_row(g, "-", "input", it,
+                                        gs_cnt[[g]][[it]])))
+    }
+  }
+  # The classes at each band. A tiger Gi*: hot, cold and few_neighbours only
+  # (Decision 26 point 7, s1).
+  its <- if (tig) c("hot", "cold", "few_neighbours") else GISTAR_CLASSES
+  for (b in gs_bands) {
+    for (it in its) {
+      gs_rows <- c(gs_rows, list(gs_row(g, b, "class", it,
+                                        sum(gs_cls(g, b) == it))))
+    }
+  }
+  # The QA bands (Decision 26 point 5): the share of the hot (cold) cells at
+  # the main band that keep the class at the QA band; NA if there is none.
+  for (b in gs_qa) {
+    for (cl in c("hot", "cold")) {
+      gs_rows <- c(gs_rows, list(gs_row(
+        g, b, "qa_band", paste0(cl, "_same_class_share"),
+        gistar_same_share(gs_cls(g, gs_main), gs_cls(g, b), cl),
+        paste0("of the ", cl, " cells at ", gs_main))))
+    }
+  }
+  # A tiger Gi* against the effort Gi* of its observer group (s1).
+  if (tig) {
+    e <- GISTAR_RUNS$compare[i]
+    hot_t <- gs_cls(g, gs_main) == "hot"
+    both <- sum(hot_t & gs_cls(e, gs_main) == "hot")
+    gs_rows <- c(gs_rows, list(
+      gs_row(g, gs_main, "compare", "hot_also_effort_hot", both,
+             paste0("hot cells that are hot in ", e)),
+      gs_row(g, gs_main, "compare", "hot_also_effort_hot_share",
+             if (sum(hot_t) > 0) both / sum(hot_t) else NA_real_,
+             paste0("of the hot cells; NA if there is none"))))
+  }
+}
+# Rule L1 for tiger_5km only (s2; S-a): the hot cells by landscape complex.
+gs_res_sf <- sf::st_read(reserves_in, quiet = TRUE)
+gs_rc <- sdm_reserve_cells(gs_res_sf, cellid_r)
+gs_res_d <- sf::st_drop_geometry(gs_res_sf)
+gs_l1 <- names(GISTAR_TIGER_STATEMENT)[GISTAR_TIGER_STATEMENT == "s2"]
+for (g in gs_l1) {
+  lcc <- gistar_landscape_counts(
+    hot_ids = gs_cells$id[gs_cls(g, gs_main) == "hot"],
+    rc_id = gs_rc$id, rc_lc = gs_res_d$landscape_complex[gs_rc$res],
+    levels = LANDSCAPE_COMPLEXES)
+  for (r in seq_len(nrow(lcc))) {
+    gs_rows <- c(gs_rows, list(gs_row(
+      g, gs_main, "landscape", lcc$landscape[r], lcc$hot_cells[r],
+      "hot cells by rule L1; a cell can count in two complexes")))
+  }
+}
+gs_tbl <- do.call(rbind, gs_rows)
+rownames(gs_tbl) <- NULL
+
+# The checks of the table before it is written (Decision 26 point 7; t1).
+gs_tig_rows <- gs_tbl$gistar %in% GISTAR_RUNS$gistar[GISTAR_RUNS$tiger]
+gs_ok_tig <- (gs_tbl$group == "class" &
+                gs_tbl$item %in% c("hot", "cold", "few_neighbours")) |
+  (gs_tbl$group == "qa_band" &
+     gs_tbl$item %in% c("hot_same_class_share", "cold_same_class_share")) |
+  (gs_tbl$group == "compare" &
+     gs_tbl$item %in% c("hot_also_effort_hot", "hot_also_effort_hot_share")) |
+  (gs_tbl$group == "landscape" & gs_tbl$gistar %in% gs_l1)
+gs_lc_words <- c(LANDSCAPE_COMPLEXES, "outside_reserve_polygons")
+gs_lc_rows <- gs_tbl$group == "landscape"
+gs_lc_text <- vapply(seq_len(nrow(gs_tbl)), function(r) {
+  any(vapply(LANDSCAPE_COMPLEXES, function(w) {
+    grepl(w, tolower(paste(gs_tbl$item[r], gs_tbl$reading[r])), fixed = TRUE)
+  }, logical(1)))
+}, logical(1))
+sdm_run_guards(list(
+  "a tiger row may hold only the counts of Decision 26 point 7" =
+    all(gs_ok_tig[gs_tig_rows]),
+  "a landscape row only for the Gi* of s2, with a level name" =
+    all(gs_tbl$gistar[gs_lc_rows] %in% gs_l1) &&
+    all(gs_tbl$item[gs_lc_rows] %in% gs_lc_words),
+  "no landscape name outside the landscape rows (t1)" =
+    !any(gs_lc_text & !gs_lc_rows),
+  "no value of the table may be a cell id of the grid" =
+    sdm_qa_id_hits(gs_tbl, grid_d$id) == 0,
+  "no reserve name or reserve column outside the landscape rows" =
+    sdm_qa_reserve_hits(gs_tbl[!gs_lc_rows, ], gs_res_d$unit_name) == 0
+), what = "tbl_18_gistar.csv before the write")
+occ_assert_counts_only(gs_tbl, cols = c("gistar", "band", "group", "item",
+                                        "value", "reading"),
+                       count_cols = character(0), name = "tbl_18_gistar.csv")
+write_table(gs_tbl, nn = GISTAR_TABLE_NN, slug = GISTAR_TABLE_SLUG)
+
+cat("\n--- tbl_18_gistar.csv (publishable; counts and statistics only) ---\n")
+gs_show <- gs_tbl[gs_tbl$group != "settings", c("gistar", "band", "group",
+                                                 "item", "value")]
+gs_show$value <- vapply(gs_show$value, function(v) {
+  if (is.na(v)) "NA" else if (v == round(v)) {
+    formatC(v, format = "d", big.mark = ",")
+  } else sprintf("%.3f", v)
+}, character(1))
+op161 <- options(width = 120)
+print(gs_show, row.names = FALSE, right = FALSE)
+options(op161)
+rm(gs_tc, gs_bc, gs_x, gs_show, gs_rc, gs_res_sf, op161)
+rule(paste0("STEP 16.1 complete (", round(as.numeric(difftime(
+  Sys.time(), t_step161, units = "mins")), 1), " min): four Gi* layers ",
+  "under data/processed/ (gitignored) and tbl_18_gistar.csv.\nNext: STEP ",
+  "16.2, the figures (task 16.4). Check `git status --short` before a ",
+  "commit: nothing under data/ may be staged."))
