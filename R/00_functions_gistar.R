@@ -42,9 +42,13 @@
 #   gistar_layer_checks()    the checks of a Gi* layer (process choice n1)
 #   gistar_self_test()       the hand-made case of STEP 16.1 (h1)
 #
+# Task 16.5 (2026-11-07): STEP 16.3, the QA. The gistar_qa_* functions at the
+# end of this file are a second path; their list is there.
+#
 # Uses base R and stats; gistar_record_cells() also uses occ_id_chr(),
 # occ_num() and occ_cell02() (R/00_functions_occ.R) and sdm_cell_index() and
-# sdm_cell_id() (R/00_functions_sdm.R).
+# sdm_cell_id() (R/00_functions_sdm.R). gistar_qa_free_objects() uses
+# codetools (a recommended package of R).
 #
 # SENSITIVE DATA: these functions return TRUE/FALSE, counts, statistics and
 # cell ids. None of them prints a coordinate, a cell corner or a cell id. A
@@ -513,6 +517,402 @@ gistar_self_test <- function(deg = 0.2, r_km = 6371.0088, band_km = 50,
                                       min_nb = min_nb))),
     "r2: the cell of a record from its GBIF coordinates (an edge goes east or north); a missing and a repeated gbifID are counted" =
       rec_ok
+  )
+  data.frame(check = names(chk),
+             pass = vapply(chk, function(v) isTRUE(v), logical(1)),
+             stringsAsFactors = FALSE, row.names = NULL)
+}
+
+# =============================================================================
+# Task 16.5 (2026-11-07): the QA of STEP 16.3, a second path (f1 of task
+# 16.2). These functions call no gistar_* function of STEP 16.1: the
+# neighbours by all pairs (no index window), K by the neighbour lists, the
+# exact p by sums of dhyper(), the Benjamini-Hochberg step by own code.
+#   gistar_qa_neighbours()     all pairs: the neighbours of each cell at each
+#                              band (haversine, the formula of Amendment 1),
+#                              and "queen" by the cell index
+#   gistar_qa_bh()             the Benjamini-Hochberg adjusted p
+#   gistar_qa_stat()           n_nb, n_win, K, G*, the exact p, p_adj, class
+#   gistar_qa_sample_cells()   the sample cells of the permutation check (q1)
+#   gistar_qa_perm()           the permutation check of the exact p (q1)
+#   gistar_qa_cell_candidates() the 0.2 degree cell(s) of a point; two at a
+#                              cell edge
+#   gistar_qa_expected_keys()  the rows of tbl_18_gistar.csv by the rule of
+#                              Decision 26 point 7 and t1 of task 16.2
+#   gistar_qa_l1()             rule L1 again (the hot cells by complex)
+#   gistar_qa_words()          the field names with a presence, background,
+#                              record, tiger or occurrence word
+#   gistar_qa_free_objects()   the objects of an environment that a code text
+#                              uses and does not make (k1)
+#   gistar_qa_png_size()       the width and the height of a PNG file
+#   gistar_qa_self_test()      the hand-made case of STEP 16.3 (h1)
+# =============================================================================
+
+# All pairs (the second path of the neighbours).
+#   ix, iy   : the integer index of each cell
+#   bands_km : a named vector of bands (km), for example c(band50_km = 50)
+# Returns list(nb = a named list (the bands, then "queen") of lists of
+# neighbour rows for each cell (the cell itself not included), margin = a
+# data frame: band, inside_max_km (the largest distance inside the band),
+# outside_min_km (the smallest distance outside it)).
+gistar_qa_neighbours <- function(ix, iy, bands_km, deg = SDM_GRAIN_DEG,
+                                 r_km = GISTAR_EARTH_RADIUS_KM) {
+  n <- length(ix)
+  if (is.null(names(bands_km)) || any(!nzchar(names(bands_km)))) {
+    stop("gistar_qa_neighbours(): bands_km must be a named vector.",
+         call. = FALSE)
+  }
+  lam <- (ix + 0.5) * deg * pi / 180
+  phi <- (iy + 0.5) * deg * pi / 180
+  cphi <- cos(phi)
+  nb <- lapply(bands_km, function(b) vector("list", n))
+  queen <- vector("list", n)
+  in_max <- rep(-Inf, length(bands_km))
+  out_min <- rep(Inf, length(bands_km))
+  rows <- seq_len(n)
+  for (i in rows) {
+    h <- sin((phi - phi[i]) / 2)^2 + cphi[i] * cphi * sin((lam - lam[i]) / 2)^2
+    d <- 2 * r_km * asin(sqrt(pmin(1, h)))
+    d[i] <- NA_real_
+    for (b in seq_along(bands_km)) {
+      inside <- !is.na(d) & d <= bands_km[[b]]
+      nb[[b]][[i]] <- rows[inside]
+      if (any(inside)) in_max[b] <- max(in_max[b], d[inside])
+      outside <- !is.na(d) & !inside
+      if (any(outside)) out_min[b] <- min(out_min[b], d[outside])
+    }
+    queen[[i]] <- rows[abs(ix - ix[i]) <= 1 & abs(iy - iy[i]) <= 1 & rows != i]
+  }
+  list(nb = c(nb, list(queen = queen)),
+       margin = data.frame(band = names(bands_km), inside_max_km = in_max,
+                           outside_min_km = out_min,
+                           stringsAsFactors = FALSE))
+}
+
+# The Benjamini-Hochberg adjusted p (own code; the second path of
+# stats::p.adjust(method = "BH")).
+gistar_qa_bh <- function(p) {
+  n <- length(p)
+  if (n == 0L) return(numeric(0))
+  o <- order(p, decreasing = TRUE)
+  adj <- numeric(n)
+  adj[o] <- pmin(1, cummin(n / (n:1) * p[o]))
+  adj
+}
+
+# The Gi* of each cell again (Decision 26 point 6).
+#   x   : the value of each cell (0 or 1)
+#   nbl : a list of the neighbour rows of each cell (gistar_qa_neighbours())
+# Returns a data frame with the fields of a Gi* layer (no id).
+gistar_qa_stat <- function(x, nbl, min_nb = GISTAR_MIN_NEIGHBOURS,
+                           q = GISTAR_FDR_Q) {
+  n <- length(x)
+  m <- sum(x)
+  n_nb <- lengths(nbl)
+  n_win <- n_nb + 1L
+  k <- x + vapply(nbl, function(w) sum(x[w]), numeric(1))
+  xbar <- m / n
+  s <- sqrt(sum((x - xbar)^2) / n)
+  g <- (k - xbar * n_win) / (s * sqrt((n * n_win - n_win^2) / (n - 1)))
+  p_hot <- vapply(seq_len(n), function(i) {
+    sum(stats::dhyper(k[i]:n_win[i], m, n - m, n_win[i]))
+  }, numeric(1))
+  p_cold <- vapply(seq_len(n), function(i) {
+    sum(stats::dhyper(0:k[i], m, n - m, n_win[i]))
+  }, numeric(1))
+  p_two <- pmin(1, 2 * pmin(p_hot, p_cold))
+  classed <- n_nb >= min_nb
+  p_adj <- rep(NA_real_, n)
+  p_adj[classed] <- gistar_qa_bh(p_two[classed])
+  e <- xbar * n_win
+  cls <- rep("few_neighbours", n)
+  cls[classed] <- "not_significant"
+  cls[classed & p_adj <= q & k > e] <- "hot"
+  cls[classed & p_adj <= q & k < e] <- "cold"
+  data.frame(value = as.integer(x), n_nb = as.integer(n_nb),
+             n_win = as.integer(n_win), k = as.integer(k), gistar = g,
+             p_hot = p_hot, p_cold = p_cold, p_two = p_two, p_adj = p_adj,
+             class = cls, stringsAsFactors = FALSE)
+}
+
+# The sample cells of the permutation check (q1 of task 16.2): the cell with
+# the largest K (a tie: the lower id), then the cells at equal steps of the
+# id order. Only cells with a class. Returns row numbers.
+#   ids : the cell ids (the rows of the layer); k : K; classed : TRUE/FALSE
+gistar_qa_sample_cells <- function(ids, k, classed, n_cells) {
+  cand <- which(classed)
+  cand <- cand[order(ids[cand])]
+  if (length(cand) == 0L) return(integer(0))
+  top <- cand[order(-k[cand], ids[cand])][1]
+  pos <- unique(round(seq(1, length(cand), length.out = max(1L, n_cells - 1L))))
+  unique(c(top, cand[pos]))
+}
+
+# The permutation check (q1): n_perm random relabellings (m cells of value 1
+# drawn from the n cells), with a fixed seed. For each sample cell, the side
+# of p_two (hot if p_hot <= p_cold) and the count of relabellings with K at
+# or beyond the K of the cell. A pass if the exact p of that side is inside
+# the Clopper-Pearson interval (binom.test()) at `level`. The RNG state of
+# the session is kept.
+# Returns a data frame: side, count, lo, hi, p_exact, inside.
+gistar_qa_perm <- function(x, nbl, cells, p_hot, p_cold, n_perm, level,
+                           seed) {
+  n <- length(x)
+  m <- sum(x)
+  win <- lapply(cells, function(i) c(i, nbl[[i]]))
+  k_obs <- vapply(win, function(w) sum(x[w]), numeric(1))
+  hot <- p_hot[cells] <= p_cold[cells]
+  ge <- numeric(length(cells))
+  le <- numeric(length(cells))
+  had_seed <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
+  if (had_seed) old_seed <- get(".Random.seed", envir = globalenv())
+  on.exit({
+    if (had_seed) {
+      assign(".Random.seed", old_seed, envir = globalenv())
+    } else if (exists(".Random.seed", envir = globalenv(), inherits = FALSE)) {
+      rm(".Random.seed", envir = globalenv())
+    }
+  })
+  set.seed(seed)
+  flag <- logical(n)
+  for (r in seq_len(n_perm)) {
+    flag[] <- FALSE
+    flag[sample.int(n, m)] <- TRUE
+    kk <- vapply(win, function(w) sum(flag[w]), numeric(1))
+    ge <- ge + (kk >= k_obs)
+    le <- le + (kk <= k_obs)
+  }
+  cnt <- ifelse(hot, ge, le)
+  p_ex <- ifelse(hot, p_hot[cells], p_cold[cells])
+  ci <- vapply(cnt, function(cc) {
+    stats::binom.test(cc, n_perm, conf.level = level)$conf.int[1:2]
+  }, numeric(2))
+  data.frame(side = ifelse(hot, "hot", "cold"), count = cnt,
+             lo = ci[1, ], hi = ci[2, ], p_exact = p_ex,
+             inside = p_ex >= ci[1, ] - 1e-12 & p_ex <= ci[2, ] + 1e-12,
+             stringsAsFactors = FALSE)
+}
+
+# The 0.2 degree cell(s) of a point (longitude, latitude in degrees): the
+# index range from (value - tol) to (value + tol), tol in cells. A point
+# within tol of a cell edge has two cells on that axis.
+gistar_qa_cell_candidates <- function(lon, lat, deg = SDM_GRAIN_DEG, tol) {
+  u <- lon / deg
+  v <- lat / deg
+  data.frame(ix_lo = floor(u - tol), ix_hi = floor(u + tol),
+             iy_lo = floor(v - tol), iy_hi = floor(v + tol))
+}
+
+# The rows (keys) of tbl_18_gistar.csv by the rule of Decision 26 point 7
+# (s1, s2 with L1) and t1 of task 16.2; written again here, not taken from
+# STEP 16.1.
+#   runs : GISTAR_RUNS; main : the name of the main band; qa : the names of
+#   the QA bands; levels : LANDSCAPE_COMPLEXES; s2 : the Gi* with rule L1
+gistar_qa_expected_keys <- function(runs, main, qa, levels, s2) {
+  key <- function(g, b, grp, it) {
+    data.frame(gistar = g, band = b, group = grp, item = it,
+               stringsAsFactors = FALSE)
+  }
+  bands <- c(main, qa)
+  out <- list(key("all", "-", "settings",
+                  c("model_cells", "band_km", "min_neighbours", "fdr_q")))
+  for (b in bands) {
+    out <- c(out, list(key("all", b, "neighbours",
+                           c("min", "median", "max", "cells_below_min"))))
+  }
+  for (i in seq_len(nrow(runs))) {
+    g <- runs$gistar[i]
+    tig <- isTRUE(runs$tiger[i])
+    if (!tig) {
+      out <- c(out, list(key(g, "-", "input",
+                             c("records", "records_not_model", "cells_model",
+                               "cells_not_model"))))
+    }
+    its <- if (tig) c("hot", "cold", "few_neighbours") else
+      c("hot", "cold", "not_significant", "few_neighbours")
+    for (b in bands) out <- c(out, list(key(g, b, "class", its)))
+    for (b in qa) {
+      out <- c(out, list(key(g, b, "qa_band", c("hot_same_class_share",
+                                                "cold_same_class_share"))))
+    }
+    if (tig) {
+      out <- c(out, list(key(g, main, "compare",
+                             c("hot_also_effort_hot",
+                               "hot_also_effort_hot_share"))))
+    }
+    if (g %in% s2) {
+      out <- c(out, list(key(g, main, "landscape",
+                             c(levels, "outside_reserve_polygons"))))
+    }
+  }
+  res <- do.call(rbind, out)
+  rownames(res) <- NULL
+  res
+}
+
+# Rule L1 again: the hot cells by landscape complex.
+#   hot_ids : the ids of the hot cells; qc : sdm_qa_reserve_cells() (row,
+#   id); res_lc : the landscape complex of each reserve row; levels
+# Returns a named vector: the levels, then outside_reserve_polygons.
+gistar_qa_l1 <- function(hot_ids, qc, res_lc, levels) {
+  h <- unique(hot_ids)
+  lc <- res_lc[qc$row]
+  n <- vapply(levels, function(l) length(intersect(h, qc$id[lc == l])),
+              integer(1))
+  c(n, outside_reserve_polygons = length(setdiff(h, qc$id)))
+}
+
+# The field names with a presence, background, record, tiger or occurrence
+# word (own list; the rule of k1 of task 16.2).
+gistar_qa_words <- function(nm) {
+  w <- c("presence", "pres_", "background", "record", "tiger", "occ")
+  low <- tolower(nm)
+  nm[vapply(low, function(s) any(vapply(w, function(z) {
+    grepl(z, s, fixed = TRUE)
+  }, logical(1))), logical(1))]
+}
+
+# The objects of `env` (not functions) that a code text uses and does not
+# make itself (codetools::findGlobals()), less the names in `allowed` and
+# the settings (a name in capital letters). k1 of task 16.2: the figure code
+# uses only the objects that it makes, the settings and the paths of the
+# script header.
+gistar_qa_free_objects <- function(code, env, allowed = character(0)) {
+  ex <- parse(text = code, keep.source = FALSE)
+  f <- function() NULL
+  body(f) <- as.call(c(as.name("{"), as.list(ex)))
+  environment(f) <- env
+  v <- codetools::findGlobals(f, merge = FALSE)$variables
+  v <- v[vapply(v, function(s) {
+    exists(s, envir = env, inherits = FALSE) &&
+      !is.function(get(s, envir = env, inherits = FALSE))
+  }, logical(1))]
+  setdiff(v[!grepl("^[A-Z][A-Z0-9_]*$", v)], allowed)
+}
+
+# The width and the height (pixels) of a PNG file (big-endian integers after
+# the signature and the IHDR length and type). c(NA, NA) if not a PNG file.
+gistar_qa_png_size <- function(path) {
+  con <- file(path, "rb")
+  on.exit(close(con))
+  sig <- readBin(con, "raw", n = 8)
+  if (!identical(sig, as.raw(c(137, 80, 78, 71, 13, 10, 26, 10)))) {
+    return(c(NA_real_, NA_real_))
+  }
+  invisible(readBin(con, "raw", n = 8))
+  as.numeric(readBin(con, "integer", n = 2, size = 4, endian = "big"))
+}
+
+# ---- The hand-made case of STEP 16.3 (h1) ---------------------------------------------
+# Made-up cells and values only; the expected values are written by hand
+# (fractions, counts of a lattice). Returns a data frame: check, pass.
+gistar_qa_self_test <- function(deg = 0.2, r_km = 6371.0088) {
+  near <- function(a, b, tol = 1e-12) {
+    isTRUE(all(abs(a - b) <= tol * pmax(1, abs(b))))
+  }
+  # A lattice of 15 x 15 cells (ix 400-414, iy 100-114; about 20-23 N).
+  g <- expand.grid(ix = 400:414, iy = 100:114)
+  rc <- function(ix, iy) which(g$ix == ix & g$iy == iy)
+  nq <- gistar_qa_neighbours(g$ix, g$iy, c(band50_km = 50), deg, r_km)
+  nb50 <- nq$nb$band50_km
+  a <- rc(402, 107); b <- rc(412, 107); corner <- rc(400, 100)
+  edge <- rc(407, 100)
+  pr <- function(l) {
+    from <- rep(seq_along(l), lengths(l)); to <- unlist(l)
+    identical(sort(paste(from, to)), sort(paste(to, from)))
+  }
+  # The east 7 columns have the value 1 (as the case of STEP 16.1).
+  x <- as.integer(g$ix >= 408)
+  st <- gistar_qa_stat(x, nb50, min_nb = 8L, q = 0.05)
+  # A small case by hand: 10 cells, 3 with the value 1; the window of cell 1
+  # is cells 1, 2, 4, 5 (K = 2). P(K >= 2) = (3 x 21 + 1 x 7) / 210 = 70/210;
+  # P(K <= 2) = 1 - 7/210 = 203/210; G* = 0.8 / (sqrt(0.21) sqrt(24/9)).
+  xs <- c(1L, 1L, 1L, 0L, 0L, 0L, 0L, 0L, 0L, 0L)
+  nbs <- c(list(c(2L, 4L, 5L)), rep(list(integer(0)), 9))
+  ss <- gistar_qa_stat(xs, nbs, min_nb = 0L, q = 0.05)
+  pm_ok  <- gistar_qa_perm(xs, nbs, 1L, ss$p_hot, ss$p_cold, 9999L, 0.999,
+                           20261107L)
+  pm_bad <- gistar_qa_perm(xs, nbs, 1L, c(0.5, ss$p_hot[-1]), ss$p_cold,
+                           9999L, 0.999, 20261107L)
+  seed_kept <- {
+    set.seed(1); r1 <- stats::runif(1); set.seed(1)
+    invisible(gistar_qa_perm(xs, nbs, 1L, ss$p_hot, ss$p_cold, 10L, 0.999, 5L))
+    identical(stats::runif(1), r1)
+  }
+  sc <- gistar_qa_sample_cells(ids = 101:200, k = c(rep(1, 49), 9, rep(1, 50)),
+                               classed = c(FALSE, rep(TRUE, 99)), n_cells = 20L)
+  cand <- gistar_qa_cell_candidates(c(77.2 + 1e-12, 77.3), c(20.1, 20.1), deg,
+                                    1e-6)
+  runs <- data.frame(gistar = c("e1", "t1", "e2", "t2"),
+                     tiger = c(FALSE, TRUE, FALSE, TRUE),
+                     stringsAsFactors = FALSE)
+  ek <- gistar_qa_expected_keys(runs, "band50_km", c("queen", "band75_km"),
+                                c("l1", "l2", "l3", "l4", "l5"), "t2")
+  env <- new.env()
+  assign("old_obj", 1, envir = env); assign("path_ok", 2, envir = env)
+  assign("helper", function() 1, envir = env)
+  fo_bad <- gistar_qa_free_objects(
+    "fig_a <- old_obj + helper() + path_ok; fig_b <- fig_a + FIG_X", env,
+    allowed = "path_ok")
+  fo_ok <- gistar_qa_free_objects(
+    "fig_a <- helper() + path_ok; for (i in 1:2) fig_a <- fig_a + i", env,
+    allowed = "path_ok")
+  tf <- tempfile(fileext = ".png")
+  writeBin(as.raw(c(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+                    0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52,
+                    0, 0, 0x08, 0x98, 0, 0, 0x08, 0x48)), tf)
+  ps <- gistar_qa_png_size(tf)
+  unlink(tf)
+  l1 <- gistar_qa_l1(hot_ids = c(11, 12, 13, 14),
+                     qc = data.frame(row = c(1, 1, 2, 3), id = c(11, 12, 12, 99)),
+                     res_lc = c("a", "b", "b"), levels = c("a", "b", "c"))
+  chk <- list(
+    "neighbours (all pairs): an inner cell 20 at 50 km; the corner 7; an edge cell 12" =
+      length(nb50[[a]]) == 20L && length(nb50[[corner]]) == 7L &&
+      length(nb50[[edge]]) == 12L,
+    "neighbours (all pairs): queen 8 for an inner cell, 3 for the corner, 5 for an edge cell" =
+      length(nq$nb$queen[[a]]) == 8L && length(nq$nb$queen[[corner]]) == 3L &&
+      length(nq$nb$queen[[edge]]) == 5L,
+    "neighbours (all pairs): each pair is there in both directions" =
+      pr(nb50) && pr(nq$nb$queen),
+    "neighbours (all pairs): the margin is inside and outside the band" =
+      nq$margin$inside_max_km <= 50 && nq$margin$outside_min_km > 50,
+    "BH by hand: 0.01, 0.04, 0.03, 0.2 -> 0.04, 0.16/3, 0.16/3, 0.2" =
+      near(gistar_qa_bh(c(0.01, 0.04, 0.03, 0.2)),
+           c(0.04, 0.16 / 3, 0.16 / 3, 0.2)),
+    "the small case: K = 2, n_win = 4" = ss$k[1] == 2L && ss$n_win[1] == 4L,
+    "the small case: p_hot = 70/210 and p_cold = 203/210" =
+      near(ss$p_hot[1], 70 / 210) && near(ss$p_cold[1], 203 / 210),
+    "the small case: G* = 0.8 / (sqrt(0.21) sqrt(24/9))" =
+      near(ss$gistar[1], 0.8 / (sqrt(0.21) * sqrt(24 / 9))),
+    "classes: the inner east cell is hot, the inner west cell cold, the corner few_neighbours" =
+      st$class[b] == "hot" && st$class[a] == "cold" &&
+      st$class[corner] == "few_neighbours" && is.na(st$p_adj[corner]),
+    "permutation: the exact p (70/210) is inside the 99.9 % interval" =
+      isTRUE(pm_ok$inside) && pm_ok$side == "hot",
+    "permutation: a wrong p (0.5) is outside the interval" =
+      identical(pm_bad$inside, FALSE),
+    "permutation: the RNG state of the session is kept" = seed_kept,
+    "sample cells: 20 cells, with the cell of the largest K; no cell with no class" =
+      length(sc) == 20L && 50L %in% sc && !(1L %in% sc),
+    "cell of a point: 77.2 (an edge) has two cells; 77.3 has one" =
+      cand$ix_lo[1] == 385 && cand$ix_hi[1] == 386 &&
+      cand$ix_lo[2] == 386 && cand$ix_hi[2] == 386 &&
+      cand$iy_lo[1] == 100 && cand$iy_hi[1] == 100,
+    "tbl_18 rows by the rule: 92 rows for 4 Gi* (5 complexes); no input or not_significant row for a tiger Gi*" =
+      nrow(ek) == 92L &&
+      !any(ek$gistar %in% c("t1", "t2") &
+             (ek$group == "input" | ek$item == "not_significant")) &&
+      sum(ek$group == "landscape") == 6L,
+    "k1 code check: an object of the session is found; settings, paths and own objects are not" =
+      identical(fo_bad, "old_obj") && length(fo_ok) == 0L,
+    "words: presence, record, tiger and occurrence words are found; id, class, value are not" =
+      identical(gistar_qa_words(c("id", "presence", "class", "n_records",
+                                  "value", "tiger_x", "occ_id")),
+                c("presence", "n_records", "tiger_x", "occ_id")),
+    "PNG size from the header: 2200 x 2120" = identical(ps, c(2200, 2120)),
+    "L1 again: the hot cells by complex (a cell in two complexes counts in each)" =
+      identical(unname(l1), c(2L, 1L, 0L, 2L))
   )
   data.frame(check = names(chk),
              pass = vapply(chk, function(v) isTRUE(v), logical(1)),

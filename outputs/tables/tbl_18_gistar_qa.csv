@@ -1,0 +1,114 @@
+"group","check","value","pass"
+"test case","STEP 16.1: distance: 1 degree of latitude = r x pi / 180","pass",TRUE
+"test case","STEP 16.1: distance: 0 for one point, and the same in both directions","pass",TRUE
+"test case","STEP 16.1: window at 50 km on this lattice: ox = 2, oy = 2","pass",TRUE
+"test case","STEP 16.1: band: the neighbour count of each cell = the count of all pairs by hand","pass",TRUE
+"test case","STEP 16.1: band: an inner cell has 20 neighbours at 50 km","pass",TRUE
+"test case","STEP 16.1: band: the corner cell has 7 neighbours; an edge cell 12","pass",TRUE
+"test case","STEP 16.1: band: each pair is there in both directions","pass",TRUE
+"test case","STEP 16.1: queen: an inner cell 8, the corner 3, an edge cell 5","pass",TRUE
+"test case","STEP 16.1: K of the border cell = the sum of its window by hand","pass",TRUE
+"test case","STEP 16.1: G* of the border cell = the formula by hand","pass",TRUE
+"test case","STEP 16.1: p_hot and p_cold of the border cell = the sums of dhyper by hand","pass",TRUE
+"test case","STEP 16.1: p_hot + p_cold - P(K = k) = 1 at each cell","pass",TRUE
+"test case","STEP 16.1: p_two = min(1, 2 x min(p_hot, p_cold))","pass",TRUE
+"test case","STEP 16.1: BH: p_adj of the cells with a class = the steps by hand","pass",TRUE
+"test case","STEP 16.1: class: the inner east cell (window all 1) is hot","pass",TRUE
+"test case","STEP 16.1: class: the inner west cell (window all 0) is cold","pass",TRUE
+"test case","STEP 16.1: k1: the corner cell is few_neighbours, with no p_adj","pass",TRUE
+"test case","STEP 16.1: k1: the value of the corner cell counts in the window of its neighbour","pass",TRUE
+"test case","STEP 16.1: a run with all values 0 stops (no variance)","pass",TRUE
+"test case","STEP 16.1: a value that is not 0 or 1 stops","pass",TRUE
+"test case","STEP 16.1: a band larger than the window limit stops","pass",TRUE
+"test case","STEP 16.1: L1: hot cells by complex (a cell in two complexes counts in each)","pass",TRUE
+"test case","STEP 16.1: the same-class share: 1 of 2 hot cells keeps its class","pass",TRUE
+"test case","STEP 16.1: layer checks: a correct layer passes","pass",TRUE
+"test case","STEP 16.1: layer checks: a layer with a presence field fails","pass",TRUE
+"test case","STEP 16.1: r2: the cell of a record from its GBIF coordinates (an edge goes east or north); a missing and a repeated gbifID are counted","pass",TRUE
+"test case","STEP 16.2: reader: a file on the list is read","pass",TRUE
+"test case","STEP 16.2: reader: a file that is not on the list of the figure is refused","pass",TRUE
+"test case","STEP 16.2: reader: the log holds each read (figure and file), in order","pass",TRUE
+"test case","STEP 16.2: fields: a presence, record or tiger word is found; plain fields pass","pass",TRUE
+"test case","STEP 16.2: hatch: 2 or 3 lines in a square of 10 km with a step of 2/3 of its side","pass",TRUE
+"test case","STEP 16.2: hatch: each line is at 45 degrees and inside the square","pass",TRUE
+"test case","STEP 16.2: hatch: the lines of two squares side by side meet at the common edge","pass",TRUE
+"test case","STEP 16.2: hatch: no polygon gives no line","pass",TRUE
+"test case","STEP 16.2: key box: a square of the given side, with its hatch inside","pass",TRUE
+"test case","STEP 16.2: labels: five classes, class 5 first, no value in a label","pass",TRUE
+"test case","STEP 16.2: numbers: 6969 -> 6,969; 0.66826 -> 0.668","pass",TRUE
+"test case","STEP 16.2: caption: no line is longer than the width","pass",TRUE
+"test case","STEP 16.2: PNG size: read from the header (123 x 45)","pass",TRUE
+"test case","STEP 16.2: area: the whole WGS 84 ellipsoid is 510,065,621.7 km2","pass",TRUE
+"test case","STEP 16.2: area: a 0.2 degree cell is 487.6 km2 at 8.0-8.2 N and 395.6 km2 at 36.8-37.0 N","pass",TRUE
+"test case","STEP 16.3: neighbours (all pairs): an inner cell 20 at 50 km; the corner 7; an edge cell 12","pass",TRUE
+"test case","STEP 16.3: neighbours (all pairs): queen 8 for an inner cell, 3 for the corner, 5 for an edge cell","pass",TRUE
+"test case","STEP 16.3: neighbours (all pairs): each pair is there in both directions","pass",TRUE
+"test case","STEP 16.3: neighbours (all pairs): the margin is inside and outside the band","pass",TRUE
+"test case","STEP 16.3: BH by hand: 0.01, 0.04, 0.03, 0.2 -> 0.04, 0.16/3, 0.16/3, 0.2","pass",TRUE
+"test case","STEP 16.3: the small case: K = 2, n_win = 4","pass",TRUE
+"test case","STEP 16.3: the small case: p_hot = 70/210 and p_cold = 203/210","pass",TRUE
+"test case","STEP 16.3: the small case: G* = 0.8 / (sqrt(0.21) sqrt(24/9))","pass",TRUE
+"test case","STEP 16.3: classes: the inner east cell is hot, the inner west cell cold, the corner few_neighbours","pass",TRUE
+"test case","STEP 16.3: permutation: the exact p (70/210) is inside the 99.9 % interval","pass",TRUE
+"test case","STEP 16.3: permutation: a wrong p (0.5) is outside the interval","pass",TRUE
+"test case","STEP 16.3: permutation: the RNG state of the session is kept","pass",TRUE
+"test case","STEP 16.3: sample cells: 20 cells, with the cell of the largest K; no cell with no class","pass",TRUE
+"test case","STEP 16.3: cell of a point: 77.2 (an edge) has two cells; 77.3 has one","pass",TRUE
+"test case","STEP 16.3: tbl_18 rows by the rule: 92 rows for 4 Gi* (5 complexes); no input or not_significant row for a tiger Gi*","pass",TRUE
+"test case","STEP 16.3: k1 code check: an object of the session is found; settings, paths and own objects are not","pass",TRUE
+"test case","STEP 16.3: words: presence, record, tiger and occurrence words are found; id, class, value are not","pass",TRUE
+"test case","STEP 16.3: PNG size from the header: 2200 x 2120","pass",TRUE
+"test case","STEP 16.3: L1 again: the hot cells by complex (a cell in two complexes counts in each)","pass",TRUE
+"inputs","effort_all: the r2 cell of each record (STEP 16.1) is a cell of its point in the clean background layer (EPSG:4326; a point at a cell edge has two cells)","0 of 23,901 records differ",TRUE
+"inputs","tiger_5km: the r2 cell of each record (STEP 16.1) is a cell of its point in the clean tiger layer (as above)","0 records differ",TRUE
+"inputs","effort_inat: the value of each model cell in the layer = the second path (the iNaturalist background layer)","0 of 6,969 cells differ",TRUE
+"inputs","tiger_obscured: the value of each model cell in the layer = the second path (the obscured layer)","0 of 6,969 cells differ",TRUE
+"inputs","effort_all: the value of each model cell in the layer = the second path (the r2 cells)","0 of 6,969 cells differ",TRUE
+"inputs","tiger_5km: the value of each model cell in the layer = the second path (the r2 cells)","0 of 6,969 cells differ",TRUE
+"inputs","effort_inat: the cells with the value 1 = the background cells of tbl_16_sdm_counts.csv; a presence cell with no mammal record has the value 0 (the presence cells of the model are not in the input)","1,486 cells; 0 presence-only cells with the value 1",TRUE
+"inputs","tiger_obscured: the cells with the value 1 = the presence cells of tbl_16_sdm_counts.csv","the same count",TRUE
+"inputs","no record of an effort input is a tiger record (gbifID; the four layers read again)","0 records",TRUE
+"inputs","each record of the four inputs is of GISTAR_YEARS (w1)","2006-2022",TRUE
+"info","records not on a model cell, by part: effort_inat (iNaturalist layer: part uncert, part obscured); effort_all (iNaturalist dataset, other datasets)","effort_inat: uncert 354, obscured 75 | effort_all: iNaturalist 354, other 75",TRUE
+"info","effort_all: records whose point is within GISTAR_QA_EDGE_CELLS of a cell edge (two cells by the point)","14 records",TRUE
+"neighbours","each neighbour pair is there in both directions (each band; all pairs)","band50_km, queen, band75_km",TRUE
+"neighbours","at 50 km, each model cell with all 24 cells of its 5 x 5 block among the model cells has 20 neighbours (Amendment 1)","5,471 such cells; 5,471 with 20",TRUE
+"neighbours","the neighbour count of each cell (all pairs) = n_nb of the four layers","4 layers",TRUE
+"info","the distance between two cell centres nearest to each band, inside and outside (km)","band50_km: 49.624 and 54.584; band75_km: 74.943 and 75.023",TRUE
+"gistar","effort_inat: K, n_nb, n_win and the class of each cell (band50_km) = the layer","0 of 6,969 cells differ",TRUE
+"gistar","effort_inat: G*, p_hot, p_cold, p_two and p_adj (band50_km) = the layer (dhyper sums; own BH)","largest relative difference 4.81e-15",TRUE
+"gistar","tiger_obscured: K, n_nb, n_win and the class of each cell (band50_km) = the layer","0 of 6,969 cells differ",TRUE
+"gistar","tiger_obscured: G*, p_hot, p_cold, p_two and p_adj (band50_km) = the layer (dhyper sums; own BH)","largest relative difference 3.77e-15",TRUE
+"gistar","effort_all: K, n_nb, n_win and the class of each cell (band50_km) = the layer","0 of 6,969 cells differ",TRUE
+"gistar","effort_all: G*, p_hot, p_cold, p_two and p_adj (band50_km) = the layer (dhyper sums; own BH)","largest relative difference 4.68e-15",TRUE
+"gistar","tiger_5km: K, n_nb, n_win and the class of each cell (band50_km) = the layer","0 of 6,969 cells differ",TRUE
+"gistar","tiger_5km: G*, p_hot, p_cold, p_two and p_adj (band50_km) = the layer (dhyper sums; own BH)","largest relative difference 3.68e-15",TRUE
+"permutation","effort_inat: at the sample cells, the exact p (the side of p_two) is inside the 99.9 % Clopper-Pearson interval of 9,999 random relabellings (band50_km)","20 of 20 cells inside",TRUE
+"permutation","tiger_obscured: at the sample cells, the exact p (the side of p_two) is inside the 99.9 % Clopper-Pearson interval of 9,999 random relabellings (band50_km)","20 of 20 cells inside",TRUE
+"permutation","effort_all: at the sample cells, the exact p (the side of p_two) is inside the 99.9 % Clopper-Pearson interval of 9,999 random relabellings (band50_km)","20 of 20 cells inside",TRUE
+"permutation","tiger_5km: at the sample cells, the exact p (the side of p_two) is inside the 99.9 % Clopper-Pearson interval of 9,999 random relabellings (band50_km)","20 of 20 cells inside",TRUE
+"table","tbl_18_gistar.csv: the rows are the rows of Decision 26 point 7 and t1 (none more, none fewer, no repeat)","92 rows; 92 by the rule",TRUE
+"table","tbl_18_gistar.csv: the values of the rows of all = the second path","0 of 16 rows differ",TRUE
+"table","tbl_18_gistar.csv: the values of the rows of effort_inat = the second path","0 of 20 rows differ",TRUE
+"table","tbl_18_gistar.csv: the values of the rows of tiger_obscured = the second path","0 of 15 rows differ",TRUE
+"table","tbl_18_gistar.csv: the values of the rows of effort_all = the second path","0 of 20 rows differ",TRUE
+"table","tbl_18_gistar.csv: the values of the rows of tiger_5km = the second path","0 of 21 rows differ",TRUE
+"table","tbl_18_gistar.csv: a tiger row holds only the counts of Decision 26 point 7 (no input count, no not_significant count)","36 tiger rows",TRUE
+"figures","the read record of STEP 16.2: each read is a file of the list of its figure or of the captions (k1)","16 reads",TRUE
+"figures","no read of STEP 16.2 is a tiger Gi* layer, another Gi* layer, or an occurrence or background layer","0 such reads",TRUE
+"figures","fig_06 read the effort_inat Gi* layer, the grid layer, and the reserve and state layers (geometry only) (Decision 26 point 7)","sdm_grid_cell02_7755.gpkg, hot_effort_inat_cell02.csv, boundary_reserves_all_7755.gpkg, boundary_states_7755.gpkg",TRUE
+"figures","the code of STEP 16.2 uses no object of an earlier STEP: only the objects that it makes, the settings and the paths of the header (k1)","0 objects",TRUE
+"figures","no field of a drawn table holds a presence, background, record, tiger or occurrence word (k1)","6 tables",TRUE
+"figures","fig_06: the class of each drawn cell = the second path (effort_inat, the main band)","0 of 6,969 cells differ",TRUE
+"figures","fig_06: the legend and the subtitle give the class counts of the second path","hot 654, cold 0, not_significant 6,275, few_neighbours 40",TRUE
+"figures","fig_04 and fig_05 read the prediction layer and the grid layer, and the reserve and state layers (geometry only) (Decision 25 point 4)","sdm_grid_cell02_7755.gpkg, sdm_prediction_cell02.csv, boundary_reserves_all_7755.gpkg, boundary_states_7755.gpkg",TRUE
+"figures","fig_04/fig_05: the class and the hatch of each drawn cell = the prediction layer on disk; the hatched cells = tbl_16_sdm_prediction.csv","0 of 6,969 cells differ; 32 hatched cells",TRUE
+"figures","the PNG files of STEP 16.2: the names of g1 under outputs/figures/, the size of z1 (read from each file), no tiger in a name","3 files; 2200 x 2120 pixels",TRUE
+"publish","(c) no file with ""tiger"" in its name under outputs/","0 of 71 files",TRUE
+"publish","no Gi* layer (hot_*) under outputs/","0 files",TRUE
+"publish","(d) the four Gi* layers are under data/processed/, and .gitignore holds data/processed/**","4 layers",TRUE
+"publish","tbl_18_gistar.csv: (a) no position or cell column; the number column is value only","6 columns",TRUE
+"publish","tbl_18_gistar.csv: (b) no value is a cell id of the grid","0 values",TRUE
+"publish","tbl_18_gistar.csv: no reserve name outside the landscape rows; a landscape name only in a landscape row of the Gi* of s2 (t1)","0 reserve names; 0 landscape names outside",TRUE
+"publish","tbl_18_gistar.csv: assert_publishable_table() passes","pass",TRUE
+"publish","tbl_18_gistar_qa.csv: (b) no value is a cell id; no reserve name","0 and 0",TRUE

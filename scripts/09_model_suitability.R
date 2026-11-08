@@ -124,7 +124,14 @@
 #              the key box of h1; the caption drafts of d1 (each number from
 #              a table or a layer; printed under "DRAFT"); h1 a hand-made
 #              case first (fig_self_test())
-#   Week 16, to come: STEP 16.3 (QA)
+#   STEP 16.3 (task 16.5)  the QA of Decision 26 and of the figures: the
+#              hand-made cases of STEPs 16.1-16.3; the inputs again (the r2
+#              cells against the points of the clean layers); the neighbours
+#              by all pairs; K, G*, the exact p, BH and the classes by a
+#              second path (gistar_qa_*); the permutation check of q1; each
+#              row of tbl_18_gistar.csv again; the read record and the code
+#              of STEP 16.2 (k1); the publish scans -> tbl_18_gistar_qa.csv,
+#              written first; then a failure stops the script
 #
 # SENSITIVE DATA (docs/sensitive-data-policy.md; Decision 23 point 9):
 #   The obscured set and each layer made from it are tier T1 and stay under
@@ -276,6 +283,21 @@
 #   inches, 200 dpi; the size is read back from each file). The titles, the
 #   subtitles and the captions are DRAFT text for the author's edit (d1).
 #   No point, no presence mark, no background mark
+#
+# INPUTS (STEP 16.3, task 16.5): the grid layer and the cell-id raster; the
+#   four Gi* layers; the obscured layer, the iNaturalist background layer and
+#   the two clean layers (the 5 km sets); the reserve layer; .gitignore;
+#   tbl_18_gistar.csv, tbl_16_sdm_counts.csv and (with a model outcome)
+#   tbl_16_sdm_prediction.csv and the prediction layer; this script (the
+#   code of STEP 16.2). From memory: the r2 cells of STEP 16.1 (checked
+#   against the points of the clean layers), and the read record and the
+#   drawn tables of STEP 16.2.
+#
+# OUTPUTS (STEP 16.3, task 16.5; t1 of task 16.2):
+#   outputs/tables/tbl_18_gistar_qa.csv   group, check, value, pass. One row
+#     per check (and the "info" rows, pass TRUE). Written first; then any
+#     FALSE in `pass` stops the script. Counts and statistics only: no cell
+#     id, no position, no reserve name; for a tiger Gi*, no input count
 #
 # SETTINGS: the SDM_* values (Decision 23) and the OCC_* values that Decision
 #   23 reuses come from R/00_config.R. Do not repeat a value as a literal.
@@ -3094,3 +3116,529 @@ rule(paste0("STEP 16.2 complete (", round(as.numeric(difftime(
   length(fig_written), " figures in outputs/figures/.\nNext: STEP 16.3, the QA ",
   "(task 16.5). Check `git status --short` before a commit: nothing under ",
   "data/ may be staged."))
+
+# =============================================================================
+# STEP 16.3 — QA of Decision 26 and of the figures (task 16.5)
+# =============================================================================
+# The QA list of Decision 26 ("Consequences"); process choices of task 16.2:
+# f1 (the gistar_qa_* functions, a second path that calls no gistar_*
+# function of STEP 16.1 and no fig_* function of STEP 16.2), t1
+# (tbl_18_gistar_qa.csv: group, check, value, pass), k1 (the read record and
+# the code of STEP 16.2), q1 (the permutation check), r2 (the cell of a
+# record); h1 a hand-made case first.
+# As STEP 15.3: the step reads its inputs from disk again (from memory: the
+# r2 cells of STEP 16.1, which it checks against the points of the clean
+# layers, and the read record and the drawn tables of STEP 16.2), writes
+# tbl_18_gistar_qa.csv first, and then any FALSE stops the script. Groups:
+# "test case", "inputs", "neighbours", "gistar", "permutation", "table",
+# "figures", "publish", "info" (a fact, not a check; pass TRUE).
+# Console: counts and statistics only. For a tiger Gi*, a value is a count of
+# the cells or the records that differ, a difference or a count of point 7:
+# no input count, no position (Decision 26 point 7).
+
+rule("STEP 16.3 — QA of Decision 26 and of the figures (task 16.5)")
+t_step163 <- Sys.time()
+
+# ---- 0. Settings, packages and the objects of STEPs 16.1 and 16.2 ----------------
+need163 <- c("GISTAR_QA_PERM_N", "GISTAR_QA_PERM_CELLS", "GISTAR_QA_PERM_LEVEL",
+             "GISTAR_QA_SEED", "GISTAR_QA_EDGE_CELLS", "SDM_QA_REL_TOL")
+miss163 <- need163[!vapply(need163, exists, logical(1))]
+if (length(miss163) > 0) {
+  stop("Setting(s) missing from R/00_config.R (tasks 16.2 and 16.5): ",
+       paste(miss163, collapse = ", "), call. = FALSE)
+}
+if (!requireNamespace("codetools", quietly = TRUE)) {
+  stop("STEP 16.3 needs the package codetools (a recommended package of R).",
+       call. = FALSE)
+}
+for (o in c("gs_ids", "fig_rd", "fig_lists", "fig_c6", "fig_lab6",
+            "fig_sub06", "fig_written", "fig_do_sdm", "fig_states_g",
+            "fig_res6")) {
+  if (!exists(o)) {
+    stop("STEP 16.3 needs the object ", o, " of STEP 16.1 or STEP 16.2. Run ",
+         "the whole script.", call. = FALSE)
+  }
+}
+q6 <- list()
+add_q6 <- function(group, check, value, pass) {
+  q6[[length(q6) + 1L]] <<- data.frame(group = group, check = check,
+                                       value = as.character(value),
+                                       pass = isTRUE(pass),
+                                       stringsAsFactors = FALSE)
+  invisible(NULL)
+}
+agree6 <- function(d) isTRUE(d <= SDM_QA_REL_TOL)
+dtxt6  <- function(d) sprintf("largest relative difference %.2e", d)
+n6     <- function(x) formatC(x, format = "d", big.mark = ",")
+same6  <- function(a, b) {               # value by value; NA = NA
+  a <- as.numeric(a); b <- as.numeric(b)
+  length(a) == length(b) &&
+    all((is.na(a) & is.na(b)) |
+          (!is.na(a) & !is.na(b) &
+             abs(a - b) <= SDM_QA_REL_TOL * pmax(1, abs(b))))
+}
+gq_main  <- paste0("band", GISTAR_BAND_KM, "_km")
+gq_qab   <- names(GISTAR_QA_BANDS)
+gq_bands <- c(gq_main, gq_qab)
+gq_runs  <- GISTAR_RUNS$gistar
+gq_tiger <- GISTAR_RUNS$gistar[GISTAR_RUNS$tiger]
+gq_s2    <- names(GISTAR_TIGER_STATEMENT)[GISTAR_TIGER_STATEMENT == "s2"]
+
+# ---- 1. Hand-made cases (h1) -------------------------------------------------------
+tests6 <- list("STEP 16.1" = gistar_self_test(), "STEP 16.2" = fig_self_test(),
+               "STEP 16.3" = gistar_qa_self_test())
+for (s6 in names(tests6)) {
+  tt <- tests6[[s6]]
+  for (i in seq_len(nrow(tt))) {
+    add_q6("test case", paste0(s6, ": ", tt$check[i]),
+           if (tt$pass[i]) "pass" else "FAIL", tt$pass[i])
+  }
+}
+cat("hand-made cases:", paste(vapply(names(tests6), function(s6)
+  paste0(s6, " ", sum(tests6[[s6]]$pass), " of ", nrow(tests6[[s6]])),
+  character(1)), collapse = " | "), "\n")
+
+# ---- 2. Inputs (files on disk) -------------------------------------------------------
+gq_t18_in  <- file.path(DIR_TABLES, sprintf("tbl_%02d_%s.csv", GISTAR_TABLE_NN,
+                                            GISTAR_TABLE_SLUG))
+gq_t16_in  <- file.path(DIR_TABLES, "tbl_16_sdm_counts.csv")
+gq_tp_in   <- file.path(DIR_TABLES, "tbl_16_sdm_prediction.csv")
+gq_grid_in <- file.path(DIR_PROCESSED, grid_out)
+gq_cid_in  <- file.path(DIR_PROCESSED, cellid_out)
+gq_lay_in  <- stats::setNames(file.path(DIR_PROCESSED, GISTAR_LAYER_FILES),
+                              names(GISTAR_LAYER_FILES))
+gq_need <- c(gq_t18_in, gq_t16_in, gq_grid_in, gq_cid_in, gq_lay_in,
+             obscured_in, bg_inat_in, bg_clean_in, tiger_clean_in,
+             reserves_in, gitignore_in,
+             if (fig_do_sdm) c(gq_tp_in, pred_path))
+for (f in gq_need) {
+  if (!file.exists(f)) stop("STEP 16.3 needs ", f, ".", call. = FALSE)
+}
+gq_grid <- sf::st_drop_geometry(sf::st_read(gq_grid_in, quiet = TRUE))
+gq_mid  <- sort(gq_grid$id[as.logical(gq_grid$model)])
+gq_n    <- length(gq_mid)
+gq_ix   <- gq_mid %% SDM_ID_BASE
+gq_iy   <- gq_mid %/% SDM_ID_BASE
+gq_lay  <- lapply(gq_lay_in, utils::read.csv, stringsAsFactors = FALSE)
+gq_t18  <- utils::read.csv(gq_t18_in, stringsAsFactors = FALSE)
+gq_t16  <- utils::read.csv(gq_t16_in, stringsAsFactors = FALSE)
+gq_od   <- sf::st_drop_geometry(sf::st_read(obscured_in, quiet = TRUE))
+gq_ib   <- sf::st_drop_geometry(sf::st_read(bg_inat_in, quiet = TRUE))
+gq_tc   <- sf::st_read(tiger_clean_in, quiet = TRUE)
+gq_bc   <- sf::st_read(bg_clean_in, quiet = TRUE)
+gq_tc   <- gq_tc[gq_tc$uncert_set %in% GISTAR_UNCERT_SETS, ]
+gq_bc   <- gq_bc[gq_bc$uncert_set %in% GISTAR_UNCERT_SETS, ]
+gq_res  <- sf::st_read(reserves_in, quiet = TRUE)
+gq_rd   <- sf::st_drop_geometry(gq_res)
+gq_cid  <- terra::rast(gq_cid_in)
+gq_t16v <- function(group, item) {
+  v <- gq_t16$value[gq_t16$group == group & gq_t16$item == item]
+  if (length(v) == 1L) v else NA_real_
+}
+
+# ---- 3. The inputs again (Decision 26 point 2; r2 of task 16.2) ------------------
+# effort_inat and tiger_obscured: the cell id from the cell corner of each
+# record (own arithmetic). effort_all and tiger_5km: the r2 cells of STEP
+# 16.1, checked against the point of each record in the clean layer.
+gq_corner_id <- function(lon, lat) {
+  round(lat / SDM_GRAIN_DEG) * SDM_ID_BASE + round(lon / SDM_GRAIN_DEG)
+}
+gq_ids <- list(
+  effort_inat    = gq_corner_id(gq_ib$cell02_lon_deg, gq_ib$cell02_lat_deg),
+  tiger_obscured = gq_corner_id(gq_od$cell02_lon_deg, gq_od$cell02_lat_deg),
+  effort_all     = gs_ids$effort_all,
+  tiger_5km      = gs_ids$tiger_5km)
+gq_pt <- function(layer, ids) {          # the r2 cell against the point
+  if (length(ids) != nrow(layer)) return(list(bad = NA, edge = NA))
+  xy <- sf::st_coordinates(sf::st_transform(sf::st_geometry(layer), 4326))
+  cc <- gistar_qa_cell_candidates(xy[, 1], xy[, 2], SDM_GRAIN_DEG,
+                                  GISTAR_QA_EDGE_CELLS)
+  ix <- ids %% SDM_ID_BASE
+  iy <- ids %/% SDM_ID_BASE
+  ok <- !is.na(ids) & ix >= cc$ix_lo & ix <= cc$ix_hi &
+    iy >= cc$iy_lo & iy <= cc$iy_hi
+  list(bad = sum(!ok), edge = sum(cc$ix_lo != cc$ix_hi | cc$iy_lo != cc$iy_hi))
+}
+gq_pt_ea <- gq_pt(gq_bc, gq_ids$effort_all)
+gq_pt_t5 <- gq_pt(gq_tc, gq_ids$tiger_5km)
+add_q6("inputs", "effort_all: the r2 cell of each record (STEP 16.1) is a cell of its point in the clean background layer (EPSG:4326; a point at a cell edge has two cells)",
+       if (is.na(gq_pt_ea$bad)) "the record counts differ" else
+         sprintf("%s of %s records differ", n6(gq_pt_ea$bad), n6(nrow(gq_bc))),
+       isTRUE(gq_pt_ea$bad == 0))
+add_q6("inputs", "tiger_5km: the r2 cell of each record (STEP 16.1) is a cell of its point in the clean tiger layer (as above)",
+       if (is.na(gq_pt_t5$bad)) "the record counts differ" else
+         sprintf("%s records differ", n6(gq_pt_t5$bad)),
+       isTRUE(gq_pt_t5$bad == 0))
+gq_x <- lapply(gq_ids, function(ids) as.integer(gq_mid %in% ids))
+gq_src <- c(effort_inat = "the iNaturalist background layer",
+            tiger_obscured = "the obscured layer",
+            effort_all = "the r2 cells", tiger_5km = "the r2 cells")
+for (g in gq_runs) {
+  L <- gq_lay[[g]]
+  ok_id <- identical(as.numeric(L$id), as.numeric(gq_mid))
+  dif <- if (ok_id) sum(L$value != gq_x[[g]]) else NA
+  add_q6("inputs", paste0(g, ": the value of each model cell in the layer = ",
+                          "the second path (", gq_src[[g]], ")"),
+         if (ok_id) sprintf("%s of %s cells differ", n6(dif), n6(gq_n)) else
+           "the cell ids of the layer differ",
+         ok_id && isTRUE(dif == 0))
+}
+gq_pres <- unique(gq_ids$tiger_obscured[gq_ids$tiger_obscured %in% gq_mid])
+gq_bgc  <- unique(gq_ids$effort_inat[gq_ids$effort_inat %in% gq_mid])
+gq_po   <- setdiff(gq_pres, gq_bgc)          # presence cells with no record
+gq_po1  <- sum(gq_lay$effort_inat$value[match(gq_po, gq_mid)] == 1)
+add_q6("inputs", "effort_inat: the cells with the value 1 = the background cells of tbl_16_sdm_counts.csv; a presence cell with no mammal record has the value 0 (the presence cells of the model are not in the input)",
+       sprintf("%s cells; %s presence-only cells with the value 1",
+               n6(sum(gq_lay$effort_inat$value)), n6(gq_po1)),
+       sum(gq_lay$effort_inat$value) == gq_t16v("background", "cells_model") &&
+         gq_po1 == 0)
+add_q6("inputs", "tiger_obscured: the cells with the value 1 = the presence cells of tbl_16_sdm_counts.csv",
+       if (sum(gq_lay$tiger_obscured$value) ==
+           gq_t16v("presence", "cells_model")) "the same count" else
+             "the counts differ",
+       sum(gq_lay$tiger_obscured$value) == gq_t16v("presence", "cells_model"))
+gq_eff <- occ_id_chr(c(gq_ib$gbifID, gq_bc$gbifID))
+gq_tig <- occ_id_chr(c(gq_od$gbifID, gq_tc$gbifID))
+gq_both <- length(intersect(gq_eff, gq_tig))
+add_q6("inputs", "no record of an effort input is a tiger record (gbifID; the four layers read again)",
+       sprintf("%s records", n6(gq_both)), gq_both == 0)
+gq_yr <- function(y) !anyNA(y) && all(y >= GISTAR_YEARS[1] & y <= GISTAR_YEARS[2])
+add_q6("inputs", "each record of the four inputs is of GISTAR_YEARS (w1)",
+       paste0(GISTAR_YEARS[1], "-", GISTAR_YEARS[2]),
+       gq_yr(gq_od$year) && gq_yr(gq_ib$year) && gq_yr(gq_tc$year) &&
+         gq_yr(gq_bc$year))
+# Information: the records not on a model cell, by part (the 429 of STEP 16.1).
+gq_nm_ei <- !(gq_ids$effort_inat %in% gq_mid)
+gq_nm_ea <- !(gq_ids$effort_all %in% gq_mid)
+gq_inat_ea <- gq_bc$datasetKey == SDM_BG_DATASET_KEY
+add_q6("info", "records not on a model cell, by part: effort_inat (iNaturalist layer: part uncert, part obscured); effort_all (iNaturalist dataset, other datasets)",
+       sprintf("effort_inat: uncert %s, obscured %s | effort_all: iNaturalist %s, other %s",
+               n6(sum(gq_nm_ei & gq_ib$part == "uncert")),
+               n6(sum(gq_nm_ei & gq_ib$part == "obscured")),
+               n6(sum(gq_nm_ea & gq_inat_ea)), n6(sum(gq_nm_ea & !gq_inat_ea))),
+       TRUE)
+add_q6("info", "effort_all: records whose point is within GISTAR_QA_EDGE_CELLS of a cell edge (two cells by the point)",
+       sprintf("%s records", n6(gq_pt_ea$edge)), TRUE)
+
+# ---- 4. The neighbours again (all pairs; Decision 26 points 4 and 5) -------------
+gq_bkm <- c(stats::setNames(GISTAR_BAND_KM, gq_main),
+            unlist(GISTAR_QA_BANDS[vapply(GISTAR_QA_BANDS, is.numeric,
+                                          logical(1))]))
+gq_nq <- gistar_qa_neighbours(gq_ix, gq_iy, gq_bkm)
+gq_sym <- vapply(gq_bands, function(b) {
+  l <- gq_nq$nb[[b]]
+  from <- rep(seq_along(l), lengths(l)); to <- unlist(l)
+  identical(sort(paste(from, to)), sort(paste(to, from)))
+}, logical(1))
+add_q6("neighbours", "each neighbour pair is there in both directions (each band; all pairs)",
+       paste(gq_bands, collapse = ", "), all(gq_sym))
+gq_key <- paste(gq_ix, gq_iy)
+gq_full <- Reduce(`&`, lapply(-2:2, function(dx) {
+  Reduce(`&`, lapply(-2:2, function(dy) {
+    paste(gq_ix + dx, gq_iy + dy) %in% gq_key
+  }))
+}))
+gq_n20 <- lengths(gq_nq$nb[[gq_main]])
+add_q6("neighbours", paste0("at ", GISTAR_BAND_KM, " km, each model cell with all 24 cells of its 5 x 5 block among the model cells has 20 neighbours (Amendment 1)"),
+       sprintf("%s such cells; %s with 20", n6(sum(gq_full)),
+               n6(sum(gq_n20[gq_full] == 20))),
+       sum(gq_full) > 0 && all(gq_n20[gq_full] == 20))
+add_q6("neighbours", "the neighbour count of each cell (all pairs) = n_nb of the four layers",
+       sprintf("%s layers", length(gq_lay)),
+       all(vapply(gq_lay, function(L) identical(as.integer(L$n_nb),
+                                                as.integer(gq_n20)),
+                  logical(1))))
+add_q6("info", "the distance between two cell centres nearest to each band, inside and outside (km)",
+       paste(sprintf("%s: %.3f and %.3f", gq_nq$margin$band,
+                     gq_nq$margin$inside_max_km, gq_nq$margin$outside_min_km),
+             collapse = "; "), TRUE)
+
+# ---- 5. The Gi* again: K, G*, the exact p, BH, the classes ------------------------
+gq_st <- list()
+for (g in gq_runs) {
+  gq_st[[g]] <- lapply(gq_nq$nb[gq_bands],
+                       function(nb) gistar_qa_stat(gq_x[[g]], nb))
+}
+for (g in gq_runs) {
+  L <- gq_lay[[g]]
+  S <- gq_st[[g]][[gq_main]]
+  ndif <- sum(L$k != S$k | L$n_nb != S$n_nb | L$n_win != S$n_win |
+                L$class != S$class)
+  add_q6("gistar", paste0(g, ": K, n_nb, n_win and the class of each cell (", gq_main, ") = the layer"),
+         sprintf("%s of %s cells differ", n6(ndif), n6(gq_n)), ndif == 0)
+  d <- max(sdm_qa_diff(L$gistar, S$gistar), sdm_qa_diff(L$p_hot, S$p_hot),
+           sdm_qa_diff(L$p_cold, S$p_cold), sdm_qa_diff(L$p_two, S$p_two),
+           sdm_qa_diff(L$p_adj, S$p_adj))
+  add_q6("gistar", paste0(g, ": G*, p_hot, p_cold, p_two and p_adj (", gq_main, ") = the layer (dhyper sums; own BH)"),
+         dtxt6(d), agree6(d))
+}
+
+# ---- 6. The permutation check of the exact p (q1 of task 16.2) --------------------
+for (i in seq_along(gq_runs)) {
+  g <- gq_runs[i]
+  L <- gq_lay[[g]]
+  cells <- gistar_qa_sample_cells(gq_mid, L$k, L$class != "few_neighbours",
+                                  GISTAR_QA_PERM_CELLS)
+  pm <- gistar_qa_perm(gq_x[[g]], gq_nq$nb[[gq_main]], cells, L$p_hot,
+                       L$p_cold, GISTAR_QA_PERM_N, GISTAR_QA_PERM_LEVEL,
+                       GISTAR_QA_SEED + i)
+  add_q6("permutation", paste0(g, ": at the sample cells, the exact p (the side of p_two) is inside the ",
+                               100 * GISTAR_QA_PERM_LEVEL, " % Clopper-Pearson interval of ",
+                               n6(GISTAR_QA_PERM_N), " random relabellings (", gq_main, ")"),
+         sprintf("%d of %d cells inside", sum(pm$inside), nrow(pm)),
+         nrow(pm) > 0 && all(pm$inside))
+}
+
+# ---- 7. tbl_18_gistar.csv again (Decision 26 point 7; t1) -------------------------
+gq_keys <- gistar_qa_expected_keys(GISTAR_RUNS, gq_main, gq_qab,
+                                   LANDSCAPE_COMPLEXES, gq_s2)
+gq_qc <- sdm_qa_reserve_cells(gq_res, gq_cid)
+gq_cls <- function(g, b) gq_st[[g]][[b]]$class
+gq_cnt <- function(ids) {
+  u <- unique(ids)
+  c(records = length(ids), records_not_model = sum(!(ids %in% gq_mid)),
+    cells_model = sum(u %in% gq_mid), cells_not_model = sum(!(u %in% gq_mid)))
+}
+gq_val <- function(g, b, grp, it) {
+  if (grp == "settings") {
+    return(switch(it, model_cells = gq_n, band_km = GISTAR_BAND_KM,
+                  min_neighbours = GISTAR_MIN_NEIGHBOURS, fdr_q = GISTAR_FDR_Q,
+                  NA_real_))
+  }
+  if (grp == "neighbours") {
+    v <- lengths(gq_nq$nb[[b]])
+    return(switch(it, min = min(v), median = stats::median(v), max = max(v),
+                  cells_below_min = sum(v < GISTAR_MIN_NEIGHBOURS), NA_real_))
+  }
+  if (grp == "input") return(gq_cnt(gq_ids[[g]])[[it]])
+  if (grp == "class") return(sum(gq_cls(g, b) == it))
+  if (grp == "qa_band") {
+    cl <- sub("_same_class_share$", "", it)
+    mn <- gq_cls(g, gq_main)
+    k <- sum(mn == cl)
+    return(if (k == 0) NA_real_ else sum(mn == cl & gq_cls(g, b) == cl) / k)
+  }
+  if (grp == "compare") {
+    e <- GISTAR_RUNS$compare[GISTAR_RUNS$gistar == g]
+    ht <- gq_cls(g, gq_main) == "hot"
+    both <- sum(ht & gq_cls(e, gq_main) == "hot")
+    return(if (it == "hot_also_effort_hot") both else
+      if (sum(ht) > 0) both / sum(ht) else NA_real_)
+  }
+  if (grp == "landscape") {
+    l1 <- gistar_qa_l1(gq_mid[gq_cls(g, gq_main) == "hot"], gq_qc,
+                       gq_rd$landscape_complex, LANDSCAPE_COMPLEXES)
+    return(l1[[it]])
+  }
+  NA_real_
+}
+gq_keys$value <- mapply(gq_val, gq_keys$gistar, gq_keys$band, gq_keys$group,
+                        gq_keys$item, USE.NAMES = FALSE)
+gq_k18 <- paste(gq_t18$gistar, gq_t18$band, gq_t18$group, gq_t18$item,
+                sep = "|")
+gq_kex <- paste(gq_keys$gistar, gq_keys$band, gq_keys$group, gq_keys$item,
+                sep = "|")
+add_q6("table", "tbl_18_gistar.csv: the rows are the rows of Decision 26 point 7 and t1 (none more, none fewer, no repeat)",
+       sprintf("%d rows; %d by the rule", nrow(gq_t18), nrow(gq_keys)),
+       nrow(gq_t18) == nrow(gq_keys) && setequal(gq_k18, gq_kex) &&
+         !anyDuplicated(gq_k18))
+gq_m <- match(gq_kex, gq_k18)
+for (g in c("all", gq_runs)) {
+  r <- which(gq_keys$gistar == g)
+  nbad <- sum(vapply(r, function(j) {
+    is.na(gq_m[j]) || !same6(gq_t18$value[gq_m[j]], gq_keys$value[j])
+  }, logical(1)))
+  add_q6("table", paste0("tbl_18_gistar.csv: the values of the rows of ", g,
+                         " = the second path"),
+         sprintf("%d of %d rows differ", nbad, length(r)), nbad == 0)
+}
+gq_trow <- gq_t18$gistar %in% gq_tiger
+gq_tok <- (gq_t18$group == "class" &
+             gq_t18$item %in% c("hot", "cold", "few_neighbours")) |
+  (gq_t18$group == "qa_band") | (gq_t18$group == "compare") |
+  (gq_t18$group == "landscape" & gq_t18$gistar %in% gq_s2)
+add_q6("table", "tbl_18_gistar.csv: a tiger row holds only the counts of Decision 26 point 7 (no input count, no not_significant count)",
+       sprintf("%d tiger rows", sum(gq_trow)), all(gq_tok[gq_trow]))
+
+# ---- 8. The figures (k1; Decision 25 point 4; Decision 26 point 7) ----------------
+gq_log <- fig_rd$log()
+gq_lb  <- lapply(fig_lists, basename)
+add_q6("figures", "the read record of STEP 16.2: each read is a file of the list of its figure or of the captions (k1)",
+       sprintf("%d reads", nrow(gq_log)),
+       nrow(gq_log) > 0 &&
+         all(mapply(function(f, b) f %in% names(gq_lb) && b %in% gq_lb[[f]],
+                    gq_log$fig, gq_log$file)))
+gq_ban <- basename(c(gq_lay_in[names(gq_lay_in) != GISTAR_PUB_FIG_GISTAR],
+                     obscured_in, bg_inat_in, bg_clean_in, tiger_clean_in))
+add_q6("figures", "no read of STEP 16.2 is a tiger Gi* layer, another Gi* layer, or an occurrence or background layer",
+       sprintf("%d such reads", sum(gq_log$file %in% gq_ban)),
+       !any(gq_log$file %in% gq_ban))
+add_q6("figures", "fig_06 read the effort_inat Gi* layer, the grid layer, and the reserve and state layers (geometry only) (Decision 26 point 7)",
+       paste(gq_log$file[gq_log$fig == "fig_06"], collapse = ", "),
+       setequal(gq_log$file[gq_log$fig == "fig_06"],
+                basename(c(gq_lay_in[[GISTAR_PUB_FIG_GISTAR]], gq_grid_in,
+                           reserves_in, states_in))) &&
+         identical(names(fig_res6), "geometry") &&
+         identical(names(fig_states_g), "geometry"))
+gq_code_l <- readLines(here("scripts", "09_model_suitability.R"), warn = FALSE)
+gq_a <- grep("^# STEP 16\\.2 \u2014 ", gq_code_l)
+gq_b <- grep("^# STEP 16\\.3 \u2014 ", gq_code_l)
+gq_free <- if (length(gq_a) == 1L && length(gq_b) == 1L && gq_b > gq_a) {
+  gistar_qa_free_objects(paste(gq_code_l[(gq_a + 1L):(gq_b - 2L)],
+                               collapse = "\n"), globalenv(),
+                         allowed = c("pred_path", "grid_out", "reserves_in",
+                                     "states_in", "tiger_doi_in", "bg_doi_in"))
+} else NA_character_
+add_q6("figures", "the code of STEP 16.2 uses no object of an earlier STEP: only the objects that it makes, the settings and the paths of the header (k1)",
+       if (anyNA(gq_free)) "the code block was not found" else
+         if (length(gq_free) == 0) "0 objects" else paste(gq_free, collapse = ", "),
+       !anyNA(gq_free) && length(gq_free) == 0)
+gq_drawn <- list(fig_c6 = fig_c6, fig_res6 = fig_res6,
+                 fig_states_g = fig_states_g)
+if (fig_do_sdm) {
+  gq_drawn <- c(gq_drawn, list(fig_c45 = fig_c45, fig_res45 = fig_res45,
+                               fig_hatch_sf = fig_hatch_sf))
+}
+gq_w <- unlist(lapply(gq_drawn, function(d) gistar_qa_words(names(d))))
+add_q6("figures", "no field of a drawn table holds a presence, background, record, tiger or occurrence word (k1)",
+       if (length(gq_w) == 0) sprintf("%d tables", length(gq_drawn)) else
+         paste(gq_w, collapse = ", "),
+       length(gq_w) == 0)
+gq_c6 <- gq_cls(GISTAR_PUB_FIG_GISTAR, gq_main)
+gq_d6 <- if (nrow(fig_c6) == gq_n) sum(as.character(fig_c6$class) != gq_c6) else NA
+add_q6("figures", "fig_06: the class of each drawn cell = the second path (effort_inat, the main band)",
+       if (is.na(gq_d6)) "the cell counts differ" else
+         sprintf("%s of %s cells differ", n6(gq_d6), n6(gq_n)),
+       isTRUE(gq_d6 == 0))
+gq_nc6 <- vapply(GISTAR_CLASSES, function(k) sum(gq_c6 == k), numeric(1))
+add_q6("figures", "fig_06: the legend and the subtitle give the class counts of the second path",
+       paste(sprintf("%s %s", GISTAR_CLASSES, n6(gq_nc6)), collapse = ", "),
+       all(vapply(seq_along(GISTAR_CLASSES), function(j) {
+         grepl(paste0("(", n6(gq_nc6[[j]]), ")"), fig_lab6[j], fixed = TRUE)
+       }, logical(1))) &&
+         grepl(paste0(n6(gq_nc6[["hot"]]), " hot cells and ",
+                      n6(gq_nc6[["cold"]]), " cold cells"), fig_sub06,
+               fixed = TRUE))
+if (fig_do_sdm) {
+  add_q6("figures", "fig_04 and fig_05 read the prediction layer and the grid layer, and the reserve and state layers (geometry only) (Decision 25 point 4)",
+         paste(gq_log$file[gq_log$fig == "fig_04_05"], collapse = ", "),
+         setequal(gq_log$file[gq_log$fig == "fig_04_05"],
+                  basename(c(pred_path, gq_grid_in, reserves_in, states_in))) &&
+           identical(names(fig_res45), "geometry"))
+  gq_pl <- utils::read.csv(pred_path)
+  gq_tp <- utils::read.csv(gq_tp_in, stringsAsFactors = FALSE)
+  gq_pm <- match(gq_mid, gq_pl$id)
+  gq_d45 <- if (nrow(fig_c45) == gq_n && !anyNA(gq_pm)) {
+    sum(as.character(fig_c45$class) != as.character(gq_pl$class[gq_pm]) |
+          fig_c45$out_of_range != as.logical(gq_pl$out_of_range[gq_pm]))
+  } else NA
+  gq_oor <- gq_tp$value[gq_tp$group == "range" & gq_tp$item == "cells_outside"]
+  add_q6("figures", "fig_04/fig_05: the class and the hatch of each drawn cell = the prediction layer on disk; the hatched cells = tbl_16_sdm_prediction.csv",
+         if (is.na(gq_d45)) "the cell counts differ" else
+           sprintf("%s of %s cells differ; %s hatched cells", n6(gq_d45),
+                   n6(gq_n), n6(sum(fig_c45$out_of_range))),
+         isTRUE(gq_d45 == 0) && length(gq_oor) == 1L &&
+           sum(fig_c45$out_of_range) == gq_oor)
+}
+gq_fig_nn <- c(SDM_PUB_FIG_CLASS, SDM_PUB_FIG_VALUE, GISTAR_PUB_FIG)
+gq_fig_sl <- c(SDM_PUB_FIG_CLASS_SLUG, SDM_PUB_FIG_VALUE_SLUG,
+               GISTAR_PUB_FIG_SLUG)
+gq_fig_ex <- file.path(DIR_FIGURES, sprintf("fig_%02d_%s.png", gq_fig_nn,
+                                            gq_fig_sl))
+if (!fig_do_sdm) gq_fig_ex <- gq_fig_ex[3]
+gq_want <- round(as.numeric(FIG_STAGE3_SIZE_IN) * FIG_STAGE3_DPI)
+gq_size_ok <- vapply(gq_fig_ex, function(p) {
+  file.exists(p) && identical(gistar_qa_png_size(p), gq_want)
+}, logical(1))
+add_q6("figures", "the PNG files of STEP 16.2: the names of g1 under outputs/figures/, the size of z1 (read from each file), no tiger in a name",
+       sprintf("%d files; %d x %d pixels", length(gq_fig_ex), gq_want[1],
+               gq_want[2]),
+       all(gq_size_ok) &&
+         setequal(normalizePath(fig_written, winslash = "/", mustWork = FALSE),
+                  normalizePath(gq_fig_ex, winslash = "/", mustWork = FALSE)) &&
+         !any(grepl("tiger", basename(gq_fig_ex), ignore.case = TRUE)))
+
+# ---- 9. Publish checks -------------------------------------------------------------
+gq_out <- list.files(here("outputs"), recursive = TRUE)
+k <- sum(grepl("tiger", basename(gq_out), ignore.case = TRUE))
+add_q6("publish", "(c) no file with \"tiger\" in its name under outputs/",
+       sprintf("%d of %d files", k, length(gq_out)), k == 0)
+k <- sum(grepl("^hot_", basename(gq_out)))
+add_q6("publish", "no Gi* layer (hot_*) under outputs/",
+       sprintf("%d files", k), k == 0)
+gq_pr <- normalizePath(DIR_PROCESSED, winslash = "/", mustWork = FALSE)
+gq_gi <- trimws(readLines(gitignore_in, warn = FALSE))
+add_q6("publish", "(d) the four Gi* layers are under data/processed/, and .gitignore holds data/processed/**",
+       sprintf("%d layers", length(gq_lay_in)),
+       all(startsWith(normalizePath(gq_lay_in, winslash = "/", mustWork = FALSE),
+                      paste0(gq_pr, "/"))) && "data/processed/**" %in% gq_gi)
+gq_pos_re <- paste0("^(x|y|lon|lat|longitude|latitude|geom|geometry|cell|",
+                    "cells|id|ix|iy)$|^cell_|cell02|_cell$|corner")
+gq_bad_pos <- names(gq_t18)[grepl(gq_pos_re, tolower(names(gq_t18)))]
+gq_bad_num <- setdiff(names(gq_t18)[vapply(gq_t18, is.numeric, logical(1))],
+                      "value")
+add_q6("publish", "tbl_18_gistar.csv: (a) no position or cell column; the number column is value only",
+       if (length(c(gq_bad_pos, gq_bad_num)) == 0) paste(ncol(gq_t18), "columns") else
+         paste("columns:", paste(unique(c(gq_bad_pos, gq_bad_num)), collapse = ", ")),
+       length(gq_bad_pos) == 0 && length(gq_bad_num) == 0)
+h <- sdm_qa_id_hits(gq_t18, gq_grid$id)
+add_q6("publish", "tbl_18_gistar.csv: (b) no value is a cell id of the grid",
+       sprintf("%d values", h), h == 0)
+gq_lcr <- gq_t18$group == "landscape"
+gq_lct <- vapply(seq_len(nrow(gq_t18)), function(r) {
+  any(vapply(LANDSCAPE_COMPLEXES, function(w) {
+    grepl(w, tolower(paste(gq_t18$item[r], gq_t18$reading[r])), fixed = TRUE)
+  }, logical(1)))
+}, logical(1))
+rh <- sdm_qa_reserve_hits(gq_t18[!gq_lcr, ], gq_rd$unit_name)
+add_q6("publish", "tbl_18_gistar.csv: no reserve name outside the landscape rows; a landscape name only in a landscape row of the Gi* of s2 (t1)",
+       sprintf("%d reserve names; %d landscape names outside", rh,
+               sum(gq_lct & !gq_lcr)),
+       rh == 0 && !any(gq_lct & !gq_lcr) &&
+         all(gq_t18$gistar[gq_lcr] %in% gq_s2))
+gq_ap <- tryCatch({
+  assert_publishable_table(gq_t18, prefix = NULL, name = "tbl_18_gistar.csv")
+  TRUE
+}, error = function(e) FALSE)
+add_q6("publish", "tbl_18_gistar.csv: assert_publishable_table() passes",
+       if (gq_ap) "pass" else "refused", gq_ap)
+
+# ---- 10. Write the QA table, then stop on a failure --------------------------------
+qa6_tbl <- do.call(rbind, q6)
+h  <- sdm_qa_id_hits(qa6_tbl, gq_grid$id)
+rh <- sdm_qa_reserve_hits(qa6_tbl, gq_rd$unit_name)
+add_q6("publish", "tbl_18_gistar_qa.csv: (b) no value is a cell id; no reserve name",
+       sprintf("%d and %d", h, rh), h == 0 && rh == 0)
+qa6_tbl <- do.call(rbind, q6)
+rownames(qa6_tbl) <- NULL
+occ_assert_counts_only(qa6_tbl, cols = c("group", "check", "value", "pass"),
+                       count_cols = character(0),
+                       name = "tbl_18_gistar_qa.csv")
+write_table(qa6_tbl, nn = GISTAR_TABLE_NN, slug = GISTAR_QA_TABLE_SLUG)
+cat("\n--- QA by group ---\n")
+grp6 <- unique(qa6_tbl$group)
+print(data.frame(group = grp6,
+                 checks = vapply(grp6, function(g) sum(qa6_tbl$group == g),
+                                 integer(1)),
+                 pass = vapply(grp6, function(g)
+                   sum(qa6_tbl$pass[qa6_tbl$group == g]), integer(1))),
+      row.names = FALSE)
+cat("\n--- information (facts, not checks) ---\n")
+inf6 <- qa6_tbl[qa6_tbl$group == "info", ]
+cat(paste0(inf6$check, ":\n  ", inf6$value, collapse = "\n"), "\n")
+n_bad6 <- sum(!qa6_tbl$pass)
+if (n_bad6 > 0) {
+  cat("\n--- checks that FAIL ---\n")
+  bad6 <- qa6_tbl[!qa6_tbl$pass, ]
+  cat(paste0(bad6$group, " | ", bad6$check, " | ", bad6$value,
+             collapse = "\n"), "\n")
+  stop("QA of Decision 26 and of the figures: ", n_bad6, " of ",
+       nrow(qa6_tbl), " checks fail. tbl_18_gistar_qa.csv is written; find ",
+       "the cause before any commit.", call. = FALSE)
+}
+rm(gq_tc, gq_bc, gq_od, gq_ib, gq_x, gq_ids, gq_lay, gq_st, gq_nq)
+rule(paste0("STEP 16.3 complete: QA ", nrow(qa6_tbl), " of ", nrow(qa6_tbl),
+            " checks pass (", round(as.numeric(difftime(Sys.time(), t_step163,
+                                                     units = "mins")), 1),
+            " min).\nCheck `git status --short` before a commit: nothing ",
+            "under data/ may be staged."))

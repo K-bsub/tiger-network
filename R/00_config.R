@@ -1107,5 +1107,12 @@ FIG_GISTAR_COLOURS <- c(hot = "#B2182B", cold = "#2166AC",
 FIG_FRAME_COLOURS  <- c(ink = "#1e1e1e", paper = "#f7f4ee",
                         state_fill = "#e9e4d8", state_line = "#ffffff")
 
+# Task 16.5 (2026-11-07): a tolerance of the QA (STEP 16.3), not a value of
+# the analysis. The QA gives each record of the 5 km sets its 0.2 degree
+# cell again from its point in the clean layer (EPSG:7755 to EPSG:4326). A
+# point within this distance of a cell edge (in cells; 1e-6 x 0.2 degrees,
+# about 2 cm) has two cells, and the r2 cell of STEP 16.1 must be one of them
+GISTAR_QA_EDGE_CELLS <- 1e-6
+
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a
