@@ -1276,6 +1276,37 @@ checked (`sdm_pred_layer_checks()`). Each run of STEP 15.1 writes it again.
 | `class` | integer | 1 to 5 (`SDM_PUB_N_CLASSES`): 5 − floor(5 × (`rank` − 1) / 6,969). Class 5 holds the highest 20 % (1,394 cells), the top set of the sensitivity rule |
 | `out_of_range` | logical | `TRUE` if one or more covariates of the cell is below `varmin` or above `varmax` of the model object (Decision 25 b2). A value equal to a limit is inside. By the definition, no presence or background cell is `TRUE` (a guard of STEP 15.1 checks it) |
 
+## hot_<gistar>_cell02.csv  *(data/processed; Week 16 — built, task 16.3; gitignored)*
+
+Written by `scripts/09` STEP 16.1 (Decision 26 with Amendment 1; process
+choice n1 of task 16.2). Four files, one for each Gi\*:
+`hot_effort_inat_cell02.csv`, `hot_tiger_obscured_cell02.csv`,
+`hot_effort_all_cell02.csv` and `hot_tiger_5km_cell02.csv`. One row per
+model cell, ordered by `id`, at the main band (`GISTAR_BAND_KM`, 50 km).
+No geometry; a figure joins a layer to `sdm_grid_cell02_7755.gpkg` by
+`id`. **The two tiger layers are never published or committed** (Decision
+23 point 8; `tiger_5km` comes from precise positions, tier T2;
+`tiger_obscured` from obscured records, tier T1). No presence or background
+field. The QA bands (queen, 75 km) are not written. Written, then read back
+and checked (`gistar_layer_checks()`). Each run of STEP 16.1 writes them
+again.
+
+**As built (2026-11-07):** 6,969 rows in each file. The classes are in
+`tbl_18_gistar.csv`.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `id` | integer | Cell id, as in `sdm_grid_cell02_7755.gpkg`. A position at 0.2°: never in a table |
+| `value` | integer | 1 if the cell holds one or more records of the input (Decision 26 point 2), otherwise 0. The number of records is not a weight |
+| `n_nb` | integer | The neighbours of the cell: the model cells with a great-circle distance of 50 km or less between the cell centres (Amendment 1). The cell itself is not counted |
+| `n_win` | integer | The cells in the window: `n_nb` + 1 (the cell itself is in its window) |
+| `k` | integer | K_i: the cells with `value` 1 in the window |
+| `gistar` | numeric | G\*_i, the standard form (Decision 26 point 6). A statistic; the class uses the p-value |
+| `p_hot`, `p_cold` | numeric | The exact p under random relabelling: P(K ≥ `k`) and P(K ≤ `k`), K hypergeometric (6,969 cells, the cells with `value` 1, `n_win` cells) |
+| `p_two` | numeric | min(1, 2 × min(`p_hot`, `p_cold`)) |
+| `p_adj` | numeric | `p_two` adjusted by Benjamini–Hochberg over the cells with a class. `NA` for `few_neighbours` |
+| `class` | character | `hot` (`p_adj` ≤ 0.05 and `k` above its expectation), `cold` (≤ 0.05 and below it), `not_significant`, or `few_neighbours` (fewer than 8 neighbours; k1) |
+
 ## osm_zoos_7755.gpkg  *(data/raw/osm; Week 13 — built, task 13.3; gitignored)*
 
 Written by `scripts/01` Block 6 (zoo block). OpenStreetMap features with
@@ -1712,5 +1743,26 @@ r2 is not published.
 | `check` | character | What is checked. For `test case`: the STEP and the name of the hand-made check. The row of `info` is the information count of task 15.5 (the reserves with valued 1 km cells outside the training range) and always passes |
 | `value` | character | What the check found: a count, the largest relative difference of the second path, or the names that were compared |
 | `pass` | logical | `TRUE` if the check passes (tolerance `SDM_QA_REL_TOL`) |
+
+## tbl_18_gistar.csv  *(Week 16 — built, task 16.3; publishable)*
+
+Written by `scripts/09` STEP 16.1 (Decision 26 point 7; process choice t1
+of task 16.2). Long format. Counts and statistics only: no cell id, no
+position and no reserve name. The table checks itself before it is
+written: the tiger rows hold only the counts of Decision 26 point 7, and a
+landscape-complex name is only in the `landscape` rows of `tiger_5km` (the
+reserve-name scan of the `tbl_16` tables would count "sundarbans" as the
+reserve name "Sundarbans").
+
+**As built (2026-11-07):** 92 rows.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `gistar` | character | `all` (a property of the grid), `effort_inat`, `tiger_obscured`, `effort_all` or `tiger_5km` |
+| `band` | character | `-` (no band), `band50_km` (the main band), `queen` or `band75_km` (the QA bands) |
+| `group` | character | `settings`, `neighbours` (`all` only), `input` (the effort Gi\* only), `class`, `qa_band`, `compare` (the tiger Gi\*, at 50 km) or `landscape` (`tiger_5km`, at 50 km; rule L1) |
+| `item` | character | For `class`: the class (a tiger Gi\*: `hot`, `cold` and `few_neighbours` only). For `qa_band`: `hot_same_class_share` or `cold_same_class_share` (the share of the cells of that class at 50 km that keep it at the QA band). For `compare`: `hot_also_effort_hot` and its share. For `landscape`: a landscape complex, or `outside_reserve_polygons` |
+| `value` | numeric | A count, a share, or a setting. `NA` for a share with no cell of the class |
+| `reading` | character | A short text on the row; it holds no name |
 
 *(Further layers — sdm — documented as they are built.)*

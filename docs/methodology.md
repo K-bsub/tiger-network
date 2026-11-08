@@ -35,8 +35,11 @@ iNaturalist effort with the obscured tiger set; the effort of all datasets
 with the tiger 5 km set), 0/1 values on the model cells, a 50 km band, an
 exact p and a false discovery rate; `fig_06` for the iNaturalist effort
 Gi*; the tiger Gi* never published. **Task 16.2 (2026-11-07):** the process choices, and Amendment 1 of
-Decision 26 (the distance between cells on the sphere). **Next:** task
-16.3 (the Gi*), then the figures `fig_04`, `fig_05` and `fig_06`.
+Decision 26 (the distance between cells on the sphere). **Task 16.3
+(2026-11-07):** STEP 16.1, the four Gi*: at 50 km, `effort_inat` 654 hot
+cells and `effort_all` 559, no cold cell; `tiger_obscured` 200 hot cells
+(85 also hot in `effort_inat`); `tiger_5km` 52 (20). **Next:** task 16.4
+(the figures `fig_04`, `fig_05` and `fig_06`).
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -4362,6 +4365,75 @@ neighbour list (A1):**
   in `R/00_config.R`. Caption item 3 of point 7 ("20 neighbours for an
   inner cell") is now true for each row of India.
 
+**Result of STEP 16.1 (task 16.3, `scripts/09`, run on the project
+machine; console text sent on 2026-11-07; facts, not a reading):**
+- The hand-made case of STEP 16.1 passed (26 of 26). The earlier STEPs ran
+  as before (QA of STEP 15.3: 84 of 84). STEP 16.1 took 0.1 minutes.
+- **Cells and neighbours (points 3 to 5; Amendment 1):** 6,969 model cells.
+  Neighbours of a cell (the cell itself not counted):
+
+  | Band | Min | Median | Max | Cells with fewer than 8 |
+  |---|---|---|---|---|
+  | 50 km | 0 | 20 | 20 | 40 |
+  | queen | 0 | 8 | 8 | 814 |
+  | 75 km | 0 | 36 | 42 | 12 |
+
+- **Inputs (point 2):**
+  - `effort_inat`: 16,806 records, 429 of them in a 0.2° cell that is not a
+    model cell; 1,486 model cells (the background cells of STEP 14.1); 55
+    cells with a record are not model cells.
+  - `effort_all`: 23,901 records, 429 of them in a cell that is not a model
+    cell; 1,375 model cells; 47 cells with a record are not model cells.
+  - The tiger inputs: no count (point 7). `tiger_obscured` has the 104
+    presence cells of STEP 14.1 (a guard).
+  - The guards passed: each clean record has its GBIF coordinates once
+    (r2); each iNaturalist record of `effort_all` has the cell of the
+    iNaturalist layer; no record of an effort input is a tiger record; each
+    record is of 2006–2022.
+- **Classes at 50 km (points 6 and 7):**
+
+  | Gi* | hot | cold | not_significant | few_neighbours |
+  |---|---|---|---|---|
+  | `effort_inat` | 654 | 0 | 6,275 | 40 |
+  | `effort_all` | 559 | 0 | 6,370 | 40 |
+  | `tiger_obscured` | 200 | 0 | — | 40 |
+  | `tiger_5km` | 52 | 0 | — | 40 |
+
+  (— : not given for a tiger Gi\*, point 7.)
+- **The comparison (point 7, s1):** 85 of the 200 `hot` cells of
+  `tiger_obscured` are `hot` in `effort_inat` (0.425). 20 of the 52 `hot`
+  cells of `tiger_5km` are `hot` in `effort_all` (0.385).
+- **Rule L1 (`tiger_5km`, s2):** the `hot` cells by landscape complex:
+  `central_india_eastern` 12, `western_ghats` 8, `northeast_hills` 4,
+  `shivalik_gangetic` 0, `sundarbans` 0; outside the reserve polygons 28.
+  The rows add up to 52, so no `hot` cell counts in two complexes.
+- **QA bands (point 5; descriptive, no rule):**
+
+  | Gi* | hot (queen) | cold (queen) | hot (75 km) | cold (75 km) | share of the 50 km hot cells that stay hot: queen / 75 km |
+  |---|---|---|---|---|---|
+  | `effort_inat` | 278 | 0 | 977 | 1,408 | 0.390 / 0.962 |
+  | `effort_all` | 208 | 0 | 817 | 949 | 0.354 / 0.953 |
+  | `tiger_obscured` | 106 | 0 | 289 | 0 | 0.480 / 0.910 |
+  | `tiger_5km` | 17 | 0 | 110 | 0 | 0.327 / 1 |
+
+  The shares of the `cold` cells are `NA`: no cell is `cold` at 50 km.
+- **Stated plainly (facts of the run; no rule changes):**
+  - At 50 km, no cell of an effort Gi\* is `cold`. Point 6 gave the
+    smallest two-sided p of a cell below the expectation at 50 km (0.0129)
+    and said that the result depends on the other p-values. At the 75 km
+    QA band, the two effort Gi\* have 1,408 and 949 `cold` cells. The band
+    stays 50 km (point 5).
+  - The two effort inputs have the same number of records outside the
+    model cells (429). The QA of task 16.5 counts the inputs again by a
+    second path.
+  - No cell of a tiger Gi\* is `cold` at any band, as point 6 said.
+- **Outputs:** `data/processed/hot_effort_inat_cell02.csv`,
+  `hot_tiger_obscured_cell02.csv`, `hot_effort_all_cell02.csv` and
+  `hot_tiger_5km_cell02.csv` (6,969 rows each; written, read back and
+  checked; gitignored); `outputs/tables/tbl_18_gistar.csv` (92 rows).
+- **Seen from this run on:** the console text of STEP 16.1 (the table), by
+  the author and the chat. No map was made.
+
 **Reason and sources:**
 - **This project only (x1).** The author's direction of 2026-11-07.
   Proposal question 4 asks how much of the pattern of this project is
@@ -4544,6 +4616,58 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-07 — Week 16, task 16.3 complete: STEP 16.1 (the four Gi\*)
+
+- **Code.** `R/00_functions_gistar.R` (new; f1 of task 16.2): 13
+  `gistar_*` functions — the haversine distance, the index window, the
+  neighbours, K_i, G\*_i and the exact p, the Benjamini–Hochberg step and
+  the classes, the cell of a record from its GBIF coordinates (r2), rule
+  L1, the share of the QA bands, the checks of a layer, and the hand-made
+  case (`gistar_self_test()`, 26 checks). `scripts/09`: STEP 16.1 after
+  STEP 15.3 (s1); the header (the choices of task 16.2, the inputs and the
+  outputs of STEP 16.1, a dated note on w2 of task 14.2); one more
+  `source()` line; three paths.
+- **Tests in the chat (not the record):** R 4.3.3 with `sf` 1.0.15 and
+  `terra` 1.7.65 (the project machine has R 4.5.2, `sf` 1.1-1 and `terra`
+  1.9-27). The hand-made case 26 of 26. Four changes made to the code on
+  purpose (an off-by-one p, the cell out of its window, a wrong distance
+  rule, the correction over all cells); each made the right checks fail.
+  STEP 16.1 on a made-up project (a 1 km stack in EPSG:7755, 1,200 model
+  cells, made-up records and GBIF zip files with coordinates on cell
+  edges): all guards passed. Two negative tests (a record with no GBIF
+  coordinates; an iNaturalist record with another cell) stopped the script
+  at the right guard. No data file was used.
+- **The run (project machine, 2026-11-07):** the result is in Decision 26,
+  "Result of STEP 16.1". In short, at 50 km: `effort_inat` 654 `hot`,
+  `effort_all` 559 `hot`, no `cold` cell; `tiger_obscured` 200 `hot` (85
+  also `hot` in `effort_inat`); `tiger_5km` 52 `hot` (20 also `hot` in
+  `effort_all`; by landscape complex 12, 8, 4, 0, 0 and 28 outside the
+  reserve polygons).
+- **Readings of the chat (stated in its reply of 2026-11-07; the author's
+  answer is open):**
+  1. Point 5 asks for the QA-band counts "for each Gi\*", and point 7
+     allows only the s1 counts for a tiger Gi\*. The tiger rows at the QA
+     bands hold `hot`, `cold`, `few_neighbours` and the same-class shares;
+     no input count and no `not_significant` count.
+  2. The tiger-against-effort comparison and the L1 counts are at 50 km
+     only.
+  3. The neighbour statistics are given once (`gistar` = `all`): they
+     depend on the grid only.
+- **An error of the chat:** the run instructions said that the Week-15
+  tables "must not show as changed". QA check (c) of STEPs 14.3 and 15.3
+  counts all files under `outputs/`, so the new `tbl_18_gistar.csv` changed
+  its value text ("0 of 66 files" to "0 of 67 files") in
+  `tbl_16_sdm_qa.csv` and `tbl_16_sdm_pred_qa.csv`. No other value
+  changed. The two tables are committed with the new file.
+- **Docs:** this file (Decision 26, "Result of STEP 16.1"; the status);
+  `data-dictionary.md` (the four Gi\* layers; `tbl_18_gistar.csv`);
+  `project-plan.md` (task 16.3 done); `naming-conventions.md` §6
+  (`tbl_18` built); `handoff.md` (the state, the files, two gotchas, the
+  open readings).
+- **Next:** task 16.4 (STEP 16.2: `fig_04`, `fig_05` and `fig_06`). First
+  the author answers the three readings and one caption question of
+  `fig_06` (raised in the chat's reply after the run).
 
 ### 2026-11-07 — Week 16, task 16.2: process choices; Decision 26 Amendment 1 (no code, no run)
 

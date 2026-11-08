@@ -107,7 +107,11 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   g1, z1, c1, h1, k1, d1, q1; each as the chat recommended) and
   **Amendment 1 of Decision 26** (A1): the distance between cells is on
   the sphere (haversine), not in EPSG:7755 — an error of the chat, found
-  in task 16.2. No code and no run yet.
+  in task 16.2. Task 16.3: STEP 16.1, run on 2026-11-07 — the four Gi\*
+  at 50 km: `effort_inat` 654 `hot` and `effort_all` 559 `hot`, no `cold`
+  cell; `tiger_obscured` 200 `hot` (85 also `hot` in `effort_inat`);
+  `tiger_5km` 52 `hot` (20 also `hot` in `effort_all`); `tbl_18_gistar.csv`
+  (92 rows). No figure yet.
 - **Stage 1 (Growth):** complete in Week 7. **Stage 2 (Connectivity):**
   complete in Week 12. **Stage 3 (Habitat suitability):** Weeks 13 and 14
   complete and committed (Week 14: `30a512d`, "Week 14 complete"); **Week
@@ -143,7 +147,8 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   24 (the settings); the fit (6 of 9 covariates; `lq`, regmult 1; mean
   test Boyce 0.668 over 5 folds of 2° blocks; both sensitivity runs
   robust); QA 133 of 133.
-- **`scripts/09_model_suitability.R`:** STEPs 14.1–15.3. `RUN_GRID`,
+- **`scripts/09_model_suitability.R`:** STEPs 14.1–16.1 (STEP 16.1 since task
+  16.3; it reads the two GBIF zip files, r2 of task 16.2). `RUN_GRID`,
   `RUN_COVARIATES` and `RUN_FIT` are `FALSE`: STEP 14.2 is skipped, and the
   later STEPs read the model file of the record (`SDM_PRED_MODEL_FILE`).
   Each run writes the tables of STEPs 14.1, 14.3 and 15.1–15.3 again (the
@@ -167,7 +172,9 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   `docs:` commit. Nothing under `data/` may be staged.
 - **Done: task 16.1 — Decision 26** (2026-11-07; the Gi* settings), before
   any Gi* was computed. **Done: task 16.2** (the process choices;
-  Amendment 1 of Decision 26). **Next: task 16.3** (STEP 16.1, the Gi\*). The forks of task 16.1 were in `project-plan.md` →
+  Amendment 1 of Decision 26) and **task 16.3** (STEP 16.1). **Next: task
+  16.4** (STEP 16.2, the figures), after the author's answers on the three
+  readings of task 16.3 and the caption question of `fig_06`. The forks of task 16.1 were in `project-plan.md` →
   "Week 16 — task breakdown" (a draft): the input set of the tiger Gi*, the input of the
   effort Gi*, the grid and the value of a cell, the neighbours and the
   band (a new value), the correction for many tests, the published form of
@@ -247,11 +254,15 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
 | `data/processed/sdm_covariates_cell02.csv` | Covariates of the 6,969 model cells | Holds cell ids: no table row from it |
 | `data/processed/tiger_sdm_maxnet_cell02_20261025.rds` | The main model and its settings | Under `data/` (D24 m1); the file that the prediction reads (D25 a1, `SDM_PRED_MODEL_FILE`) |
 | `data/processed/sdm_prediction_cell02.csv` | The prediction: `id`, `value` (cloglog), `rank`, `class`, `out_of_range`; 6,969 rows | No presence or background field; holds cell ids: no table row from it; not published as a layer (D25 d1) |
+| `data/processed/hot_<gistar>_cell02.csv` (4 files: `effort_inat`, `tiger_obscured`, `effort_all`, `tiger_5km`) | The Gi\* at 50 km (Decision 26): `id`, `value`, `n_nb`, `n_win`, `k`, `gistar`, `p_hot`, `p_cold`, `p_two`, `p_adj`, `class`; 6,969 rows each | No geometry; holds cell ids; the two tiger layers are never published or committed; the `fig_06` code reads `hot_effort_inat_cell02.csv` only (k1 of task 16.2) |
 | `data/processed/boundary_states_7755.gpkg` | Natural Earth states (36), for the state boundaries of the figures | State and district can disagree at a border (gotcha) |
-| `outputs/tables/tbl_00`–`tbl_17_*`, `outputs/figures/fig_01`–`fig_03` | Committed tables and figures | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `fig_04` and `fig_05` reserved (D25 f3) |
+| `outputs/tables/tbl_00`–`tbl_18_*`, `outputs/figures/fig_01`–`fig_03` | Committed tables and figures | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `fig_04` and `fig_05` reserved (D25 f3); `tbl_18_gistar.csv` holds only the tiger counts of D26 point 7; `fig_06` reserved (D26 f1) |
 
 ### Open items (carried)
 
+- **The three readings of task 16.3** (the tiger rows at the QA bands; the
+  comparison and L1 at 50 km only; the neighbour rows as `all`) wait for
+  the author's answer (change log, 2026-11-07, task 16.3).
 - `scripts/03` line 101: wrap the literal text in `I()` for `readr` ≥ 2.2
   (no output change; not done).
 - The NTCA overlap has no buffer (Decision 17). Transboundary links are
@@ -497,6 +508,15 @@ of closed one-time work are in git history.)*
   distance must say where the distance is measured (Decision 26 Amendment
   1: on the sphere). Check a count that a rule gives in the CRS that the
   code uses, not by arithmetic on the sphere.
+- **QA check (c) of STEPs 14.3 and 15.3 counts all files under `outputs/`.**
+  A new output file changes its value text ("0 of 66 files" to "0 of 67
+  files" with `tbl_18_gistar.csv`), so `tbl_16_sdm_qa.csv` and
+  `tbl_16_sdm_pred_qa.csv` change. This is expected: commit them with the
+  new file.
+- **At 50 km no effort cell is `cold`** (STEP 16.1, 2026-11-07); at the
+  75 km QA band, 1,408 (`effort_inat`) and 949 (`effort_all`). A text must
+  not read the absence of `cold` cells as records everywhere (Decision 26
+  point 6).
 
 **Process (chat)**
 - **A list of expected `git status` lines starts from the last commit.** Ask
