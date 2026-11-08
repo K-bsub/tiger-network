@@ -1091,5 +1091,21 @@ GISTAR_QA_PERM_CELLS <- 20L               # sample cells for each Gi*
 GISTAR_QA_PERM_LEVEL <- 0.999             # the binomial interval
 GISTAR_QA_SEED       <- 20261107L         # a fixed seed (QA only)
 
+# Task 16.4 (2026-11-07), c1 and z1 of task 16.2: the colours.
+#   FIG_GISTAR_COLOURS  the four classes of fig_06. The chat simulated
+#       protanopia, deuteranopia and tritanopia (Machado et al. 2009, severity
+#       1) on these four colours and the state fill: the smallest CIELAB
+#       difference (CIE76) of two of them is 15.2 (not_significant against the
+#       state fill). The cold colour is in the key; no cell is cold at 50 km in
+#       the run of task 16.3
+#   FIG_FRAME_COLOURS   the ink, the paper and the state fill of fig_03
+#       (scripts/07 STEP 12.7). The state line is white here (fig_03:
+#       #d4cfc4): a start value, so that the line shows on the dark cells
+FIG_GISTAR_COLOURS <- c(hot = "#B2182B", cold = "#2166AC",
+                        not_significant = "#BBBBBB",
+                        few_neighbours = "#5E5E5E")
+FIG_FRAME_COLOURS  <- c(ink = "#1e1e1e", paper = "#f7f4ee",
+                        state_fill = "#e9e4d8", state_line = "#ffffff")
+
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a

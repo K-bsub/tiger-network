@@ -117,7 +117,14 @@
 #              tbl_18_gistar.csv; h1 a hand-made case first
 #              (gistar_self_test()). The tiger Gi* are never published or
 #              committed
-#   Week 16, to come: STEP 16.2 (fig_04, fig_05, fig_06), STEP 16.3 (QA)
+#   STEP 16.2 (task 16.4)  the figures fig_04 (the five classes) and fig_05
+#              (the model output) of Decision 25 points 4 to 6, only with a
+#              model outcome; fig_06 (the effort_inat Gi*) of Decision 26
+#              point 7. The read guard of k1 (fig_reader()); the hatch and
+#              the key box of h1; the caption drafts of d1 (each number from
+#              a table or a layer; printed under "DRAFT"); h1 a hand-made
+#              case first (fig_self_test())
+#   Week 16, to come: STEP 16.3 (QA)
 #
 # SENSITIVE DATA (docs/sensitive-data-policy.md; Decision 23 point 9):
 #   The obscured set and each layer made from it are tier T1 and stay under
@@ -252,6 +259,24 @@
 #     Decision 26 point 7 (s1; for tiger_5km also by landscape complex, s2).
 #     No cell id, no position, no reserve name
 #
+# INPUTS (STEP 16.2, task 16.4; k1 of task 16.2): the figures read only the
+#   files of their list. fig_04 and fig_05: the prediction layer (STEP 15.1),
+#   the grid layer (STEP 14.1), the reserve layer and
+#   data/processed/boundary_states_7755.gpkg. fig_06: the layer
+#   hot_effort_inat_cell02.csv (STEP 16.1), the grid, the reserves and the
+#   states. The captions: tbl_16_sdm_counts, tbl_16_sdm_cv,
+#   tbl_16_sdm_sensitivity, tbl_16_sdm_prediction, tbl_16_sdm_reserve_check,
+#   tbl_18_gistar and the two GBIF DOI files (gbif_tiger_download_doi.txt,
+#   background_download_doi.txt). Of the reserve and state layers, only the
+#   geometry is drawn.
+#
+# OUTPUTS (STEP 16.2, task 16.4; g1, z1 of task 16.2):
+#   outputs/figures/fig_04_suitability_classes.png,
+#   fig_05_suitability_value.png and fig_06_effort_gistar.png (11 x 10.6
+#   inches, 200 dpi; the size is read back from each file). The titles, the
+#   subtitles and the captions are DRAFT text for the author's edit (d1).
+#   No point, no presence mark, no background mark
+#
 # SETTINGS: the SDM_* values (Decision 23) and the OCC_* values that Decision
 #   23 reuses come from R/00_config.R. Do not repeat a value as a literal.
 #
@@ -272,6 +297,7 @@ source(here("R", "00_functions_occ.R"))      # occ_id_chr, occ_cell02
 source(here("R", "00_functions_sensitive.R"))# publish checks (later STEPs)
 source(here("R", "00_functions_sdm.R"))      # sdm_* (task 14.2)
 source(here("R", "00_functions_gistar.R"))   # gistar_* (task 16.3)
+source(here("R", "00_functions_fig.R"))      # fig_* (task 16.4)
 
 rule <- function(txt) cat("\n", strrep("=", 78), "\n", txt, "\n",
                           strrep("=", 78), "\n", sep = "")
@@ -339,6 +365,11 @@ tiger_clean_in <- file.path(DIR_PROCESSED, "occ_tiger_gbif_clean_7755.gpkg")
 tiger_key_in   <- file.path(DIR_RAW, "gbif", "gbif_tiger_download_key.txt")
 bg_key_in      <- file.path(DIR_RAW, "gbif_background",
                             "background_download_key.txt")
+# STEP 16.2 (k1 of task 16.2): the frame and the DOI files of the captions
+states_in    <- file.path(DIR_PROCESSED, "boundary_states_7755.gpkg")
+tiger_doi_in <- file.path(DIR_RAW, "gbif", "gbif_tiger_download_doi.txt")
+bg_doi_in    <- file.path(DIR_RAW, "gbif_background",
+                          "background_download_doi.txt")
 # Output table via write_table(nn = 16, slug = "sdm_counts")
 
 # Fields that the later STEPs use. The structure of the scripts/08 layers,
@@ -2552,3 +2583,514 @@ rule(paste0("STEP 16.1 complete (", round(as.numeric(difftime(
   "under data/processed/ (gitignored) and tbl_18_gistar.csv.\nNext: STEP ",
   "16.2, the figures (task 16.4). Check `git status --short` before a ",
   "commit: nothing under data/ may be staged."))
+
+# =============================================================================
+# STEP 16.2 — the figures fig_04, fig_05 and fig_06 (task 16.4)
+# =============================================================================
+# Decision 25 points 4 to 6; Decision 26 point 7 (with k-a); process choices
+# g1, z1, c1, h1, k1, d1 of task 16.2; h1 a hand-made case first. fig_04 and
+# fig_05 only with a model outcome (the gate of Decision 24 point 8 is open:
+# STEP 15.1 stops the script if it is closed).
+#   1. the settings; the packages; the hand-made case (fig_self_test())
+#   2. the read guard (k1): the files of each figure, and the tables and the
+#      DOI files of the captions; each read is recorded
+#   3. the drawing tables: the model cells with the prediction layer (fig_04,
+#      fig_05) and with the effort_inat Gi* layer (fig_06); the hatch (h1)
+#   4. the caption drafts (d1): each number from a table or a layer
+#   5. the checks (a failure stops the step before a file is written)
+#   6. the three PNG files; their size read back from the file
+# Console text: counts, statistics and the title, subtitle and caption drafts
+# (marked DRAFT). No position.
+
+rule("STEP 16.2 — the figures fig_04, fig_05 and fig_06 (task 16.4)")
+t_step162 <- Sys.time()
+
+# ---- 1. The settings, the packages and the hand-made case (h1) -----------------
+need162 <- c("SDM_PUB_FIG_CLASS", "SDM_PUB_FIG_VALUE", "SDM_PUB_VALUE_LABEL",
+             "SDM_PUB_HATCH", "SDM_PUB_N_CLASSES", "GISTAR_PUB_FIG",
+             "GISTAR_PUB_FIG_GISTAR", "SDM_PUB_FIG_CLASS_SLUG",
+             "SDM_PUB_FIG_VALUE_SLUG", "GISTAR_PUB_FIG_SLUG",
+             "FIG_STAGE3_SIZE_IN", "FIG_STAGE3_DPI", "FIG_STAGE3_PALETTE",
+             "FIG_HATCH_LINES_PER_CELL", "FIG_HATCH_KEY_POS",
+             "FIG_GISTAR_COLOURS", "FIG_FRAME_COLOURS")
+miss162 <- need162[!vapply(need162, exists, logical(1))]
+if (length(miss162) > 0) {
+  stop("Setting(s) missing from R/00_config.R (Decisions 25 and 26; tasks ",
+       "16.2 and 16.4): ", paste(miss162, collapse = ", "), call. = FALSE)
+}
+for (pk in c("ggplot2", "viridisLite")) {
+  if (!requireNamespace(pk, quietly = TRUE)) {
+    stop("STEP 16.2 needs the package ", pk, " (in renv.lock). Run ",
+         "renv::restore().", call. = FALSE)
+  }
+}
+suppressPackageStartupMessages(library(ggplot2))
+fig_slugs <- c(SDM_PUB_FIG_CLASS_SLUG, SDM_PUB_FIG_VALUE_SLUG,
+               GISTAR_PUB_FIG_SLUG)
+sdm_run_guards(list(
+  "the figure numbers must be 4, 5 and 6 (Decision 25 f3; Decision 26 f1)" =
+    SDM_PUB_FIG_CLASS == 4 && SDM_PUB_FIG_VALUE == 5 && GISTAR_PUB_FIG == 6,
+  "no figure slug may hold the word tiger (g1)" =
+    !any(grepl("tiger", fig_slugs, ignore.case = TRUE)),
+  "fig_06 must draw the effort_inat Gi* (Decision 26 f1)" =
+    identical(GISTAR_PUB_FIG_GISTAR, "effort_inat") &&
+    !grepl("tiger", GISTAR_LAYER_FILES[[GISTAR_PUB_FIG_GISTAR]]),
+  "the hatch must be on (Decision 25 b2)" = isTRUE(SDM_PUB_HATCH),
+  "FIG_GISTAR_COLOURS must name the four classes" =
+    identical(names(FIG_GISTAR_COLOURS), GISTAR_CLASSES),
+  "FIG_FRAME_COLOURS must name ink, paper, state_fill and state_line" =
+    identical(names(FIG_FRAME_COLOURS),
+              c("ink", "paper", "state_fill", "state_line")),
+  "FIG_HATCH_LINES_PER_CELL must be a whole number of 1 or more" =
+    is.numeric(FIG_HATCH_LINES_PER_CELL) &&
+    FIG_HATCH_LINES_PER_CELL >= 1 &&
+    FIG_HATCH_LINES_PER_CELL == round(FIG_HATCH_LINES_PER_CELL)
+), what = "the settings of the figures")
+st162 <- fig_self_test()
+cat("hand-made case of STEP 16.2:", sum(st162$pass), "of", nrow(st162),
+    "checks pass.\n")
+if (!all(st162$pass)) {
+  stop("The hand-made case of STEP 16.2 failed:\n  ",
+       paste(st162$check[!st162$pass], collapse = "\n  "), call. = FALSE)
+}
+fig_do_sdm <- SDM_GRAIN_OUTCOME %in% c("reduced_model", "planned_model")
+fig_ink   <- FIG_FRAME_COLOURS[["ink"]]
+fig_paper <- FIG_FRAME_COLOURS[["paper"]]
+
+# ---- 2. The read guard (k1 of task 16.2) ----------------------------------------
+# One list for each figure and one for the captions. A read of a file that is
+# not on the list stops the step; each read is recorded and printed.
+fig_grid_in <- file.path(DIR_PROCESSED, grid_out)
+fig_hot_in  <- file.path(DIR_PROCESSED,
+                         GISTAR_LAYER_FILES[[GISTAR_PUB_FIG_GISTAR]])
+fig_tab <- function(slug) file.path(DIR_TABLES, paste0(slug, ".csv"))
+fig_lists <- list(
+  fig_04_05 = c(pred_path, fig_grid_in, reserves_in, states_in),
+  fig_06    = c(fig_hot_in, fig_grid_in, reserves_in, states_in),
+  caption   = c(fig_tab("tbl_16_sdm_counts"), fig_tab("tbl_16_sdm_cv"),
+                fig_tab("tbl_16_sdm_sensitivity"),
+                fig_tab("tbl_16_sdm_prediction"),
+                fig_tab("tbl_16_sdm_reserve_check"),
+                fig_tab(sprintf("tbl_%02d_%s", GISTAR_TABLE_NN,
+                                GISTAR_TABLE_SLUG)),
+                tiger_doi_in, bg_doi_in))
+fig_need <- unique(unlist(if (fig_do_sdm) fig_lists else
+  list(fig_lists$fig_06, fig_tab("tbl_16_sdm_counts"),
+       fig_tab(sprintf("tbl_%02d_%s", GISTAR_TABLE_NN, GISTAR_TABLE_SLUG)),
+       bg_doi_in)))
+fig_miss <- fig_need[!file.exists(fig_need)]
+if (length(fig_miss) > 0) {
+  stop("STEP 16.2 needs:\n  ", paste(fig_miss, collapse = "\n  "),
+       call. = FALSE)
+}
+fig_rd <- fig_reader(fig_lists)
+
+# The tables and the DOI files of the captions (statistics and text only).
+# The tables of the model and the tiger DOI only with a model outcome.
+fig_t_counts <- fig_rd$read(fig_tab("tbl_16_sdm_counts"), "caption")
+fig_t_gs     <- fig_rd$read(fig_tab(sprintf("tbl_%02d_%s", GISTAR_TABLE_NN,
+                                            GISTAR_TABLE_SLUG)), "caption")
+fig_doi <- function(txt) {
+  d <- sub("^DOI:\\s*", "", grep("^DOI:", txt, value = TRUE))
+  if (length(d) != 1L || !nzchar(d)) {
+    stop("A GBIF DOI file must hold one line \"DOI: ...\".", call. = FALSE)
+  }
+  d
+}
+fig_doi_b <- fig_doi(fig_rd$read(bg_doi_in, "caption"))
+if (fig_do_sdm) {
+  fig_t_cv   <- fig_rd$read(fig_tab("tbl_16_sdm_cv"), "caption")
+  fig_t_sens <- fig_rd$read(fig_tab("tbl_16_sdm_sensitivity"), "caption")
+  fig_t_pred <- fig_rd$read(fig_tab("tbl_16_sdm_prediction"), "caption")
+  fig_t_rchk <- fig_rd$read(fig_tab("tbl_16_sdm_reserve_check"), "caption")
+  fig_doi_t  <- fig_doi(fig_rd$read(tiger_doi_in, "caption"))
+}
+fig_val <- function(t, group, item, col = "value") {
+  v <- t[[col]][t$group == group & t$item == item]
+  if (length(v) != 1L) {
+    stop("A caption value is not in its table: ", group, " / ", item,
+         call. = FALSE)
+  }
+  v
+}
+fig_gs <- function(gistar, band, group, item) {
+  v <- fig_t_gs$value[fig_t_gs$gistar == gistar & fig_t_gs$band == band &
+                        fig_t_gs$group == group & fig_t_gs$item == item]
+  if (length(v) != 1L) {
+    stop("A value is not in tbl_18_gistar.csv: ", gistar, " / ", band, " / ",
+         group, " / ", item, call. = FALSE)
+  }
+  v
+}
+
+# ---- 3. The drawing tables and the hatch (h1) -------------------------------------
+fig_cells_of <- function(grid) {
+  g <- grid[as.logical(grid$model), "id"]
+  g[order(g$id), ]
+}
+fig_area_range <- function(ids) {         # km2 on the WGS 84 ellipsoid
+  iy <- ids %/% SDM_ID_BASE
+  a <- fig_quad_area_km2(iy * SDM_GRAIN_DEG, (iy + 1) * SDM_GRAIN_DEG,
+                         SDM_GRAIN_DEG)
+  range(a)
+}
+fig_geom_only <- function(x) {
+  g <- sf::st_geometry(x)
+  sf::st_sf(geometry = g[!sf::st_is_empty(g)])
+}
+# fig_06: the effort_inat Gi* (always).
+fig_g6     <- fig_cells_of(fig_rd$read(fig_grid_in, "fig_06"))
+fig_hot    <- fig_rd$read(fig_hot_in, "fig_06")
+fig_res6   <- fig_geom_only(fig_rd$read(reserves_in, "fig_06"))
+fig_st6    <- fig_rd$read(states_in, "fig_06")
+fig_m6     <- match(fig_g6$id, fig_hot$id)
+fig_c6 <- sf::st_sf(class = factor(fig_hot$class[fig_m6],
+                                   levels = GISTAR_CLASSES),
+                    geometry = sf::st_geometry(fig_g6))
+fig_states_g <- fig_geom_only(fig_st6)
+fig_bb <- sf::st_bbox(fig_st6)
+fig_area <- fig_area_range(fig_g6$id)
+fig_side <- sqrt(stats::median(as.numeric(sf::st_area(fig_g6))))
+fig_step <- 2 * fig_side / FIG_HATCH_LINES_PER_CELL
+# fig_04 and fig_05: the prediction (model outcome only).
+if (fig_do_sdm) {
+  fig_g45  <- fig_cells_of(fig_rd$read(fig_grid_in, "fig_04_05"))
+  fig_pred <- fig_rd$read(pred_path, "fig_04_05")
+  fig_res45 <- fig_geom_only(fig_rd$read(reserves_in, "fig_04_05"))
+  fig_st45 <- fig_rd$read(states_in, "fig_04_05")
+  fig_m45  <- match(fig_g45$id, fig_pred$id)
+  fig_c45 <- sf::st_sf(
+    class = factor(as.character(fig_pred$class[fig_m45]),
+                   levels = as.character(SDM_PUB_N_CLASSES:1)),
+    value = fig_pred$value[fig_m45],
+    out_of_range = as.logical(fig_pred$out_of_range[fig_m45]),
+    geometry = sf::st_geometry(fig_g45))
+  fig_hatch <- fig_hatch_lines(sf::st_geometry(fig_c45)[fig_c45$out_of_range],
+                               fig_step)
+  fig_hatch_sf <- sf::st_sf(geometry = fig_hatch)
+  fig_w <- fig_bb[["xmax"]] - fig_bb[["xmin"]]
+  fig_h <- fig_bb[["ymax"]] - fig_bb[["ymin"]]
+  fig_key_x <- fig_bb[["xmin"]] + FIG_HATCH_KEY_POS[["x"]] * fig_w
+  fig_key_y <- fig_bb[["ymin"]] + FIG_HATCH_KEY_POS[["y"]] * fig_h
+  fig_kb <- fig_key_box(fig_key_x, fig_key_y, 3 * fig_side, fig_step,
+                        sf::st_crs(fig_st45))
+}
+
+# ---- 4. The caption drafts (d1) -----------------------------------------------------
+fig_deg <- "\u00b0"; fig_km2 <- "km\u00b2"; fig_dash <- "\u2013"
+fig_area_txt <- paste0(fig_fmt_int(fig_area[1]), fig_dash,
+                       fig_fmt_int(fig_area[2]), " ", fig_km2)
+fig_n_model <- nrow(fig_g6)
+fig_outlines <- paste0(
+  "Reserve outlines: the core protected-area polygons of the NTCA (Decision ",
+  "4), not the notified total area. State lines: Natural Earth ",
+  "(approximate).")
+if (fig_do_sdm) {
+  fig_n_pres <- fig_val(fig_t_counts, "presence", "cells_model")
+  fig_n_bg   <- fig_val(fig_t_counts, "background", "cells_model")
+  fig_boyce  <- fig_t_cv$boyce[fig_t_cv$fold == "mean"]
+  fig_auc    <- fig_t_cv$auc_test[fig_t_cv$fold == "mean"]
+  fig_ov     <- fig_t_sens$top_overlap
+  fig_noor   <- sum(fig_c45$out_of_range)
+  fig_rho    <- fig_val(fig_t_rchk, "r1", "rho")
+  fig_rn     <- fig_val(fig_t_rchk, "r1", "n")
+  fig_rp     <- fig_val(fig_t_rchk, "r1", "p_value")
+  fig_rread  <- fig_val(fig_t_rchk, "r1", "result", "reading")
+  fig_cap45 <- function(how_to_read) fig_wrap(list(
+    paste0("Relative habitat suitability for tigers from a maxnet model at ",
+           "the 0.2", fig_deg, " grain (cells of about 20 km; ", fig_area_txt,
+           "), on ", fig_fmt_int(fig_n_model), " model cells. It is not ",
+           "occupancy (Decision 1) and not a probability of presence."),
+    paste0("Presences: the iNaturalist tiger records, obscured by the source ",
+           "to their 0.2", fig_deg, " cell, in ", fig_fmt_int(fig_n_pres),
+           " cells. Background: the iNaturalist mammal records, in ",
+           fig_fmt_int(fig_n_bg), " cells. The records show where people ",
+           "photograph and upload animals; the background corrects this ",
+           "effort bias in part, not fully (proposal \u00a77)."),
+    how_to_read,
+    paste0("Sensitivity runs: ", fig_fmt(fig_ov[1]), " and ",
+           fig_fmt(fig_ov[2]), " of the top-20 % cells of the main model are ",
+           "also in the top 20 % of the two runs."),
+    paste0("Evaluation: a mean test Boyce index of ", fig_fmt(fig_boyce),
+           " over ", SDM_CV_K, " folds of ", SDM_CV_BLOCK_DEG, fig_deg,
+           " spatial blocks (repeated P/E values kept; not the ",
+           "ecospat.boyce() default) and a mean test AUC of ",
+           fig_fmt(fig_auc), "."),
+    paste0("Hatch: the ", fig_noor, " cells outside the training range of ",
+           "one or more covariates; their values are clamped. A blank cell ",
+           "is not a model cell (less than ",
+           round(100 * SDM_CELL_MIN_COVER), " % complete-case cover: a value ",
+           "of each covariate)."),
+    fig_outlines,
+    paste0("Reserve check: \"", fig_rread, "\" by the rule of the project ",
+           "(Spearman rho ", fig_fmt(fig_rho), " between the reserve value ",
+           "and the 2022 census density; n = ", fig_fmt_int(fig_rn),
+           " reserves; p = ", fig_fmt(fig_rp), ")."),
+    paste0("Sources: GBIF occurrence downloads ", fig_doi_t, " (tiger) and ",
+           fig_doi_b, " (mammals), iNaturalist research-grade observations; ",
+           "ESA WorldCover 2021; Global Human Modification 2022; terrain ",
+           "AWS Terrain Tiles; OpenStreetMap data \u00a9 OpenStreetMap ",
+           "contributors (ODbL).")))
+  fig_title45 <- "Modelled relative habitat suitability for tigers in India"
+  fig_sub04 <- paste0("Five classes of equal size by rank of the model ",
+                      "output, on ", fig_fmt_int(fig_n_model), " cells of 0.2",
+                      fig_deg, ". Hatch: ", fig_noor, " cells outside the ",
+                      "training range.")
+  fig_sub05 <- paste0("The model output (cloglog) on ",
+                      fig_fmt_int(fig_n_model), " cells of 0.2", fig_deg,
+                      ": relative, not a probability of presence. Hatch: ",
+                      fig_noor, " cells outside the training range.")
+  fig_cap04 <- fig_cap45(paste0(
+    "Classes: five classes of equal size by the rank of the model output; ",
+    "each class holds 20 % of the model cells. The legend gives no model ",
+    "value."))
+  fig_cap05 <- fig_cap45(paste0(
+    "Colour: the ", SDM_PUB_VALUE_LABEL, "."))
+}
+fig_n6 <- vapply(GISTAR_CLASSES, function(k) sum(fig_c6$class == k),
+                 numeric(1))
+fig_m_eff <- fig_gs(GISTAR_PUB_FIG_GISTAR, "-", "input", "cells_model")
+fig_nb_in <- fig_gs("all", paste0("band", GISTAR_BAND_KM, "_km"),
+                    "neighbours", "max")
+fig_qa_names <- setdiff(unique(fig_t_gs$band[fig_t_gs$group == "qa_band"]),
+                        "-")
+fig_share <- vapply(fig_qa_names, function(b) {
+  fig_gs(GISTAR_PUB_FIG_GISTAR, b, "qa_band", "hot_same_class_share")
+}, numeric(1))
+# k-a (2026-11-07): the cold count at the QA band(s) of a distance (75 km).
+fig_qa_km <- paste0("band", unlist(GISTAR_QA_BANDS[vapply(
+  GISTAR_QA_BANDS, is.numeric, logical(1))]), "_km")
+fig_cold_qa <- vapply(fig_qa_km, function(b) {
+  fig_gs(GISTAR_PUB_FIG_GISTAR, b, "class", "cold")
+}, numeric(1))
+fig_band_txt <- function(b) {
+  if (identical(b, "queen")) "the queen neighbours" else
+    paste0("a band of ", sub("^band([0-9.]+)_km$", "\\1", b), " km")
+}
+fig_cold_note <- if (fig_n6[["cold"]] == 0) {
+  paste0(" No cell is cold at ", GISTAR_BAND_KM, " km; with ",
+         paste(vapply(fig_qa_km, function(b) {
+           paste0(fig_band_txt(b), " (QA), ", fig_fmt_int(fig_cold_qa[[b]]),
+                  " cells are cold")
+         }, character(1)), collapse = "; with "), ".")
+} else ""
+fig_cap06 <- fig_wrap(list(
+  paste0("The Getis", fig_dash, "Ord Gi* of the iNaturalist mammal records ",
+         "(tiger excluded) at the 0.2", fig_deg, " grain (cells of ",
+         fig_area_txt, "), ", GISTAR_YEARS[1], fig_dash, GISTAR_YEARS[2],
+         ". It shows clusters of cells with records. It does not show search ",
+         "effort or animals."),
+  paste0("Input: the ", fig_fmt_int(fig_m_eff), " model cells with one or ",
+         "more records, of ", fig_fmt_int(fig_n_model), " model cells; the ",
+         "source obscured part of the records to their 0.2", fig_deg,
+         " cell. The presence cells of the model are not in the input; the ",
+         "figure uses no tiger record."),
+  paste0("Neighbours: the cells within ", GISTAR_BAND_KM, " km (great-circle ",
+         "distance between cell centres; ", fig_nb_in, " neighbours for an ",
+         "inner cell), the cell itself included. A cell with fewer than ",
+         GISTAR_MIN_NEIGHBOURS, " neighbours has no class (",
+         fig_fmt_int(fig_n6[["few_neighbours"]]), " cells)."),
+  paste0("Test: the exact p-value under random relabelling of the cells, ",
+         "with a false discovery rate (Benjamini", fig_dash, "Hochberg) of ",
+         GISTAR_FDR_Q, ": ", fig_fmt_int(fig_n6[["hot"]]), " hot cells, ",
+         fig_fmt_int(fig_n6[["cold"]]), " cold cells, ",
+         fig_fmt_int(fig_n6[["not_significant"]]),
+         " cells not significant.", fig_cold_note),
+  "A blank cell is not a model cell.",
+  paste0("QA bands: the share of the hot cells that stay hot is ",
+         paste(vapply(fig_qa_names, function(b) {
+           paste0(round(100 * fig_share[[b]]), " % with ", fig_band_txt(b))
+         }, character(1)), collapse = " and "), "."),
+  paste0("The records show where people record mammals on iNaturalist. A ",
+         "place with no record can still have been visited, and a cluster ",
+         "mixes effort with where mammals are (proposal \u00a77)."),
+  fig_outlines,
+  paste0("Source: GBIF occurrence download ", fig_doi_b, " (mammals), ",
+         "iNaturalist research-grade observations.")))
+fig_title06 <- paste0("Clusters of iNaturalist mammal records (Getis",
+                      fig_dash, "Ord Gi*, ", GISTAR_BAND_KM, " km)")
+fig_sub06 <- paste0(fig_fmt_int(fig_n6[["hot"]]), " hot cells and ",
+                    fig_fmt_int(fig_n6[["cold"]]), " cold cells of ",
+                    fig_fmt_int(fig_n_model), " model cells of 0.2", fig_deg,
+                    ". Tiger records are not used.")
+
+# ---- 5. The checks (stop before a file is written) --------------------------------
+fig_cls_tbl <- function(k) fig_val(fig_t_pred, "class",
+                                   paste0("class_", k, "_cells"))
+fig_chk <- list(
+  "fig_06: one row for each model cell, each with a class" =
+    nrow(fig_c6) == fig_val(fig_t_counts, "grid", "model_cells") &&
+    !anyNA(fig_m6) && !anyNA(fig_c6$class),
+  "fig_06: the class counts are the counts of tbl_18_gistar.csv (main band)" =
+    all(vapply(GISTAR_CLASSES, function(k) {
+      fig_n6[[k]] == fig_gs(GISTAR_PUB_FIG_GISTAR,
+                            paste0("band", GISTAR_BAND_KM, "_km"), "class", k)
+    }, logical(1))),
+  "fig_06: no field of the drawn table holds a presence, record or tiger word" =
+    fig_fields_ok(fig_c6) && fig_fields_ok(fig_hot),
+  "the reserve outlines and the state lines are geometry only" =
+    identical(names(fig_res6), "geometry") &&
+    identical(names(fig_states_g), "geometry"),
+  "the read log: each figure read only the files of its list (k1)" =
+    all(fig_rd$log()$fig %in% names(fig_lists))
+)
+if (fig_do_sdm) {
+  fig_chk <- c(fig_chk, list(
+    "fig_04/05: one row for each model cell, each with a class and a value" =
+      nrow(fig_c45) == nrow(fig_g6) && !anyNA(fig_m45) &&
+      !anyNA(fig_c45$class) && !anyNA(fig_c45$value),
+    "fig_04/05: the class sizes are those of tbl_16_sdm_prediction.csv" =
+      all(vapply(SDM_PUB_N_CLASSES:1, function(k) {
+        sum(fig_c45$class == as.character(k)) == fig_cls_tbl(k)
+      }, logical(1))),
+    "fig_04/05: the hatched cells are the cells outside the training range of tbl_16_sdm_prediction.csv" =
+      fig_noor == fig_val(fig_t_pred, "range", "cells_outside"),
+    "fig_04/05: each hatched cell holds one or more hatch lines" =
+      fig_noor == 0 ||
+      all(lengths(sf::st_intersects(
+        sf::st_geometry(fig_c45)[fig_c45$out_of_range], fig_hatch)) > 0),
+    "fig_04/05: no field of the drawn table holds a presence, record or tiger word" =
+      fig_fields_ok(fig_c45) && fig_fields_ok(fig_pred),
+    "fig_04/05: the gate is open (Decision 24 point 8)" =
+      fig_val(fig_t_pred, "gate", "mean_test_boyce") > SDM_BOYCE_GATE,
+    "fig_04/05: the key box is inside the frame" =
+      fig_key_x + 3 * fig_side < fig_bb[["xmax"]] &&
+      fig_key_y + 3 * fig_side < fig_bb[["ymax"]]
+  ))
+}
+for (i in seq_along(fig_chk)) {
+  cat(sprintf("  %-4s %s\n", if (isTRUE(fig_chk[[i]])) "ok" else "FAIL",
+              names(fig_chk)[i]))
+}
+if (!all(vapply(fig_chk, isTRUE, logical(1)))) {
+  stop("Figure check(s) failed. No figure is written.", call. = FALSE)
+}
+
+# ---- 6. The three figures (z1, c1, h1) ----------------------------------------------
+fig_frame <- function(cells, fill_scale, colour_scale, aes_fill, res, st,
+                      title, subtitle, caption, hatch = NULL, key = NULL,
+                      key_label = NULL) {
+  p <- ggplot() +
+    geom_sf(data = st, fill = FIG_FRAME_COLOURS[["state_fill"]],
+            colour = NA) +
+    geom_sf(data = cells, mapping = aes_fill, linewidth = 0.05) +
+    geom_sf(data = st, fill = NA, colour = FIG_FRAME_COLOURS[["state_line"]],
+            linewidth = 0.25) +
+    geom_sf(data = res, fill = NA, colour = "white", linewidth = 0.7) +
+    geom_sf(data = res, fill = NA, colour = fig_ink, linewidth = 0.3)
+  if (!is.null(hatch) && nrow(hatch) > 0) {
+    p <- p + geom_sf(data = hatch, colour = "white", linewidth = 0.6) +
+      geom_sf(data = hatch, colour = fig_ink, linewidth = 0.25)
+  }
+  if (!is.null(key)) {
+    p <- p +
+      geom_sf(data = sf::st_sf(geometry = key$square), fill = fig_paper,
+              colour = fig_ink, linewidth = 0.3) +
+      geom_sf(data = sf::st_sf(geometry = key$hatch), colour = fig_ink,
+              linewidth = 0.25) +
+      annotate("text", x = fig_key_x + 3.6 * fig_side,
+               y = fig_key_y + 1.5 * fig_side, label = key_label, hjust = 0,
+               vjust = 0.5, size = 2.8, colour = fig_ink, lineheight = 1.05)
+  }
+  p + fill_scale + colour_scale +
+    coord_sf(crs = sf::st_crs(st), datum = NA,
+             xlim = c(fig_bb[["xmin"]], fig_bb[["xmax"]]),
+             ylim = c(fig_bb[["ymin"]], fig_bb[["ymax"]])) +
+    labs(title = title, subtitle = subtitle, caption = caption) +
+    fig_theme(fig_ink, fig_paper)
+}
+fig_save <- function(p, nn, slug) {
+  if (!dir.exists(DIR_FIGURES)) dir.create(DIR_FIGURES, recursive = TRUE)
+  path <- file.path(DIR_FIGURES, sprintf("fig_%02d_%s.png", nn, slug))
+  ggsave(path, plot = p, width = FIG_STAGE3_SIZE_IN[["width"]],
+         height = FIG_STAGE3_SIZE_IN[["height"]], dpi = FIG_STAGE3_DPI,
+         bg = fig_paper)
+  want <- round(FIG_STAGE3_SIZE_IN * FIG_STAGE3_DPI)
+  got <- fig_png_size(path)
+  if (!all(got == want)) {
+    stop("The figure ", basename(path), " has ", got[1], " x ", got[2],
+         " pixels, not ", want[1], " x ", want[2], ".", call. = FALSE)
+  }
+  message("Wrote ", path, " (", got[1], " x ", got[2], " pixels)")
+  invisible(path)
+}
+fig_written <- character(0)
+if (fig_do_sdm) {
+  fig_pal5 <- stats::setNames(viridisLite::viridis(SDM_PUB_N_CLASSES,
+                                                   option = FIG_STAGE3_PALETTE),
+                              as.character(1:SDM_PUB_N_CLASSES))
+  fig_key_label <- paste0("Outside the training range of\none or more ",
+                          "covariates (", fig_noor, " cells)")
+  fig_p04 <- fig_frame(
+    fig_c45,
+    scale_fill_manual(values = fig_pal5,
+                      breaks = as.character(SDM_PUB_N_CLASSES:1),
+                      labels = fig_class_labels(SDM_PUB_N_CLASSES),
+                      drop = FALSE,
+                      name = "Relative suitability\n(class by rank)"),
+    scale_colour_manual(values = fig_pal5, guide = "none"),
+    aes(fill = class, colour = class), fig_res45,
+    fig_geom_only(fig_st45), fig_title45, fig_sub04, fig_cap04,
+    hatch = fig_hatch_sf, key = fig_kb, key_label = fig_key_label)
+  fig_p05 <- fig_frame(
+    fig_c45,
+    scale_fill_viridis_c(option = FIG_STAGE3_PALETTE, limits = c(0, 1),
+                         breaks = seq(0, 1, 0.25),
+                         name = paste(strwrap(SDM_PUB_VALUE_LABEL, 24),
+                                      collapse = "\n")),
+    scale_colour_viridis_c(option = FIG_STAGE3_PALETTE, limits = c(0, 1),
+                           guide = "none"),
+    aes(fill = value, colour = value), fig_res45,
+    fig_geom_only(fig_st45), fig_title45, fig_sub05, fig_cap05,
+    hatch = fig_hatch_sf, key = fig_kb, key_label = fig_key_label)
+  fig_written <- c(fig_written,
+                   fig_save(fig_p04, SDM_PUB_FIG_CLASS, SDM_PUB_FIG_CLASS_SLUG),
+                   fig_save(fig_p05, SDM_PUB_FIG_VALUE, SDM_PUB_FIG_VALUE_SLUG))
+}
+fig_lab6 <- c(hot = "Hot", cold = "Cold", not_significant = "Not significant",
+              few_neighbours = paste0("Fewer than ", GISTAR_MIN_NEIGHBOURS,
+                                      " neighbours"))
+fig_lab6 <- paste0(fig_lab6[GISTAR_CLASSES], " (",
+                   vapply(fig_n6, fig_fmt_int, character(1)), ")")
+fig_p06 <- fig_frame(
+  fig_c6,
+  scale_fill_manual(values = FIG_GISTAR_COLOURS, breaks = GISTAR_CLASSES,
+                    labels = fig_lab6, drop = FALSE,
+                    name = paste0("Gi* class (", GISTAR_BAND_KM, " km;\n",
+                                  "cells of 0.2", fig_deg, ")")),
+  scale_colour_manual(values = FIG_GISTAR_COLOURS, guide = "none"),
+  aes(fill = class, colour = class), fig_res6, fig_states_g, fig_title06,
+  fig_sub06, fig_cap06)
+fig_written <- c(fig_written,
+                 fig_save(fig_p06, GISTAR_PUB_FIG, GISTAR_PUB_FIG_SLUG))
+
+cat("\nfiles read by the figure code (k1):\n")
+print(fig_rd$log(), row.names = FALSE, right = FALSE)
+if (fig_do_sdm) {
+  cat(sprintf("\nfig_%02d and fig_%02d: %s model cells; classes 5 to 1: %s;",
+              SDM_PUB_FIG_CLASS, SDM_PUB_FIG_VALUE, fig_fmt_int(nrow(fig_c45)),
+              paste(vapply(SDM_PUB_N_CLASSES:1, function(k) {
+                fig_fmt_int(sum(fig_c45$class == as.character(k)))
+              }, character(1)), collapse = ", ")),
+      "hatched cells:", fig_noor, "| hatch lines:", length(fig_hatch), "\n")
+}
+cat(sprintf("fig_%02d: hot %s, cold %s, not significant %s, fewer than %d neighbours %s\n",
+            GISTAR_PUB_FIG, fig_fmt_int(fig_n6[["hot"]]),
+            fig_fmt_int(fig_n6[["cold"]]),
+            fig_fmt_int(fig_n6[["not_significant"]]), GISTAR_MIN_NEIGHBOURS,
+            fig_fmt_int(fig_n6[["few_neighbours"]])))
+cat("\n*** DRAFT text for the author's edit (title, subtitle, caption) ***\n")
+if (fig_do_sdm) {
+  cat("\n[fig_04]\n", fig_title45, "\n", fig_sub04, "\n", fig_cap04, "\n",
+      sep = "")
+  cat("\n[fig_05]\n", fig_title45, "\n", fig_sub05, "\n", fig_cap05, "\n",
+      sep = "")
+}
+cat("\n[fig_06]\n", fig_title06, "\n", fig_sub06, "\n", fig_cap06, "\n",
+    sep = "")
+cat("*** END OF DRAFT ***\n")
+rule(paste0("STEP 16.2 complete (", round(as.numeric(difftime(
+  Sys.time(), t_step162, units = "mins")), 1), " min): ",
+  length(fig_written), " figures in outputs/figures/.\nNext: STEP 16.3, the QA ",
+  "(task 16.5). Check `git status --short` before a commit: nothing under ",
+  "data/ may be staged."))
