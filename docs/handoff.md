@@ -54,6 +54,7 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   | 23 | A `maxnet` model at the 0.2° grain on the obscured set; model cell = complete-case cover ≥ 50 %; the limits 25 and 80 presence cells; background = the clean iNaturalist Mammalia records (two parts), ≥ 10 × the presence cells; the Facebook dataset is a check (0 records); Gi* of the effort and of the tiger records (tiger Gi* never published); no ratio. Outcome `planned_model` (locked) |
   | 24 | Model settings: nine candidates summarised over the 1 km cells of a cell; no water cells in the terrain means, elevation floor 0 m; \|r\| > 0.7 removes the later candidate of a fixed order; AICc over `lq`/`lqh`/`lqph` × regmult 1–4 (fewest coefficients within ΔAICc 2); no bias covariate; presences added to the background; 2° blocks in 5 folds (Boyce, test AUC, OR10, AUCdiff; cloglog); gate: mean test Boyce ≤ 0 → no suitability map; reserve check (Week 15); two sensitivity runs; the model file under `data/processed/` |
   | 25 | Prediction and publication: the model file of 2026-10-25, cloglog with clamping; a cell with a covariate outside the training range is flagged, counted and hatched; five equal-count classes by rank (a tie to the lower cell id; class 5 = the top-20 % set of the sensitivity rule), no value in the legend; no published layer before the Week-18 rule; tier T1; two static figures, `fig_04` (classes) and `fig_05` (value, label "model output (cloglog), relative; not a probability of presence"); nine caption items; a reserve table (58 rows, no presence column); reserve check: a 1 km cell is inside if its centre is, a 1 km cell outside the model cells has no value and is counted; point 9 (task 15.2): r2 only if each count of the 2 × 2 table is 3 or more, and a QA stop on a reserve whose presence state the outputs show |
+| 26 | Gi\*: four Gi\* — `effort_inat` (the model background, before `maxnet` adds a presence cell) with `tiger_obscured`; `effort_all` (the clean background of all datasets) with `tiger_5km`; no comparison with Phase 1; the 6,969 model cells, value 0/1; a 50 km band on the sphere (Amendment 1), the cell itself included; a class only with 8 neighbours or more; QA bands queen and 75 km (descriptive); the exact p (hypergeometric, random relabelling); Benjamini–Hochberg, q = 0.05; `fig_06` = `effort_inat` (`effort_all`: table only, a reading); the tiger Gi\* never published: counts only (obscured set), and counts by landscape complex by rule L1 (5 km set); all years; own code. The tiger Gi\* cannot show a cold spot |
 
 ## Ways of working (apply every chat)
 
@@ -63,7 +64,9 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 - Decisions before code: raise open forks; Kiran makes the call.
 - Deliver **full files**, not snippets. Present only changed files per turn.
 - Work at the **file level** (Kiran applies edits and re-uploads corrected
-  files; those are the source of truth).
+  files; those are the source of truth). *(2026-11-07: from Week 16 the chat edits the
+  docs and the scripts in the repository folder on the project machine.
+  Kiran runs the scripts, makes the Decisions and commits.)*
 - Pre-registration discipline: fix analytical rules as numbered Decisions
   before looking at results.
 - Sensitive-data policy: no precise points published; continuous surfaces
@@ -82,18 +85,34 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 - Before each deliverable, check the new text against the AI-word list.
 - Take each figure from code or data, never from prose.
 - Doc commits are separate from analysis commits (`analysis:` / `docs:`).
+- **Commit commands** (the author, 2026-11-07): with each commit (at a
+  split point or at the end of a week), the chat gives the exact git
+  commands — the files to add, the messages, the push, and the
+  `git status --short` checks before and after.
 
 ---
 
-## Current state  ·  **Week 15 complete** · 2026-11-01
+## Current state  ·  **Week 16 in progress** (task 16.1 done) · 2026-11-07
 
 ### Where the project is
 
+- **Week 16 so far (2026-11-07):** Week 15 is committed and pushed
+  (`7ae300a`; one commit, not the planned `analysis:` and `docs:` pair;
+  nothing under `data/`). Task 16.1: **Decision 26** (the Gi\* settings) —
+  x1, a3, b1 with C1-2, c1, d1 (k1, q2), e1, m1, f1, s2 with L1 and S-a,
+  w1, g1; h1 and h2. a3, s2 and C1-2 are not the chat's recommendation.
+  With C1-2, `effort_all` goes into the table only, with no figure (the
+  chat's reading). `data/README.md` written again. A config block
+  `GISTAR_*`. Task 16.2: the process choices (s1, f1, p1, r2, n1, t1,
+  g1, z1, c1, h1, k1, d1, q1; each as the chat recommended) and
+  **Amendment 1 of Decision 26** (A1): the distance between cells is on
+  the sphere (haversine), not in EPSG:7755 — an error of the chat, found
+  in task 16.2. No code and no run yet.
 - **Stage 1 (Growth):** complete in Week 7. **Stage 2 (Connectivity):**
   complete in Week 12. **Stage 3 (Habitat suitability):** Weeks 13 and 14
   complete and committed (Week 14: `30a512d`, "Week 14 complete"); **Week
-  15 complete (2026-11-01)**. Nothing of Week 15 was committed during the
-  week; the author commits it (task 15.7) before the Week-16 chat.
+  15 complete (2026-11-01)**. Week 15 was committed on 2026-11-01
+  (`7ae300a`).
 - **Week 15 in short** (full record: Decision 25 and the change log in
   `methodology.md`):
   - **Decision 25** (task 15.1): the prediction and its published form,
@@ -130,11 +149,13 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   Each run writes the tables of STEPs 14.1, 14.3 and 15.1–15.3 again (the
   same values). A full run takes under 1 minute on the project machine.
 - **`renv.lock`:** no change in Week 15 (`maxnet` 0.1.4, `glmnet` 5.0
-  since task 14.5). `sfdep` is in the `scripts/00a` list only.
+  since task 14.5). `sfdep` is in the `scripts/00a` list only. *(2026-11-07, Decision 26 g1:
+  own code for the Gi\*; no new package.)*
 
 ### Week-16 entry point
 
-- **First: the commit of Week 15** (task 15.7, by the author). Changes
+- **Done: the commit of Week 15** (task 15.7; `7ae300a`, 2026-11-01; one
+  commit, not the planned two). Changes
   since `30a512d`: `R/00_config.R`, `R/00_functions_sdm.R`,
   `scripts/09_model_suitability.R`; `outputs/tables/tbl_16_sdm_qa.csv`
   (three check texts) and the new `tbl_16_sdm_prediction.csv`,
@@ -144,15 +165,16 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   `data-dictionary.md`, `proposal.md`, this file, and `README.md`. One
   `analysis:` commit (`R/`, `scripts/`, `outputs/tables/`) and one
   `docs:` commit. Nothing under `data/` may be staged.
-- **Next: task 16.1 — Decision 26** (the Gi* settings), before any Gi* is
-  computed. The forks are in `project-plan.md` → "Week 16 — task
-  breakdown" (a draft): the input set of the tiger Gi*, the input of the
+- **Done: task 16.1 — Decision 26** (2026-11-07; the Gi* settings), before
+  any Gi* was computed. **Done: task 16.2** (the process choices;
+  Amendment 1 of Decision 26). **Next: task 16.3** (STEP 16.1, the Gi\*). The forks of task 16.1 were in `project-plan.md` →
+  "Week 16 — task breakdown" (a draft): the input set of the tiger Gi*, the input of the
   effort Gi*, the grid and the value of a cell, the neighbours and the
   band (a new value), the correction for many tests, the published form of
   the effort Gi* and what the docs can state from the tiger Gi*, the code
   (`sfdep` or own), what was seen.
 - **Then:** 16.2 (process choices), 16.3 (STEP 16.1: the Gi*), 16.4 (STEP
-  16.2: `fig_04` and `fig_05` with the caption drafts), 16.5 (STEP 16.3:
+  16.2: `fig_04`, `fig_05` and `fig_06` with the caption drafts), 16.5 (STEP 16.3:
   QA), 16.6 (docs: the Stage-3 close; the Week-17 plan), 16.7 (commit).
   Split point after task 16.2.
 - **Read before Week 16:** Decision 23 point 8 (the Gi* and the Phase-1
@@ -285,34 +307,35 @@ Elith 2013 (the title, volume and pages not on the record read); Lei et
 al. 2023 (the full author list not recorded); Brewer & Pickle 2002, Hastie
 & Fithian 2013 and Phillips et al. 2017 (abstracts); Gilmartin & Shelton
 1990, the Hirzel et al. 2007 poster and the Maxent tutorial 2017 (extracts);
-the Maxent user-group thread (not to be cited on the site).
+the Maxent user-group thread (not to be cited on the site). Week 16: Getis & Ord 1992, Ord & Getis 1995, Caldas de Castro &
+Singer 2006 and Benjamini & Yekutieli 2001 (from the PySAL reference list
+only); Benjamini & Hochberg 1995 (a record and the abstract; the series,
+the issue and the DOI not on the record); Anselin & Li 2019 and Anselin
+2023 (extracts); the Esri page (through a fetch); the R-sig-Geo thread
+(through a summary; not to be cited on the site); the `sfdep` manual.
 
 ### Open pending Decisions (decide in the week noted)
 
 Full text in `methodology.md` → "Decisions pending".
-- **[Week 15–16] Gi\* settings** → **Decision 26**, task 16.1 (raised with
-  Decision 23 point 8): the input set of the tiger Gi* (5 km set, obscured
-  set or both), the grid, the value of a cell, the neighbours and the band
-  (a new value; Phase 1: 50 km and 25 km), the correction for many tests,
-  and what the docs can state from the tiger Gi* (never published).
 - **[Week 18] Published layers** (raised with Decision 20 as "Published
   path layer"; widened by Decision 25 point 4): before a path layer or a
   suitability layer goes on the site. Paths: no layer, simplified lines,
   or a zoom limit. Suitability at 0.2°: no layer, the class only, or the
   class and the value; a publish check for a layer of 0.2° cells
   (`assert_publishable_rast()` refuses a raster of 0.2° in EPSG:4326); the
-  hatch and the caption items in an interactive map.
+  hatch and the caption items in an interactive map. *(2026-11-07, Decision 26: a Gi\*
+  layer would wait for the same rule.)*
 - **[After Stage 3] SDM-based resistance + circuit-theory check.** The
   surface is at 0.2° (about 20 km); decide in task 16.6 whether the item
   still applies.
 
-_Resolved (in `methodology.md`): Decisions 7 to 25 closed the earlier
+_Resolved (in `methodology.md`): Decisions 7 to 26 closed the earlier
 items (missing years, area source, zeros, the NA policy, the gHM fill,
 resistance values, barrier roads, water and gHM, the path set-up, the
 comparison metric, the link rule, the pinch-point rule, the cleaning rule,
 the settlement layer, the target-group scope, the model Decisions, the
 uses of the effort surfaces, the terrain variables, the prediction and its
-publication)._
+publication, the Gi\* settings)._
 
 ### Data on disk (raw; via `scripts/01`)
 
@@ -469,6 +492,11 @@ of closed one-time work are in git history.)*
   `sf::st_intersects()` on the cell centres (an edge counts); the QA path is
   `terra::extract()` on the polygons (GDAL). They agree on the real
   reserves (task 15.5); a centre exactly on an edge would make them differ.
+- **A distance in EPSG:7755 is not a distance on the Earth.** The scale
+  factor is 1.018 at 8° N and about 0.98 at 24° N. A rule with a fixed
+  distance must say where the distance is measured (Decision 26 Amendment
+  1: on the sphere). Check a count that a rule gives in the CRS that the
+  code uses, not by arithmetic on the sphere.
 
 **Process (chat)**
 - **A list of expected `git status` lines starts from the last commit.** Ask
@@ -503,6 +531,12 @@ of closed one-time work are in git history.)*
 - **The console of STEP 15.2 prints the reserve table** (names and values;
   publishable). A block marked "NOT FOR THE DOCS" (z1) can come to a chat,
   but its names go into no doc.
+- **The Phase-1 documents are not an input** (the author, 2026-11-07: "This
+  is not Phase 1 and it is a different project"). Do not raise a
+  discrepancy inside them. Decision 26 x1 removed the Phase-1 comparison.
+- **A sparse 0/1 Gi\*:** at 104 of 6,969 cells, the normal approximation is
+  far from the exact p, and no cell can be a cold spot (Decision 26 point
+  6). A text about the tiger Gi\* says so.
 
 ---
 

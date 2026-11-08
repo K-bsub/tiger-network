@@ -17,7 +17,7 @@ Sibling in method to
 | **Study area** | India — all tiger reserves with reserve-level census data |
 | **Primary unit** | Reserve, rolled up to landscape complex and state |
 | **Analysis CRS** | EPSG:7755 — WGS 84 / India NSF LCC (national equal-area/conformal frame) |
-| **Stack** | R (sf, terra, xml2, igraph, ggplot2, gganimate + gifski; own least-cost-path engine on `terra` + `igraph`, Decision 17; density surfaces by `terra::focal()`, Decision 22; `maxnet` for the SDM, Decisions 23–24; `sfdep` for Gi* if Decision 26 uses it), Quarto, Leaflet |
+| **Stack** | R (sf, terra, xml2, igraph, ggplot2, gganimate + gifski; own least-cost-path engine on `terra` + `igraph`, Decision 17; density surfaces by `terra::focal()`, Decision 22; `maxnet` for the SDM, Decisions 23–24; own code for Gi*, Decision 26), Quarto, Leaflet |
 | **Story site** | Planned — Quarto site on GitHub Pages, one page per analysis track |
 
 ---

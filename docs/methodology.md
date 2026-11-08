@@ -29,9 +29,14 @@ the training range. **Task 15.4 (2026-11-01):** the reserve check — r1
 "agrees" (ρ = 0.379, n = 51, p = 0.00614); r2 not published (Decision 25
 point 9); z1 0; `tbl_17_reserve_suitability.csv` (58 rows). **Task 15.5
 (2026-11-01):** the QA of Decision 25, 84 of 84. **Task 15.6:** the docs
-of Week 15 and the Week-16 plan. No map yet. **Next:** the commit of Week
-15 (task 15.7, by the author), then **Week 16** — Decision 26 (the Gi*
-settings), the Gi*, and the figures `fig_04` and `fig_05`.
+of Week 15 and the Week-16 plan. No map yet. Week 15 is committed (`7ae300a`). **Week 16, task 16.1 (2026-11-07):
+Decision 26** — the Gi* settings, fixed before any Gi*: four Gi* (the
+iNaturalist effort with the obscured tiger set; the effort of all datasets
+with the tiger 5 km set), 0/1 values on the model cells, a 50 km band, an
+exact p and a false discovery rate; `fig_06` for the iNaturalist effort
+Gi*; the tiger Gi* never published. **Task 16.2 (2026-11-07):** the process choices, and Amendment 1 of
+Decision 26 (the distance between cells on the sphere). **Next:** task
+16.3 (the Gi*), then the figures `fig_04`, `fig_05` and `fig_06`.
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -159,6 +164,9 @@ effort proxy.
   Phase-1 Ranthambore cold spot. The tiger Gi* is never published. A
   numbered Decision fixes the settings before any Gi* is computed (Week 16
   in the plan draft of 2026-10-25).
+  *(2026-11-07, Decision 26: four Gi\* on the 0.2° model cells, each tiger
+  set against the effort Gi\* of its observer group; no comparison with
+  Phase 1. The tiger Gi\* cannot show a cold spot (Decision 26 point 6).)*
 - No ratio of the tiger and the effort surfaces.
 
 ---
@@ -2912,6 +2920,10 @@ Decision with the code, for example "Decision 23 r2".)*
      many tests, and what the docs can state from the tiger Gi* (for
      example, whether the Phase-1 cold spot at Ranthambore is found again).
      Task 14.7 puts that Decision in the plan.
+     *(2026-11-07, Decision 26 x1: the tiger Gi\* is compared with the
+     effort Gi\* of this project only. There is no Phase-1 form and no
+     comparison with Phase 1. Decision 26 fixes the settings. The text of
+     this point does not change.)*
    - **No ratio** of the tiger and the effort surfaces (`SDM_RATIO` =
      `FALSE`). The model is the bias-corrected product. If task 14.4 gives
      a no-model outcome, the Gi* Decision also decides the ratio and the
@@ -4058,6 +4070,439 @@ This closes the **[Week 15] Prediction and publication of the suitability
 surface** pending item, and widens the **[Week 18] Published path layer**
 item to **[Week 18] Published layers**.
 
+### Decision 26 — Gi\*: aim, input sets, cells and value, neighbours and band, QA bands, test and correction, publication, time window, code
+**Date:** 2026-11-07 (fixed **before** any Gi\* is computed and before any
+neighbour list is made — see "What was seen before this Decision")
+**Choice:** Settings in `R/00_config.R` (a new block "Stage 3: Gi\*
+(Decision 26)" after the Decision-25 block; prefix `GISTAR_`). `scripts/09`
+applies them in Week 16: the Gi\* in task 16.3, the figure `fig_06` in task
+16.4, the QA in task 16.5. Fork codes as raised and chosen on 2026-11-07:
+x1, a3, b1 (with C1-2), c1, d1 (with k1 and q2), e1, m1, f1, s2 (with L1
+and S-a), w1, g1; the author's statements h1 and h2. *(Earlier Decisions
+use some of the same letters. Write the Decision with the code, for example
+"Decision 26 e1".)*
+
+1. **Aim (x1).**
+   - The Gi\* show where cells with records cluster. Each tiger Gi\* is
+     compared with the effort Gi\* of its observer group (point 2). This is
+     a part of the answer to proposal question 4.
+   - There is no comparison with Phase 1 and no Phase-1 form. The author
+     stated on 2026-11-07 that this project is not Phase 1. Decision 23
+     point 8 said "in the Phase-1 form … for a comparison with Phase 1";
+     this point narrows it. The text of Decision 23 does not change; a
+     dated note there points here.
+   - The tiger Gi\* are never published and never committed (Decision 23
+     point 8; `SDM_GISTAR_PUBLISH_TIGER` = `FALSE`). Point 7 says what the
+     docs can state.
+2. **Four Gi\* (a3, b1, C1-2).**
+
+   | Gi\* | Input | Compared with |
+   |---|---|---|
+   | `effort_inat` | b1: the background cells of Decision 23 point 5 (iNaturalist Mammalia, tiger excluded; parts (a) and (b)): 1,486 model cells, from before `maxnet` adds a presence cell | `tiger_obscured` |
+   | `tiger_obscured` | the obscured set (Decision 21 point 4): 884 records in 104 model cells | `effort_inat` |
+   | `effort_all` | C1-2: the clean background of all datasets, the 5 km set of Decision 22 point 2 (23,901 records; the input of the Decision-22 effort surface) | `tiger_5km` |
+   | `tiger_5km` | the tiger 5 km set (Decision 21 point 3; 300 records in 44 cells of 1 km) | `effort_all` |
+
+   - **The cell of a record of `effort_all` and `tiger_5km`:** the 0.2°
+     cell of its own coordinates, by the cell rule of Decision 21 point 4
+     (the coordinates in EPSG:4326 rounded down to a multiple of 0.2°).
+     This is the rule of part (b) of the background of Decision 23. A
+     record in a 0.2° cell that is not a model cell is not used; the script
+     counts these records and their cells. *(Reading 1 of 2026-11-07,
+     confirmed by the author.)*
+   - The number of 0.2° cells of `effort_all` and of `tiger_5km` is not
+     counted yet. The tiger 5 km set has 44 cells of 1 km, so it has 44
+     cells of 0.2° or fewer.
+   - **No presence cell goes into an effort input.** `effort_inat` is the
+     1,486 cells of Decision 23 point 6, from before `maxnet` adds the 18
+     presence cells with no background record (Decision 24 a1).
+     `effort_all` holds no tiger record (Decision 5).
+   - `tiger_5km` comes from precise positions (tier T2). `tiger_obscured`
+     comes from records that the source obscured (tier T1). Part (a) of
+     `effort_inat` is records of other mammals that the source obscured.
+3. **Cells and value (c1).**
+   - The cells: the 6,969 model cells of Decision 23 point 3
+     (`sdm_grid_cell02_7755.gpkg`, `model` = `TRUE`). The 481 other cells
+     of the grid are in no Gi\*.
+   - The value of a cell: 1 if the cell holds one or more records of the
+     input, otherwise 0. The number of records is not a weight (the unit
+     rule of Decision 21 point 5, Decision 22 point 3 and Decision 23 point
+     2).
+4. **Neighbours and band (d1, k1).**
+   - The distance between two cells is the distance between their centres
+     in EPSG:7755. The definition of the centre is a process choice of task
+     16.2.
+     *(Amended 2026-11-07, Amendment 1 (A1): the distance is on the sphere,
+     between the centres in longitude and latitude. See "Amendment 1"
+     below.)*
+   - **Band:** cell j is a neighbour of cell i if the distance is 50 km or
+     less (`GISTAR_BAND_KM`). The weights are binary. The cell itself is in
+     its own window (w_ii = 1; the "star" of Gi\*). The window of cell i is
+     the cell and its neighbours; n_i is the number of cells in it.
+   - On the sphere, an inner cell has 20 neighbours at each latitude from
+     8° N to 37° N (computed for this Decision; 25 km gives 4, 35 km gives
+     8, 75 km gives 36–46 and 100 km gives 68–82). The script counts the
+     neighbours of each cell, and the QA reports their distribution.
+   - **Minimum (k1):** a cell with fewer than 8 neighbours
+     (`GISTAR_MIN_NEIGHBOURS`; the cell itself is not counted) gets no
+     class (`few_neighbours`) and is counted. Its value stays in the
+     windows of the other cells.
+5. **QA bands (q2).** Descriptive only; no rule uses them; the band stays
+   50 km.
+   - **queen:** the 8 cells around a cell (by the cell index `ix`, `iy`)
+     that are model cells. With k1, a cell gets a class only if all 8 are
+     model cells.
+   - **75 km:** a fixed band of 75 km (36–46 neighbours for an inner cell).
+   - Each of the four Gi\* is computed again at each QA band, with k1 and m1
+     applied to each separately (reading 2 of 2026-11-07). Reported for each
+     Gi\* and QA band: the number of `hot` and of `cold` cells, and the share
+     of the `hot` cells (and of the `cold` cells) at 50 km that have the
+     same class at the QA band.
+6. **Statistic, p-value and correction (e1, m1).**
+   - **Statistic (the standard form; Ord & Getis 1995):** with n the number
+     of model cells, x̄ and S the mean and the standard deviation (divisor n)
+     of the values, and K_i = Σ_j w_ij x_j the number of cells with the
+     value 1 in the window of i:
+     G\*_i = (K_i − x̄ n_i) / (S √((n n_i − n_i²) / (n − 1))).
+     The denominator is the standard deviation of a window sum when the n
+     values are put at random on the n cells (sampling without
+     replacement). G\*_i is reported as a statistic; the class uses the
+     p-value below.
+   - **Exact p (e1):** when the n values are put at random on the n cells
+     (random relabelling, the null hypothesis of the denominator above),
+     K_i follows a hypergeometric distribution: n cells, M cells with the
+     value 1, a sample of n_i cells. With binary weights, G\*_i is a linear
+     function of K_i. So:
+     - p_hot = P(K ≥ K_i) and p_cold = P(K ≤ K_i) (`stats::phyper`);
+     - the two-sided p = min(1, 2 × min(p_hot, p_cold)).
+     There is no random number and no Monte Carlo error.
+   - **Correction (m1):** Benjamini–Hochberg (`stats::p.adjust(method =
+     "BH")`) over the two-sided p of the cells with a class, for each Gi\*
+     and each band separately; q = 0.05 (`GISTAR_FDR_Q`).
+   - **Classes:** `hot` if the adjusted p is 0.05 or less and K_i is above
+     its expectation (x̄ n_i); `cold` if the adjusted p is 0.05 or less and
+     K_i is below it; `not_significant` otherwise; `few_neighbours` (point
+     4). A cell that is not a model cell has no class.
+   - **Arithmetic from the published counts (before any run; not a
+     result):**
+     - `tiger_obscured` at 50 km (M = 104, n_i = 21): a window with no
+       record has P(K ≤ 0) = 0.729, so the two-sided p of a cell below the
+       expectation is 1. No cell can be `cold`. A two-sided p of 0.05 for a
+       cell below the expectation needs a window of 242 cells or more (a
+       band of about 175–195 km), before the correction. `tiger_5km` has 44
+       cells with the value 1 or fewer, so the same is true for it.
+     - So the tiger Gi\* can show clusters of cells with records (`hot`)
+       only. They cannot show where tiger records are fewer than expected.
+     - `effort_inat` at 50 km (M = 1,486): the smallest two-sided p of a
+       cell below the expectation is 0.0129 (a window of 21 cells with no
+       record). Whether a cell is `cold` after the correction depends on
+       the other p-values.
+     - At this sparsity the normal approximation is far from the exact p.
+       For `tiger_obscured`, a window of 21 cells with 2 cells with a record
+       gives a normal one-sided p of 0.0012; the exact P(K ≥ 2) is 0.039.
+7. **Publication (f1, s2 with L1 and S-a; readings 3 and 4).**
+   - **`effort_inat` — a figure:** `fig_06_<slug>.png` (`GISTAR_PUB_FIG` =
+     6), static, at national scale, with the frame of `fig_04` and
+     `fig_05`: the model cells by class (`hot`, `cold`, `not_significant`,
+     `few_neighbours`); the reserve outlines and the state boundaries; no
+     presence mark, no background mark, no point. A blank cell is not a
+     model cell. The slug, the colours (readable with a colour-vision
+     deficiency) and the size are process choices of task 16.2. The slug
+     does not hold "tiger".
+     - **Tier T1:** part (a) of the input is records that the source
+       obscured, and the figure is at the grain of that obscuring (0.2°).
+       Sensitive-data policy §2: "normal use; document the obscuring".
+       Caption item 2 states it.
+     - **Caption items** (reading 4; drafted in Week 16 and marked as
+       drafts; the narrative is the author's):
+       1. The Getis–Ord Gi\* of the iNaturalist mammal records (tiger
+          excluded) at the 0.2° grain (cells of 396–488 km²), 2006–2022. It
+          shows clusters of cells with records; it does not show search
+          effort or animals.
+       2. The input: the 1,486 model cells with one or more records, of the
+          6,969 model cells; the source obscured part of the records to
+          their 0.2° cell. The presence cells of the model are not in the
+          input; the figure uses no tiger record.
+       3. The neighbours: a fixed band of 50 km (20 neighbours for an inner
+          cell), the cell itself included; a cell with fewer than 8
+          neighbours has no class (with the count).
+       4. The test: the exact p under random relabelling; the false
+          discovery rate (Benjamini–Hochberg) at q = 0.05; the classes with
+          their counts.
+       5. A blank cell: not a model cell.
+       6. The two QA bands: the share of the `hot` cells that stay `hot`
+          (queen; 75 km).
+       7. The effort caveat (proposal §7).
+       8. The reserve outlines are the core protected-area polygons
+          (Decision 4), not the notified total area; the state lines are
+          from Natural Earth.
+       9. The data sources, with the GBIF download DOI.
+
+       *(Item 2 says that the source obscured part of the records. This was
+       added when this Decision was written, for the T1 rule of the policy;
+       reading 4 did not hold it.)*
+   - **`effort_all` — the statistics table only**, no figure. *(The chat's
+     reading of C1-2, stated in its reply of 2026-11-07: C1-2 adds
+     `effort_all` "for the 5 km comparison only", and f1 names one figure.
+     The author can change it before task 16.4.)*
+   - **One statistics table** (committed and publishable; the number and
+     the slug are a process choice of task 16.2). Counts and statistics
+     only (reading 3):
+     - for each Gi\* and band: the cells by class; the neighbour counts
+       (minimum, median, maximum, and the cells below 8); for the two
+       effort Gi\*, the shares of the QA bands;
+     - for the two tiger Gi\*, only the counts of the next item;
+     - no cell id, no position and no reserve name.
+   - **What the docs and the table can state from the tiger Gi\* (S-a):**
+     - **`tiger_obscured` (s1):** the number of `hot` cells; how many of
+       them are `hot` in `effort_inat`; that share. Also the number of
+       `cold` cells (0, point 6) and of `few_neighbours` cells. No name of
+       a reserve, a landscape complex or a state; no position.
+     - **`tiger_5km` (s2):** the counts of s1, against `effort_all`; and the
+       number of `hot` cells by landscape complex, by rule L1. No reserve
+       name; no position. The record counts of this set by reserve are
+       already published (`tbl_15_occ_by_reserve.csv`).
+     - **L1:** a `hot` cell counts for a landscape complex if one or more
+       of its complete-case 1 km cells is inside a reserve polygon of that
+       complex (the centre rule of Decision 25 point 8). A `hot` cell with
+       no such 1 km cell counts as "outside the reserve polygons". A cell
+       with reserves of two complexes counts in each, so the rows can add
+       up to more than the `hot` cells.
+     - **S-a:** the obscured set gets no count by landscape complex. The
+       Sundarbans complex holds one reserve, so a count there would link a
+       reserve name to a presence state of the obscured set (Decision 24
+       point 9; Decision 25 point 9).
+   - **Layers:** the four Gi\* at 50 km are written under `data/processed/`
+     (gitignored): one row per model cell with the cell id, the value,
+     K_i, n_i, G\*_i, the p-values and the class. The layer names are a
+     process choice of task 16.2 (prefix `hot_`, naming §2). The two tiger
+     layers are never committed. No layer is published before the Week-18
+     rule (pending item "Published layers").
+   - **Check (as Decision 25 point 4):** the code of `fig_06` reads only
+     the `effort_inat` layer, the grid layer, the reserve layer and the
+     state layer: no tiger layer and no presence field. The check is
+     written with the figure.
+   - The console text holds counts and statistics only; for the tiger
+     Gi\*, only the counts of this point.
+8. **Time window (w1).** All years, 2006–2022 (the years of the clean
+   sets). No Gi\* by time window.
+9. **Code (g1).** Own code in base R and `sf`: the neighbours by the
+   distance between cell centres; K_i and G\*_i; `stats::phyper`;
+   `stats::p.adjust`. No new package; `renv.lock` does not change. `sfdep`
+   stays in the `scripts/00a` list only, and no script loads it (task 16.6
+   decides whether the list keeps it).
+
+**What was seen before this Decision (pre-registration, stated plainly):**
+- **In the documents (the author and the chat):** each value of the
+  `tbl_15`, `tbl_16` and `tbl_17` tables as the documents quote them. Among
+  them: the counts that point 6 uses (104 presence cells and 1,486
+  background cells of 6,969 model cells; the tiger 5 km set, 300 records
+  in 44 cells of 1 km; the background 5 km set, 23,901 records in 5,512
+  cells of 1 km); the counts by time window; the record counts by reserve
+  (`tbl_15_occ_by_reserve.csv`); the reserve values
+  (`tbl_17_reserve_suitability.csv`).
+- **By the author (stated on 2026-11-07):** h1 — no density surface,
+  prediction, grid or point layer was looked at on a map; h2 — no value
+  from a console that is not in the documents is remembered.
+- **By the chat that drafted this Decision:** the documents;
+  `R/00_config.R` and four function files in full, and the other code in
+  part; the committed `tbl_15`, `tbl_16` and `tbl_17` tables; the
+  literature. One search of the Phase-1 documents of the claude.ai Project
+  (for the Phase-1 Gi\* settings, before x1); by x1, no value of it is
+  used. No data file and no map.
+- **Not computed by anyone:** a Gi\*, a neighbour list, the number of 0.2°
+  cells of `tiger_5km` and of `effort_all`, a map.
+- **Post-seen in principle:**
+  - Forks c, e and x: the counts 104 and 1,486 of 6,969 were known. The
+    arithmetic of point 6 was made from them and was in the fork text
+    before the choice.
+  - Fork a: the record counts by reserve of the tiger 5 km set were known.
+- **The choices.** The chat gave one recommended option for each fork. The
+  author took it for each fork but three: a3 (the chat recommended a2, the
+  obscured set only), s2 (the chat recommended s1 for the tiger Gi\*) and
+  C1-2 (the chat recommended C1-1, `effort_inat` for both comparisons).
+  After the first choices and before this text, the chat raised two
+  conflicts (C1: a3 against the reason of b1; the cell rule and the
+  Sundarbans complex for s2) and four readings. The author chose C1-2, L1
+  and S-a, and confirmed the readings.
+
+**Amendment 1 — 2026-11-07, in task 16.2, before any Gi\* and before any
+neighbour list (A1):**
+- **The error.** Point 4 put the distance between cell centres in
+  EPSG:7755. The count of 20 neighbours and the reason for d1 came from
+  arithmetic on the sphere. The scale factor of EPSG:7755 is 1.018 at 8° N
+  (the chat had estimated about 1.003). A check with PROJ (2026-11-07): at
+  50 km in EPSG:7755, the rows of cells with a centre at 9.5° N or south
+  have 12–18 neighbours, and at about 8.6° N one pair of cells is 30 m from
+  the band. The fork text of task 16.2 (fork p) also said that no
+  neighbour count changes at 50 km, with margins of 49.4 and 53.1 km; for
+  EPSG:7755 that was wrong.
+- **The rule now.** The distance between two cells is the great-circle
+  distance (the haversine formula) on a sphere of radius 6,371.0088 km
+  (`GISTAR_EARTH_RADIUS_KM`; the mean radius of WGS 84, (2a + b) / 3),
+  between the cell centres in longitude and latitude (p1 of task 16.2:
+  ((ix + 0.5) × 0.2°, (iy + 0.5) × 0.2°)). The band (50 km), the binary
+  weights, the cell in its own window and k1 do not change. The 75 km QA
+  band of point 5 uses the same distance.
+- **Checked for this amendment (arithmetic on cell centres made from the
+  grid rule; not a result):**
+  - 50 km: an inner cell has 20 neighbours at each row of cells from
+    6.1° N to 37.3° N. The largest distance inside the band is 49.675 km;
+    the smallest outside is 53.212 km.
+  - 75 km: 36–46 neighbours, by latitude. At some rows a pair of cells is
+    20–30 m from the band. Both QA paths use the same distance formula, so
+    no pair can change sides between them. No band from 60 to 90 km has a
+    margin of 1 km at each row.
+- **Options:** A1 (chosen; the chat's recommendation); A2 — EPSG:7755 and
+  a band of 52 km; A3 — EPSG:7755 and 50 km, as recorded; A4 — the 5 × 5
+  block of cells without its four corners (an index rule).
+- **What was seen:** nothing more than the list above. No Gi\* and no
+  neighbour list exists, and no data file was read.
+- **Consequences:** `GISTAR_DIST` = `"sphere"` and `GISTAR_EARTH_RADIUS_KM`
+  in `R/00_config.R`. Caption item 3 of point 7 ("20 neighbours for an
+  inner cell") is now true for each row of India.
+
+**Reason and sources:**
+- **This project only (x1).** The author's direction of 2026-11-07.
+  Proposal question 4 asks how much of the pattern of this project is
+  effort.
+- **One effort Gi\* for each observer group (a3, b1, C1-2).** A
+  target-group background has the bias of the presences when its records
+  come from the same observers (Phillips et al. 2009; Decision 23). The
+  obscured set and `effort_inat` are both from iNaturalist. 273 of the 300
+  records of the tiger 5 km set come from one dataset that is not
+  iNaturalist (Decision 21), so its comparison uses the background of all
+  datasets.
+- **0/1 on the model cells (c1).** One unit rule for Stage 3. A count of
+  records is skewed (one dataset gives 273 of the 300 records of the tiger
+  5 km set). A 0/1 value gives the exact p of e1.
+- **A fixed band of 50 km (d1).** Getis & Ord (1992) define the statistics
+  by a distance band. On this grid, 50 km gives the same number of
+  neighbours (20) at each latitude of India; 25 km gives 4.
+- **At least 8 neighbours (k1).** "Features should have about eight
+  neighbors each, especially if the values for the Input Field parameter
+  value are skewed" (Esri, Hot Spot Analysis).
+- **QA bands (q2).** A Gi\* result depends on the band. The QA bands show
+  how much, with no rule (as Decision 22 c2).
+- **The exact p (e1).**
+  - The denominator of G\*_i is the standard deviation of a window sum
+    under random relabelling. Under the same relabelling, K_i is
+    hypergeometric, so its tail probability is the exact p. A permutation
+    test of the same statistic gets nearer to it as the number of
+    permutations increases.
+  - At this sparsity the normal approximation is far off (point 6). For a
+    variable that is not bell-shaped, a permutation p is preferred to the
+    analytical one (Bivand, R-sig-Geo, 2024).
+  - With permutations, the number of permutations sets the smallest p,
+    and this limits what a correction for many tests can find (Anselin
+    2023, §16.5). The exact p has no such limit.
+  - Anselin & Li (2019) prefer a conditional permutation to an exact
+    probability for the local join count. Their exact probability is the
+    probability of one count, with the value of the cell fixed at 1. e1 is
+    a tail probability under total relabelling, the null hypothesis of the
+    denominator of G\*_i. The QA compares e1 with a permutation test at
+    sample cells.
+- **The false discovery rate (m1).** Benjamini & Hochberg (1995); for
+  local statistics, Caldas de Castro & Singer (2006). Bivand (2024) calls it
+  "a reasonable compromise". One level of q gives three classes in the
+  figure.
+- **A figure of the effort Gi\* (f1).** Proposal question 4 and §7.
+- **Counts only for the obscured set (S-a); counts by landscape complex for
+  the tiger 5 km set (s2, L1).** See point 7.
+- **All years (w1).** The tiger sets have 21, 54 and 71 cells of 0.2°
+  (obscured set) and 11, 11 and 26 cells of 1 km (5 km set) in the three
+  windows (Decision 22).
+- **Own code (g1).** e1 needs no package. Own code is also used for the
+  paths (Decision 17) and the Boyce index (y1 of task 14.5).
+
+**Judgement values:** 50 km (band); 8 (minimum neighbours; the Esri
+guidance); 0.05 (q); queen and 75 km (QA bands). From earlier Decisions:
+the 0.2° model cells (Decision 23); the sets (Decisions 21–23).
+
+**Rejected:**
+- *x2 — the Phase-1 form and comparison; x3 — no tiger Gi\*.*
+- *a1 — the tiger 5 km set only; a2 — the obscured set only (the chat's
+  recommendation).*
+- *b2 as the only effort input; C1-1 — `effort_inat` for both comparisons
+  (the chat's recommendation).*
+- *c2 — the number of records as the value; c3 — all 7,450 cells.*
+- *d2 — queen contiguity as the main rule; d3 — 100 km; d4 — a band from
+  the data (a choice after a result). k2 — no minimum. q1 — no QA band.*
+- *e2 — permutation p-values; e3 — the normal approximation.*
+- *m2 — three levels (seven classes); m3 — no correction; m4 —
+  Bonferroni.*
+- *f2 — a table only; f3 — nothing published.*
+- *s1 for both tiger Gi\* (the chat's recommendation); s3 — nothing; S-b —
+  the Sundarbans count with "outside the reserve polygons"; S-c — s2 for
+  both, with the link recorded.*
+- *w2 — the effort Gi\* by time window. g2 — `sfdep`.*
+- *Not offered: a Gi\* on the sampled cells only (near a ratio; Decision 23:
+  no ratio).*
+
+**Limitations:**
+- A `hot` cell is a cluster of cells with records at about 20 km. It is not
+  a cluster of tigers or of search effort.
+- The tiger Gi\* cannot show a `cold` cell (point 6).
+- The effort inputs are records, not search effort (Decision 22).
+- A position of `effort_all` and `tiger_5km` can be up to 5 km from the
+  true position; a record near a cell edge can be in the next cell.
+- `tiger_5km` is in effect one dataset (273 of 300 records). Its Gi\* shows
+  that dataset.
+- The cells are not equal in area (396–488 km²), and the band is in km.
+  Cells at the coast and the border have fewer neighbours, and the data
+  has no record outside India.
+- The exact p assumes random relabelling over the model cells. A
+  large-scale trend (for example in effort) can make many cells
+  significant for that reason only: "the p-values of the local statistic
+  may be affected by the presence of global spatial autocorrelation"
+  (Anselin 2023).
+- The tests are dependent, because the windows overlap. Benjamini–Hochberg
+  controls the false discovery rate under positive dependence (Benjamini &
+  Yekutieli 2001; not read, see `references.md`); this is not checked here.
+  With discrete p-values, the correction is conservative.
+- 50 km and 8 are judgement values. The QA bands show the effect of the
+  band; they do not test it.
+- L1 uses the core polygons (Decision 4). A cell counts for a complex if
+  one of its 1 km cells is in a reserve, and a cell can count for two
+  complexes.
+
+**Consequences:**
+- `R/00_config.R`: a new block "Stage 3: Gi\* (Decision 26)" (`GISTAR_*`);
+  a dated note in the Decision-23 block. No earlier value changes.
+- **Task 16.2 (process choices, before code):** the STEP numbers of
+  `scripts/09`; the cell centre (point 4); how a record of the 5 km sets
+  gets its 0.2° cell (point 2: its coordinates in EPSG:4326, from the GBIF
+  file or from the point converted from EPSG:7755); the layer names
+  (`hot_`); the number and the slug of the statistics table; the slugs,
+  the colours and the size of `fig_04`, `fig_05` and `fig_06`; where the
+  caption drafts go; the checks of Decision 25 point 4 and of point 7 of
+  this Decision; hand-made cases first.
+- **Task 16.3 (STEP 16.1):** the four Gi\* at 50 km and at the two QA
+  bands; the layers; the statistics table.
+- **Task 16.4 (STEP 16.2):** `fig_04`, `fig_05` and `fig_06`, with the
+  caption drafts.
+- **Task 16.5 (STEP 16.3), QA:** hand-made cases (a small grid: the
+  neighbours at a known band, K_i, G\*_i by hand, the exact p by a direct
+  sum, a `cold` case, the Benjamini–Hochberg step, k1); the neighbour count
+  of the inner cells (20); K_i, G\*_i and the classes again by a second
+  path; the exact p against a permutation test at sample cells; the inputs
+  again from the layers (the cell counts; no presence cell in an effort
+  input); the publish checks (no tiger Gi\* file under `outputs/`, no file
+  with "tiger" in its name, the scan of the table, only the tiger counts of
+  point 7, the check of the `fig_06` code).
+- **The time of Week 16:** two more Gi\* (`effort_all`, `tiger_5km`), the
+  QA bands and `fig_06` add about 45–75 min to the estimate of 3.4–4.9 h
+  (an estimate).
+- `naming-conventions.md` §6: `fig_06` is reserved; `fig_07` is the next
+  free number.
+- `references.md`: a new section "Gi\* settings (Decision 26)".
+- The pending item "[Week 18] Published layers" gets a dated note.
+- Decision 23 point 8 and §5.5 get dated notes.
+- *(2026-11-07: the process choices of task 16.2 are in the change log;
+  Amendment 1 above changes point 4.)*
+
+This closes the **[Week 15–16] Gi\* settings** pending item.
+
 ### Decisions pending (raised, not yet made)
 
 These forks are open. Each is decided in the week noted in the project plan,
@@ -4077,17 +4522,9 @@ before the relevant code is written.
   a layer of 0.2° cells (`assert_publishable_rast()` refuses a raster of
   0.2° in EPSG:4326); how the hatch of Decision 25 point 2 and the caption
   items of point 5 appear in an interactive map.)*
-- **[Week 15–16] Gi\* settings (raised 2026-10-25 with Decision 23 point
-  8; decide before any Gi\* is computed).** A Gi* of the effort and a Gi* of
-  the tiger records in the Phase-1 form are built (Decision 23 f2); the
-  tiger Gi* is never published or committed. Decide: the input set of the
-  tiger Gi* (the 5 km set, the obscured set or both), the grid, the value of
-  a cell, the neighbours and the distance band (a new value: the Phase-1
-  documents give 50 km and 25 km), the correction for many tests, and what
-  the docs can state from the tiger Gi* (for example, whether the Phase-1
-  cold spot at Ranthambore is found again). *(This item takes point (6) of
-  the closed item "Model Decisions that Decision 21 names".)* *(2026-10-25,
-  task 14.7: the Week-15 plan draft puts this Decision in Week 16.)*
+  *(2026-11-07, Decision 26 point 7: the Gi\* layers are not published;
+  `fig_06` is a static figure. A Gi\* layer on the site would wait for this
+  rule too.)*
 - **[After Stage 3] SDM-based resistance + circuit-theory check.** Raised
   2026-09-26 (Decision 14, F1). After the SDM exists, build a resistance
   surface from 1 − suitability and run circuit theory between reserves, to
@@ -4107,6 +4544,167 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-07 — Week 16, task 16.2: process choices; Decision 26 Amendment 1 (no code, no run)
+
+- **Docs and config only.** No script, data layer or table changed; no
+  run; no Gi\*.
+- **Process choices of task 16.2 (author, 2026-11-07; each as the chat
+  recommended).** Write a choice with the task, for example "r2 of task
+  16.2".
+  - **s1 — STEPs.** In `scripts/09`, after STEP 15.3: STEP 16.1 the four
+    Gi\* (task 16.3), STEP 16.2 `fig_04`, `fig_05` and `fig_06` (task 16.4),
+    STEP 16.3 the QA (task 16.5). No new run switch: each run writes the
+    Gi\* layers, `tbl_18_gistar.csv` and the three PNG files again (the same
+    values).
+  - **f1 — function files.** `R/00_functions_gistar.R` (`gistar_*`: the
+    neighbours, K_i, G\*_i, the exact p, the classes, the L1 counts, the
+    hand-made case; `gistar_qa_*`, the QA second path) and
+    `R/00_functions_fig.R` (`fig_*`: the frame, the hatch, the key box, the
+    read guard of k1, the hand-made case).
+  - **p1 — the cell centre:** ((ix + 0.5) × 0.2°, (iy + 0.5) × 0.2°) in
+    longitude and latitude. *(The fork text said "converted to EPSG:7755";
+    with Amendment 1 of Decision 26 the centre is used in longitude and
+    latitude.)*
+  - **r2 — the 0.2° cell of a record of `effort_all` and `tiger_5km`:** the
+    GBIF coordinates read again from the two download zip files by
+    `gbifID`, then `occ_cell02()` — the input of background part (b)
+    (`scripts/08` STEP 13.3). Process choice w2 of task 14.2 said that
+    `scripts/09` reads no GBIF file; from task 16.3 it reads the two zip
+    files (in STEP 16.1 only; the header of `scripts/09` changes with the
+    code). The QA checks that an iNaturalist record of `effort_all` has the
+    cell of `effort_background_inat_cell02_7755.gpkg`.
+  - **n1 — the layers:** `data/processed/hot_effort_inat_cell02.csv`,
+    `hot_tiger_obscured_cell02.csv`, `hot_effort_all_cell02.csv` and
+    `hot_tiger_5km_cell02.csv` (gitignored): one row per model cell; `id`,
+    `value`, `n_nb`, `n_win`, `k`, `gistar`, `p_hot`, `p_cold`, `p_two`,
+    `p_adj`, `class`; no geometry (joined to the grid by `id`). The QA
+    bands are not written as layers.
+  - **t1 — the tables:** `outputs/tables/tbl_18_gistar.csv` (publishable;
+    `gistar`, `band`, `group`, `item`, `value`, `reading`) and
+    `tbl_18_gistar_qa.csv` (STEP 16.3; `group`, `check`, `value`, `pass`).
+    A landscape-complex name is allowed only in the `tiger_5km` rows of
+    `tbl_18_gistar.csv` (the reserve-name scan of the `tbl_16` tables would
+    count "sundarbans" as the reserve name "Sundarbans"); STEP 16.3 scans
+    for it. `tbl_19` is the next free number.
+  - **g1 — the figure slugs:** `fig_04_suitability_classes.png`,
+    `fig_05_suitability_value.png`, `fig_06_effort_gistar.png`.
+  - **z1 — size and frame:** as `fig_03` (11 × 10.6 in, 200 dpi; the
+    extent of the state layer; the theme of `fig_03`). The order: the
+    state fill, the model cells, the state lines, the reserve outlines
+    (core polygons, no fill; a white line under an ink line), the hatch,
+    the key box. The legend on the right; the title, the subtitle and the
+    caption in the image.
+  - **c1 — colours:** `fig_04` viridis in 5 steps (class 1 dark, class 5
+    light); `fig_05` viridis on a continuous scale, marks at 0, 0.25, 0.5,
+    0.75 and 1; `fig_06` hot dark red, cold dark blue, `not_significant`
+    light grey, `few_neighbours` mid grey; a blank cell (the land colour)
+    is not a model cell. Task 16.4 sets the hex values of `fig_06` and
+    checks them with a colour-vision simulation.
+  - **h1 — the hatch:** diagonal lines cut to the 32 cell polygons with
+    `sf` (own code), about 2–3 lines in each cell (tuned in task 16.4),
+    each a white line under an ink line; a key box in the map with a
+    hatched square and the text "outside the training range of one or more
+    covariates" (its position in the config).
+  - **k1 — the check of the figure inputs:** the figure code reads its
+    files through `fig_read()`, which refuses a file that is not on the
+    list of the figure and records each file that it reads. The lists:
+    `fig_04` and `fig_05` — the prediction layer, the grid layer, the
+    reserve layer, the state layer; `fig_06` — `hot_effort_inat_cell02.csv`,
+    the grid layer, the reserve layer, the state layer. The figure code
+    uses only objects that it makes (prefix `fig_`). STEP 16.3 checks the
+    record, and that no data frame that is drawn has a field with a
+    presence, background, record, tiger or occurrence word.
+  - **d1 — the caption drafts:** as `fig_03`: made in STEP 16.2 from the
+    values of the run, drawn in the PNG and printed in the console under
+    "DRAFT"; an open item in the handoff until the author edits them.
+  - **q1 — the permutation check:** for each Gi\* at 50 km, about 20 sample
+    cells (the cell with the largest K_i and cells chosen by a fixed rule
+    on the cell id); 9,999 total relabellings with a fixed seed; a pass if
+    the exact p is inside the 99.9 % binomial interval of the Monte Carlo
+    estimate.
+- **Decision 26 Amendment 1 (A1), before any Gi\*.** The chat found an
+  error of its own (below) and raised four options; the author chose A1:
+  the distance between two cells is on the sphere (haversine, radius
+  6,371.0088 km), between the centres in longitude and latitude. 50 km
+  then gives 20 neighbours for an inner cell at each row of India.
+  Decision 26, "Amendment 1", has the record.
+- **Errors of the chat (found in task 16.2):**
+  - Decision 26 point 4 put the distance in EPSG:7755, but the count of 20
+    neighbours and the reason for d1 came from arithmetic on the sphere.
+    The scale factor of EPSG:7755 is 1.018 at 8° N; the chat had estimated
+    about 1.003.
+  - The fork text of p said that no neighbour count changes at 50 km, with
+    margins of 49.4 and 53.1 km. For EPSG:7755 that was wrong (12–18
+    neighbours for the rows at 9.5° N or south; a pair of cells 30 m from
+    the band at about 8.6° N).
+  - The check that found it: PROJ (through `pyproj` in the chat's
+    workspace) on cell centres made from the grid rule. No data file.
+- **Not forks (fixed by practice):** a hand-made case first in each STEP;
+  counts and statistics only in the console (for the tiger Gi\*, only the
+  counts of Decision 26 point 7); L1 by the 1 km cells of each reserve by
+  the centre rule (e1 of task 15.2); each number of a caption from a table
+  or a layer of the run; no new package (`viridisLite` and `RColorBrewer`
+  are in `renv.lock` as dependencies of `ggplot2`).
+- **Config:** `GISTAR_DIST` and `GISTAR_EARTH_RADIUS_KM` (Amendment 1); a
+  block "Process choices of task 16.2" after the Decision-26 block (the
+  centre, the layer files, the table number and slugs, the figure slugs,
+  the size and the resolution, the palette name, the hatch lines and the
+  position of the key box (start values for task 16.4), the permutation
+  settings). Two comments of the Decision-26 block changed for Amendment
+  1. No other value changed.
+- **Other docs:** this file (Decision 26: Amendment 1, a note on point 4
+  and on "Consequences"; the status); `project-plan.md` (task 16.2 done;
+  notes on tasks 16.3–16.5); `naming-conventions.md` §6 (`tbl_18`, the
+  figure slugs and the layer names; `tbl_19` and `fig_07` next free);
+  `handoff.md` (the state, the entry point, row 26, a gotcha).
+- **Next:** the split point — the author can commit tasks 16.1–16.2
+  (`analysis:` for `R/00_config.R`; `docs:` for the docs and
+  `data/README.md`). Then task 16.3 (STEP 16.1, the Gi\*).
+
+### 2026-11-07 — Week 16, task 16.1: Decision 26 recorded (no code, no Gi\*)
+
+- **Docs and config only.** No script, data layer or table changed; no
+  run; no Gi\*.
+- **Entry state:** Week 15 is committed and pushed (`7ae300a`,
+  2026-11-01). It is one commit with no scope prefix, not the planned
+  `analysis:` and `docs:` commits of task 15.7. Nothing under `data/` is in
+  it. The working tree was clean.
+- **The author's directions (2026-11-07):**
+  - This project is not Phase 1. The Phase-1 documents are not an input
+    (Decision 26 x1). The chat had raised two discrepancies inside the
+    Phase-1 documents; they are closed with no action.
+  - From Week 16, the chat edits the docs and the scripts in the
+    repository folder. The author runs the scripts, makes the Decisions
+    and commits.
+  - `renv.lock` and the references are changed when a task needs them.
+- **Decision 26** (the Gi\* settings): x1, a3, b1 with C1-2, c1, d1 (k1,
+  q2), e1, m1, f1, s2 with L1 and S-a, w1, g1; the author's statements h1
+  and h2. a3, s2 and C1-2 are not the chat's recommendation. Before the
+  text, the chat raised two conflicts (C1: a3 against the reason of b1; the
+  cell rule and the Sundarbans complex for s2) and four readings; the
+  author chose C1-2, L1 and S-a and confirmed the readings.
+- **A reading of a short answer** (the gotcha of task 15.1): with C1-2,
+  `effort_all` is published in the statistics table only, with no figure.
+  The chat stated this reading in its reply; the author can change it
+  before task 16.4.
+- **A change after the readings:** caption item 2 of `fig_06` says that
+  the source obscured part of the records (the T1 rule, sensitive-data
+  policy §2).
+- **Config:** a new block "Stage 3: Gi\* (Decision 26)" (`GISTAR_*`); a
+  dated note in the Decision-23 block. No earlier value changed.
+- **`data/README.md`** written again (the author's request): the folder
+  layout as it is on disk; the background is Mammalia (Decision 5); the
+  boundary source is the NTCA KML (Decision 4); ISFR is an area
+  cross-check only (Decision 8).
+- **Other docs:** this file (Decision 26; dated notes on Decision 23 point
+  8, §5.5 and "Published layers"; the pending item closed; the status);
+  `project-plan.md` (task 16.1 done; notes on tasks 16.2–16.5; the time
+  estimate); `naming-conventions.md` §6 (`fig_06`); `references.md` (a
+  new section); `handoff.md`; `README.md` (the line "Stack").
+- **Next:** task 16.2 (the process choices). The commit is by the author:
+  `analysis:` for `R/00_config.R`; `docs:` for the docs and
+  `data/README.md`.
 
 ### 2026-11-01 — Week 15 complete: task 15.6 (docs close, the Week-16 plan)
 

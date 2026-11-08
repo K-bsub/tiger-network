@@ -1203,6 +1203,114 @@ the object holds `varmin` and `varmax` ("minimum of each predictor, to be
 used for clamping") and `featuremins` and `featuremaxs`. Decision 25 a1 and
 b2.)* *(Package manual.)*
 
+## Gi\* settings (Decision 26)
+
+*All entries in this section were read on 2026-11-07, from a tool manual
+page, a package manual, an open-access paper and a book chapter (extracts
+through a fetch tool), a mailing-list thread (through a summary), a
+repository record, and the reference list of the PySAL `esda` package
+(marked). No paper was read in full. Verify each entry before it is cited
+on the site. Phillips et al. (2009) is in the section "Occurrence cleaning
+(Decision 21)".*
+
+Anselin, L. (2023). *An Introduction to Spatial Data Science with GeoDa*
+(online book, volume 1), §16.5 "Significance and interpretation".
+https://lanselin.github.io/introbook_vol1/sigandinterpretation.html ·
+*(The false discovery rate is "a slightly less conservative option" than a
+Bonferroni bound. With permutations, the smallest pseudo p-value limits the
+bounds: "data sets with n > 1000 cannot have a single significant location
+using the Bonferroni criterion" (α = 0.01, the largest number of
+permutations of GeoDa), and "The same limitation applies to the FRD
+criterion" [sic]. "The p-values of the local statistic may be affected by
+the presence of global spatial autocorrelation." Decision 26 e1, m1 and
+"Limitations".)* *(Extracts through a fetch tool. The print edition was
+not checked.)*
+
+Anselin, L., & Li, X. (2019). Operational local join count statistics for
+cluster detection. *Journal of Geographical Systems*, 21(2), 189–210.
+https://doi.org/10.1007/s10109-019-00299-x ·
+https://pmc.ncbi.nlm.nih.gov/articles/PMC6546301 · *(The local join count
+is a "constrained form of the local Gi\*, limited to observations where
+xi = 1". Inference by a one-sided conditional permutation, pseudo p =
+(v + 1)/(r + 1). The paper gives the exact conditional hypergeometric
+probability of a count and says that "the permutation approach is to be
+preferred, since it does not require any parametric assumptions";
+asymptotic approximations for a local statistic "are not pursued". Decision
+26 e1.)* *(Open-access paper; extracts through a fetch tool; the full text
+was not read.)*
+
+Benjamini, Y., & Hochberg, Y. (1995). Controlling the false discovery
+rate: a practical and powerful approach to multiple testing. *Journal of
+the Royal Statistical Society*, 57, 289–300.
+https://planosphere.stowers.org/pub/197 · *("It calls for controlling the
+expected proportion of falsely rejected hypotheses-the false discovery
+rate." Decision 26 m1.)* *(From a repository record and the abstract. The
+series (B), the issue and the DOI are not on the record that was read.)*
+
+Benjamini, Y., & Yekutieli, D. (2001). The control of the false discovery
+rate in multiple testing under dependency. *The Annals of Statistics*,
+29(4), 1165–1188. http://www.jstor.org/stable/2674075 · *(Cited for the
+condition of positive dependence under which the Benjamini–Hochberg
+procedure controls the false discovery rate. Decision 26 "Limitations".)*
+*(From the PySAL reference list only; the paper was not read. The
+statement about positive dependence is not from a text that was read:
+verify it.)*
+
+Bivand, R. (2024, 4 July). Re: Seeking guidance for best application of
+spdep localG_perm. R-sig-Geo mailing list.
+https://stat.ethz.ch/pipermail/r-sig-geo/2024-July/029450.html · *(For a
+variable that is not bell-shaped, with conditional permutations, "Pr(z !=
+E(Gi)) Sim" is preferred; "In all cases, adjustment for multiple
+comparisons is judicious", and FDR adjustment is "a reasonable
+compromise"; "All one gets from increasing the number of simulations is
+more digits in the p-value." Decision 26 e1 and m1.)* *(Through a summary
+of the thread. The URL is the message that starts the thread; the URL of
+the reply was not checked. A mailing-list post: not to be cited on the
+site.)*
+
+Caldas de Castro, M., & Singer, B.H. (2006). Controlling the false
+discovery rate: a new application to account for multiple and dependent
+tests in local statistics of spatial association. *Geographical Analysis*,
+38(2), 180–208. https://doi.org/10.1111/j.0016-7363.2006.00682.x ·
+*(The false discovery rate for local statistics of spatial association.
+Decision 26 m1.)* *(From the PySAL reference list only; the paper was not
+read.)*
+
+Esri. How Hot Spot Analysis (Getis-Ord Gi\*) works. ArcGIS Pro
+documentation.
+https://pro.arcgis.com/en/pro-app/tool-reference/spatial-statistics/h-how-hot-spot-analysis-getis-ord-gi-spatial-stati.htm
+· *("Results aren't reliable with less than 30 features"; "All features
+should have at least one neighbor"; "Features should have about eight
+neighbors each, especially if the values for the Input Field parameter
+value are skewed"; incident data are aggregated before the analysis.
+Decision 26 k1.)* *(Tool documentation, through a fetch tool; the
+software version of the page was not recorded.)*
+
+Getis, A., & Ord, J.K. (1992). The analysis of spatial association by use
+of distance statistics. *Geographical Analysis*, 24(3), 189–206.
+https://doi.org/10.1111/j.1538-4632.1992.tb00261.x · *(The G statistics,
+defined by a distance band. Decision 26 d1.)* *(From the PySAL reference
+list only; the paper was not read.)*
+
+Ord, J.K., & Getis, A. (1995). Local spatial autocorrelation statistics:
+distributional issues and an application. *Geographical Analysis*, 27(4),
+286–306. https://doi.org/10.1111/j.1538-4632.1995.tb00912.x · *(The
+standard form of G\*_i of Decision 26 point 6. Decision 26 e1.)* *(From the
+PySAL reference list only; the paper was not read. The formula of point 6
+is the standard form as the chat knows it; it was not checked against the
+paper or against a page that was read. Its denominator was checked by
+algebra: the standard deviation of a window sum under sampling without
+replacement.)*
+
+*sfdep*, version 0.2.4. Reference manual: `local_gstar`,
+`local_gstar_perm`.
+https://search.r-project.org/CRAN/refmans/sfdep/html/local_gstar.html ·
+*(`local_gstar_perm(x, nb, wt, nsim = 499, alternative = "two.sided",
+...)`; `p_folded_sim`: "p-value based on the implementation of Pysal which
+always assumes a two-sided test taking the minimum possible p-value".
+Decision 26 g2, rejected.)* *(Package manual. The author is not on the
+page that was read.)*
+
 ## Tiger movement and landscape resistance (Decision 14)
 
 Dutta, S., & Krishnamurthy, R. (2024). Multiphasic movement and step-selection
