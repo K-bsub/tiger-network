@@ -1065,6 +1065,41 @@ national scale, 11 × 10.6 in at 200 dpi (2200 × 2120 pixels). Settings:
 - **Colours:** the site symbology of `scripts/05` (same hex values) and
   mixes of them. Each class has a shape or a size of its own.
 
+## Output figures — fig_04, fig_05, fig_06  *(Week 16 — built, task 16.4)*
+
+Not data layers. Written by `scripts/09_model_suitability.R` STEP 16.2
+(Decision 25 points 3 to 6; Decision 26 point 7). Static maps at national
+scale, 11 × 10.6 in at 200 dpi (2200 × 2120 pixels), in the frame of
+`fig_03`. Settings: `SDM_PUB_*`, `GISTAR_PUB_*` and `FIG_*` in
+`R/00_config.R`; the functions in `R/00_functions_fig.R`.
+
+- **`outputs/figures/fig_04_suitability_classes.png`:** the 6,969 model
+  cells in five classes of equal size by rank (viridis). The legend gives
+  the classes by rank and no model value.
+- **`outputs/figures/fig_05_suitability_value.png`:** the model output
+  (cloglog, 0 to 1) on a continuous viridis scale. The legend label is
+  `SDM_PUB_VALUE_LABEL`.
+- **On `fig_04` and `fig_05`:** a diagonal hatch on the 32 cells outside
+  the training range of one or more covariates, and a key box for it.
+- **`outputs/figures/fig_06_effort_gistar.png`:** the `effort_inat` Gi\* at
+  50 km by class (`hot`, `cold`, `not_significant`, `few_neighbours`;
+  `FIG_GISTAR_COLOURS`), with the count of each class in the legend. No
+  tiger record.
+- **On all three:** the reserve outlines (the core polygons; a white line
+  under the ink line), the state lines (white), and blank land where a
+  cell is not a model cell. No point, no presence mark, no background
+  mark.
+- **Inputs (k1 of task 16.2):** `fig_04` and `fig_05` read the prediction
+  layer, the grid layer, the reserve layer and the state layer; `fig_06`
+  reads `hot_effort_inat_cell02.csv`, the grid layer, the reserve layer
+  and the state layer. The caption values come from five `tbl_16` tables,
+  `tbl_18_gistar.csv` and the two GBIF DOI files. The console prints each
+  read.
+- **Caption:** the items of Decision 25 point 5 (`fig_04`, `fig_05`) and
+  of Decision 26 point 7 (`fig_06`). **The title, the subtitle and the
+  caption are draft text of the chat (d1); the author's edit is open.**
+  Each number in them is read from a table or a layer of the run.
+
 ## lcp_road_crossings_7755.gpkg  *(data/processed; Week 12 — built, tasks 12.3–12.5; gitignored)*
 
 Written by `scripts/07_connectivity.R` STEPs 12.2 and 12.3 (layer `baseline`)

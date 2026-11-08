@@ -200,6 +200,8 @@ layers (n1) are `hot_effort_inat_cell02.csv`, `hot_tiger_obscured_cell02.csv`,
 `hot_effort_all_cell02.csv` and `hot_tiger_5km_cell02.csv` (no geometry, so
 no CRS code, as `sdm_prediction_cell02.csv`). `tbl_18` is in use (t1);
 `tbl_19` is the next free table number.)*
+*(2026-11-07, task 16.4: the three figures are built (`scripts/09` STEP
+16.2). `fig_07` is the next free number.)*
 
 ---
 

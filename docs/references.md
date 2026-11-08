@@ -1311,6 +1311,29 @@ always assumes a two-sided test taking the minimum possible p-value".
 Decision 26 g2, rejected.)* *(Package manual. The author is not on the
 page that was read.)*
 
+## Figures (task 16.4)
+
+*Both entries were read on 2026-11-07: the authors' web page of the paper
+(through a fetch tool) and the CRAN page of the package. The paper was not
+read in full. Verify each entry before it is cited on the site.*
+
+Garnier, S., Ross, N., Rudis, B., Sciaini, M., Camargo, A. P., & Scherer,
+C. *viridisLite: Colorblind-Friendly Color Maps (Lite Version)*. R package.
+https://doi.org/10.32614/CRAN.package.viridisLite · *(The palette of
+`fig_04` and `fig_05` (`FIG_STAGE3_PALETTE` = "viridis"). The project uses
+version 0.4.2 (`renv.lock`); the CRAN page read on 2026-11-07 gives
+version 0.4.3 (2026-02-04) and this author list.)*
+
+Machado, G. M., Oliveira, M. M., & Fernandes, L. A. F. (2009). A
+physiologically-based model for simulation of color vision deficiency.
+*IEEE Transactions on Visualization and Computer Graphics*, 15(6),
+1291–1298. https://www.inf.ufrgs.br/~oliveira/pubs_files/CVD_Simulation/CVD_Simulation.html
+· *(Table 1 of the page gives a matrix for each type and severity;
+severity 1.0 "represents the highest severity or a case of dichromacy".
+The chat used the matrices of severity 1.0 for the three types on the
+colours of `fig_06` and the state fill (`FIG_GISTAR_COLOURS`, task 16.4).)*
+*(The DOI is not in the page text that was read.)*
+
 ## Tiger movement and landscape resistance (Decision 14)
 
 Dutta, S., & Krishnamurthy, R. (2024). Multiphasic movement and step-selection

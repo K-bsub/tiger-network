@@ -38,8 +38,10 @@ Gi*; the tiger Gi* never published. **Task 16.2 (2026-11-07):** the process choi
 Decision 26 (the distance between cells on the sphere). **Task 16.3
 (2026-11-07):** STEP 16.1, the four Gi*: at 50 km, `effort_inat` 654 hot
 cells and `effort_all` 559, no cold cell; `tiger_obscured` 200 hot cells
-(85 also hot in `effort_inat`); `tiger_5km` 52 (20). **Next:** task 16.4
-(the figures `fig_04`, `fig_05` and `fig_06`).
+(85 also hot in `effort_inat`); `tiger_5km` 52 (20). **Task 16.4
+(2026-11-07):** STEP 16.2, the figures `fig_04` (the five classes),
+`fig_05` (the model output) and `fig_06` (the `effort_inat` Gi*), with
+caption drafts. **Next:** task 16.5 (the QA).
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -3652,7 +3654,9 @@ complete):**
    items, as the caption of `fig_03` does. The caption text is drafted in
    Week 16 and marked as a draft (the narrative is the author's).
    1. Relative suitability from a `maxnet` model at the 0.2° grain (cells
-      of about 20 km; 396–488 km² in India).
+      of about 20 km; 396–488 km² in India). *(2026-11-07, task 16.4: the
+      model cells give 404–489 km²; see Decision 26, "Result of STEP
+      16.2".)*
    2. Not occupancy (Decision 1), and not a probability of presence.
    3. The presences: the obscured iNaturalist tiger records, in 104 cells
       of 0.2° (obscured by the source; point 4). The background: the
@@ -3886,6 +3890,8 @@ machine; console text sent on 2026-11-01; facts):**
   show the hatch, and caption item 6 gives the count of hatched cells.
   Rejected: m2, a column of the cells outside the range in `tbl_17`; m3,
   one more caption item.)*
+- *(2026-11-07, task 16.4: STEP 16.2 drew `fig_04` and `fig_05`; see
+  Decision 26, "Result of STEP 16.2".)*
 
 **Reason and sources:**
 - **One model file and one output type (a1).**
@@ -4222,6 +4228,8 @@ use some of the same letters. Write the Decision with the code, for example
           excluded) at the 0.2° grain (cells of 396–488 km²), 2006–2022. It
           shows clusters of cells with records; it does not show search
           effort or animals.
+          *(2026-11-07, task 16.4: the model cells give 404–489 km²; see
+          "Result of STEP 16.2".)*
        2. The input: the 1,486 model cells with one or more records, of the
           6,969 model cells; the source obscured part of the records to
           their 0.2° cell. The presence cells of the model are not in the
@@ -4438,6 +4446,43 @@ machine; console text sent on 2026-11-07; facts, not a reading):**
 - **Seen from this run on:** the console text of STEP 16.1 (the table), by
   the author and the chat. No map was made.
 
+**Result of STEP 16.2, the figures (task 16.4, `scripts/09`, run on the
+project machine; console text sent on 2026-11-07; facts):**
+- The hand-made case of STEP 16.2 passed (15 of 15), and the 12 checks
+  before the write passed. STEP 16.2 took 0.1 minutes.
+- **The files that the figure code read (k1 of task 16.2):** for `fig_04`
+  and `fig_05`, the prediction layer, the grid layer, the reserve layer
+  and the state layer; for `fig_06`, `hot_effort_inat_cell02.csv`, the
+  grid layer, the reserve layer and the state layer; for the captions,
+  five `tbl_16` tables, `tbl_18_gistar.csv` and the two GBIF DOI files.
+  No other file. Of the reserve and state layers, only the geometry is
+  drawn.
+- **`fig_04` and `fig_05`:** 6,969 model cells; classes 5 to 1 with 1,394,
+  1,394, 1,394, 1,394 and 1,393 cells; 32 hatched cells (76 hatch lines).
+- **`fig_06`:** 654 `hot`, 0 `cold`, 6,275 `not_significant` and 40
+  `few_neighbours` (the counts of `tbl_18_gistar.csv`).
+- **Files:** `outputs/figures/fig_04_suitability_classes.png`,
+  `fig_05_suitability_value.png` and `fig_06_effort_gistar.png`, each
+  2,200 × 2,120 pixels (11 × 10.6 in at 200 dpi; the size read back from
+  each file).
+- **The caption values of the run:** the cell area 404–489 km² (on the WGS
+  84 ellipsoid, over the model cells); 104 presence cells and 1,486
+  background cells; the top-20 % overlaps 0.931 and 0.896; a mean test
+  Boyce index of 0.668 and a mean test AUC of 0.749; 32 hatched cells; r1
+  "agrees" (ρ 0.379, n 51, p 0.006); for `fig_06`, 1,486 input cells, 20
+  neighbours for an inner cell, 40 cells with fewer than 8 neighbours,
+  1,408 `cold` cells at the 75 km QA band (k-a), and the shares 39 %
+  (queen) and 96 % (75 km); the two GBIF DOIs.
+- **Stated plainly (facts of the run; no rule changes):**
+  - Decision 25 point 5 item 1 and point 7 item 1 of this Decision give
+    396–488 km². That range was the chat's arithmetic for India from 8° N
+    to 37° N, not a value of the model cells. The model cells give
+    404–489 km². The captions use the value of the run.
+  - The titles, the subtitles and the captions are drafts of the chat (d1
+    of task 16.2; printed under "DRAFT"). The narrative is the author's.
+- **Seen from this run on:** the console text of STEP 16.2 (the author and
+  the chat) and the three figures (the author).
+
 **Reason and sources:**
 - **This project only (x1).** The author's direction of 2026-11-07.
   Proposal question 4 asks how much of the pattern of this project is
@@ -4620,6 +4665,87 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-07 — Week 16, task 16.4 complete: STEP 16.2 (the figures `fig_04`, `fig_05` and `fig_06`)
+
+- **Code.** `R/00_functions_fig.R` (new; f1 of task 16.2): 11 `fig_*`
+  functions — the read guard `fig_reader()` (k1; the plan said
+  `fig_read()`), the field-word check, the hatch lines and the key box
+  (h1), the legend labels of the classes, the number format and the
+  caption wrap, the cell area on the WGS 84 ellipsoid, the PNG size from
+  the file header, the theme of `fig_03` (z1), and the hand-made case
+  (`fig_self_test()`, 15 checks). `R/00_config.R`: `FIG_GISTAR_COLOURS`
+  (the four classes of `fig_06`) and `FIG_FRAME_COLOURS` (the ink, the
+  paper, the state fill and the state line). `scripts/09`: STEP 16.2 after
+  STEP 16.1; the header (STEP 16.2, its inputs and its outputs); one more
+  `source()` line; three paths (the state layer and the two DOI files).
+- **Colours (c1).** `fig_04` and `fig_05`: viridis (`viridisLite`), five
+  steps and a continuous scale. `fig_06`: `hot` #B2182B, `cold` #2166AC,
+  `not_significant` #BBBBBB, `few_neighbours` #5E5E5E. The chat simulated
+  protanopia, deuteranopia and tritanopia (Machado et al. 2009, severity
+  1) on the four colours and the state fill: the smallest CIE76
+  difference is 15.2 (`not_significant` against the state fill, in
+  tritanopia); the next is 20.5 (`hot` against `few_neighbours`, in
+  protanopia). The state lines are white (`fig_03`: #d4cfc4), so that they
+  show on the dark cells; a start value.
+- **Start values of h1:** 3 hatch lines for each cell; the key box at 0.60
+  and 0.36 of the frame of the state layer.
+- **Tests in the chat (not the record):** R 4.3.3 with `ggplot2` 3.4.4
+  (the project machine has `ggplot2` 4.0.3; the chat could not install
+  it, because the package site is blocked from the chat's workspace). The
+  hand-made case 15 of 15. STEP 16.1 and STEP 16.2 on the made-up project
+  of task 16.3 (1,200 model cells; a made-up prediction layer, made-up
+  tables, a made-up state layer and made-up DOI files): the 12 checks
+  passed, and three PNG files of 2,200 × 2,120 pixels were written; the
+  chat looked at them. A negative test (the count of hatched cells in the
+  table one too high) stopped the step before a file was written. The
+  sentence of k-a was tested with a made-up `cold` count of 0. No data
+  file was used.
+- **The run (project machine, 2026-11-07):** the result is in Decision 26,
+  "Result of STEP 16.2".
+- **Readings of the chat (stated in its reply of 2026-11-07, before the
+  run):**
+  1. k1: the lists of `fig_04`/`fig_05` and of `fig_06` also hold the
+     reserve layer and the state layer (Decision 25 point 4 names the
+     prediction layer and the grid layer). Only their geometry is drawn,
+     and a check confirms it. The caption tables and the two DOI files are
+     on a list "caption"; `tbl_16_sdm_counts.csv` gives the presence count
+     of caption item 3.
+  2. `fig_04` and `fig_05` are drawn only with a model outcome.
+  3. The read guard is `fig_reader()`, not `fig_read()`.
+  4. The k-a sentence gives the 75 km QA band only, not the queen band.
+- **The author's answer "Looks good" (2026-11-07). The chat's reading:**
+  the result is accepted; the four readings are confirmed; the start
+  values (white state lines, 3 hatch lines, the key box) stay; the titles,
+  the subtitles and the captions stay drafts for the author's edit. The
+  author can change this reading.
+- **Errors of the chat:**
+  1. The cell area of 396–488 km² in Decision 25 point 5 item 1 and in
+     Decision 26 point 7 item 1 was the chat's arithmetic for India, not a
+     value of the model cells. The run gives 404–489 km². The two Decision
+     texts keep the old range, with a dated note.
+  2. The run instructions said that `tbl_16_sdm_qa.csv` and
+     `tbl_16_sdm_pred_qa.csv` do not change in this run. They changed:
+     check (c) went from "0 of 67 files" to "0 of 68 files". STEPs 14.3
+     and 15.3 count the files under `outputs/` before STEP 16.1 and STEP
+     16.2 write their files, so a file that a run writes for the first
+     time is counted in the next run. This run counted
+     `tbl_18_gistar.csv`, first written in the run of task 16.3. The next
+     run counts the three figures ("0 of 71 files"). By the same
+     mechanism, the change from 66 to 67 in the run of task 16.3 did not
+     come from `tbl_18_gistar.csv`, as the entry of task 16.3 says. It came
+     from a file that an earlier run wrote after the count (probably
+     `tbl_16_sdm_pred_qa.csv`); the record does not show which. No other
+     value of the two tables changed.
+- **References:** `references.md`, a new section "Figures (task 16.4)":
+  Machado et al. 2009; `viridisLite`.
+- **Docs:** this file (the status; Decision 25, two dated notes; Decision
+  26, "Result of STEP 16.2" and a dated note); `project-plan.md` (task
+  16.4 done); `naming-conventions.md` (the three figures built; `fig_07`
+  is the next free number); `data-dictionary.md` (the three figures);
+  `references.md`; `handoff.md` (the state, the files, an open item, two
+  gotchas).
+- **Next:** task 16.5 (STEP 16.3, the QA).
 
 ### 2026-11-07 — Week 16, task 16.3 complete: STEP 16.1 (the four Gi\*)
 
