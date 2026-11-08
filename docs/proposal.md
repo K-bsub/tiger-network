@@ -169,3 +169,20 @@ open are documented as numbered Decisions in `docs/methodology.md`, not here.*
   census density, "agrees"; r2 is not published (Decision 25 point 9).
   The published form is static figures and tables; a layer that a reader
   can zoom waits for the Week-18 rule. Not a new deviation.)*
+  *(2026-11-07, Week 16: the figures are built — `fig_04` (the classes),
+  `fig_05` (the value) and `fig_06` (the effort Gi\* of iNaturalist).
+  Decision 26 (x1) makes no comparison with Phase 1: the four Gi\* compare
+  each tiger set with the effort of its observer group, and the tiger Gi\*
+  are not published. The model cells are 404–489 km² (the text above says
+  396–488 km², the chat's arithmetic for India). The Week-18 rule is now
+  in Week 19. Not a new deviation.)*
+- **SDM-based resistance and a circuit-theory check (§5 connectivity and
+  habitat suitability; added 2026-11-07).** §5 names a land-cover + road
+  resistance surface and least-cost paths for connectivity, and a national
+  prediction for suitability. It does not name a resistance surface from
+  the suitability. The item was raised with Decision 14 (2026-09-26) and
+  stayed pending. At the Week-16 close the author chose to work on it in
+  Week 17 (choice R4 of task 16.6): a resistance surface from the
+  suitability at 0.2° and a circuit-theory check against the Stage-2
+  paths. **Decision 27** fixes the settings before any surface. The story
+  site (deliverable 1) moves one week later (Weeks 18–21).

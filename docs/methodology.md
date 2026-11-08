@@ -2,7 +2,9 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** **Week 15 complete (2026-11-01; tasks 15.1–15.2 on 2026-10-31,
+**Status:** **Week 16 complete (2026-11-07; tasks 16.1–16.6, each
+committed by the author); Stage 3 (habitat suitability) complete.**
+**Week 15 complete (2026-11-01; tasks 15.1–15.2 on 2026-10-31,
 tasks 15.3–15.6 on 2026-11-01; the commit, task 15.7, by the author);
 Week 14 complete (2026-10-25).** Stage 3 (habitat
 suitability) has a fitted model. **Decision 23:** a `maxnet` model on the
@@ -42,8 +44,11 @@ cells and `effort_all` 559, no cold cell; `tiger_obscured` 200 hot cells
 (2026-11-07):** STEP 16.2, the figures `fig_04` (the five classes),
 `fig_05` (the model output) and `fig_06` (the `effort_inat` Gi*), with
 caption drafts. **Task 16.5 (2026-11-07):** STEP 16.3, the QA of
-Decision 26 and of the figures: 113 of 113. **Next:** task 16.6 (the docs
-of the Stage-3 close; the Week-17 plan).
+Decision 26 and of the figures: 113 of 113. **Task 16.6 (2026-11-07):** the
+docs of the Stage-3 close; the author's choices R4 and S1. **Next: Week
+17** (R4) — a resistance surface from the suitability and a circuit-theory
+check against the Stage-2 paths (the pending item), with Decision 27
+first. Stage 4 (the story site) moves to Weeks 18–21.
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -105,7 +110,8 @@ STEP block per task.
 
 ### 5.4 Habitat suitability (priority 3)
 
-*(Written again 2026-11-01 at the Week-15 close; the dated notes of
+*(2026-11-07, Week-16 close: the figures and the cell range of the model
+cells.)* *(Written again 2026-11-01 at the Week-15 close; the dated notes of
 Decision 25 are in this text now. Earlier texts: 2026-10-25 (Week 14) and
 the first text, which named a `maxnet` SDM at 1 km on the cleaned
 occurrences.)*
@@ -115,7 +121,9 @@ tiger records with a position good to 1 km are 45 records in 17 cells,
 below the minimum of 25 (Decision 21 point 8).
 
 - **Grain:** the cells of the iNaturalist obscuring grid, 0.2° × 0.2°
-  (396–488 km² in India). A cell is a model cell if complete-case 1 km
+  (404–489 km² for the model cells, on the WGS 84 ellipsoid; *corrected
+  2026-11-07, task 16.4: the text said 396–488 km², the chat's arithmetic
+  for India*). A cell is a model cell if complete-case 1 km
   cells cover 50 % or more of it: 6,969 model cells.
 - **Presences:** the obscured iNaturalist tiger records (Decision 21 point
   4): 104 presence cells.
@@ -144,11 +152,14 @@ below the minimum of 25 (Decision 21 point 8).
   published table). r1: Spearman ρ = 0.379 with the 2022 census density
   (n = 51, p = 0.006) → "agrees". r2 is not published (Decision 25 point
   9). QA of Week 15: 84 of 84.
-- **Published form:** two static figures at national scale in Week 16
-  (`fig_04` the classes, `fig_05` the value, with the nine caption items of
-  Decision 25 point 5); the tables of statistics; the reserve table. No
-  layer that a reader can zoom or download before the Week-18 rule
-  (pending item "Published layers").
+- **Published form (as built in Week 16):** two static figures at
+  national scale, `fig_04_suitability_classes.png` (the five classes) and
+  `fig_05_suitability_value.png` (the value), with the nine caption items
+  of Decision 25 point 5 (drafts of the chat; the author's edit is open)
+  and the hatch on the 32 cells; the tables of statistics; the reserve
+  table. QA of the figures in STEP 16.3 (Decision 26, "Result of STEP
+  16.3"). No layer that a reader can zoom or download before the rule of
+  the pending item "Published layers" (Week 19 since 2026-11-07).
 
 **This is suitability, not occupancy** (Decision 1). At a grain of about
 20 km it is not habitat at the scale of a reserve.
@@ -174,6 +185,13 @@ effort proxy.
   *(2026-11-07, Decision 26: four Gi\* on the 0.2° model cells, each tiger
   set against the effort Gi\* of its observer group; no comparison with
   Phase 1. The tiger Gi\* cannot show a cold spot (Decision 26 point 6).)*
+  *(2026-11-07, Week 16, as run: at 50 km, the effort Gi\* of iNaturalist
+  has 654 `hot` cells and no `cold` cell (1,408 `cold` cells at the 75 km
+  QA band); `fig_06_effort_gistar.png` shows it. The effort Gi\* of all
+  datasets has 559 `hot` cells (a table only). The tiger Gi\*: 200 `hot`
+  cells (the obscured set), 85 of them also `hot` in the iNaturalist
+  effort Gi\*; 52 (the 5 km set), 20 of them also `hot` in the effort Gi\*
+  of all datasets. QA 113 of 113.)*
 - No ratio of the tiger and the effort surfaces.
 
 ---
@@ -4692,7 +4710,8 @@ This closes the **[Week 15–16] Gi\* settings** pending item.
 These forks are open. Each is decided in the week noted in the project plan,
 before the relevant code is written.
 
-- **[Week 18] Published layers (raised 2026-10-10 with Decision 20 as
+- **[Week 19] Published layers (was "[Week 18]" until 2026-11-07; raised
+  2026-10-10 with Decision 20 as
   "Published path layer"; widened 2026-10-31 by Decision 25 point 4; decide
   before a path layer or a suitability layer goes on the site).** Decision
   20 point 7 allows the path lines in a static figure at national scale
@@ -4709,7 +4728,10 @@ before the relevant code is written.
   *(2026-11-07, Decision 26 point 7: the Gi\* layers are not published;
   `fig_06` is a static figure. A Gi\* layer on the site would wait for this
   rule too.)*
-- **[After Stage 3] SDM-based resistance + circuit-theory check.** Raised
+  *(2026-11-07, task 16.6: Stage 4 moves by one week (the author's choice
+  R4); the Leaflet maps, and this item, are in Week 19.)*
+- **[Week 17] SDM-based resistance + circuit-theory check (was "[After
+  Stage 3]" until 2026-11-07).** Raised
   2026-09-26 (Decision 14, F1). After the SDM exists, build a resistance
   surface from 1 − suitability and run circuit theory between reserves, to
   reproduce the national method (Jhala et al. 2021; Qureshi et al. 2014) as
@@ -4722,12 +4744,97 @@ before the relevant code is written.
   surface is at the 0.2° grain (about 20 km), not at 1 km. A resistance
   surface from it would have that grain. Decide then whether this item
   still applies.)*
+  *(2026-11-07, task 16.6, the author's choice R4: the item applies; Week
+  17 works on it, and Stage 4 moves to Weeks 18–21. The chat's reading:
+  the item keeps its scope as written above. Decision 27, in task 17.1,
+  fixes before any surface: the input (the value or the class); the
+  transform; the grain (a surface of the 0.2° model cells, or the 0.2°
+  value on the 1 km frame of Stage 2) and the cells with no value; the
+  method and the tool (circuit theory in R, for example with `gdistance`,
+  or Circuitscape or Omniscape outside R; least-cost paths too or not);
+  the pairs; the comparison with the Stage-2 paths and its reading; the
+  published form. "Not yet in the week plan" no longer applies:
+  `project-plan.md` → "Week 17".)*
 
 ---
 
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-07 — Week 16 complete: task 16.6 (docs close; the Week-17 plan)
+
+- **Docs, and one list in a script.** No rule, value, data layer or table
+  changed; no run.
+- **The author's choices (task 16.6, 2026-11-07):**
+  - **R4** (the author's own option; the chat had given R1–R3): Week 17
+    works on the pending item "SDM-based resistance + circuit-theory
+    check"; Stage 4 moves by one week (Weeks 18–21); the project can go
+    past Week 20. **The chat's reading** (stated in its reply of
+    2026-11-07): the item keeps its scope as written (a resistance surface
+    from 1 − suitability, circuit theory between the reserves, a comparison
+    with the Stage-2 least-cost paths). Decision 27, in task 17.1, fixes
+    the transform, the grain, the tool and the comparison before any
+    surface. Rejected: R1 (close the item; future work), R2 (keep it open
+    after Week 20), R3 (a smaller check in Stage 4, with no circuit
+    theory).
+  - **S1:** the package list of `scripts/00a_setup_environment.R` follows
+    the code: `viridisLite`, `maxnet` and `codetools` by name; out:
+    `spatstat.explore`, `spatstat.geom`, `sfdep` and `predicts` (not used;
+    not in `renv.lock`); `leaflet` and `htmlwidgets` stay (the site).
+    `renv.lock` does not change. Rejected: S2 (no change).
+- **The facts given with fork R (the chat, 2026-11-07):** the suitability
+  is at 0.2° (cells of 404–489 km²; 6,969 model cells); the Stage-2
+  resistance surfaces are at 1 km; a surface of 1 − suitability gives one
+  value to all 1 km cells of a 0.2° cell; the cells that are not model
+  cells have no value; 55 of the 56 reserve values are above the median of
+  the model cells, and the presence records are mostly in reserves (the
+  effort caveat); circuit theory needs a tool outside the R pipeline
+  (Circuitscape or Omniscape). *(The fork text did not name an R method;
+  the Week-17 plan names `gdistance` as an option to check.)*
+- **§5.4 and §5.5:** the figures as built, the Gi\* results, the cell
+  range of the model cells. **"Limitations":** seven Week-16 items at the
+  end. **Pending items:** "[Week 17] SDM-based resistance + circuit-theory
+  check" (the label, and a dated note with R4); "Published layers" is now
+  Week 19.
+- **Stage 3 against proposal questions 3 and 4 (a record, not text for the
+  site):**
+  - **Q3:** "Where is habitat suitable for tigers across India, and does
+    modelled suitability agree with where reserves are?"
+    - A relative suitability surface exists at the 0.2° grain over 6,969
+      model cells (`fig_04`, `fig_05`); it is not occupancy and not a
+      probability of presence; 32 cells are outside the training range
+      (hatched). The gate is open (mean test Boyce 0.668; mean test AUC
+      0.749).
+    - Of the 56 reserves with a value, 55 are above the median of the
+      model cells; r1 "agrees" with the 2022 census density (ρ 0.379,
+      n 51, p 0.006); r2 has no published answer (Decision 25 point 9).
+  - **Q4:** "How much of the apparent spatial pattern shows true
+    distribution, and how much shows observer effort?"
+    - The model uses a target-group background from the same platform as
+      its main bias correction; a settlement bias covariate changes little
+      (sensitivity run, ρ 0.988).
+    - The effort Gi\* of iNaturalist has 654 `hot` cells at 50 km
+      (`fig_06`). 85 of the 200 `hot` cells of the obscured tiger set
+      (0.425) are also `hot` in it; 20 of the 52 `hot` cells of the tiger
+      5 km set (0.385) are also `hot` in the effort Gi\* of all datasets.
+      So 115 and 32 tiger `hot` cells are not effort `hot` cells at 50 km.
+      This is a description: such a cell can still have much effort, and
+      the Gi\* uses 0/1 values (Decision 26).
+    - The project gives no share of the pattern that is effort. The
+      records are not search effort (Decision 22), and r1 is partly linked
+      to the presences (Decision 24 point 9).
+  - The effort caveat (proposal §7) applies to each of these statements.
+- **`proposal.md` §8:** a dated note on "Habitat suitability at a coarser
+  grain" (the figures; no comparison with Phase 1 by Decision 26 x1; the
+  cell range), and a new entry "SDM-based resistance and a circuit-theory
+  check".
+- **`README.md`:** the status. **`project-plan.md`:** Week 16 ticked; the
+  milestone; a new **Week 17** (the row, a draft task breakdown and the
+  pitfalls; a plan, not a Decision); Stage 4 in Weeks 18–21.
+  **`handoff.md`:** written for Week 17. **`scripts/00a`:** the list (S1).
+- **Next:** the commit of task 16.6 (task 16.7, by the author); then Week
+  17, task 17.1 — Decision 27.
 
 ### 2026-11-07 — Week 16, task 16.5 complete: STEP 16.3 (the QA of Decision 26 and of the figures)
 
@@ -6287,3 +6394,37 @@ prediction and the reserve check needs.)*
   correct all of that effort (not tested).
 - **Static figures only, so far.** No layer that a reader can zoom or
   download before the Week-18 rule (pending item "Published layers").
+
+*(Week 16, added 2026-11-07 at the Week-16 close. Decision 26 keeps its
+own list of limitations; the items below are the ones that a reader of the
+Gi\* and the figures needs.)*
+
+- **A `hot` cell is a cluster of cells with records (Decision 26).** The
+  value of a cell is 0 or 1: a cell with one record and a cell with 500
+  records count the same. A `hot` cell is not a cluster of tigers, and an
+  effort `hot` cell is not a cluster of search effort.
+- **The absence of `cold` cells at 50 km depends on the band.** At 50 km
+  no cell of an effort Gi\* is `cold`; at the 75 km QA band, 1,408 cells of
+  `effort_inat` are `cold`. A text must not read it as records everywhere.
+  The tiger Gi\* cannot show a `cold` cell (Decision 26 point 6).
+- **The band changes the `hot` cells.** 39 % of the `hot` cells of
+  `effort_inat` stay `hot` with the queen neighbours, and 96 % with the
+  75 km band. 50 km and the minimum of 8 neighbours are judgement values.
+- **The test assumes random relabelling over the model cells.** A
+  large-scale trend in effort can make many cells significant, and the
+  windows overlap, so the tests are dependent (Decision 26,
+  "Limitations").
+- **The tiger-against-effort comparison is a count, not a test.** 85 of
+  the 200 `hot` cells of the obscured set and 20 of the 52 of the 5 km set
+  are also effort `hot` cells. A cell that is not effort `hot` can still
+  have much effort. The 5 km set is in effect one dataset (273 of 300
+  records), and 28 of its 52 `hot` cells are outside the reserve polygons
+  (rule L1); the cause is not known.
+- **The figure text is a draft, and it is in the image.** The titles, the
+  subtitles and the captions of `fig_04`–`fig_06` are drafts of the chat,
+  drawn in the PNG files; an edit needs a change of `scripts/09` and a new
+  run. In `fig_06`, the grey of `not_significant` and the state fill are
+  near in colour (the smallest difference of the colour-vision simulation,
+  CIE76 15.2). The state lines are from Natural Earth (approximate).
+- **No Gi\* layer and no suitability layer is published** before the rule
+  of the pending item "Published layers" (Week 19).

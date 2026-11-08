@@ -92,11 +92,18 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ---
 
-## Current state  ·  **Week 16 in progress** (tasks 16.1–16.5 done) · 2026-11-07
+## Current state  ·  **Week 16 complete** · 2026-11-07
 
 ### Where the project is
 
-- **Week 16 so far (2026-11-07):** Week 15 is committed and pushed
+- **Next: Week 17** (the author's choice R4 of task 16.6): a resistance
+  surface from the suitability and a circuit-theory check against the
+  Stage-2 paths — the pending item "SDM-based resistance + circuit-theory
+  check". Task 17.1: Decision 27 before any surface. The draft task
+  breakdown is in `project-plan.md` → "Week 17". Stage 4 (the story
+  site) moves to Weeks 18–21; the project can go past Week 20.
+- **Week 16 in short (2026-11-07; full record: Decision 26 and the change
+  log in `methodology.md`):** Week 15 is committed and pushed
   (`7ae300a`; one commit, not the planned `analysis:` and `docs:` pair;
   nothing under `data/`). Task 16.1: **Decision 26** (the Gi\* settings) —
   x1, a3, b1 with C1-2, c1, d1 (k1, q2), e1, m1, f1, s2 with L1 and S-a,
@@ -121,12 +128,14 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   16.5: STEP 16.3, the QA, run on 2026-11-07 — 113 of 113 (a second path
   for the inputs, the neighbours, the Gi\* and each row of
   `tbl_18_gistar.csv`; the permutation check; the read record and the
-  code of STEP 16.2); `tbl_18_gistar_qa.csv`.
+  code of STEP 16.2); `tbl_18_gistar_qa.csv`. Task 16.6: the docs of the
+  Stage-3 close and the Week-17 plan; the author's choices R4 and S1 (the
+  `scripts/00a` list follows the code).
 - **Stage 1 (Growth):** complete in Week 7. **Stage 2 (Connectivity):**
   complete in Week 12. **Stage 3 (Habitat suitability):** Weeks 13 and 14
   complete and committed (Week 14: `30a512d`, "Week 14 complete"); **Week
   15 complete (2026-11-01)**. Week 15 was committed on 2026-11-01
-  (`7ae300a`).
+  (`7ae300a`). **Week 16 complete (2026-11-07): Stage 3 complete.**
 - **Week 15 in short** (full record: Decision 25 and the change log in
   `methodology.md`):
   - **Decision 25** (task 15.1): the prediction and its published form,
@@ -157,54 +166,54 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   24 (the settings); the fit (6 of 9 covariates; `lq`, regmult 1; mean
   test Boyce 0.668 over 5 folds of 2° blocks; both sensitivity runs
   robust); QA 133 of 133.
-- **`scripts/09_model_suitability.R`:** STEPs 14.1–16.1 (STEP 16.1 since task
-  16.3; it reads the two GBIF zip files, r2 of task 16.2). `RUN_GRID`,
+- **`scripts/09_model_suitability.R`:** STEPs 14.1–16.3 (STEP 16.1 since task
+  16.3; it reads the two GBIF zip files, r2 of task 16.2; STEP 16.2 draws
+  `fig_04`–`fig_06`; STEP 16.3 is the QA). `RUN_GRID`,
   `RUN_COVARIATES` and `RUN_FIT` are `FALSE`: STEP 14.2 is skipped, and the
   later STEPs read the model file of the record (`SDM_PRED_MODEL_FILE`).
-  Each run writes the tables of STEPs 14.1, 14.3 and 15.1–15.3 again (the
-  same values). A full run takes under 1 minute on the project machine.
+  Each run writes the tables of STEPs 14.1, 14.3, 15.1–15.3 and 16.1–16.3
+  and the three figures again (the same values). STEPs 16.1–16.3 take
+  about 0.5 minutes on the project machine.
 - **`renv.lock`:** no change in Week 15 (`maxnet` 0.1.4, `glmnet` 5.0
-  since task 14.5). `sfdep` is in the `scripts/00a` list only. *(2026-11-07, Decision 26 g1:
-  own code for the Gi\*; no new package.)*
+  since task 14.5). *(2026-11-07, Decision 26 g1: own code for the Gi\*;
+  no new package.)* No change in Week 16 (`ggplot2` 4.0.3, `viridisLite`
+  0.4.2 and `codetools` were in it). *(2026-11-07, S1 of task 16.6: the
+  `scripts/00a` list follows the code; `sfdep`, `spatstat.*` and
+  `predicts` are out of it.)*
 
-### Week-16 entry point
+### Week-17 entry point
 
-- **Done: the commit of Week 15** (task 15.7; `7ae300a`, 2026-11-01; one
-  commit, not the planned two). Changes
-  since `30a512d`: `R/00_config.R`, `R/00_functions_sdm.R`,
-  `scripts/09_model_suitability.R`; `outputs/tables/tbl_16_sdm_qa.csv`
-  (three check texts) and the new `tbl_16_sdm_prediction.csv`,
-  `tbl_16_sdm_reserve_check.csv`, `tbl_16_sdm_pred_qa.csv`,
-  `tbl_17_reserve_suitability.csv`; the docs `methodology.md`,
-  `project-plan.md`, `references.md`, `naming-conventions.md`,
-  `data-dictionary.md`, `proposal.md`, this file, and `README.md`. One
-  `analysis:` commit (`R/`, `scripts/`, `outputs/tables/`) and one
-  `docs:` commit. Nothing under `data/` may be staged.
-- **Done: task 16.1 — Decision 26** (2026-11-07; the Gi* settings), before
-  any Gi* was computed. **Done: task 16.2** (the process choices;
-  Amendment 1 of Decision 26), **task 16.3** (STEP 16.1), **task 16.4**
-  (STEP 16.2, the figures) and **task 16.5** (STEP 16.3, the QA). **Next:
-  task 16.6** (the docs of the Stage-3 close; the Week-17 plan). The forks of task 16.1 were in `project-plan.md` →
-  "Week 16 — task breakdown" (a draft): the input set of the tiger Gi*, the input of the
-  effort Gi*, the grid and the value of a cell, the neighbours and the
-  band (a new value), the correction for many tests, the published form of
-  the effort Gi* and what the docs can state from the tiger Gi*, the code
-  (`sfdep` or own), what was seen.
-- **Then:** 16.2 (process choices), 16.3 (STEP 16.1: the Gi*), 16.4 (STEP
-  16.2: `fig_04`, `fig_05` and `fig_06` with the caption drafts), 16.5 (STEP 16.3:
-  QA), 16.6 (docs: the Stage-3 close; the Week-17 plan), 16.7 (commit).
-  Split point after task 16.2.
-- **Read before Week 16:** Decision 23 point 8 (the Gi* and the Phase-1
-  settings), Decision 22 (the surfaces; point 9: the tiger surface is never
-  published), Decision 25 points 4–6 (the figures) and the two "Result"
-  parts, the Week-16 pitfalls of the plan, `docs/sensitive-data-policy.md`,
-  the Stage-3 items of "Limitations".
-- **Files for the Week-16 chat:** the docs; `R/00_config.R`,
-  `R/00_functions_sdm.R`, `R/00_functions_io.R`, `R/00_functions_occ.R`,
-  `R/00_functions_kde.R`, `R/00_functions_sensitive.R`;
-  `scripts/09_model_suitability.R`; the code that draws `fig_03` (for the
-  frame of the two figures); the `tbl_15` and `tbl_16` tables if a value
-  is needed. No data file (rule d1).
+- **Done: Week 16** (2026-11-07; tasks 16.1–16.6). The author committed
+  each task after it (an `analysis:` and a `docs:` commit for each task
+  with code; the last pair, task 16.5: `fa9cc04`, `a9b2766`). Task 16.7:
+  the commit of task 16.6 and a push. Nothing under `data/` may be
+  staged.
+- **Next: task 17.1 — Decision 27** (the SDM-based resistance and the
+  circuit-theory check; the author's choice R4 of task 16.6), before any
+  surface. The forks are in `project-plan.md` → "Week 17 — task
+  breakdown" (a draft): the input (the value or the class; the hatched
+  cells), the transform, the grain and the cells with no value, the
+  method and the tool (in R, or Circuitscape or Omniscape outside R), the
+  nodes and the pairs, the comparison with the Stage-2 paths and its
+  reading, the published form, what was seen.
+- **Then:** 17.2 (process choices), 17.3–17.5 (STEPs 17.1–17.3: the
+  surface, the circuit-theory run, the comparison), 17.6 (QA), 17.7 (docs;
+  the Week-18 plan), 17.8 (commit). Split point after task 17.2. Stage 4
+  (the story site) is in Weeks 18–21.
+- **Read before Week 17:** the pending item in `methodology.md` →
+  "Decisions pending"; Decision 14 (F1) and Decisions 17–18 (the pairs,
+  the path engine, the comparison metric); Decision 25 (the prediction,
+  the classes, the cells outside the training range) and its "Result"
+  parts; §5.3 and §5.4; the Week-17 pitfalls of the plan;
+  `docs/sensitive-data-policy.md` §3 (modelled paths); the Stage-2 and
+  Stage-3 items of "Limitations"; `references.md` → "Tiger movement and
+  landscape resistance (Decision 14)".
+- **Files for the Week-17 chat:** the docs; `R/00_config.R`,
+  `R/00_functions_lcp.R`, `R/00_functions_network.R`,
+  `R/00_functions_sdm.R`, `R/00_functions_io.R`,
+  `R/00_functions_sensitive.R`; `scripts/07_connectivity.R` (the Stage-2
+  STEPs) and `scripts/09_model_suitability.R`; the `tbl_12`, `tbl_13` and
+  `tbl_16` tables if a value is needed. No data file (rule d1).
 
 ### Results by stage (a record for the write-up of Weeks 17–20)
 
@@ -232,7 +241,7 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   `tbl_03b_pinch_points.csv`, `tbl_03_notes.md`,
   `fig_03_reserve_network.png`. Full summary against proposal question 2:
   `methodology.md`, change log, "Weeks 3–13".
-- **Stage 3 — so far (Weeks 13–14).** GBIF tiger records 4,606 → 300
+- **Stage 3 — Habitat suitability (Weeks 13–16; complete).** GBIF tiger records 4,606 → 300
   clean (1 km set: 45 records in 17 cells → no 1 km model; 5 km set: 300
   records in 44 cells; one Facebook dataset gives 273 of the 300);
   obscured set 884 records in 104 cells of 0.2°; clean background 23,901
@@ -244,6 +253,16 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   value; 55 above the median of the model cells; the highest the
   Sundarbans, the lowest Kamlang). Record against proposal question 3:
   `methodology.md`, change log, 2026-11-01, Week 15 complete.
+  **Week 16:** four Gi\* on the 6,969 model cells (Decision 26). At 50 km:
+  the iNaturalist effort Gi\* 654 `hot` cells, no `cold` cell (1,408
+  `cold` at the 75 km QA band); the effort of all datasets 559 `hot`; the
+  obscured tiger set 200 `hot` (85 also effort `hot`, 0.425); the tiger
+  5 km set 52 `hot` (20 also effort `hot`, 0.385; by landscape complex:
+  Central India 12, Western Ghats 8, North-East Hills 4, outside the
+  reserve polygons 28). The tiger Gi\* are never published; only these
+  counts. `tbl_18_gistar.csv`; `fig_04`, `fig_05`, `fig_06` (caption
+  drafts); QA 113 of 113. Record against proposal questions 3 and 4:
+  `methodology.md`, change log, 2026-11-07, Week 16 complete.
 
 ### Files that later weeks read
 
@@ -281,6 +300,9 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
   chat drafts (d1 of task 16.2) — the author's edit is open. The start
   values of the frame (white state lines, 3 hatch lines for each cell,
   the key box at 0.60 and 0.36 of the frame) were kept on 2026-11-07.
+  The text is drawn in the PNG files: an edit needs a change of
+  `scripts/09` and a new run (or the caption as page text on the site,
+  a fork for Week 18). The narrative week is Week 20.
 - `sensitive-data-policy.md`: the sentence "Bobcat-style finer
   publication…" was not reviewed against the rule for modelled paths and
   crossings.
@@ -343,7 +365,8 @@ uses 0.4.2). Task 16.5: Clopper & Pearson 1934 (the R help page of
 ### Open pending Decisions (decide in the week noted)
 
 Full text in `methodology.md` → "Decisions pending".
-- **[Week 18] Published layers** (raised with Decision 20 as "Published
+- **[Week 19] Published layers** (was Week 18 until 2026-11-07; raised
+  with Decision 20 as "Published
   path layer"; widened by Decision 25 point 4): before a path layer or a
   suitability layer goes on the site. Paths: no layer, simplified lines,
   or a zoom limit. Suitability at 0.2°: no layer, the class only, or the
@@ -351,9 +374,9 @@ Full text in `methodology.md` → "Decisions pending".
   (`assert_publishable_rast()` refuses a raster of 0.2° in EPSG:4326); the
   hatch and the caption items in an interactive map. *(2026-11-07, Decision 26: a Gi\*
   layer would wait for the same rule.)*
-- **[After Stage 3] SDM-based resistance + circuit-theory check.** The
-  surface is at 0.2° (about 20 km); decide in task 16.6 whether the item
-  still applies.
+- **[Week 17] SDM-based resistance + circuit-theory check.** The author's
+  choice R4 (task 16.6): Week 17 works on it; Decision 27 in task 17.1
+  (the chat's reading: the item keeps its scope as written).
 
 _Resolved (in `methodology.md`): Decisions 7 to 26 closed the earlier
 items (missing years, area source, zeros, the NA policy, the gHM fill,
@@ -531,6 +554,9 @@ of closed one-time work are in git history.)*
   run "0 of 72 files" with `tbl_18_gistar_qa.csv`). The value text of
   `tbl_16_sdm_qa.csv`, `tbl_16_sdm_pred_qa.csv` and `tbl_18_gistar_qa.csv`
   then changes. This is expected: commit them.
+- **The text of a figure is in the image** (`fig_03`–`fig_06`). The
+  title, the subtitle and the caption are drawn in the PNG file, so an
+  edit of the text needs a change of the code and a new run.
   *(Corrected 2026-11-07, task 16.4: the note of task 16.3 gave
   `tbl_18_gistar.csv` as the cause of "66 to 67"; it was not counted in
   that run.)*
@@ -587,6 +613,40 @@ of closed one-time work are in git history.)*
 
 *(Weeks 0–13: git history, and the change log of `methodology.md` with its
 archive.)*
+
+### Week 16 — Stage 3: Decision 26, the Gi*, the figures and the QA · 2026-11-07
+- Entry state: Week 15 complete and committed (`7ae300a`).
+- Did: task 16.1 Decision 26; task 16.2 the process choices and Amendment
+  1; task 16.3 STEP 16.1 (the four Gi*; `tbl_18_gistar.csv`); task 16.4
+  STEP 16.2 (`fig_04`, `fig_05`, `fig_06`); task 16.5 STEP 16.3 (QA 113 of
+  113); task 16.6 the docs close and the Week-17 plan.
+- Decisions made: **Decision 26** (x1, a3, b1 with C1-2, c1, d1 (k1, q2),
+  e1, m1, f1, s2 with L1 and S-a, w1, g1; a3, s2 and C1-2 are not the
+  chat's recommendation) and **Amendment 1** (A1). Process choices of task
+  16.2: s1, f1, p1, r2, n1, t1, g1, z1, c1, h1, k1, d1, q1. The author:
+  the readings of task 16.3 and k-a; "Looks good" (task 16.4); R4 (Week
+  17 works on the SDM-based resistance; Stage 4 moves to Weeks 18–21) and
+  S1 (task 16.6).
+- Outputs: the `GISTAR_*` block and the figure settings in
+  `R/00_config.R`; `R/00_functions_gistar.R` (new; with the QA second
+  path) and `R/00_functions_fig.R` (new); STEPs 16.1–16.3 in `scripts/09`;
+  the four Gi* layers under `data/processed/` (gitignored; the tiger
+  layers never committed); `tbl_18_gistar.csv`, `tbl_18_gistar_qa.csv`;
+  `fig_04_suitability_classes.png`, `fig_05_suitability_value.png`,
+  `fig_06_effort_gistar.png`; the docs; the `scripts/00a` list (S1).
+- Gotchas found: see "Known gotchas" (a distance in EPSG:7755 is not a
+  distance on the Earth; QA check (c) counts the files that exist when the
+  STEP runs; at 50 km no effort cell is `cold`; the figure text is in the
+  image; the chat's tests use `ggplot2` 3.4.4).
+- Errors of the chat: Decision 26 point 4 put the distance in EPSG:7755
+  while its counts came from the sphere (Amendment 1); the run
+  instructions of tasks 16.3 and 16.4 said that QA tables would not
+  change; the cause given for "66 to 67" (corrected in task 16.4); the
+  cell range 396–488 km² (the model cells give 404–489 km²). Each is in
+  the change log.
+- Carried forward / next session: the commit of task 16.6 (task 16.7, by
+  the author); then Week 17, task 17.1 — Decision 27. The caption drafts
+  of `fig_03`–`fig_06` (the author's edit; Week 20).
 
 ### Week 15 — Stage 3: Decision 25, the prediction and the reserve check · 2026-10-31 to 2026-11-01
 - Entry state: Week 14 complete and committed (`30a512d`).

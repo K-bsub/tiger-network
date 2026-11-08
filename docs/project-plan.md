@@ -988,7 +988,7 @@ takes a later number.)*
 | **13** ✅ | Occurrence + effort | **Decisions 21–22** first; `scripts/08_prepare_occurrences.R` (new script, named in task 13.2, process choice s1) outputs: cleaned occurrences, target-group background, KDE (task breakdown below) *(done 2026-10-18: Decisions 21 and 22; STEPs 13.1–13.6; 300 clean tiger records, 23,901 clean background records; 11 surfaces; QA 171 of 171; eleven `tbl_15` tables; outcome of Decision 21 point 8: `no_1km_model`. Committed 2026-10-18 (task 13.10))* | 3–4 h planned; the task estimates add up to 4.6–6.3 h (split point after task 13.4). *(Ran on 2026-10-11, 2026-10-17 and 2026-10-18; no time recorded per task)* |
 | **14** ✅ | SDM fit | A new script, named in Week 14 (process choice s1 of task 13.2: `scripts/08` holds Week 13 only): `maxnet` fitted with bias correction; model saved. *(2026-10-11: by Decision 21 point 8, the week starts with the outcome of the presence-cell count — no 1 km model, a reduced model, or the planned model — and the Decisions that follow from it.)* *(2026-10-18: the outcome is `no_1km_model`. Task breakdown below: **Decision 23** first picks branch A (no suitability model; Week 14 builds the effort result) or branch B (a model at a coarser grain; Week 14 fits it). The focus "SDM fit" applies to branch B only)* *(2026-10-25: Decision 23 picks **branch B** — a `maxnet` model on the obscured iNaturalist set at the 0.2° grain (a2, b3). Task 14.4 counts the presence and background cells; below the limits of Decision 23 points 4 and 6 there is no model, and the week gives the effort result)* *(2026-10-25: task 14.4 gives `planned_model` — 104 presence cells, 1,486 background cells. A model is fitted; Weeks 15–16 predict and show it at 0.2°)* *(done 2026-10-25: Decisions 23 and 24; `scripts/09_model_suitability.R` STEPs 14.1–14.3; 6 of 9 covariates kept; `lq`, multiplier 1; mean test Boyce 0.668 over 5 spatial folds; both sensitivity runs robust; the model file under `data/processed/`; QA 133 of 133; seven `tbl_16` tables. Commit (task 14.8) by the author before the Week-15 chat)* | 3–4 h *(2026-10-18: the task estimates add up to 4.1–5.7 h for branch A and 4.3–5.9 h for branch B; split point after task 14.3)* *(2026-10-25: branch B, plus about 15–30 min for the new background output and the 0.2° cells; estimate)* |
 | **15** ✅ | Predict + validate | **Decision 25** first (the prediction: the model file, the output type and clamping, the cells, the published form and classes, the sensitive-data check of the surface, the caption content), before any prediction file is written; then the prediction of the main model over the 6,969 model cells (`scripts/09`), the gate of Decision 24 point 8 (the mean test Boyce index is 0.668, so the gate allows a map), the reserve check of point 9 (the Spearman ρ of the reserve value and `density_2022`; the reserves with no presence cell, counts only) and the QA (task breakdown below) *(written again 2026-10-25, task 14.7; the earlier dated notes said that the week depends on Decisions 23 and 24, which are now made)* *(2026-10-31: tasks 15.1–15.2 done — Decision 25 with point 9, and the process choices)* *(2026-11-01: task 15.3 done — the prediction and the gate (open); task 15.4 done — r1 "agrees", r2 not published, z1 0; task 15.5 done — QA 84 of 84)* *(done 2026-11-01: Decision 25; `scripts/09` STEPs 15.1–15.3; the prediction of 6,969 model cells; `tbl_17_reserve_suitability.csv`; QA 84 of 84; the docs and the Week-16 breakdown (task 15.6). Commit (task 15.7) by the author)* | 3–4 h planned; the task estimates add up to 3.2–4.7 h (split point after task 15.2) |
-| **16** | SDM visuals + Gi* | **Decision 26** (the Gi* settings; pending item "[Week 15–16] Gi* settings") before any Gi* is computed; the Gi* of the effort and of the tiger records in the Phase-1 form (the tiger Gi* is never published or committed); the suitability figure in the form that Decision 25 fixes, with the effort caveat (proposal §7). `fig_04` is the next free figure number (the earlier row named `fig_05`). Task breakdown written in Week 15 *(written again 2026-10-25, task 14.7; the draft puts the Gi* Decision in Week 16, not Week 15)* *(2026-11-01: the task breakdown is written below — Decision 26, the process choices, the Gi*, the two figures, the QA, the docs (the Stage-3 close), the commit; estimates 3.4–4.9 h)* *(2026-10-31, Decision 25 f3: **two** suitability figures — `fig_04` (the five classes by rank) and `fig_05` (the cloglog value, with the legend label "model output (cloglog), relative; not a probability of presence"); the hatch of the cells outside the training range on both; the nine caption items of Decision 25 point 5, drafted and marked as drafts; the check that the figure code reads only the prediction layer and the grid layer, written with the figures. A slug does not hold "tiger")* *(2026-11-07: task 16.1 done — Decision 26: four Gi\* (`effort_inat` with `tiger_obscured`, `effort_all` with `tiger_5km`) on the 0.2° model cells, value 0/1, a 50 km band, the exact p, Benjamini–Hochberg; `fig_06` (the `effort_inat` Gi\*) is a third figure; the tiger Gi\* never published)* *(2026-11-07: task 16.2 done — the process choices; Amendment 1 of Decision 26: the distance between cells on the sphere)* | 2–3 h planned; probably 3–4 h with the Gi* (estimate) *(2026-11-07: about 4.2–6.2 h with Decision 26; estimate)* |
+| **16** ✅ | SDM visuals + Gi* | **Decision 26** (the Gi* settings; pending item "[Week 15–16] Gi* settings") before any Gi* is computed; the Gi* of the effort and of the tiger records in the Phase-1 form (the tiger Gi* is never published or committed); the suitability figure in the form that Decision 25 fixes, with the effort caveat (proposal §7). `fig_04` is the next free figure number (the earlier row named `fig_05`). Task breakdown written in Week 15 *(written again 2026-10-25, task 14.7; the draft puts the Gi* Decision in Week 16, not Week 15)* *(2026-11-01: the task breakdown is written below — Decision 26, the process choices, the Gi*, the two figures, the QA, the docs (the Stage-3 close), the commit; estimates 3.4–4.9 h)* *(2026-10-31, Decision 25 f3: **two** suitability figures — `fig_04` (the five classes by rank) and `fig_05` (the cloglog value, with the legend label "model output (cloglog), relative; not a probability of presence"); the hatch of the cells outside the training range on both; the nine caption items of Decision 25 point 5, drafted and marked as drafts; the check that the figure code reads only the prediction layer and the grid layer, written with the figures. A slug does not hold "tiger")* *(2026-11-07: task 16.1 done — Decision 26: four Gi\* (`effort_inat` with `tiger_obscured`, `effort_all` with `tiger_5km`) on the 0.2° model cells, value 0/1, a 50 km band, the exact p, Benjamini–Hochberg; `fig_06` (the `effort_inat` Gi\*) is a third figure; the tiger Gi\* never published)* *(2026-11-07: task 16.2 done — the process choices; Amendment 1 of Decision 26: the distance between cells on the sphere)* *(done 2026-11-07: Decision 26 and Amendment 1; the four Gi\* (`tbl_18_gistar.csv`); `fig_04`, `fig_05` and `fig_06` with caption drafts; QA 113 of 113 (`tbl_18_gistar_qa.csv`); the docs of the Stage-3 close; the author's choices R4 (Week 17: the SDM-based resistance) and S1. Each task committed by the author)* | 2–3 h planned; probably 3–4 h with the Gi* (estimate) *(2026-11-07: about 4.2–6.2 h with Decision 26; estimate)* |
 
 **Pending, not yet scheduled (raised with Decision 14):** after the SDM exists,
 an SDM-based resistance surface (1 − suitability) and a circuit-theory run
@@ -998,7 +998,8 @@ Transform and tool are decided then (see `methodology.md`, Decisions pending).
 whether one is made, and at which grain.)* *(2026-10-25: Decision 23 — a
 surface at 0.2° (about 20 km), if task 14.4 allows a model. A resistance
 surface from it would have that grain; decide then whether the item still
-applies.)*
+applies.)* *(2026-11-07, task 16.6, the author's choice R4: Week 17 works on
+this item — see "Week 17" below. Stage 4 moves to Weeks 18–21.)*
 
 ### Week 13 — task breakdown *(complete)*
 
@@ -1525,8 +1526,8 @@ split point after task 16.3 is possible.)*
 | 16.3 ✅ | STEP 16.1 — the Gi* of Decision 26: the effort Gi* and the tiger Gi* (the tiger Gi* stays under `data/`, gitignored); tables of statistics only *(2026-11-07, Decision 26: four Gi\* at 50 km and at the two QA bands; one statistics table with the counts of point 7)* *(2026-11-07, task 16.2: `R/00_functions_gistar.R` (f1); the GBIF coordinates of the 5 km sets from the two zip files (r2); the layers `hot_*_cell02.csv` (n1); `tbl_18_gistar.csv` (t1); the distance on the sphere (Amendment 1))* | The layers written and read back; the tables written *(done 2026-11-07: the hand-made case 26 of 26; the four layers `hot_*_cell02.csv` written and read back; `tbl_18_gistar.csv`, 92 rows; at 50 km `effort_inat` 654 hot, `effort_all` 559 hot, no cold cell; `tiger_obscured` 200 hot (85 also effort hot), `tiger_5km` 52 hot (20). STEP 16.1 took 0.1 min. Details: Decision 26, "Result of STEP 16.1")* | 30–45 min *(2026-11-07: probably 45–60 min; estimate)* |
 | 16.4 ✅ | STEP 16.2 — the two suitability figures of Decision 25 points 4–6: `fig_04` (the five classes; the legend by rank, no value) and `fig_05` (the value; the legend label `SDM_PUB_VALUE_LABEL`); on both: the hatch of the 32 cells outside the training range, the blank cells that are not model cells, the reserve outlines (the core polygons) and the state boundaries; no presence or background mark; the caption drafts with the nine items of Decision 25 point 5, marked as drafts (the narrative is the author's) *(2026-11-07, Decision 26 f1: also `fig_06`, the `effort_inat` Gi\*, with the nine caption items of Decision 26 point 7)* *(2026-11-07, task 16.2: `R/00_functions_fig.R` (f1); the slugs of g1; the frame of z1; the colours of c1 (the `fig_06` hex values with a colour-vision simulation); the hatch and the key box of h1; the read guard `fig_read()` (k1); the caption drafts as for `fig_03` (d1))* *(2026-11-07, after the run of task 16.3: before the code, the author answers the three readings of task 16.3 and a caption question of `fig_06` (at 50 km no effort cell is cold))* *(2026-11-07: the readings confirmed; the caption choice k-a — caption item 4 of `fig_06` also states that no cell is cold at 50 km and gives the cold count at 75 km)* | Two PNG files under `outputs/figures/`; the caption drafts *(2026-11-07: three PNG files)* *(done 2026-11-07: the hand-made case 15 of 15 and the 12 checks; `fig_04`, `fig_05` and `fig_06`, 2,200 × 2,120 pixels each; classes of 1,394 cells (four) and 1,393 cells; 32 hatched cells; `fig_06` 654 hot, 0 cold; the caption drafts printed under "DRAFT"; the author: "Looks good". STEP 16.2 took 0.1 min. Details: Decision 26, "Result of STEP 16.2")* | 45–60 min *(2026-11-07: probably 60–90 min; estimate)* |
 | 16.5 ✅ | STEP 16.3 — QA: hand-made cases; the Gi* again by a second path; the check of Decision 25 point 4; the publish checks (no tiger Gi* file under `outputs/`; no file with "tiger" in its name; the scans of the new tables) → a QA table; a failure stops the script *(2026-11-07: the QA list of Decision 26 "Consequences")* *(2026-11-07, task 16.2: `tbl_18_gistar_qa.csv` (t1); the read record of k1; the permutation check of q1; the cell of r2 against the iNaturalist layer)* | QA passes *(done 2026-11-07: 113 of 113 — the hand-made cases 26, 15 and 19; the inputs, the neighbours by all pairs, the Gi\* and each row of `tbl_18_gistar.csv` again by a second path; the permutation check 20 of 20 cells for each Gi\*; the read record and the code of STEP 16.2; the publish scans; `tbl_18_gistar_qa.csv`, 113 rows. STEP 16.3 took 0.3 min. Details: Decision 26, "Result of STEP 16.3")* | 30–45 min |
-| 16.6 | Docs, the Stage-3 close: `methodology.md` (Decision 26 and its result, change log, Limitations, §5.4–5.5), `proposal.md` §8, `README.md`, `data-dictionary.md`, `naming-conventions.md` §6, `references.md`, the handoff; Stage 3 against proposal questions 3 and 4 (a record, not site text); the pending item "[After Stage 3] SDM-based resistance" (does it still apply at 0.2°?); the Week-17 plan | Docs match as-built | 30–45 min |
-| 16.7 | Commit (`analysis:` for `09`, config, functions, tables, figures; `docs:` separate) | Committed and pushed; `git status --short` shows nothing under `data/` staged | 10 min |
+| 16.6 ✅ | Docs, the Stage-3 close: `methodology.md` (Decision 26 and its result, change log, Limitations, §5.4–5.5), `proposal.md` §8, `README.md`, `data-dictionary.md`, `naming-conventions.md` §6, `references.md`, the handoff; Stage 3 against proposal questions 3 and 4 (a record, not site text); the pending item "[After Stage 3] SDM-based resistance" (does it still apply at 0.2°?); the Week-17 plan | Docs match as-built *(done 2026-11-07: §5.4, §5.5, Limitations, the pending items, the change log with the record against questions 3 and 4; `proposal.md` §8; `README.md`; the handoff; the Week-17 plan. The author chose R4 — the pending item is the work of Week 17, and Stage 4 moves to Weeks 18–21 — and S1, the `scripts/00a` list)* | 30–45 min |
+| 16.7 | Commit (`analysis:` for `09`, config, functions, tables, figures; `docs:` separate) | Committed and pushed; `git status --short` shows nothing under `data/` staged *(2026-11-07: the author committed each task of Week 16 after it; task 16.7 is the commit of task 16.6 and a push)* | 10 min |
 
 **Week 16 pitfalls:**
 - **Decision 26 before any Gi\*.** The Phase-1 settings are known (a band of
@@ -1565,17 +1566,110 @@ split point after task 16.3 is possible.)*
 **Exit state:** Decision 26 recorded; the Gi* written (the tiger Gi* under
 `data/` only); `fig_04` and `fig_05` with the caption drafts; QA passed;
 docs updated (the Stage-3 close); the Week-17 plan written; Week 16 ticked.
+*(Done 2026-11-07, with `fig_06` too.)*
 
 ---
 
-## Stage 4 — Story site and close (Weeks 17–20)
+## Week 17 — SDM-based resistance and a circuit-theory check (added 2026-11-07)
+
+*(Added 2026-11-07 at the Week-16 close (task 16.6), by the author's choice
+R4: Week 17 works on the pending item "SDM-based resistance +
+circuit-theory check" (raised with Decision 14). Stage 4 moves by one
+week; the project can go past Week 20.)*
 
 | Week | Focus | Exit state (deliverable) | Est. |
 |---|---|---|---|
-| **17** | Site skeleton | Quarto site structure; one page per track; navigation | 3–4 h |
-| **18** | Leaflet maps | Interactive maps wired in (reuse Bay Area Leaflet recipe) *(2026-10-31: first the pending item "[Week 18] Published layers" (`methodology.md`) — whether a path layer and the suitability surface at 0.2° go on an interactive map, and in which form; Decision 25 point 4)* | 3–4 h |
-| **19** | Narrative + QC | Author-written narrative; figure alt text; accessibility pass | 3–4 h |
-| **20** | Publish + docs close | Site deployed to GitHub Pages; final report; decision log closed | 3–4 h |
+| **17** | SDM-based resistance + circuit theory | **Decision 27** first (the input, the transform, the grain and the cells with no value, the method and the tool, the pairs, the comparison with the Stage-2 paths and its reading, the published form), before any surface; then the surface, the circuit-theory run (and paths, if Decision 27 says so), the comparison with the Stage-2 least-cost paths, the QA, the docs and the Week-18 plan | 4–6 h (an estimate) |
+
+### Week 17 — task breakdown
+
+*(Written 2026-11-07 at the Week-16 close (task 16.6). This is a draft
+plan. It makes no Decision: Decision 27 is the author's, in task 17.1.)*
+
+Entry state (as of the Week-16 close, 2026-11-07). On disk, all gitignored:
+
+- `data/processed/sdm_prediction_cell02.csv` — the prediction (`id`,
+  `value`, `rank`, `class`, `out_of_range`), 6,969 rows;
+  `sdm_grid_cell02_7755.gpkg` (the 0.2° cells as polygons in EPSG:7755)
+  and `sdm_cellid_1km_7755.tif` (the 0.2° cell of each 1 km cell).
+- The Stage-2 layers: the four resistance surfaces
+  `resist_tiger_<surface>_7755.tif` (1 km) and the paths
+  `lcp_reserve_network_7755.gpkg`; the reserve layer.
+- The four Gi\* layers `hot_*_cell02.csv` (the two tiger layers are never
+  committed).
+
+Committed: the Stage-2 tables (`tbl_03`, `tbl_03b`, `tbl_11`–`tbl_14`),
+the `tbl_16`–`tbl_18` tables, `fig_01`–`fig_06`. `scripts/07_connectivity.R`
+holds Stage 2 and `scripts/09_model_suitability.R` STEPs 14.1–16.3.
+
+**Seen at the Week-16 close.** The statistics of the prediction and of the
+reserve values (Week 15), the Gi\* tables and their QA; the three figures
+(the author). **Not computed:** a resistance surface from the suitability,
+a current map, an effective resistance, a path on such a surface. Decision
+27 states this list again.
+
+**Size.** The estimates add up to about 4–6 hours (estimates, not
+measured). A split point is marked after task 17.2.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 17.1 | **Decision 27 (numbered), before any surface.** It closes the pending item "[Week 17] SDM-based resistance + circuit-theory check". Research, raise the forks, record the choices: (a) the input — the cloglog value or the class of each model cell (Decision 25), and the 32 hatched cells; (b) the transform — linear 1 − suitability (the national method: Jhala et al. 2021; Qureshi et al. 2014), a negative exponential (Keeley et al. 2016), or another, and the range of the values (Stage 2: 1 to 100); (c) the grain — a surface of the 0.2° model cells, or the 0.2° value on the 1 km frame of Stage 2, and the cells with no value (not model cells; the coast and the border); (d) the method and the tool — circuit theory between the reserves (an effective resistance; a current map), least-cost paths with the Stage-2 engine (Decision 17), or both; in R (for example `gdistance`, which is in `renv.lock`; check what it computes) or Circuitscape or Omniscape outside R (Julia; outside `renv`); (e) the nodes and the pairs — the 106 pairs of Decision 17 or the edges of Decision 19, and the node polygons; (f) the comparison with the Stage-2 paths — the metric (for example the metric of Decision 18, or the rank correlation of the pair costs) and the rule of the reading, fixed before the result; (g) the published form and the sensitive-data check (policy §3; Decision 20 point 7); (h) what was seen | Decision 27 recorded in `methodology.md`; the pending item closed; a config block | 60–90 min |
+| 17.2 | Process choices before code (not numbered): the script (a new `scripts/10_<verb_object>.R`, or a STEP in `scripts/07` or `scripts/09`); the function file; the layer and table names (`tbl_19` and `fig_07` are the next free numbers); a run switch; a new package (and `renv.lock`); a hand-made case first | Choices recorded in the change log | 20–30 min |
+| — | **Split point**: commit the Decision and the docs of tasks 17.1–17.2; continue with task 17.3 in the next session | — | — |
+| 17.3 | STEP 17.1 — the resistance surface of Decision 27 → `data/processed/` (gitignored); a statistics table | The surface written and read back; the table written | 30–45 min |
+| 17.4 | STEP 17.2 — the circuit-theory run (and the paths, if Decision 27 says so) between the pairs of Decision 27 | The results written; counts and statistics in a table | 45–60 min |
+| 17.5 | STEP 17.3 — the comparison with the Stage-2 paths by the rule of Decision 27; a figure if Decision 27 says so | The comparison table; the reading by the rule | 30–45 min |
+| 17.6 | STEP 17.4 — QA: a hand-made case first; a second path for the surface and the comparison; the publish checks | QA passes | 30–45 min |
+| 17.7 | Docs: `methodology.md` (Decision 27 and its result, change log, Limitations, §5.3–5.4), `proposal.md` §8, `README.md`, `data-dictionary.md`, `naming-conventions.md`, `references.md`, the handoff; the Week-18 plan (Stage 4) | Docs match as-built | 30–45 min |
+| 17.8 | Commit (`analysis:`; `docs:` separate) | Committed and pushed; `git status --short` shows nothing under `data/` staged | 10 min |
+
+**Week 17 pitfalls:**
+- **The grain.** The suitability is at 0.2° (cells of 404–489 km²); the
+  Stage-2 surfaces are at 1 km. A surface from the suitability cannot show
+  a corridor narrower than a 0.2° cell. A comparison with the 1 km paths
+  must say which grain it compares.
+- **Relative suitability.** The cloglog value is relative, not a
+  probability of presence (Decision 25); the classes have equal counts by
+  construction.
+- **The effort caveat.** The presence records are mostly in reserves; 55
+  of the 56 reserve values are above the median of the model cells. A
+  resistance from the suitability partly shows where people record tigers.
+- **The national method used its own suitability model** (Jhala et al.
+  2021; Qureshi et al. 2014). Check its inputs in task 17.1: the
+  comparison is with that method, not a copy of it.
+- **Cells with no value.** 1,564 complete-case 1 km cells of 6 reserves
+  are in 0.2° cells that are not model cells (Decision 25), at the coast
+  and the border.
+- **A modelled path is sensitive** (sensitive-data policy §3): published at
+  a 10 km cell at most (Decision 20 point 7); a layer on the site waits for
+  the rule of the pending item "Published layers" (Week 19).
+- **A tool outside R** (Circuitscape or Omniscape, in Julia) is not in
+  `renv.lock`; a run outside R must be recorded so that it can be done
+  again.
+- **Numbers.** Decision 27 is the next Decision number; `tbl_19` and
+  `fig_07` are the next free numbers.
+- **PROJ `proj.db` clash still applies** — fresh session.
+
+**Decisions due this week:** **27** (the SDM-based resistance), before any
+surface.
+
+**Exit state:** Decision 27 recorded; the surface and the results of the
+circuit-theory run under `data/` (gitignored); the comparison table; QA
+passed; docs updated; the Week-18 plan written; Week 17 ticked.
+
+---
+
+## Stage 4 — Story site and close (Weeks 18–21)
+
+*(2026-11-07, task 16.6: moved by one week by the author's choice R4; was
+Weeks 17–20. Each row below has its new week number.)*
+
+| Week | Focus | Exit state (deliverable) | Est. |
+|---|---|---|---|
+| **18** | Site skeleton | Quarto site structure; one page per track; navigation *(2026-11-07: the site has placeholder pages and a navbar since the first commit (`site/`). The captions of `fig_03`–`fig_06` are drawn in the PNG files; an edit needs a new run, unless the site gives the caption as page text — a fork for the Week-18 plan)* | 3–4 h |
+| **19** | Leaflet maps | Interactive maps wired in (reuse Bay Area Leaflet recipe) *(2026-10-31: first the pending item "[Week 18] Published layers" (`methodology.md`) — whether a path layer and the suitability surface at 0.2° go on an interactive map, and in which form; Decision 25 point 4)* *(2026-11-07: the item is now "[Week 19] Published layers")* | 3–4 h |
+| **20** | Narrative + QC | Author-written narrative; figure alt text; accessibility pass *(2026-11-07: the author's edit of the caption drafts of `fig_03`–`fig_06`)* | 3–4 h |
+| **21** | Publish + docs close | Site deployed to GitHub Pages; final report; decision log closed | 3–4 h |
 
 ---
 
@@ -1587,8 +1681,9 @@ docs updated (the Stage-3 close); the Week-17 plan written; Week 16 ticked.
 | Data audited and gaps closed | 2 | Know exactly what must be rebuilt |
 | **Growth track complete** | 7 | ✅ Achieved Week 7 — priority-1 deliverable done and publishable (tbl_01, tbl_02, fig_01, fig_02) |
 | **Connectivity track complete** | 12 | ✅ Achieved Week 12 — priority-2 deliverable done (`tbl_03`, `tbl_03b`, `fig_03`; working tables `tbl_11`–`tbl_14`). The figure text is a draft; the path layer for the site needs its own rule (Week 18) |
-| Suitability track complete | 16 | Priority-3 deliverable done *(2026-10-25: a model is fitted at the 0.2° grain (Week 14); the prediction, the reserve check, the Gi* and the figure in Weeks 15–16)* *(2026-11-01: the prediction and the reserve check are done (Week 15; r1 "agrees"); the Gi* and the two figures in Week 16)* |
-| **Site published** | 20 | Full project live |
+| **Suitability track complete** | 16 | ✅ Achieved Week 16 (2026-11-07) — a relative suitability surface at 0.2° (`fig_04`, `fig_05`), the reserve check (r1 "agrees"; `tbl_17`), the effort Gi\* (`fig_06`, `tbl_18`); the figure text is a draft. Earlier notes: Priority-3 deliverable done *(2026-10-25: a model is fitted at the 0.2° grain (Week 14); the prediction, the reserve check, the Gi* and the figure in Weeks 15–16)* *(2026-11-01: the prediction and the reserve check are done (Week 15; r1 "agrees"); the Gi* and the two figures in Week 16)* |
+| SDM-based resistance check | 17 | Decision 27; a resistance surface from the suitability and a circuit-theory check against the Stage-2 paths *(added 2026-11-07, the author's choice R4)* |
+| **Site published** | 21 *(was 20; 2026-11-07)* | Full project live |
 
 ---
 
@@ -1599,7 +1694,7 @@ docs updated (the Stage-3 close); the Week-17 plan written; Week 16 ticked.
 | All-reserve census extraction is slower than 2 weeks | ~~High~~ **Retired** | Stage 1 slips | Did not materialise — the full within-reserve series was extracted in Week 4 (2014/2018/2022 is only 3 tabular rounds, not 5). Week 5 is now the join, not more extraction |
 | WII TR boundaries not public | Medium | Weaker boundary layer | KBA fallback, documented (Decision) |
 | Weeks slip due to job load | High | Calendar stretches | Expected. Each week is self-contained; no penalty for a gap |
-| SDM adds little beyond growth + connectivity | Medium *(2026-10-18: occurred in part — no 1 km model, Decision 21 point 8)* | Wasted effort | Priority 3 by design — drop it if Stage 1–2 already tell the story. *(2026-10-18: Decision 23, task 14.1, decides between no model and a model at a coarser grain)* *(2026-10-25: Decision 23 chose a model at the 0.2° grain (a2, b3); the count of task 14.4 can still give no model)* *(2026-10-25, Week 14: the count gave `planned_model`; the model is fitted, and the value for the gate is above 0. The answer to question 3 is at about 20 km, not at 1 km)* |
+| SDM adds little beyond growth + connectivity | Medium *(2026-10-18: occurred in part — no 1 km model, Decision 21 point 8)* | Wasted effort | Priority 3 by design — drop it if Stage 1–2 already tell the story. *(2026-10-18: Decision 23, task 14.1, decides between no model and a model at a coarser grain)* *(2026-10-25: Decision 23 chose a model at the 0.2° grain (a2, b3); the count of task 14.4 can still give no model)* *(2026-10-25, Week 14: the count gave `planned_model`; the model is fitted, and the value for the gate is above 0. The answer to question 3 is at about 20 km, not at 1 km)* *(2026-11-07: Stage 3 complete at 0.2°; by the author's choice R4, Week 17 adds a resistance surface from the suitability)* |
 | Scope creep to "every possible analysis" | Medium | Never finishes | Three tracks only. New ideas go to a Phase-2 future-work list |
 
 ---
@@ -1624,5 +1719,6 @@ deliverable exists.
 | 10 | Least-cost paths + variant comparison | ✅ Complete |
 | 11 | Reserve network graph (Decision 19) | ✅ Complete |
 | 12 | Pinch points + network figure (Decision 20) | ✅ Complete |
-| 13–16 | Suitability track | In progress — Week 13 complete (Decisions 21–22; outcome `no_1km_model`; committed 2026-10-18). **Week 14 complete (2026-10-25)** — Decision 23, a model at the 0.2° grain on the obscured set; `scripts/09`; the count: `planned_model` (104 presence cells, 1,486 background cells); Decision 24 (the model settings); the fit: `lq`, multiplier 1, mean test Boyce 0.668 over 5 spatial folds; QA 133 of 133; the commit by the author (task 14.8). **Week 15:** tasks 15.1–15.2 done (2026-10-31) — Decision 25 (the prediction and its published form; point 9 added in task 15.2) and the process choices; task 15.3 done (2026-11-01) — the prediction; the gate open; task 15.4 done (2026-11-01) — the reserve check: r1 "agrees"; task 15.5 done (2026-11-01) — QA 84 of 84. **Week 15 complete (2026-11-01)**; the commit (task 15.7) by the author. **Week 15 committed** (`7ae300a`). **Week 16:** task 16.1 done (2026-11-07) — Decision 26 (the Gi* settings). Task 16.2 done (2026-11-07) — the process choices and Amendment 1 of Decision 26. Task 16.3 done (2026-11-07) — STEP 16.1, the four Gi\*. Task 16.4 done (2026-11-07) — STEP 16.2, the figures `fig_04`, `fig_05` and `fig_06`. Task 16.5 done (2026-11-07) — STEP 16.3, QA 113 of 113. Next: task 16.6 (the docs of the Stage-3 close) |
-| 17–20 | Site + close | ⚪ Not started |
+| 13–16 | Suitability track | ✅ Complete (2026-11-07) — Week 13 complete (Decisions 21–22; outcome `no_1km_model`; committed 2026-10-18). **Week 14 complete (2026-10-25)** — Decision 23, a model at the 0.2° grain on the obscured set; `scripts/09`; the count: `planned_model` (104 presence cells, 1,486 background cells); Decision 24 (the model settings); the fit: `lq`, multiplier 1, mean test Boyce 0.668 over 5 spatial folds; QA 133 of 133; the commit by the author (task 14.8). **Week 15:** tasks 15.1–15.2 done (2026-10-31) — Decision 25 (the prediction and its published form; point 9 added in task 15.2) and the process choices; task 15.3 done (2026-11-01) — the prediction; the gate open; task 15.4 done (2026-11-01) — the reserve check: r1 "agrees"; task 15.5 done (2026-11-01) — QA 84 of 84. **Week 15 complete (2026-11-01)**; the commit (task 15.7) by the author. **Week 15 committed** (`7ae300a`). **Week 16:** task 16.1 done (2026-11-07) — Decision 26 (the Gi* settings). Task 16.2 done (2026-11-07) — the process choices and Amendment 1 of Decision 26. Task 16.3 done (2026-11-07) — STEP 16.1, the four Gi\*. Task 16.4 done (2026-11-07) — STEP 16.2, the figures `fig_04`, `fig_05` and `fig_06`. Task 16.5 done (2026-11-07) — STEP 16.3, QA 113 of 113. Task 16.6 done (2026-11-07) — the docs of the Stage-3 close. **Week 16 complete** |
+| 17 | SDM-based resistance + circuit-theory check (Decision 27; added 2026-11-07) | ⚪ Not started |
+| 18–21 | Site + close *(was Weeks 17–20; moved 2026-11-07)* | ⚪ Not started |
