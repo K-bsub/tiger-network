@@ -111,7 +111,9 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   at 50 km: `effort_inat` 654 `hot` and `effort_all` 559 `hot`, no `cold`
   cell; `tiger_obscured` 200 `hot` (85 also `hot` in `effort_inat`);
   `tiger_5km` 52 `hot` (20 also `hot` in `effort_all`); `tbl_18_gistar.csv`
-  (92 rows). No figure yet.
+  (92 rows); committed (`b217a6f`, `464245e`). The author confirmed the
+  three readings of task 16.3 and chose k-a (caption item 4 of `fig_06`
+  states that no cell is `cold` at 50 km). No figure yet.
 - **Stage 1 (Growth):** complete in Week 7. **Stage 2 (Connectivity):**
   complete in Week 12. **Stage 3 (Habitat suitability):** Weeks 13 and 14
   complete and committed (Week 14: `30a512d`, "Week 14 complete"); **Week
@@ -173,8 +175,7 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 - **Done: task 16.1 — Decision 26** (2026-11-07; the Gi* settings), before
   any Gi* was computed. **Done: task 16.2** (the process choices;
   Amendment 1 of Decision 26) and **task 16.3** (STEP 16.1). **Next: task
-  16.4** (STEP 16.2, the figures), after the author's answers on the three
-  readings of task 16.3 and the caption question of `fig_06`. The forks of task 16.1 were in `project-plan.md` →
+  16.4** (STEP 16.2, the figures). The forks of task 16.1 were in `project-plan.md` →
   "Week 16 — task breakdown" (a draft): the input set of the tiger Gi*, the input of the
   effort Gi*, the grid and the value of a cell, the neighbours and the
   band (a new value), the correction for many tests, the published form of
@@ -260,9 +261,6 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
 
 ### Open items (carried)
 
-- **The three readings of task 16.3** (the tiger rows at the QA bands; the
-  comparison and L1 at 50 km only; the neighbour rows as `all`) wait for
-  the author's answer (change log, 2026-11-07, task 16.3).
 - `scripts/03` line 101: wrap the literal text in `I()` for `readr` ≥ 2.2
   (no output change; not done).
 - The NTCA overlap has no buffer (Decision 17). Transboundary links are

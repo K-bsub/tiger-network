@@ -4231,7 +4231,11 @@ use some of the same letters. Write the Decision with the code, for example
           neighbours has no class (with the count).
        4. The test: the exact p under random relabelling; the false
           discovery rate (Benjamini–Hochberg) at q = 0.05; the classes with
-          their counts.
+          their counts. *(2026-11-07, k-a, chosen by the author after the
+          run of task 16.3 (after the result was seen): item 4 also says
+          that no cell is `cold` at 50 km, and gives the count of `cold`
+          cells at the 75 km QA band, from `tbl_18_gistar.csv`. Caption
+          text only; no rule changes. Rejected: k-b, no change.)*
        5. A blank cell: not a model cell.
        6. The two QA bands: the share of the `hot` cells that stay `hot`
           (queen; 75 km).
@@ -4644,8 +4648,8 @@ before the relevant code is written.
   also `hot` in `effort_inat`); `tiger_5km` 52 `hot` (20 also `hot` in
   `effort_all`; by landscape complex 12, 8, 4, 0, 0 and 28 outside the
   reserve polygons).
-- **Readings of the chat (stated in its reply of 2026-11-07; the author's
-  answer is open):**
+- **Readings of the chat (stated in its reply of 2026-11-07; confirmed by
+  the author on 2026-11-07):**
   1. Point 5 asks for the QA-band counts "for each Gi\*", and point 7
      allows only the s1 counts for a tiger Gi\*. The tiger rows at the QA
      bands hold `hot`, `cold`, `few_neighbours` and the same-class shares;
