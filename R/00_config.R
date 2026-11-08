@@ -765,6 +765,8 @@ SDM_CHECK_ABSENT_DATASETS <- c("ff8a7785-27c8-4162-907e-658e28a09ba1")
 # Decision in Week 15 or 16, before any Gi* is computed. The tiger Gi* is
 # never published and never committed. No ratio of the tiger and effort
 # surfaces (if task 14.4 gives no model, the Gi* Decision decides the ratio).
+# (2026-11-07: Decision 26 fixes the Gi* settings: the GISTAR_* block below.
+# x1: no Phase-1 form and no comparison with Phase 1.)
 SDM_GISTAR_SETS          <- c("effort", "tiger")
 SDM_GISTAR_PUBLISH_TIGER <- FALSE
 SDM_RATIO                <- FALSE
@@ -963,6 +965,131 @@ SDM_PUB_R2_MIN_N <- KDE_SMALL_N           # 3, the value of Decision 22 point 9
 #       SDM_RESERVE_P_EXACT) in each case, with or without ties
 SDM_PUB_RANK_TIES   <- "min"
 SDM_RESERVE_P_EXACT <- FALSE
+
+# ---- Stage 3: Gi* (Decision 26, 2026-11-07) ----------------------------------
+# Fixed BEFORE any Gi* is computed and before any neighbour list is made. See
+# docs/methodology.md, Decision 26, for the sources, the reasons and what was
+# seen. Fork codes: x1, a3, b1 (C1-2), c1, d1 (k1, q2), e1, m1, f1, s2 (L1,
+# S-a), w1, g1. scripts/09 (Week 16) reads these; do not repeat the values as
+# literals in any script.
+#   aim    = each tiger Gi* against the effort Gi* of its observer group; no
+#            comparison with Phase 1 (x1)
+#   cells  = the 6,969 model cells (Decision 23 point 3); the value of a cell
+#            is 1 if it holds one or more records of the input, else 0 (c1)
+#   window = the cell and its neighbours within GISTAR_BAND_KM (distance
+#            between cell centres on the sphere, GISTAR_DIST, Amendment 1;
+#            binary weights; the cell itself included)
+#   p      = exact under random relabelling: K_i ~ hypergeometric(n cells,
+#            M cells with 1, n_i cells in the window); two-sided p =
+#            min(1, 2 x min(P(K >= K_i), P(K <= K_i))) (e1)
+#   class  = hot / cold: BH-adjusted p <= GISTAR_FDR_Q and K_i above / below
+#            its expectation; not_significant; few_neighbours (k1) (m1)
+#   the tiger Gi* are never published or committed (SDM_GISTAR_PUBLISH_TIGER)
+
+# (1)-(2) The four Gi* (x1, a3, b1, C1-2): the input of each and the Gi* it
+# is compared with.
+#   effort_inat    the background cells of Decision 23 point 5 (iNaturalist,
+#                  parts a and b) BEFORE maxnet adds a presence cell: no
+#                  presence cell in an effort input
+#   tiger_obscured the obscured set (Decision 21 point 4)
+#   effort_all     the clean background of all datasets, uncert_set in
+#                  GISTAR_UNCERT_SETS (the input of the Decision-22 effort
+#                  surface)
+#   tiger_5km      the clean tiger records, uncert_set in GISTAR_UNCERT_SETS
+# A record of effort_all or tiger_5km goes into the 0.2 degree cell of its
+# own coordinates (the rule of Decision 21 point 4); a record in a cell that
+# is not a model cell is not used and is counted.
+GISTAR_RUNS <- data.frame(
+  gistar  = c("effort_inat", "tiger_obscured", "effort_all", "tiger_5km"),
+  compare = c("tiger_obscured", "effort_inat", "tiger_5km", "effort_all"),
+  tiger   = c(FALSE, TRUE, FALSE, TRUE),
+  stringsAsFactors = FALSE
+)
+GISTAR_UNCERT_SETS <- KDE_UNCERT_SETS     # c("1km", "5km"): the 5 km sets
+
+# (3) Cells and value (c1).
+GISTAR_CELLS <- "model"                   # the model cells of Decision 23
+GISTAR_VALUE <- "binary"                  # 1 = one or more records
+
+# (4) Neighbours and band (d1, k1). The distance is on the sphere (GISTAR_DIST,
+# Amendment 1); an inner cell has 20 neighbours at 6-37 degrees N; the script
+# counts them. A cell with fewer than
+# GISTAR_MIN_NEIGHBOURS neighbours (the cell itself not counted) gets the
+# class "few_neighbours"; its value stays in the windows of the other cells.
+GISTAR_BAND_KM        <- 50               # judgement value
+GISTAR_SELF           <- TRUE             # Gi* (star): w_ii = 1
+GISTAR_MIN_NEIGHBOURS <- 8L               # Esri guidance (judgement value)
+
+# (5) QA bands (q2): descriptive only; no rule uses them. "queen" = the 8
+# cells around a cell by the cell index (ix, iy) that are model cells. k1
+# and m1 apply to each QA band separately.
+GISTAR_QA_BANDS <- list(queen = "queen", band75_km = 75)   # judgement values
+
+# (6) Test and correction (e1, m1), for each Gi* and each band separately.
+GISTAR_TEST     <- "exact_relabel"        # stats::phyper; no random number
+GISTAR_P_ADJUST <- "BH"                   # stats::p.adjust(method = )
+GISTAR_FDR_Q    <- 0.05                   # judgement value
+GISTAR_CLASSES  <- c("hot", "cold", "not_significant", "few_neighbours")
+
+# (7) Publication (f1, s2 with L1 and S-a). fig_06 = the effort_inat Gi*
+# (tier T1: the source obscured part of its input). effort_all: in the
+# statistics table only (the chat's reading of C1-2). The tiger Gi*: counts
+# only (s1); for tiger_5km also the hot cells by landscape complex (s2) by
+# rule L1: a hot cell counts for a complex if one or more of its
+# complete-case 1 km cells has its centre in a reserve polygon of that
+# complex (Decision 25 point 8); otherwise "outside the reserve polygons".
+GISTAR_PUB_FIG         <- 6L              # fig_06_<slug>.png
+GISTAR_PUB_FIG_GISTAR  <- "effort_inat"
+GISTAR_PUB_TABLE_ONLY  <- "effort_all"
+GISTAR_TIGER_STATEMENT <- c(tiger_obscured = "s1", tiger_5km = "s2")
+GISTAR_LANDSCAPE_RULE  <- "centre_any"    # L1
+
+# (8)-(9) Time window (w1) and code (g1).
+GISTAR_YEARS <- c(BASELINE_YEAR, CURRENT_YEAR)   # 2006-2022: all years
+GISTAR_CODE  <- "own"                     # base R and sf; no new package
+
+# Process choices of task 16.2 (2026-11-07) that set a value, and Amendment 1
+# of Decision 26 (A1):
+#   A1  the distance between two cells: the great-circle distance (haversine)
+#       on a sphere of radius GISTAR_EARTH_RADIUS_KM between the cell
+#       centres in longitude and latitude; for the main band, the 75 km QA
+#       band and both QA paths (was: in the analysis CRS)
+#   p1  the centre of a cell: ((ix + 0.5) x SDM_GRAIN_DEG, (iy + 0.5) x
+#       SDM_GRAIN_DEG) in longitude and latitude
+#   n1  the four Gi* layers in DIR_PROCESSED (gitignored; no geometry)
+#   t1  tbl_18_gistar.csv (publishable) and tbl_18_gistar_qa.csv
+#   g1  the figure slugs (no "tiger")
+#   z1  the size and the resolution of fig_03
+#   c1  the palette of fig_04 and fig_05 (a viridisLite option); the fig_06
+#       colours are set in task 16.4
+#   h1  the hatch lines in each cell, and the position of the key box (a
+#       share of the extent of the state layer: x from the west side, y
+#       from the south side). Start values; tuned in task 16.4
+#   q1  the permutation check of the exact p (QA only)
+GISTAR_DIST            <- "sphere"        # A1
+GISTAR_EARTH_RADIUS_KM <- 6371.0088       # (2a + b) / 3 of WGS 84
+GISTAR_CENTRE          <- "lonlat_index"  # p1
+GISTAR_LAYER_FILES <- c(
+  effort_inat    = "hot_effort_inat_cell02.csv",
+  tiger_obscured = "hot_tiger_obscured_cell02.csv",
+  effort_all     = "hot_effort_all_cell02.csv",
+  tiger_5km      = "hot_tiger_5km_cell02.csv"
+)
+GISTAR_TABLE_NN      <- 18L
+GISTAR_TABLE_SLUG    <- "gistar"          # tbl_18_gistar.csv
+GISTAR_QA_TABLE_SLUG <- "gistar_qa"       # tbl_18_gistar_qa.csv
+SDM_PUB_FIG_CLASS_SLUG <- "suitability_classes"   # fig_04
+SDM_PUB_FIG_VALUE_SLUG <- "suitability_value"     # fig_05
+GISTAR_PUB_FIG_SLUG    <- "effort_gistar"         # fig_06
+FIG_STAGE3_SIZE_IN <- PINCH_FIG_SIZE_IN   # 11 x 10.6 inches, as fig_03
+FIG_STAGE3_DPI     <- PINCH_FIG_DPI       # 200, as fig_03
+FIG_STAGE3_PALETTE <- "viridis"           # viridisLite option
+FIG_HATCH_LINES_PER_CELL <- 3L            # start value (task 16.4)
+FIG_HATCH_KEY_POS  <- c(x = 0.60, y = 0.36)   # start value (task 16.4)
+GISTAR_QA_PERM_N     <- 9999L             # total relabellings
+GISTAR_QA_PERM_CELLS <- 20L               # sample cells for each Gi*
+GISTAR_QA_PERM_LEVEL <- 0.999             # the binomial interval
+GISTAR_QA_SEED       <- 20261107L         # a fixed seed (QA only)
 
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a
