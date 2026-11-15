@@ -54,8 +54,10 @@ surface from the rank of the suitability (a linear main surface and a
 negative-exponential variant), circuit theory and least-cost paths on
 the 0.2° model cells, a comparison with the Stage-2 paths (phase 1, the
 106 pairs of Decision 17) and a check of the pair rule (phase 2, all
-1,540 pairs); the process choices of task 17.2. No code and no surface
-yet.
+1,540 pairs); the process choices of task 17.2. **Task 17.3
+(2026-11-14):** STEP 17.1 — the two surfaces, the graph of the 6,969
+model cells (5 connected sets) and the cells of the reserves; 94 of the
+97 pairs to compare. No current and no path yet.
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -4947,6 +4949,41 @@ complete):**
   chat's, stated in its reply of 2026-11-14. The author chose P3a in a
   later reply on the same day, before any surface.
 
+**Result of STEP 17.1 (task 17.3, `scripts/10_check_sdm_connectivity.R`,
+run on the project machine; console text sent on 2026-11-14; facts, not a
+reading):**
+- The guards: 49 checks pass. The hand-made case of STEP 17.1 passes (20
+  of 20).
+- **The surfaces (points 1 and 2):** `resist_sdm_main_cell02.csv` and
+  `resist_sdm_negexp8_cell02.csv`, 6,969 rows each; written, read back and
+  checked (gitignored).
+  - `main`: R from 1 to 100; quartiles 25.75, 50.5 and 75.25; mean 50.5
+    (the arithmetic of a rank input).
+  - `negexp8`: R from 1 to 100; quartiles 1.212, 2.781 and 14.37; mean
+    13.35.
+  - The 32 cells outside the training range (k1): R from 1.298 to 99.99 on
+    `main` (1.001 to 99.89 on `negexp8`). They are near both ends of the
+    rank.
+- **The graph (point 3):** 6,969 nodes; 26,844 links (13,507 rook, 13,337
+  diagonal). Link length on the sphere 18.15 to 31.33 km (median 22.24 km,
+  the north-south step). Link resistance (resistance-km): `main` 20.81 to
+  2,969 (median 1,259); `negexp8` 19.01 to 2,874 (median 90.48).
+  - 5 connected sets: one of 6,958 cells and 4 sets with 11 cells in total
+    (one cell has no link). No reserve has cells in two or more sets. Where
+    the 11 cells are was not checked (the console gives no position).
+- **The cells of the reserves:** each of the 56 reserves with a polygon has
+  2 to 17 model cells (median 6; no reserve has one cell). 34 model cells
+  are cells of two or more reserves. The 1 km counts agree with
+  `tbl_17_reserve_suitability.csv` for each reserve (42,713 in model cells,
+  1,564 in other cells).
+- **The phase-1 pairs (point 3):** the 9 contiguous pairs of Decision 17
+  are also contiguous at 0.2°. Of the 97 other pairs, 3 are contiguous at
+  0.2° and none has no path: **94 pairs to compare** (point 7).
+- `tbl_19_sdmres_surface.csv`: 52 rows.
+- **Seen from this run on:** the console text of STEP 17.1 (statistics
+  only), by the author and the chat. No effective resistance, current or
+  path exists yet; no map was made.
+
 **Reason and sources:**
 - **The national method.** The national report modelled occupancy on
   9,309 grids of 10 × 10 km, made the cost surface as 1 − Ψ, made
@@ -5112,6 +5149,43 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-14 — Week 17, task 17.3 complete: STEP 17.1 (the surfaces, the graph and the cells of the reserves)
+
+- **Code (new):** `scripts/10_check_sdm_connectivity.R` (the header, the run
+  switch `RUN_PHASE2`, the guards and STEP 17.1) and
+  `R/00_functions_circuit.R` (the functions of points 1 to 3 and the
+  hand-made case `circ_self_test_171()`). It reuses `sdm_reserve_cells()`,
+  `sdm_run_guards()`, `sdm_read_fields()`, `sdm_pred_layer_checks()` and
+  `sdm_cell_id()` of `R/00_functions_sdm.R`, and `gistar_centres()` and
+  `gistar_dist_km()` of `R/00_functions_gistar.R`.
+- **The scope of the task (the chat, 2026-11-14):** STEP 17.1 holds points
+  1 to 3. The checks of Decision 27 point 5 (the circuits, `gdistance`,
+  the path cost) come in task 17.4 with the circuit code, before any real
+  circuit run. The handoff text of the split point ("the function file
+  with the hand-made cases of Decision 27 point 5") is corrected.
+- **Guards:** the `SDMRES_*` block (`circ_check_config()`); the grid; the
+  prediction against `tbl_16_sdm_prediction.csv`; the reserves and the
+  cell-id raster; the pairs of `tbl_12_reserve_pairs.csv`. In STEP 17.1, a
+  guard compares the 1 km cells of each reserve with
+  `tbl_17_reserve_suitability.csv`. `RUN_PHASE2 = TRUE` stops the script
+  (phase 2 is not written yet).
+- **The chat's test** (made-up records; R 4.3.3, igraph 1.6.0, sf 1.0.15,
+  terra 1.7.65): a made-up block of 0.2° cells with a gap column, four
+  made-up reserves and four pairs; 20 of 20; a wrong `tbl_17` count and
+  `RUN_PHASE2 = TRUE` each stop the script.
+- **Errors of the chat (found by its own test, before delivery):** (i) the
+  "bad layer" of the hand-made case did not break the rule that it was to
+  test (R still fell with x); (ii) the count of the reserves in two or
+  more connected sets in `circ_surface_summary()` used a wrong look-up.
+  Both were fixed before the files went to the repository.
+- **The run** (2026-11-14): Decision 27, "Result of STEP 17.1".
+- **Docs:** Decision 27 (the result); `data-dictionary.md` (the two
+  surface layers; `tbl_19_sdmres_surface.csv`); `naming-conventions.md`
+  (`tbl_19`); `project-plan.md` (task 17.3); `handoff.md`.
+- **Next:** task 17.4 — the circuit solver and the least-cost paths, the
+  checks of point 5, and STEP 17.2 (phase 1). `Matrix` goes into the
+  `scripts/00a` list with that code (p1 of task 17.2).
 
 ### 2026-11-14 — Week 17, task 17.2: process choices (no code, no run)
 

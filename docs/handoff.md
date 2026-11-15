@@ -93,11 +93,11 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ---
 
-## Current state  ·  **Week 17 in progress (tasks 17.1–17.2 done)** · 2026-11-14
+## Current state  ·  **Week 17 in progress (tasks 17.1–17.3 done)** · 2026-11-14
 
 ### Where the project is
 
-- **Week 17 so far (2026-11-14; tasks 17.1–17.2; full record: Decision
+- **Week 17 so far (2026-11-14; tasks 17.1–17.3; full record: Decision
   27 and the change log in `methodology.md`):**
   - A text fix before Week 17: the headers of the two one-time scripts
     (kept in git) and three stale "Week 18" statements (commits
@@ -113,11 +113,24 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
     `fig_08_sdm_paths.png`, the layers under `data/processed/`); w1
     `RUN_PHASE2`; p1 no new package (`Matrix` into the `scripts/00a` list
     with the first code); h1 the hand-made cases first.
-  - The `SDMRES_*` block in `R/00_config.R`. No code and no surface yet.
-  - **Next:** the split-point commit (the config and the docs of tasks
-    17.1–17.2); then **task 17.3** — the script header and guards, the
-    function file with the hand-made cases of Decision 27 point 5, and
-    STEP 17.1 (the two surfaces).
+  - The `SDMRES_*` block in `R/00_config.R` (the split-point commits
+    `977d128`, `0fc73be`).
+  - Task 17.3: `scripts/10_check_sdm_connectivity.R` (header, guards,
+    `RUN_PHASE2`, STEP 17.1) and `R/00_functions_circuit.R`. Run on
+    2026-11-14: 49 guards; hand-made case 20 of 20; the two surfaces
+    (6,969 cells each); the graph of the model cells has 26,844 links and
+    5 connected sets (6,958 cells and 4 small sets of 11 cells; no reserve
+    in them); each reserve has 2 to 17 model cells; 34 model cells belong
+    to two or more reserves; of the 97 pairs that are not contiguous in
+    Decision 17, 3 are contiguous at 0.2° and none has no path: 94 to
+    compare. `tbl_19_sdmres_surface.csv`.
+  - **Next: task 17.4** — the circuit solver and the least-cost paths in
+    `R/00_functions_circuit.R`; the checks of Decision 27 point 5
+    (hand-made circuits; `gdistance::commuteDistance` on a small grid;
+    each path cost again) before any real circuit run; STEP 17.2 (phase 1
+    on both surfaces). `Matrix` goes into the `scripts/00a` list with that
+    code. *(Corrected 2026-11-14: the text of the split point put the
+    checks of point 5 in task 17.3.)*
 - **Week 17 plan** (the author's choice R4 of task 16.6): a resistance
   surface from the suitability and a circuit-theory check against the
   Stage-2 paths — the pending item "SDM-based resistance + circuit-theory
@@ -205,8 +218,9 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ### Week-17 entry point
 
-*(2026-11-14: tasks 17.1 and 17.2 are done; the entry point is now task
-17.3 — see "Where the project is". Read Decision 27 first.)*
+*(2026-11-14: tasks 17.1 to 17.3 are done; the entry point is now task
+17.4 — see "Where the project is". Read Decision 27 first, with its
+"Result of STEP 17.1".)*
 
 - **Done: Week 16** (2026-11-07; tasks 16.1–16.6). The author committed
   each task after it (an `analysis:` and a `docs:` commit for each task
@@ -309,6 +323,7 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
 | `data/processed/tiger_sdm_maxnet_cell02_20261025.rds` | The main model and its settings | Under `data/` (D24 m1); the file that the prediction reads (D25 a1, `SDM_PRED_MODEL_FILE`) |
 | `data/processed/sdm_prediction_cell02.csv` | The prediction: `id`, `value` (cloglog), `rank`, `class`, `out_of_range`; 6,969 rows | No presence or background field; holds cell ids: no table row from it; not published as a layer (D25 d1) |
 | `data/processed/hot_<gistar>_cell02.csv` (4 files: `effort_inat`, `tiger_obscured`, `effort_all`, `tiger_5km`) | The Gi\* at 50 km (Decision 26): `id`, `value`, `n_nb`, `n_win`, `k`, `gistar`, `p_hot`, `p_cold`, `p_two`, `p_adj`, `class`; 6,969 rows each | No geometry; holds cell ids; the two tiger layers are never published or committed; the `fig_06` code reads `hot_effort_inat_cell02.csv` only (k1 of task 16.2) |
+| `data/processed/resist_sdm_<surface>_cell02.csv` (2 files: `main`, `negexp8`) | The SDM-based resistance of Decision 27 (STEP 17.1): `id`, `x`, `resistance`; 6,969 rows each | No geometry; holds cell ids: no table row from it; no layer published (Decision 27 point 10) |
 | `data/processed/boundary_states_7755.gpkg` | Natural Earth states (36), for the state boundaries of the figures | State and district can disagree at a border (gotcha) |
 | `outputs/tables/tbl_00`–`tbl_18_*`, `outputs/figures/fig_01`–`fig_06` | Committed tables and figures | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `tbl_18_gistar.csv` holds only the tiger counts of D26 point 7; `fig_04`–`fig_06` (STEP 16.2) show 0.2° model cells only: no point, no presence or background mark; `tbl_18_gistar_qa.csv` is the QA of STEP 16.3 |
 

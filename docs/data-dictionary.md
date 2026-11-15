@@ -1342,6 +1342,25 @@ again.
 | `p_adj` | numeric | `p_two` adjusted by Benjamini–Hochberg over the cells with a class. `NA` for `few_neighbours` |
 | `class` | character | `hot` (`p_adj` ≤ 0.05 and `k` above its expectation), `cold` (≤ 0.05 and below it), `not_significant`, or `few_neighbours` (fewer than 8 neighbours; k1) |
 
+## resist_sdm_<surface>_cell02.csv  *(data/processed; Week 17 — built, task 17.3; gitignored)*
+
+Written by `scripts/10_check_sdm_connectivity.R` STEP 17.1 (Decision 27
+points 1 and 2; n1 of task 17.2). Two files: `main` (linear) and `negexp8`
+(the negative exponential, c = 8) (`SDMRES_SURFACES`). One row per model
+cell, ordered by `id`. No geometry; the later STEPs join it to
+`sdm_grid_cell02_7755.gpkg` by `id`. **No presence or background field.**
+It holds the 0.2° cell id, so it stays under `data/`; no table holds a row
+of it. Written, then read back and checked (`circ_surface_checks()`). Each
+run of STEP 17.1 writes it again.
+
+**As built (2026-11-14):** 6,969 rows each.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `id` | integer | Cell id, as in `sdm_grid_cell02_7755.gpkg`. A position at 0.2°: never in a table |
+| `x` | numeric | The input of Decision 27 point 1: (6,969 − `rank`) / 6,968, with `rank` from `sdm_prediction_cell02.csv`. 1 for the highest value, 0 for the lowest |
+| `resistance` | numeric | 1 to 100 (`SDMRES_R_MIN`, `SDMRES_R_MAX`). `main`: 1 + 99 × (1 − x); `negexp8`: 100 − 99 × (1 − exp(−8x)) / (1 − exp(−8)). A cell outside the training range keeps its value (Decision 27 k1) |
+
 ## osm_zoos_7755.gpkg  *(data/raw/osm; Week 13 — built, task 13.3; gitignored)*
 
 Written by `scripts/01` Block 6 (zoo block). OpenStreetMap features with
@@ -1821,5 +1840,21 @@ Gi\*, no input count.
 | `check` | character | What is checked. For `test case`: the STEP and the name of the hand-made check. A row of `info` is a fact (the records not on a model cell by part; the records on a cell edge; the distances nearest to each band) and always passes |
 | `value` | character | What the check found: a count, the largest relative difference of the second path, or the names of the files or the objects |
 | `pass` | logical | `TRUE` if the check passes (tolerance `SDM_QA_REL_TOL`) |
+
+## tbl_19_sdmres_surface.csv  *(Week 17 — built, task 17.3)*
+
+Written by `scripts/10` STEP 17.1 (Decision 27 points 1 to 3; n1 of task
+17.2). Counts and statistics only: no cell id, no position and no reserve
+name; `assert_publishable_table()` (no prefix) runs before the write.
+
+**As built (2026-11-14):** 52 rows.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `group` | character | `input`, `surface`, `graph`, `reserves` or `pairs` |
+| `item` | character | The statistic. `surface`: `r_min`, `r_q25`, `r_median`, `r_mean`, `r_q75`, `r_max`, the range over the cells outside the training range, and the link resistance (`link_r_*`, resistance-km). `graph`: the nodes, the rook and diagonal links, the link length on the sphere (km) and the connected sets. `reserves`: the model cells of the reserves (centre rule) and the 1 km counts. `pairs`: the status of the 106 pairs of Decision 17 (contiguous at 0.2°, no path, to compare) |
+| `surface` | character | `main` or `negexp8` for the group `surface`; empty otherwise |
+| `value` | numeric | The count or the statistic |
+| `reading` | character | A short note (the unit or the Decision point) |
 
 *(Further layers — sdm — documented as they are built.)*
