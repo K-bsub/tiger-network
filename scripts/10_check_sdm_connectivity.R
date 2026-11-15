@@ -31,8 +31,16 @@
 #              0.2 degrees, no path) -> the layers resist_sdm_<surface>_
 #              cell02.csv and tbl_19_sdmres_surface.csv; h1 a hand-made case
 #              first (circ_self_test_171())
-#   STEP 17.2 (task 17.4)  phase 1: the circuit and the least-cost paths
-#              (points 4-6), after the checks of point 5
+#   STEP 17.2 (task 17.4)  phase 1 on both surfaces: for each pair of
+#              Decision 17 that is not contiguous at 0.2 degrees, the
+#              effective resistance and the node currents (Z1) and the
+#              least-cost path (points 4-6), after the checks of point 5:
+#              (i) hand-made circuits and paths (circ_self_test_172()),
+#              (ii) gdistance::commuteDistance() on a small grid
+#              (circ_check_gdistance()), (iii) each path cost again from the
+#              cells -> lcp_sdm_network_7755.gpkg (layers <surface>_phase1),
+#              circ_current_<surface>_phase1_cell02.csv and
+#              tbl_19_sdmres_pairs.csv
 #   STEP 17.3 (task 17.5)  the comparison of point 7; fig_07 and fig_08
 #   STEP 17.4 (task 17.6)  the QA of phase 1
 #   STEP 17.5 (task 17.6b) phase 2 (points 6 and 8) and its QA; only with
@@ -60,6 +68,25 @@
 #                                                    the training range
 #   outputs/tables/tbl_17_reserve_suitability.csv    a guard: the 1 km cells
 #                                                    of each reserve
+#
+# INPUTS (STEP 17.2): the objects of STEP 17.1 in memory (the surfaces, the
+#   graph, the cells of the reserves, the status of the pairs).
+#
+# OUTPUTS (STEP 17.2, task 17.4; n1 of task 17.2), all from phase 1:
+#   data/processed/lcp_sdm_network_7755.gpkg   one layer per surface
+#     (main_phase1, negexp8_phase1), one LINESTRING per pair of Decision 17
+#     through the 0.2 degree cell centres in EPSG:7755 (empty for a pair
+#     that is contiguous at 0.2 degrees): pair_id, surface, phase, the unit
+#     ids and names, status, reff, cost_rkm, path_km, n_path_cells,
+#     n_hatched_cells, redundancy. Read back and checked. Gitignored
+#   data/processed/circ_current_main_phase1_cell02.csv and
+#     circ_current_negexp8_phase1_cell02.csv   one row per model cell: id,
+#     current (the total current of the phase-1 pairs, 1 A each; Z1). No
+#     geometry. Read back and checked. Gitignored
+#   outputs/tables/tbl_19_sdmres_pairs.csv   one row per pair and surface:
+#     pair_id, surface, the unit ids and names, contiguous_decision17,
+#     status, reff, cost_rkm, path_km, n_path_cells, n_hatched_cells,
+#     redundancy. No position and no cell id
 #
 # OUTPUTS (STEP 17.1, task 17.3; n1 of task 17.2):
 #   data/processed/resist_sdm_main_cell02.csv and
@@ -91,6 +118,7 @@ source(here("R", "00_functions_io.R"))       # write_table
 source(here("R", "00_functions_sensitive.R"))# assert_publishable_table
 source(here("R", "00_functions_sdm.R"))      # sdm_reserve_cells, guards
 source(here("R", "00_functions_gistar.R"))   # gistar_centres, gistar_dist_km
+source(here("R", "00_functions_lcp.R"))      # lcp_write_layer (task 17.4)
 source(here("R", "00_functions_circuit.R"))  # circ_* (task 17.3)
 
 options(width = 120)
@@ -350,4 +378,188 @@ print(show171, row.names = FALSE, right = FALSE)
 
 cat(sprintf("\nSTEP 17.1 time: %.1f min\n",
             as.numeric(difftime(Sys.time(), t_step171, units = "mins"))))
-rule("STEP 17.1 done. Next: STEP 17.2 (task 17.4): the circuit and the paths of phase 1.")
+rule("STEP 17.1 done.")
+
+# =============================================================================
+# STEP 17.2 — phase 1: the circuit and the least-cost paths (task 17.4;
+#             Decision 27 points 4 to 6), after the checks of point 5
+# =============================================================================
+# h1 the checks of point 5 first.
+#   1. check (i) and the paths of (iii) on hand-made graphs
+#      (circ_self_test_172()); check (ii): gdistance on a small grid
+#      (circ_check_gdistance())
+#   2. for each surface and each phase-1 pair with the status "path": the
+#      effective resistance and the node currents on the connected set of
+#      the pair (Z1); the least-cost path, edge to edge; for each path,
+#      check (iii) (the cost again from the cells), the current out of the
+#      first reserve (1 A), and the path cost not below the effective
+#      resistance. A pair contiguous at 0.2 degrees gets 0 and no path; a
+#      pair with no path gets Inf (none in STEP 17.1)
+#   3. the paths (one layer per surface) and the total currents, written and
+#      read back
+#   4. tbl_19_sdmres_pairs.csv
+# Console text: counts and statistics only.
+
+rule("STEP 17.2 — phase 1: the circuit and the least-cost paths (task 17.4)")
+t_step172 <- Sys.time()
+
+# ---- 1. The checks of Decision 27 point 5 -------------------------------------------
+if (!requireNamespace("Matrix", quietly = TRUE)) {
+  stop("STEP 17.2 needs the package Matrix (p1 of task 17.2; scripts/00a).",
+       call. = FALSE)
+}
+st172 <- circ_self_test_172()
+cat("checks (i) and (iii), hand-made case of STEP 17.2:", sum(st172$pass),
+    "of", nrow(st172), "pass.\n")
+if (!all(st172$pass)) {
+  stop("The hand-made case of STEP 17.2 failed:\n  ",
+       paste(st172$check[!st172$pass], collapse = "\n  "), call. = FALSE)
+}
+gd172 <- circ_check_gdistance()
+cat("check (ii), gdistance::commuteDistance() on a small grid:",
+    sum(gd172$pass), "of", nrow(gd172), "pass; largest relative difference",
+    format(signif(max(gd172$rel_diff), 3)), "\n")
+if (!all(gd172$pass)) {
+  stop("Check (ii) failed (gdistance):\n  ",
+       paste(gd172$check[!gd172$pass], collapse = "\n  "), call. = FALSE)
+}
+
+# ---- 2. The circuit and the paths of phase 1 ------------------------------------------
+PHASE1  <- "phase1"
+n_nodes <- length(model_ids)
+node_a  <- lapply(ia, function(i) match(rcl$cells[[i]], model_ids))
+node_b  <- lapply(ib, function(i) match(rcl$cells[[i]], model_ids))
+paths172 <- list()
+cur172   <- list()
+hat172   <- list()   # the hatched cells on the paths (k1: counted)
+for (nm in names(surf)) {
+  r  <- surf[[nm]]$resistance
+  lr <- circ_link_resistance(links, r)
+  cur <- numeric(n_nodes)
+  hat <- integer(0)
+  geoms <- vector("list", nrow(pairs_d))
+  out <- data.frame(
+    pair_id = pairs_d$pair_id, surface = nm, phase = PHASE1,
+    from_unit_id = as.integer(pairs_d$from_unit_id),
+    from_name = pairs_d$from_name,
+    to_unit_id = as.integer(pairs_d$to_unit_id), to_name = pairs_d$to_name,
+    contiguous_decision17 = pairs_d$contiguous, status = status,
+    reff = NA_real_, cost_rkm = NA_real_, path_km = NA_real_,
+    n_path_cells = NA_integer_, n_hatched_cells = NA_integer_,
+    redundancy = NA_real_, stringsAsFactors = FALSE)
+  for (k in seq_len(nrow(pairs_d))) {
+    if (status[k] %in% c("contiguous_02", "no_path")) {
+      z <- if (status[k] == "contiguous_02") 0 else Inf
+      out$reff[k] <- z
+      out$cost_rkm[k] <- z
+      out$path_km[k] <- if (z == 0) 0 else NA_real_
+      out$n_path_cells[k] <- 0L
+      out$n_hatched_cells[k] <- 0L
+      geoms[[k]] <- sf::st_linestring()
+      next
+    }
+    a <- node_a[[k]]
+    b <- node_b[[k]]
+    keep <- which(memb == memb[a[1]])
+    sol <- circ_solve_pair(n_nodes, links$from, links$to, 1 / lr, a, b, keep)
+    p   <- circ_lcp_pair(n_nodes, links$from, links$to, lr, a, b)
+    pc  <- circ_path_cost(grid_m$ix[p$nodes], grid_m$iy[p$nodes], r[p$nodes])
+    ok <- c(
+      "the current out of the first reserve is 1 A" =
+        abs(sol$out_a - 1) <= SDMRES_CHECK_TOL_REL,
+      "the effective resistance is finite and above 0" =
+        is.finite(sol$reff) && sol$reff > 0,
+      "the path has 2 cells or more" =
+        is.finite(p$cost) && length(p$nodes) >= 2L,
+      "the path starts in the first reserve and ends in the second" =
+        p$nodes[1] %in% a && p$nodes[length(p$nodes)] %in% b,
+      "(iii) the path cost again from the cells" =
+        isTRUE(pc$steps_ok) &&
+        abs(pc$cost - p$cost) <= SDMRES_CHECK_TOL_REL * max(1, p$cost),
+      "the path cost is not below the effective resistance" =
+        p$cost >= sol$reff * (1 - SDMRES_CHECK_TOL_REL))
+    if (!all(ok)) {
+      stop("STEP 17.2, pair_id ", pairs_d$pair_id[k], " on ", nm, ": ",
+           paste(names(ok)[!ok], collapse = "; "), call. = FALSE)
+    }
+    cur <- cur + sol$current
+    hat <- union(hat, p$nodes[oor[p$nodes]])
+    ln <- circ_path_line(grid_m$ix[p$nodes], grid_m$iy[p$nodes])
+    geoms[[k]] <- ln
+    out$reff[k] <- sol$reff
+    out$cost_rkm[k] <- p$cost
+    out$path_km[k] <- as.numeric(sf::st_length(
+      sf::st_sfc(ln, crs = CRS_ANALYSIS))) / 1000
+    out$n_path_cells[k] <- length(p$nodes)
+    out$n_hatched_cells[k] <- sum(oor[p$nodes])
+    out$redundancy[k] <- p$cost / sol$reff
+  }
+  paths172[[nm]] <- sf::st_sf(out, geometry = sf::st_sfc(geoms,
+                                                         crs = CRS_ANALYSIS))
+  cur172[[nm]] <- cur
+  hat172[[nm]] <- hat
+  solved <- out$status == "path"
+  cat(sprintf(paste0("%s: %d pairs solved; each passed the checks (current ",
+                     "out = 1 A; (iii) the cost again; cost not below the ",
+                     "effective resistance)\n"), nm, sum(solved)))
+}
+
+# ---- 3. The paths and the total currents, written and read back ----------------------
+paths_out <- file.path(DIR_PROCESSED, SDMRES_LAYER_PATHS)
+for (nm in names(paths172)) {
+  lcp_write_layer(paths172[[nm]], paths_out, paste0(nm, "_", PHASE1))
+  f_cur <- file.path(DIR_PROCESSED, sprintf(SDMRES_LAYER_CURRENT, nm, PHASE1))
+  cur_d <- data.frame(id = model_ids, current = cur172[[nm]])
+  utils::write.csv(cur_d, f_cur, row.names = FALSE)
+  back <- utils::read.csv(f_cur)
+  sdm_run_guards(list(
+    "the current layer must have the fields id and current" =
+      identical(names(back), c("id", "current")),
+    "the current layer must hold each model cell once, in id order" =
+      identical(as.integer(back$id), model_ids),
+    "each current must be 0 or more" =
+      !anyNA(back$current) && all(back$current >= 0),
+    "the file must hold the values in memory" =
+      isTRUE(all.equal(back$current, cur_d$current, tolerance = 1e-12))
+  ), what = paste0("the file ", basename(f_cur), " (read back)"))
+  cat("wrote", basename(f_cur), "-", format(nrow(back), big.mark = ","),
+      "rows; read back and checked\n")
+}
+
+# ---- 4. tbl_19_sdmres_pairs.csv -----------------------------------------------------
+tbl172 <- do.call(rbind, lapply(paths172, sf::st_drop_geometry))
+tbl172 <- tbl172[, setdiff(names(tbl172), "phase")]
+rownames(tbl172) <- NULL
+assert_publishable_table(tbl172, prefix = NULL,
+                         name = "tbl_19_sdmres_pairs.csv")
+write_table(tbl172, SDMRES_TABLE_NN, SDMRES_TABLE_SLUGS[["pairs"]])
+
+# ---- The console: counts and statistics -----------------------------------------------
+q3 <- function(v) {
+  q <- stats::quantile(v, c(0, 0.5, 1), names = FALSE)
+  paste0(format(signif(q[2], 4), big.mark = ","), " (",
+         format(signif(q[1], 4), big.mark = ","), " to ",
+         format(signif(q[3], 4), big.mark = ","), ")")
+}
+sum172 <- do.call(rbind, lapply(names(paths172), function(nm) {
+  d <- sf::st_drop_geometry(paths172[[nm]])
+  s <- d$status == "path"
+  data.frame(
+    surface = nm,
+    pairs_solved = sum(s),
+    contiguous_02 = sum(d$status == "contiguous_02"),
+    reff_median_min_max = q3(d$reff[s]),
+    cost_median_min_max = q3(d$cost_rkm[s]),
+    redundancy_median_min_max = q3(d$redundancy[s]),
+    path_km_median_min_max = q3(d$path_km[s]),
+    paths_with_hatched = sum(d$n_hatched_cells[s] > 0),
+    hatched_cells_on_paths = length(hat172[[nm]]),
+    cells_with_current = sum(cur172[[nm]] > 0),
+    current_max = signif(max(cur172[[nm]]), 4),
+    stringsAsFactors = FALSE)
+}))
+print(t(sum172), quote = FALSE)
+
+cat(sprintf("\nSTEP 17.2 time: %.1f min\n",
+            as.numeric(difftime(Sys.time(), t_step172, units = "mins"))))
+rule("STEP 17.2 done. Next: STEP 17.3 (task 17.5): the comparison of point 7 and the figures.")

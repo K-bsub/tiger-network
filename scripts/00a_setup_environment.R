@@ -20,7 +20,10 @@ required <- c(
   "sf", "terra", "here",
   # Connectivity. The path engine is our own (R/00_functions_lcp.R, terra +
   # igraph; Decision 17). gdistance + raster are for validation check (c) only.
-  "igraph", "gdistance", "raster",
+  # 2026-11-14 (p1 of task 17.2): Matrix for the circuit solve of Decision 27
+  # (R/00_functions_circuit.R; a recommended package of R, in renv.lock);
+  # gdistance + raster also for check (ii) of Decision 27 point 5.
+  "igraph", "Matrix", "gdistance", "raster",
   # Data handling
   "dplyr", "tidyr", "readr", "stringr", "tibble", "xml2", "jsonlite",
   # Acquisition (scripts/01)

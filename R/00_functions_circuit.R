@@ -516,3 +516,314 @@ circ_self_test_171 <- function() {
       identical(circ_pair_status(rcl2$cells[1], rcl2$cells[2], ids, m), "path"))
   do.call(rbind, res)
 }
+
+# =============================================================================
+# Task 17.4 (2026-11-14): STEP 17.2 — the circuit and the least-cost paths of
+# phase 1 (Decision 27 points 4 to 6), after the checks of point 5.
+#   circ_solve_pair()       the effective resistance and the node currents of
+#                           one pair (the two reserves joined into one node
+#                           each; Z1)
+#   circ_lcp_pair()         the least-cost path of one pair, edge to edge
+#   circ_path_cost()        the cost of a path again from the cell values and
+#                           the cell centres (check (iii) of point 5)
+#   circ_path_line()        the line of a path through the cell centres, in
+#                           the analysis CRS
+#   circ_grid_links()       the 8-neighbour links of a small projected grid
+#                           (for check (ii))
+#   circ_check_gdistance()  check (ii): the effective resistance against
+#                           gdistance::commuteDistance() on a small grid
+#   circ_self_test_172()    the hand-made circuits and paths (check (i))
+# =============================================================================
+
+# ---- Point 4: one pair, circuit theory ---------------------------------------------
+# A general graph: n_nodes nodes; links (from, to) with conductance g > 0.
+# The nodes of `a` are joined into one node and the nodes of `b` into one
+# node (for this pair only); 1 A goes in at a; b is the ground. Only the
+# nodes of `keep` are solved (the connected set that holds a and b; NULL =
+# all nodes). The Laplacian of the reduced graph, with the row and the column
+# of b removed, is solved with Matrix (a sparse Cholesky factor).
+# Returns list(reff = the voltage of a; v = the voltage of each node (NA
+# outside keep); current = the node current of each node (half the sum of
+# the absolute currents of its links; 0 in a and b (Z1) and outside keep);
+# out_a = the current out of a, which must be 1).
+circ_solve_pair <- function(n_nodes, from, to, g, a, b, keep = NULL) {
+  a <- unique(as.integer(a))
+  b <- unique(as.integer(b))
+  if (length(a) == 0L || length(b) == 0L || length(intersect(a, b)) > 0L) {
+    stop("circ_solve_pair(): a and b must be non-empty and disjoint.",
+         call. = FALSE)
+  }
+  if (length(g) != length(from) || length(to) != length(from) ||
+      anyNA(g) || any(g <= 0) || any(!is.finite(g))) {
+    stop("circ_solve_pair(): each link needs one conductance above 0.",
+         call. = FALSE)
+  }
+  keep <- if (is.null(keep)) seq_len(n_nodes) else sort(unique(as.integer(keep)))
+  if (!all(c(a, b) %in% keep)) {
+    stop("circ_solve_pair(): a and b must be in keep.", call. = FALSE)
+  }
+  # New index: a -> 1, b -> 2, the other kept nodes -> 3, 4, ...
+  map <- rep(NA_integer_, n_nodes)
+  others <- setdiff(keep, c(a, b))
+  map[a] <- 1L
+  map[b] <- 2L
+  map[others] <- seq_along(others) + 2L
+  k <- length(others) + 2L
+  mf <- map[from]
+  mt <- map[to]
+  use <- !is.na(mf) & !is.na(mt) & mf != mt
+  mf <- mf[use]
+  mt <- mt[use]
+  gu <- g[use]
+  L <- Matrix::sparseMatrix(i = c(mf, mt, mf, mt), j = c(mt, mf, mf, mt),
+                            x = c(-gu, -gu, gu, gu), dims = c(k, k))
+  Lr <- Matrix::forceSymmetric(L[-2L, -2L, drop = FALSE], uplo = "U")
+  rhs <- numeric(k - 1L)
+  rhs[1] <- 1
+  vr <- as.vector(Matrix::solve(Lr, rhs))
+  vn <- c(vr[1], 0, vr[-1])            # the voltage of each new node; b = 0
+  I <- gu * (vn[mf] - vn[mt])          # the current of each link (mf -> mt)
+  out_a <- sum(I[mf == 1L]) - sum(I[mt == 1L])
+  cn <- numeric(k)
+  cn <- cn + tabulate(mf, nbins = k) * 0   # keep the length k
+  s <- rowsum(c(abs(I), abs(I)), c(mf, mt), reorder = TRUE)
+  cn[as.integer(rownames(s))] <- 0.5 * s[, 1]
+  cn[1:2] <- 0                          # Z1: the two reserves of the pair
+  v <- rep(NA_real_, n_nodes)
+  v[keep] <- vn[map[keep]]
+  current <- numeric(n_nodes)
+  current[keep] <- cn[map[keep]]
+  list(reff = vn[1], v = v, current = current, out_a = out_a)
+}
+
+# ---- Point 4: one pair, the least-cost path ------------------------------------------
+# Dijkstra (igraph) on the links with the weights w (the link resistances),
+# from all nodes of a at once (a super node joined to each node of a with
+# weight 0) to the nodes of b. The path ends at the node of b with the lowest
+# cost; a tie goes to the lowest node index (as lcp_search()). Movement
+# inside a costs nothing; the first node of b reached is the entry.
+# Returns list(cost, nodes = the path from the exit node of a to the entry
+# node of b). cost is Inf and nodes empty when b cannot be reached.
+circ_lcp_pair <- function(n_nodes, from, to, w, a, b, tol_rel = 1e-9) {
+  a <- sort(unique(as.integer(a)))
+  b <- sort(unique(as.integer(b)))
+  if (anyNA(w) || any(w < 0) || length(w) != length(from)) {
+    stop("circ_lcp_pair(): each link needs one weight of 0 or more.",
+         call. = FALSE)
+  }
+  s <- n_nodes + 1L
+  gr <- igraph::make_graph(edges = as.vector(rbind(c(from, rep(s, length(a))),
+                                                   c(to, a))),
+                           n = n_nodes + 1L, directed = FALSE)
+  w2 <- c(w, rep(0, length(a)))
+  d <- igraph::distances(gr, v = s, to = b, weights = w2,
+                         algorithm = "dijkstra")[1, ]
+  if (all(is.infinite(d))) return(list(cost = Inf, nodes = integer(0)))
+  best <- b[which(d == min(d))[1]]
+  sp <- igraph::shortest_paths(gr, from = s, to = best, weights = w2,
+                               output = "both")
+  vp <- as.integer(sp$vpath[[1]])
+  ep <- as.integer(sp$epath[[1]])
+  cost <- sum(w2[ep])
+  if (abs(cost - min(d)) > tol_rel * max(1, min(d))) {
+    stop("circ_lcp_pair(): the path cost differs from the Dijkstra distance.",
+         call. = FALSE)
+  }
+  list(cost = min(d), nodes = vp[vp != s])
+}
+
+# ---- Point 5 (iii): the cost of a path again --------------------------------------------
+# From the cells (ix, iy) of the path and their resistance r, by the link rule
+# of point 3: for each step, the distance between the two centres on the
+# sphere x (R_i + R_j) / 2. A step must go to one of the 8 neighbours. It
+# uses no link table. Returns list(cost, steps_ok).
+circ_path_cost <- function(ix, iy, r, deg = SDM_GRAIN_DEG) {
+  n <- length(ix)
+  if (n < 2L) return(list(cost = 0, steps_ok = TRUE))
+  dx <- abs(diff(ix))
+  dy <- abs(diff(iy))
+  steps_ok <- all(pmax(dx, dy) == 1L)
+  lon <- (ix + 0.5) * deg
+  lat <- (iy + 0.5) * deg
+  d <- gistar_dist_km(lon[-n], lat[-n], lon[-1], lat[-1])
+  list(cost = sum(d * (r[-n] + r[-1]) / 2), steps_ok = steps_ok)
+}
+
+# The line of a path through the cell centres, in the analysis CRS (an sfg).
+# Fewer than 2 cells gives an empty LINESTRING.
+circ_path_line <- function(ix, iy, deg = SDM_GRAIN_DEG, crs_out = CRS_ANALYSIS) {
+  if (length(ix) < 2L) return(sf::st_linestring())
+  ll <- cbind((ix + 0.5) * deg, (iy + 0.5) * deg)
+  xy <- sf::sf_project(from = sf::st_crs(CRS_WGS84), to = sf::st_crs(crs_out),
+                       pts = ll)
+  sf::st_linestring(xy)
+}
+
+# ---- Point 5 (ii): gdistance on a small projected grid ---------------------------------
+# The 8-neighbour links of a grid of nr x nc cells of size res (map units),
+# cells numbered row by row from the top left (as raster and terra). The
+# link resistance is the distance between the centres x (R_i + R_j) / 2.
+circ_grid_links <- function(nr, nc, res, r) {
+  cell <- seq_len(nr * nc)
+  row <- (cell - 1L) %/% nc + 1L
+  col <- (cell - 1L) %% nc + 1L
+  off <- data.frame(dr = c(0L, 1L, 1L, 1L), dc = c(1L, 0L, 1L, -1L))
+  parts <- lapply(seq_len(nrow(off)), function(k) {
+    r2 <- row + off$dr[k]
+    c2 <- col + off$dc[k]
+    ok <- r2 >= 1L & r2 <= nr & c2 >= 1L & c2 <= nc
+    data.frame(from = cell[ok], to = (r2[ok] - 1L) * nc + c2[ok],
+               d = res * sqrt(off$dr[k]^2 + off$dc[k]^2))
+  })
+  L <- do.call(rbind, parts)
+  L$resistance <- L$d * (r[L$from] + r[L$to]) / 2
+  L
+}
+
+# Check (ii) of Decision 27 point 5. A grid of 8 x 9 cells of 1,000 m with
+# made-up resistance values (1 to 97); two point nodes. gdistance:
+# conductance 1 / mean(R) for 8 directions, divided by the step length
+# (geoCorrection type "c"), so the conductance of a link is 1 / (d x mean R),
+# the rule of the own code. commuteDistance() gives the effective resistance
+# x sum(transitionMatrix(tr)) (the gdistance source); the check multiplies the
+# own value by the same sum. Returns a data frame: check, own, reference,
+# rel_diff, pass.
+circ_check_gdistance <- function(tol_rel = SDMRES_CHECK_TOL_REL) {
+  if (!requireNamespace("gdistance", quietly = TRUE) ||
+      !requireNamespace("raster", quietly = TRUE)) {
+    stop("circ_check_gdistance(): the packages gdistance and raster are ",
+         "needed (check (ii) of Decision 27 point 5; scripts/00a).",
+         call. = FALSE)
+  }
+  nr <- 8L
+  nc <- 9L
+  res <- 1000
+  v <- 1 + ((seq_len(nr * nc) * 37L) %% 97L)
+  # gdistance grounds the last cell of the grid inside commuteDistance(), so
+  # that cell cannot be a point node (an index error in gdistance 1.6.4).
+  pairs <- rbind(c(1L, nr * nc - 1L), c(12L, 50L), c(30L, 31L))
+  rr <- raster::raster(nrows = nr, ncols = nc, xmn = 0, xmx = nc * res,
+                       ymn = 0, ymx = nr * res,
+                       crs = "+proj=utm +zone=44 +datum=WGS84 +units=m")
+  rr <- raster::setValues(rr, v)
+  tr <- gdistance::transition(rr, transitionFunction = function(x) 1 / mean(x),
+                              directions = 8, symm = TRUE)
+  tr <- gdistance::geoCorrection(tr, type = "c", multpl = FALSE)
+  vol <- sum(gdistance::transitionMatrix(tr))
+  L <- circ_grid_links(nr, nc, res, v)
+  out <- lapply(seq_len(nrow(pairs)), function(k) {
+    p <- pairs[k, ]
+    own <- circ_solve_pair(nr * nc, L$from, L$to, 1 / L$resistance,
+                           a = p[1], b = p[2])$reff
+    xy <- raster::xyFromCell(rr, p)
+    ref <- as.matrix(gdistance::commuteDistance(tr, xy))[1, 2]
+    data.frame(check = sprintf("(ii) gdistance, cells %d and %d of %d", p[1],
+                               p[2], nr * nc),
+               own = own * vol, reference = ref,
+               rel_diff = abs(own * vol - ref) / max(1, abs(ref)))
+  })
+  out <- do.call(rbind, out)
+  out$pass <- out$rel_diff <= tol_rel
+  out
+}
+
+# ---- Point 5 (i) and (iii): the hand-made case of STEP 17.2 ------------------------------
+# Circuits with exact values, the current rule (Z1), the paths and the path
+# cost, on made-up graphs only. Returns a data frame: check, pass.
+circ_self_test_172 <- function() {
+  res <- list()
+  chk <- function(name, ok) res[[length(res) + 1L]] <<-
+    data.frame(check = name, pass = isTRUE(ok), stringsAsFactors = FALSE)
+  near <- function(a, b, tol = 1e-9) {
+    length(a) == length(b) && all(abs(a - b) <= tol * pmax(1, abs(b)))
+  }
+  solve <- function(n, L, a, b, keep = NULL) {
+    circ_solve_pair(n, L[, 1], L[, 2], 1 / L[, 3], a, b, keep)
+  }
+  # 1. Series: 1 -3- 2 -5- 3. R = 8; the middle node carries 1 A.
+  s1 <- solve(3L, rbind(c(1, 2, 3), c(2, 3, 5)), 1L, 3L)
+  chk("(i) series: R = 3 + 5 = 8", near(s1$reff, 8))
+  chk("(i) series: the middle node carries 1 A; the two ends 0 (Z1)",
+      near(s1$current, c(0, 1, 0)))
+  chk("(i) series: 1 A leaves a", near(s1$out_a, 1))
+  # 2. Parallel: 1 -4- 2 and 1 -2- 3 -2- 2. R = 4 || 4 = 2.
+  s2 <- solve(3L, rbind(c(1, 2, 4), c(1, 3, 2), c(3, 2, 2)), 1L, 2L)
+  chk("(i) parallel: R = 4 || (2 + 2) = 2", near(s2$reff, 2))
+  chk("(i) parallel: the middle node carries 0.5 A", near(s2$current[3], 0.5))
+  # 3. Unbalanced bridge: A=1, B=2, C=3, D=4; A-C 1, A-D 2, C-B 2, D-B 1,
+  #    C-D 1. By hand (nodal equations): V_A = 7/5, V_C = 4/5, V_D = 3/5, so
+  #    R = 1.4; the C-D current is 0.2 A; C and D each carry 0.6 A.
+  s3 <- solve(4L, rbind(c(1, 3, 1), c(1, 4, 2), c(3, 2, 2), c(4, 2, 1),
+                        c(3, 4, 1)), 1L, 2L)
+  chk("(i) unbalanced bridge: R = 1.4", near(s3$reff, 1.4))
+  chk("(i) unbalanced bridge: V_C = 0.8 and V_D = 0.6",
+      near(s3$v[3:4], c(0.8, 0.6)))
+  chk("(i) unbalanced bridge: C and D carry 0.6 A each",
+      near(s3$current, c(0, 0, 0.6, 0.6)))
+  # 4. Balanced bridge (1/2 = 2/4): no current in C-D; R = (1+2) || (2+4) = 2.
+  s4 <- solve(4L, rbind(c(1, 3, 1), c(1, 4, 2), c(3, 2, 2), c(4, 2, 4),
+                        c(3, 4, 7)), 1L, 2L)
+  chk("(i) balanced bridge: R = 3 || 6 = 2; V_C = V_D",
+      near(s4$reff, 2) && near(s4$v[3], s4$v[4]))
+  # 5. A region joined into one node: a = {1, 2}, each -2- 3, 3 -1- 4 (b).
+  #    R = (2 || 2) + 1 = 2. With a = {1} only: R = 2 + 1 = 3.
+  L5 <- rbind(c(1, 3, 2), c(2, 3, 2), c(3, 4, 1), c(1, 2, 9))
+  chk("(i) region: a joined into one node gives R = 2",
+      near(solve(4L, L5, c(1L, 2L), 4L)$reff, 2))
+  chk("(i) region: the node 1 alone gives R = 2 || (9 + 2) + 1",
+      near(solve(4L, L5, 1L, 4L)$reff, 1 / (1 / 2 + 1 / 11) + 1))
+  # 6. Only the connected set is solved: nodes 5-6 are a separate set.
+  L6 <- rbind(c(1, 2, 3), c(2, 3, 5), c(5, 6, 1))
+  s6 <- solve(6L, L6, 1L, 3L, keep = 1:3)
+  chk("(i) a separate set is left out: R = 8; no voltage and no current there",
+      near(s6$reff, 8) && all(is.na(s6$v[5:6])) && all(s6$current[5:6] == 0))
+  chk("(i) a and b that share a node stop the solve",
+      inherits(try(solve(3L, L6[1:2, ], c(1L, 2L), 2L), silent = TRUE),
+               "try-error"))
+  # 7. Paths: 1 -1- 2 -1- 3; 1 -5- 4 -0.5- 3; 3 -1- 5.
+  L7 <- rbind(c(1, 2, 1), c(2, 3, 1), c(1, 4, 5), c(4, 3, 0.5), c(3, 5, 1))
+  p1 <- circ_lcp_pair(5L, L7[, 1], L7[, 2], L7[, 3], 1L, c(3L, 5L))
+  chk("(iii) path: from 1 to {3, 5}: 1-2-3, cost 2",
+      near(p1$cost, 2) && identical(p1$nodes, c(1L, 2L, 3L)))
+  p2 <- circ_lcp_pair(5L, L7[, 1], L7[, 2], L7[, 3], c(1L, 4L), 3L)
+  chk("(iii) path: from the region {1, 4}: 4-3, cost 0.5 (edge to edge)",
+      near(p2$cost, 0.5) && identical(p2$nodes, c(4L, 3L)))
+  L8 <- rbind(c(1, 3, 2), c(1, 5, 2))
+  p3 <- circ_lcp_pair(5L, L8[, 1], L8[, 2], L8[, 3], 1L, c(5L, 3L))
+  chk("(iii) path: a tie goes to the lowest node (3)",
+      identical(p3$nodes, c(1L, 3L)))
+  chk("(iii) path: no route gives cost Inf",
+      is.infinite(circ_lcp_pair(5L, L8[, 1], L8[, 2], L8[, 3], 1L, 4L)$cost))
+  chk("(i) the effective resistance is not above the least-cost cost (bridge)",
+      s3$reff <= circ_lcp_pair(4L, c(1, 1, 3, 4, 3), c(3, 4, 2, 2, 4),
+                               c(1, 2, 2, 1, 1), 1L, 2L)$cost + 1e-12)
+  # 8. The path cost again on made-up 0.2 degree cells: (400, 100) east to
+  #    (401, 100), then north-east to (402, 101); R = 1, 3, 5. By hand: the
+  #    east step d1 x 2 + the diagonal step d2 x 4, with the haversine
+  #    distances of the centres.
+  rad <- pi / 180
+  hav <- function(lo1, la1, lo2, la2) {
+    2 * GISTAR_EARTH_RADIUS_KM * asin(sqrt(sin((la2 - la1) * rad / 2)^2 +
+      cos(la1 * rad) * cos(la2 * rad) * sin((lo2 - lo1) * rad / 2)^2))
+  }
+  d1 <- hav(80.1, 20.1, 80.3, 20.1)
+  d2 <- hav(80.3, 20.1, 80.5, 20.3)
+  pc <- circ_path_cost(c(400L, 401L, 402L), c(100L, 100L, 101L), c(1, 3, 5),
+                       deg = 0.2)
+  chk("(iii) path cost again: d1 x 2 + d2 x 4", near(pc$cost, d1 * 2 + d2 * 4) &&
+      isTRUE(pc$steps_ok))
+  chk("(iii) path cost again: a step that is not to a neighbour fails",
+      !circ_path_cost(c(400L, 402L), c(100L, 100L), c(1, 1), 0.2)$steps_ok)
+  # The same cells through circ_links() and circ_lcp_pair(): one cost.
+  ixg <- c(400L, 401L, 402L, 401L)
+  iyg <- c(100L, 100L, 101L, 101L)
+  rg <- c(1, 3, 5, 50)
+  Lg <- circ_links(ixg, iyg, 0.2)
+  pg <- circ_lcp_pair(4L, Lg$from, Lg$to, circ_link_resistance(Lg, rg), 1L, 3L)
+  pcg <- circ_path_cost(ixg[pg$nodes], iyg[pg$nodes], rg[pg$nodes], 0.2)
+  chk("(iii) the Dijkstra cost on circ_links() = the cost again from the cells",
+      near(pg$cost, pcg$cost) && identical(pg$nodes, c(1L, 2L, 3L)))
+  chk("path line: fewer than 2 cells gives an empty line",
+      sf::st_is_empty(circ_path_line(400L, 100L)))
+  do.call(rbind, res)
+}

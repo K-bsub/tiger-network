@@ -1194,7 +1194,8 @@ SDMRES_PUB_FIGS         <- c(current = 7L, paths = 8L)
 SDMRES_FIG_N_CLASSES    <- SDM_PUB_N_CLASSES          # 5
 SDMRES_FIG08_BACKGROUND <- "plain"                    # F2
 # Task 17.2 (n1): the names. Layers under data/processed/ (gitignored); one
-# layer of the GeoPackage for each surface and phase (for example main_p1)
+# layer of the GeoPackage for each surface and phase (for example
+# main_phase1; the phase names are phase1 and phase2)
 SDMRES_LAYER_SURFACE <- "resist_sdm_%s_cell02.csv"        # surface
 SDMRES_LAYER_PATHS   <- "lcp_sdm_network_7755.gpkg"
 SDMRES_LAYER_CURRENT <- "circ_current_%s_%s_cell02.csv"   # surface, phase
