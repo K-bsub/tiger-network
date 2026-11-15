@@ -1458,6 +1458,11 @@ distance between the nodes times the volume of the graph (the sum of the
 conductance weights of all the edges); point coordinates only. Decision 27 point 5, check (ii), and the reason that
 `gdistance` is not the engine (t3).)* *(The CRAN reference manual and a
 help page, through a search tool. The project uses 1.6.5, as `renv.lock`.)*
+*(2026-11-14, task 17.4: the source of version 1.6.4 (GitHub) was read:
+`commuteDistance()` multiplies the effective resistance by
+`sum(transitionMatrix(x))`, and it grounds the last cell of the grid, so
+that cell cannot be a point node. The chat's test used 1.6.4 from GitHub
+(CRAN is not open from the chat's workspace).)*
 
 Wright, P.G.R., Bellamy, C., Hamilton, P.B., Schofield, H., Finch, D., &
 Mathews, F. (2021). Characterising the relationship between suitable

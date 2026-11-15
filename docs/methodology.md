@@ -57,7 +57,9 @@ the 0.2° model cells, a comparison with the Stage-2 paths (phase 1, the
 1,540 pairs); the process choices of task 17.2. **Task 17.3
 (2026-11-14):** STEP 17.1 — the two surfaces, the graph of the 6,969
 model cells (5 connected sets) and the cells of the reserves; 94 of the
-97 pairs to compare. No current and no path yet.
+97 pairs to compare. **Task 17.4 (2026-11-14):** STEP 17.2 — phase 1
+on both surfaces: 94 pairs solved, each with its checks; the paths, the
+total currents and `tbl_19_sdmres_pairs.csv`. No comparison yet.
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -4984,6 +4986,38 @@ reading):**
   only), by the author and the chat. No effective resistance, current or
   path exists yet; no map was made.
 
+**Result of STEP 17.2 (task 17.4, `scripts/10`, run on the project machine;
+console text sent on 2026-11-14; facts, not a reading):**
+- STEP 17.1 ran again and gave the same table.
+- **The checks of point 5:** (i) and the hand-made paths, 22 of 22; (ii)
+  `gdistance::commuteDistance()`, 3 of 3 (largest relative difference
+  1.7e-15); (iii) and the checks of each pair passed for each of the 94
+  pairs on each surface (1 A out of the first reserve; the path cost again
+  from the cells; the path cost not below the effective resistance; the
+  path from one reserve to the other).
+- **Pairs:** 94 solved on each surface; the 12 pairs contiguous at 0.2°
+  get 0 and no path; no pair has no path.
+- **`main`** (resistance-km; median, then the range): effective resistance
+  166.1 (20.05 to 1,015); path cost 1,867 (130.7 to 22,750); redundancy
+  (path cost / effective resistance) 12.32 (4.10 to 46.04); path length
+  140.8 km (21.89 to 607.5).
+- **`negexp8`:** effective resistance 12.55 (3.689 to 233.2); path cost
+  166.8 (23.31 to 5,508); redundancy 13.79 (4.259 to 48.82); path length
+  132.3 km (21.75 to 1,050).
+- **Hatched cells (k1):** on each surface, 2 paths cross a hatched cell,
+  and the two paths cross the same 1 cell.
+- **The total current of phase 1:** 6,956 of the 6,969 model cells carry
+  current. 13 do not: the 11 cells outside the largest connected set, and
+  2 more (the cause was not checked). The largest cell current is 3.808 on
+  `main` and 1.995 on `negexp8` (in units of the 1 A of each pair).
+- **Files:** the paths (`lcp_sdm_network_7755.gpkg`, layers `main_phase1`
+  and `negexp8_phase1`, 106 features each); the two current files (6,969
+  rows each); `tbl_19_sdmres_pairs.csv` (212 rows).
+- **Seen from this run on:** the console text of STEP 17.2 (statistics
+  only), by the author and the chat. `tbl_19_sdmres_pairs.csv` holds the
+  values by pair, with the reserve names; the chat has not read its rows.
+  No map was made. The comparison of point 7 is not computed.
+
 **Reason and sources:**
 - **The national method.** The national report modelled occupancy on
   9,309 grids of 10 × 10 km, made the cost surface as 1 − Ψ, made
@@ -5149,6 +5183,51 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-14 — Week 17, task 17.4 complete: STEP 17.2 (phase 1: the circuit and the least-cost paths)
+
+- **Code:** `R/00_functions_circuit.R` gets the functions of Decision 27
+  points 4 and 5: `circ_solve_pair()` (the effective resistance and the node
+  currents of one pair; the two reserves joined into one node each; Z1),
+  `circ_lcp_pair()` (Dijkstra, edge to edge), `circ_path_cost()` (check
+  (iii)), `circ_path_line()`, `circ_grid_links()`, `circ_check_gdistance()`
+  (check (ii)) and `circ_self_test_172()` (check (i) and the hand-made
+  paths). `scripts/10` gets STEP 17.2 and sources `R/00_functions_lcp.R`
+  (for `lcp_write_layer()`).
+- **`scripts/00a`:** `Matrix` in the list (p1 of task 17.2; rule S1).
+  **`R/00_config.R`:** a comment only — the example layer name is now
+  `main_phase1` (the phase names are `phase1` and `phase2`; the fork text
+  gave `main_p1`).
+- **Check (ii), how it compares:** the source of `gdistance` multiplies the
+  effective resistance by `sum(transitionMatrix(tr))`; the check multiplies
+  the own value by the same sum, so no factor of 2 is assumed. The last
+  cell of the grid cannot be a point node: `commuteDistance()` grounds it
+  (an index error in `gdistance` 1.6.4).
+- **The checks of each pair in the real run:** 1 A out of the first
+  reserve; (iii) the path cost again from the cells (relative difference ≤
+  `SDMRES_CHECK_TOL_REL`); the path cost not below the effective
+  resistance (Rayleigh: one path is a subgraph); the path from one reserve
+  to the other. A failure stops the script with the pair_id.
+- **The chat's test** (made-up records; R 4.3.3, igraph 1.6.0, Matrix
+  1.6.5): 22 of 22; check (ii) 3 of 3 (1.7e-15); a made-up project with a
+  pair with a path, a pair contiguous at 0.2° and a pair with no path. On a
+  made-up graph of 6,969 cells: about 0.1 s for a circuit solve and 0.02 s
+  for a path. CRAN is not open from the chat's workspace (a policy
+  refusal), so the chat used `gdistance` 1.6.4 from its GitHub source; the
+  project uses 1.6.5 from CRAN (`renv.lock`).
+- **Errors of the chat (found before delivery):** (i) check (ii) first used
+  the last cell of the grid as a point node; (ii) a placeholder in the
+  console summary of STEP 17.2 (replaced by the count of the hatched cells
+  on the paths).
+- **The run** (2026-11-14): Decision 27, "Result of STEP 17.2".
+- **Docs:** Decision 27 (the result); `data-dictionary.md` (the path layer,
+  the current files, `tbl_19_sdmres_pairs.csv`); `naming-conventions.md`;
+  `references.md` (the `gdistance` entry); `project-plan.md` (task 17.4);
+  `handoff.md`.
+- **Next:** task 17.5 — STEP 17.3, the comparison of point 7 with the
+  Stage-2 baseline paths and the figures `fig_07` and `fig_08`. The figure
+  settings (colours, size, the line styles of `fig_08`) are process
+  choices; the chat raises them before the code.
 
 ### 2026-11-14 — Week 17, task 17.3 complete: STEP 17.1 (the surfaces, the graph and the cells of the reserves)
 

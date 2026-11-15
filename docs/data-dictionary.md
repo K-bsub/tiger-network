@@ -1361,6 +1361,49 @@ run of STEP 17.1 writes it again.
 | `x` | numeric | The input of Decision 27 point 1: (6,969 − `rank`) / 6,968, with `rank` from `sdm_prediction_cell02.csv`. 1 for the highest value, 0 for the lowest |
 | `resistance` | numeric | 1 to 100 (`SDMRES_R_MIN`, `SDMRES_R_MAX`). `main`: 1 + 99 × (1 − x); `negexp8`: 100 − 99 × (1 − exp(−8x)) / (1 − exp(−8)). A cell outside the training range keeps its value (Decision 27 k1) |
 
+## lcp_sdm_network_7755.gpkg  *(data/processed; Week 17 — layers `main_phase1` and `negexp8_phase1` built, task 17.4; gitignored)*
+
+Written by `scripts/10` STEP 17.2 (Decision 27 points 4 to 6). One layer per
+surface and phase; one LINESTRING per pair of Decision 17, through the 0.2°
+cell centres in EPSG:7755, from the exit cell of the first reserve to the
+entry cell of the second (edge to edge). A pair contiguous at 0.2° has an
+empty line. Each layer is read back and checked (`lcp_write_layer()`). A
+modelled path: never published at a position finer than a 10 km cell
+(policy §3); no layer on the site (Decision 27 point 10).
+
+**As built (2026-11-14):** `main_phase1` and `negexp8_phase1`, 106 features
+each (94 paths, 12 contiguous at 0.2°).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `pair_id` | integer | Join key to `tbl_12_reserve_pairs.csv` |
+| `surface`, `phase` | character | `main` or `negexp8`; `phase1` |
+| `from_unit_id`, `from_name`, `to_unit_id`, `to_name` | integer / character | The two reserves (from the pair table); the search runs from `from_unit_id` |
+| `contiguous_decision17` | logical | `contiguous` of Decision 17 |
+| `status` | character | `path`, `contiguous_02` (the two reserves share a model cell) or `no_path` (Decision 27 point 3) |
+| `reff` | numeric | The effective resistance of the pair (resistance-km); 0 for `contiguous_02`, `Inf` for `no_path` |
+| `cost_rkm` | numeric | The least cost (resistance-km); 0 for `contiguous_02`, `Inf` for `no_path` |
+| `path_km` | numeric | The length of the line in EPSG:7755 (km); 0 for `contiguous_02` |
+| `n_path_cells` | integer | The model cells of the path, with the exit and entry cells |
+| `n_hatched_cells` | integer | The cells of the path outside the training range (Decision 27 k1) |
+| `redundancy` | numeric | `cost_rkm` / `reff` (1 or more); `NA` with no path |
+
+## circ_current_<surface>_<phase>_cell02.csv  *(data/processed; Week 17 — `phase1` built, task 17.4; gitignored)*
+
+Written by `scripts/10` STEP 17.2 (Decision 27 point 4, Z1). One row per
+model cell, ordered by `id`. The total current of the pairs of the phase (1 A
+each); the cells of the two reserves of a pair carry 0 for that pair. No
+geometry. It holds the 0.2° cell id, so it stays under `data/`; no table holds
+a row of it. Written, then read back and checked.
+
+**As built (2026-11-14):** `circ_current_main_phase1_cell02.csv` and
+`circ_current_negexp8_phase1_cell02.csv`, 6,969 rows each.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `id` | integer | Cell id, as in `sdm_grid_cell02_7755.gpkg`. A position at 0.2°: never in a table |
+| `current` | numeric | The sum over the pairs of the node current (half the sum of the absolute currents of the links of the cell), in units of the 1 A of a pair; 0 or more |
+
 ## osm_zoos_7755.gpkg  *(data/raw/osm; Week 13 — built, task 13.3; gitignored)*
 
 Written by `scripts/01` Block 6 (zoo block). OpenStreetMap features with
@@ -1856,5 +1899,19 @@ name; `assert_publishable_table()` (no prefix) runs before the write.
 | `surface` | character | `main` or `negexp8` for the group `surface`; empty otherwise |
 | `value` | numeric | The count or the statistic |
 | `reading` | character | A short note (the unit or the Decision point) |
+
+## tbl_19_sdmres_pairs.csv  *(Week 17 — built, task 17.4)*
+
+Written by `scripts/10` STEP 17.2 (Decision 27 points 4 to 6; n1 of task
+17.2). One row per pair of Decision 17 and surface (phase 1): the fields of
+the layer `lcp_sdm_network_7755.gpkg` without the geometry and `phase`. Reserve
+names and values; no position and no cell id (`assert_publishable_table()`,
+no prefix).
+
+**As built (2026-11-14):** 212 rows (106 pairs × 2 surfaces).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `pair_id`, `surface`, `from_unit_id`, `from_name`, `to_unit_id`, `to_name`, `contiguous_decision17`, `status`, `reff`, `cost_rkm`, `path_km`, `n_path_cells`, `n_hatched_cells`, `redundancy` | — | As in `lcp_sdm_network_7755.gpkg` |
 
 *(Further layers — sdm — documented as they are built.)*

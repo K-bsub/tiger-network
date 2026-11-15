@@ -93,11 +93,11 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ---
 
-## Current state  ·  **Week 17 in progress (tasks 17.1–17.3 done)** · 2026-11-14
+## Current state  ·  **Week 17 in progress (tasks 17.1–17.4 done)** · 2026-11-14
 
 ### Where the project is
 
-- **Week 17 so far (2026-11-14; tasks 17.1–17.3; full record: Decision
+- **Week 17 so far (2026-11-14; tasks 17.1–17.4; full record: Decision
   27 and the change log in `methodology.md`):**
   - A text fix before Week 17: the headers of the two one-time scripts
     (kept in git) and three stale "Week 18" statements (commits
@@ -124,13 +124,20 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
     to two or more reserves; of the 97 pairs that are not contiguous in
     Decision 17, 3 are contiguous at 0.2° and none has no path: 94 to
     compare. `tbl_19_sdmres_surface.csv`.
-  - **Next: task 17.4** — the circuit solver and the least-cost paths in
-    `R/00_functions_circuit.R`; the checks of Decision 27 point 5
-    (hand-made circuits; `gdistance::commuteDistance` on a small grid;
-    each path cost again) before any real circuit run; STEP 17.2 (phase 1
-    on both surfaces). `Matrix` goes into the `scripts/00a` list with that
-    code. *(Corrected 2026-11-14: the text of the split point put the
-    checks of point 5 in task 17.3.)*
+  - Task 17.4: STEP 17.2 and the circuit functions (commits by the
+    author). Run on 2026-11-14: the checks of point 5 (22 of 22;
+    `gdistance` 3 of 3, 1.7e-15); 94 pairs on each surface, each with its
+    checks; `main`: effective resistance median 166.1 resistance-km,
+    redundancy median 12.32, path length median 140.8 km (up to 607.5);
+    `negexp8`: 12.55, 13.79 and 132.3 km (up to 1,050); 2 paths cross the
+    same 1 hatched cell; 6,956 cells carry current. The paths
+    (`lcp_sdm_network_7755.gpkg`), the currents and
+    `tbl_19_sdmres_pairs.csv`. `Matrix` is in the `scripts/00a` list.
+  - **Next: task 17.5** — STEP 17.3: the comparison of Decision 27 point
+    7 with the Stage-2 baseline paths (`lcp_reserve_network_7755.gpkg`,
+    layer `baseline`; the overlap code of Decision 18,
+    `lcp_route_share()`), and the figures `fig_07` and `fig_08`. The figure
+    settings are process choices: raise them before the code.
 - **Week 17 plan** (the author's choice R4 of task 16.6): a resistance
   surface from the suitability and a circuit-theory check against the
   Stage-2 paths — the pending item "SDM-based resistance + circuit-theory
@@ -218,9 +225,9 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ### Week-17 entry point
 
-*(2026-11-14: tasks 17.1 to 17.3 are done; the entry point is now task
-17.4 — see "Where the project is". Read Decision 27 first, with its
-"Result of STEP 17.1".)*
+*(2026-11-14: tasks 17.1 to 17.4 are done; the entry point is now task
+17.5 — see "Where the project is". Read Decision 27 first, with its
+"Result" parts.)*
 
 - **Done: Week 16** (2026-11-07; tasks 16.1–16.6). The author committed
   each task after it (an `analysis:` and a `docs:` commit for each task
@@ -324,6 +331,7 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
 | `data/processed/sdm_prediction_cell02.csv` | The prediction: `id`, `value` (cloglog), `rank`, `class`, `out_of_range`; 6,969 rows | No presence or background field; holds cell ids: no table row from it; not published as a layer (D25 d1) |
 | `data/processed/hot_<gistar>_cell02.csv` (4 files: `effort_inat`, `tiger_obscured`, `effort_all`, `tiger_5km`) | The Gi\* at 50 km (Decision 26): `id`, `value`, `n_nb`, `n_win`, `k`, `gistar`, `p_hot`, `p_cold`, `p_two`, `p_adj`, `class`; 6,969 rows each | No geometry; holds cell ids; the two tiger layers are never published or committed; the `fig_06` code reads `hot_effort_inat_cell02.csv` only (k1 of task 16.2) |
 | `data/processed/resist_sdm_<surface>_cell02.csv` (2 files: `main`, `negexp8`) | The SDM-based resistance of Decision 27 (STEP 17.1): `id`, `x`, `resistance`; 6,969 rows each | No geometry; holds cell ids: no table row from it; no layer published (Decision 27 point 10) |
+| `data/processed/lcp_sdm_network_7755.gpkg` (layers `<surface>_phase1`) and `circ_current_<surface>_phase1_cell02.csv` | The paths on the SDM-based surfaces and the total currents of phase 1 (STEP 17.2) | Modelled paths: never a position finer than 10 km in a committed table or figure; no layer on the site; the current files hold cell ids |
 | `data/processed/boundary_states_7755.gpkg` | Natural Earth states (36), for the state boundaries of the figures | State and district can disagree at a border (gotcha) |
 | `outputs/tables/tbl_00`–`tbl_18_*`, `outputs/figures/fig_01`–`fig_06` | Committed tables and figures | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `tbl_18_gistar.csv` holds only the tiger counts of D26 point 7; `fig_04`–`fig_06` (STEP 16.2) show 0.2° model cells only: no point, no presence or background mark; `tbl_18_gistar_qa.csv` is the QA of STEP 16.3 |
 
@@ -606,6 +614,11 @@ of closed one-time work are in git history.)*
   point 6).
 
 **Process (chat)**
+- **`gdistance::commuteDistance()` grounds the last cell of the grid**, so
+  that cell cannot be a point node (an index error), and it multiplies the
+  effective resistance by `sum(transitionMatrix(x))` (task 17.4). CRAN is
+  not open from the chat's workspace; the chat's `gdistance` is 1.6.4 from
+  GitHub, the project's 1.6.5.
 - **A git command from the chat's shell can leave a lock file**
   (2026-11-14). The project folder allows no delete from the chat's shell,
   so git cannot remove its own `.lock` files there. The chat runs only
