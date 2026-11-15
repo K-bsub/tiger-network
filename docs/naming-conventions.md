@@ -164,7 +164,7 @@ suffix marks a companion table to a numbered one (`tbl_05b_…`). As built:
 | `tbl_16` | `sdm_counts` (STEP 14.1, task 14.4); `sdm_covariates`, `sdm_covariate_cor`, `sdm_aicc`, `sdm_cv`, `sdm_sensitivity` (STEP 14.2, task 14.5, process choice t1); `sdm_qa` (STEP 14.3, task 14.6; reserved by process choice t1 of task 14.2) — all `scripts/09`. Counts and statistics only; no 0.2° cell id or corner and no data row (Decision 23 point 9). Later Week-15 and Week-16 tables of `scripts/09` take their slugs in their tasks. *(2026-10-31, process choice t1 of task 15.2: `sdm_prediction` (STEP 15.1), `sdm_reserve_check` (STEP 15.2), `sdm_pred_qa` (STEP 15.3) reserved. No `tbl_16` table holds a reserve name (check s1 of task 14.6))* *(built 2026-11-01: `sdm_prediction`, `sdm_reserve_check`, `sdm_pred_qa`)* |
 | `tbl_17` | `reserve_suitability` — the publishable table of the reserve values (Decision 25 point 7; `scripts/09` STEP 15.2, task 15.4; reserved by process choice n1 of task 15.2). One row per reserve; no presence column *(built 2026-11-01: 58 rows)* |
 | `tbl_18` | `gistar` — the publishable statistics of the Gi\* (Decision 26 point 7; `scripts/09` STEP 16.1, task 16.3); `gistar_qa` — the QA of STEP 16.3 (task 16.5). Reserved by t1 of task 16.2 (2026-11-07). A landscape-complex name only in the `tiger_5km` rows of `gistar` *(built 2026-11-07: `gistar`, 92 rows; `gistar_qa`, 113 rows)* |
-| `tbl_19` | `sdmres_surface`, `sdmres_pairs`, `sdmres_compare`, `sdmres_phase2`, `sdmres_qa` — the SDM-based resistance and the circuit-theory check (Decision 27; `scripts/10`). Reserved by n1 of task 17.2 (2026-11-14). Counts, statistics and pair rows with reserve names; no position and no cell id (Decision 27 point 10) *(built 2026-11-14: `sdmres_surface`, 52 rows; `sdmres_pairs`, 212 rows)* |
+| `tbl_19` | `sdmres_surface`, `sdmres_pairs`, `sdmres_compare`, `sdmres_compare_summary`, `sdmres_phase2`, `sdmres_qa` — the SDM-based resistance and the circuit-theory check (Decision 27; `scripts/10`). Reserved by n1 of task 17.2 (2026-11-14); `sdmres_compare_summary` added by TB1 of task 17.5. Counts, statistics and pair rows with reserve names; no position and no cell id (Decision 27 point 10) *(built 2026-11-14: `sdmres_surface`, 52 rows; `sdmres_pairs`, 212 rows; `sdmres_compare`, 194 rows; `sdmres_compare_summary`, 2 rows)* |
 
 Before a new table is written, check that its full filename is not already in
 use. A new, unrelated table takes the next free number.
@@ -213,6 +213,10 @@ layers of Decision 27 (gitignored): `resist_sdm_<surface>_cell02.csv`,
 `lcp_sdm_network_7755.gpkg` (one layer for each surface and phase) and
 `circ_current_<surface>_<phase>_cell02.csv` (no geometry, so no CRS code,
 as `sdm_prediction_cell02.csv`).)*
+*(2026-11-14, task 17.5: `fig_07_sdm_current.png` and `fig_08_sdm_paths.png`
+are built (`scripts/10` STEP 17.3); a sixth `tbl_19` slug,
+`sdmres_compare_summary` (TB1). `fig_09` and `tbl_20` are the next free
+numbers.)*
 
 ---
 

@@ -93,11 +93,11 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ---
 
-## Current state  ·  **Week 17 in progress (tasks 17.1–17.4 done)** · 2026-11-14
+## Current state  ·  **Week 17 in progress (tasks 17.1–17.5 done)** · 2026-11-14
 
 ### Where the project is
 
-- **Week 17 so far (2026-11-14; tasks 17.1–17.4; full record: Decision
+- **Week 17 so far (2026-11-14; tasks 17.1–17.5; full record: Decision
   27 and the change log in `methodology.md`):**
   - A text fix before Week 17: the headers of the two one-time scripts
     (kept in git) and three stale "Week 18" statements (commits
@@ -133,11 +133,23 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
     same 1 hatched cell; 6,956 cells carry current. The paths
     (`lcp_sdm_network_7755.gpkg`), the currents and
     `tbl_19_sdmres_pairs.csv`. `Matrix` is in the `scripts/00a` list.
-  - **Next: task 17.5** — STEP 17.3: the comparison of Decision 27 point
-    7 with the Stage-2 baseline paths (`lcp_reserve_network_7755.gpkg`,
-    layer `baseline`; the overlap code of Decision 18,
-    `lcp_route_share()`), and the figures `fig_07` and `fig_08`. The figure
-    settings are process choices: raise them before the code.
+  - Task 17.5: the process choices (each as the chat recommended): TB1
+    (a sixth slug, `sdmres_compare_summary`), CC1, FC1, PL1 (inferno),
+    L7a, L8a, FR1 (`fig_frame_paths()` in `R/00_functions_fig.R`), SZ1;
+    the readings R3 and R4; the text fixes D1 and D2 of Decision 27.
+    STEP 17.3, run on 2026-11-14 (the first run stopped at a test that
+    `ggplot2` 4.0 broke; fixed): `main` against the Stage-2 baseline
+    paths **"differs"** (46 of 94 pairs material; ρ 0.758; median route
+    overlap 0.711); `negexp8` against `main` **"sensitive"** (29 of 94;
+    ρ 0.887). Descriptive: the ρ of the effective resistance and the
+    Stage-2 cost 0.570 (partial, given the gap, 0.346); the median share
+    of a Stage-2 path inside the top 20 % cells by current 0.937.
+    `tbl_19_sdmres_compare.csv`, `tbl_19_sdmres_compare_summary.csv`,
+    `fig_07_sdm_current.png`, `fig_08_sdm_paths.png`.
+  - **Next: task 17.6** — STEP 17.4, the QA of phase 1 (a hand-made case
+    first; a second path for the surfaces and the comparison; the publish
+    checks; `tbl_19_sdmres_qa.csv`). The QA settings are process choices:
+    raise them before the code. Then task 17.6b (phase 2, `RUN_PHASE2`).
 - **Week 17 plan** (the author's choice R4 of task 16.6): a resistance
   surface from the suitability and a circuit-theory check against the
   Stage-2 paths — the pending item "SDM-based resistance + circuit-theory
@@ -333,7 +345,7 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
 | `data/processed/resist_sdm_<surface>_cell02.csv` (2 files: `main`, `negexp8`) | The SDM-based resistance of Decision 27 (STEP 17.1): `id`, `x`, `resistance`; 6,969 rows each | No geometry; holds cell ids: no table row from it; no layer published (Decision 27 point 10) |
 | `data/processed/lcp_sdm_network_7755.gpkg` (layers `<surface>_phase1`) and `circ_current_<surface>_phase1_cell02.csv` | The paths on the SDM-based surfaces and the total currents of phase 1 (STEP 17.2) | Modelled paths: never a position finer than 10 km in a committed table or figure; no layer on the site; the current files hold cell ids |
 | `data/processed/boundary_states_7755.gpkg` | Natural Earth states (36), for the state boundaries of the figures | State and district can disagree at a border (gotcha) |
-| `outputs/tables/tbl_00`–`tbl_18_*`, `outputs/figures/fig_01`–`fig_06` | Committed tables and figures | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `tbl_18_gistar.csv` holds only the tiger counts of D26 point 7; `fig_04`–`fig_06` (STEP 16.2) show 0.2° model cells only: no point, no presence or background mark; `tbl_18_gistar_qa.csv` is the QA of STEP 16.3 |
+| `outputs/tables/tbl_00`–`tbl_19_*`, `outputs/figures/fig_01`–`fig_08` | Committed tables and figures | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `tbl_18_gistar.csv` holds only the tiger counts of D26 point 7; `fig_04`–`fig_06` (STEP 16.2) show 0.2° model cells only: no point, no presence or background mark; `tbl_18_gistar_qa.csv` is the QA of STEP 16.3; `tbl_19_*` (Decision 27): counts, statistics and pair rows with reserve names, no position, no cell id; `fig_07`–`fig_08` (STEP 17.3): 0.2° cells and modelled path lines at national scale only |
 
 ### Open items (carried)
 
@@ -348,6 +360,10 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
   chat drafts (d1 of task 16.2) — the author's edit is open. The start
   values of the frame (white state lines, 3 hatch lines for each cell,
   the key box at 0.60 and 0.36 of the frame) were kept on 2026-11-07.
+- `fig_07`, `fig_08`: the titles, subtitles and captions are chat drafts
+  — the author's edit is open. The "Sources" line is the line of
+  `fig_04`: check that it also covers the inputs of the Stage-2 baseline
+  surface. The colours and widths (PL1, L7a, L8a) are start values.
   The text is drawn in the PNG files: an edit needs a change of
   `scripts/09` and a new run (or the caption as page text on the site,
   a fork for Week 18). The narrative week is Week 20.
@@ -602,7 +618,7 @@ of closed one-time work are in git history.)*
   run "0 of 72 files" with `tbl_18_gistar_qa.csv`). The value text of
   `tbl_16_sdm_qa.csv`, `tbl_16_sdm_pred_qa.csv` and `tbl_18_gistar_qa.csv`
   then changes. This is expected: commit them.
-- **The text of a figure is in the image** (`fig_03`–`fig_06`). The
+- **The text of a figure is in the image** (`fig_03`–`fig_08`). The
   title, the subtitle and the caption are drawn in the PNG file, so an
   edit of the text needs a change of the code and a new run.
   *(Corrected 2026-11-07, task 16.4: the note of task 16.3 gave
@@ -619,6 +635,10 @@ of closed one-time work are in git history.)*
   effective resistance by `sum(transitionMatrix(x))` (task 17.4). CRAN is
   not open from the chat's workspace; the chat's `gdistance` is 1.6.4 from
   GitHub, the project's 1.6.5.
+- **From `ggplot2` 4.0 the layers of a plot have names** (task 17.5):
+  `which()` over `p$layers` gives a named number, so `identical(..., 8L)`
+  is FALSE. Compare positions with `unname()`. The chat can install
+  `ggplot2` 4.0.3 from its GitHub source into a test library.
 - **A git command from the chat's shell can leave a lock file**
   (2026-11-14). The project folder allows no delete from the chat's shell,
   so git cannot remove its own `.lock` files there. The chat runs only

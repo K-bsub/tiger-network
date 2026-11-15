@@ -59,7 +59,11 @@ the 0.2° model cells, a comparison with the Stage-2 paths (phase 1, the
 model cells (5 connected sets) and the cells of the reserves; 94 of the
 97 pairs to compare. **Task 17.4 (2026-11-14):** STEP 17.2 — phase 1
 on both surfaces: 94 pairs solved, each with its checks; the paths, the
-total currents and `tbl_19_sdmres_pairs.csv`. No comparison yet.
+total currents and `tbl_19_sdmres_pairs.csv`. **Task 17.5
+(2026-11-14):** the process choices of the comparison and the figures;
+STEP 17.3 — point 7: the `main` paths against the Stage-2 baseline paths
+"differs" (46 of 94 pairs material; ρ 0.758); the variant `negexp8`
+against `main` "sensitive" (29 of 94; ρ 0.887); `fig_07` and `fig_08`.
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -4875,6 +4879,12 @@ complete):**
        top 20 % of the model cells by the phase-1 total current of the
        surface (1,394 cells, `SDMRES_TOP_CURRENT_SHARE`; a tie to the
        lower cell id), with the cells as polygons in EPSG:7755.
+   - *(Task 17.5, 2026-11-14, the author's reading R4: the per-pair table
+     has a row for each of the 97 Stage-2 baseline paths on each surface;
+     a pair that is not compared has NA in the columns of Decision 18;
+     the summary values, the descriptive values too, use the compared
+     pairs. TB1: the summary is a sixth table, as
+     `tbl_12_lcp_variant_summary.csv`.)*
 8. **Phase 2 and the pair rule of Decision 17 (P2c).** On the `main`
    surface:
    - **Share:** the share of the 106 pairs of Decision 17 among the 106
@@ -4891,11 +4901,16 @@ complete):**
      phase-2 paths: counts and lengths only (no comparison; Stage 2 has no
      path for 1,434 of the 1,540 pairs).
 9. **The current of `fig_07` (P3a).** The phase-1 total current of the
-   `main` surface (the 97 pairs whose Stage-2 paths the figure draws;
-   `SDMRES_FIG07_PHASE` = `"phase1"`). The phase-2 total currents go into
+   `main` surface (`SDMRES_FIG07_PHASE` = `"phase1"`): the phase-1 pairs
+   with a path at 0.2°. The phase-2 total currents go into
    a table as statistics only. *(The author chose P3a on 2026-11-14 in a
    later reply, before any surface; the first reply did not answer P3.
    Decision 17 has a sub-fork P3 too: write "Decision 27 P3a".)*
+   *(Text corrected 2026-11-14, task 17.5 (D1): the first text said "the
+   97 pairs whose Stage-2 paths the figure draws". The current comes from
+   the 94 pairs with a path at 0.2°; the 3 pairs that are contiguous at
+   0.2° carry no current (point 3). The figure draws the 97 Stage-2
+   baseline paths. No change to the code.)*
 10. **Published form (g3, F2).**
     - **No layer.** The surfaces, the currents, the effective resistances
       by cell and the paths stay under `data/processed/` (gitignored)
@@ -4903,14 +4918,20 @@ complete):**
       current layer waits for the same rule.
     - **Tables `tbl_19_*`** (slugs: n1 of task 17.2): counts, statistics
       and pair rows with reserve names; no position
-      (`assert_publishable_table()` with no prefix); no cell id.
+      (`assert_publishable_table()` with no prefix); no cell id. *(Task
+      17.5, TB1: a sixth slug, `sdmres_compare_summary`.)*
     - **`fig_07`:** the total current of point 9 on the `main` surface, on
       the 0.2° model cells, in five classes of equal count by rank (as
       Decision 25 c1; no value in the legend), with the 97 Stage-2
       baseline paths as lines.
-    - **`fig_08` (F2):** the 97 phase-1 paths of the `main` surface and the
-      97 Stage-2 baseline paths, as lines in two styles, on a plain
-      background.
+    - **`fig_08` (F2):** the 94 phase-1 paths of the `main` surface (the
+      compared pairs of point 7) and the 97 Stage-2 baseline paths, as
+      lines in two styles, on a plain background. *(Text corrected
+      2026-11-14, task 17.5 (D2; the author's reading R3): the first text
+      said "the 97 phase-1 paths of the `main` surface"; the 3 pairs that
+      are contiguous at 0.2° have no path (point 3). Their 3 Stage-2 paths
+      keep the normal style; the caption gives the count and the
+      reason.)*
     - **Both:** national scale; the reserve outlines and the state lines;
       the hatch of the 32 cells (Decision 25 point 6); no point and no
       presence or background mark; each path labelled as modelled, not
@@ -5017,6 +5038,43 @@ console text sent on 2026-11-14; facts, not a reading):**
   only), by the author and the chat. `tbl_19_sdmres_pairs.csv` holds the
   values by pair, with the reserve names; the chat has not read its rows.
   No map was made. The comparison of point 7 is not computed.
+
+**Result of STEP 17.3 (task 17.5, `scripts/10`, run on the project machine;
+the console text and the two figures sent on 2026-11-14; facts, not a
+reading):**
+- STEPs 17.1 and 17.2 ran again and gave the same console text and the
+  same tables.
+- **The checks:** the settings of task 17.5, 10 of 10; the hand-made cases
+  15 of 15 (the comparison, with the test against
+  `lcp_compare_variant()`), 15 of 15 (the figure helpers of STEP 16.2) and
+  6 of 6 (the frame); the guards of the Stage-2 layer, of the pairs and of
+  the top cells; the 13 checks of the figures.
+- **The pairs (point 7):** 97 Stage-2 baseline paths; 94 compared; 3
+  contiguous at 0.2°; none with no path.
+- **`main` against the Stage-2 baseline paths (labelled):** material route
+  29 of 94 (0.3085), material rank 25 (0.2660), material pair 46
+  (0.4894); Spearman ρ of the path costs 0.7583; median route overlap at
+  20 km 0.7109. **Label: "differs"** (0.4894 is above 0.20 and 0.7583 is
+  below 0.9).
+- **`negexp8` against `main` (labelled):** material route 26 of 94
+  (0.2766), material rank 6 (0.0638), material pair 29 (0.3085); ρ
+  0.8867; median route overlap 0.9168. **Label: "sensitive"** (0.3085 is
+  above 0.20 and 0.8867 is below 0.9).
+- **Descriptive (no label), `main` and then `negexp8`:** the Spearman ρ of
+  the effective resistance and the Stage-2 `cost_rkm` 0.5701 and 0.6385;
+  the partial ρ given `gap_km` 0.3461 and 0.4049; the median redundancy
+  12.32 and 13.79; the median share of a Stage-2 path inside the top
+  20 % of the cells by the current (1,394 cells) 0.9369 and 0.9169.
+- **Files:** `tbl_19_sdmres_compare.csv` (194 rows: 97 Stage-2 paths × 2
+  surfaces) and `tbl_19_sdmres_compare_summary.csv` (2 rows);
+  `fig_07_sdm_current.png` and `fig_08_sdm_paths.png`, 2,200 × 2,120
+  pixels each. `fig_07`: classes of 1,394 cells (four) and 1,393 cells; 13
+  cells carry no current (in the lowest class); 32 hatched cells. The
+  caption drafts were printed under "DRAFT". STEP 17.3 took 0.5 min.
+- **Seen from this run on:** the console text of STEPs 17.1–17.3 and the
+  two figures, by the author and the chat (the author sent the two PNG
+  files to the chat). The chat has not read the rows of
+  `tbl_19_sdmres_compare.csv`.
 
 **Reason and sources:**
 - **The national method.** The national report modelled occupancy on
@@ -5140,6 +5198,9 @@ the check limit 1e-6 (Decision 17).
   17.5) the comparison of point 7 and the figures; STEP 17.4 (task 17.6)
   the QA of phase 1; STEP 17.5 phase 2 (point 8) and its QA, with
   `RUN_PHASE2`. The hand-made cases of point 5 run first.
+- `R/00_functions_fig.R` (FR1 of task 17.5): the frame of `fig_07` and
+  `fig_08` (`fig_frame_paths()`), with each input as an argument;
+  `scripts/09` does not use it.
 - `scripts/00a_setup_environment.R`: `Matrix` in the list with the first
   code (p1 of task 17.2; rule S1).
 - `naming-conventions.md`: `fig_07` and `fig_08` reserved; `tbl_19` in
@@ -5183,6 +5244,84 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-14 — Week 17, task 17.5 complete: STEP 17.3 (the comparison of point 7 and the figures)
+
+- **The author's choices (2026-11-14), each as the chat recommended:**
+  "Tb1, CC1, FC1, PL1, L7a, L8a, FR1, SZ1, R3, R4" ("Tb1" read as TB1).
+  - **TB1:** two tables — `tbl_19_sdmres_compare.csv` (a row for each
+    surface and Stage-2 path) and a sixth slug, `sdmres_compare_summary`
+    (a row for each surface), as `tbl_12_lcp_variant_comparison.csv` and
+    `tbl_12_lcp_variant_summary.csv` (Decision 18). It changes n1 of task
+    17.2. Rejected: TB2 (the per-pair file only; the labels in the console
+    and the docs only).
+  - **CC1:** new functions `circ_compare_paths()` and
+    `circ_compare_summary()` in `R/00_functions_circuit.R`. They call
+    `lcp_route_share()`; a hand-made test checks that they give the values
+    of `lcp_compare_variant()` (one yardstick). Rejected: CC2 (an adapter
+    that sets `contiguous` = TRUE for the 3 pairs contiguous at 0.2°).
+  - **FC1:** the classes of `fig_07` by `sdm_rank_class()` over all 6,969
+    model cells. The top class is the set of the top 1,394 cells of point
+    7; the cells with no current are in the lowest class. Rejected: FC2 (a
+    separate class "no current").
+  - **PL1:** `fig_07` in inferno (begin 0.10, end 0.92). The chat's
+    colour-vision simulation (Machado et al. 2009, severity 1; CIE76) of
+    the five colours and the state fill: smallest difference 15.9
+    (tritanopia); viridis as `fig_04`, 14.6; the colours of `fig_06`, 15.2
+    (task 16.4). Rejected: cividis (12.9), magma (9.7), viridis (the
+    colours of `fig_04`).
+  - **L7a:** the Stage-2 paths on `fig_07` in cyan (#00B4D8, width 0.45) on
+    an ink casing (0.9); CIE76 37.0 or more to each class. Rejected: cyan
+    alone (luminance contrast 1.09 to the orange class), white (the state
+    lines are white), ink (9.6 to the dark class in tritanopia).
+  - **L8a:** `fig_08`: the `main` paths solid purple (#762A83, 0.7, drawn
+    first); the Stage-2 paths dashed in the link grey of `fig_03`
+    (#7F7E7B, 0.4, drawn last); smallest CIE76 difference 35.8. Rejected:
+    the blue of `fig_06` (its "cold" class), ink (the reserve outlines and
+    the hatch).
+  - **FR1:** the frame in `R/00_functions_fig.R` (`fig_frame_paths()`,
+    `fig_save_png()`, `fig_mix()`), with the drawing rules of `fig_frame()`
+    of `scripts/09`; `scripts/09` is not changed. Rejected: FR2 (move
+    `fig_frame()`; `scripts/09` would need a new run), FR3 (a copy in
+    `scripts/10`).
+  - **SZ1:** the size, the resolution and the key of `fig_04`–`fig_06`.
+  - **R3** (D2, the text of point 10) and **R4** (point 7): the dated
+    notes in Decision 27. **D1** (the text of point 9): a text fix; no
+    change to the code.
+- **`R/00_config.R`:** the sixth slug; `SDMRES_FIG07_PALETTE`,
+  `SDMRES_FIG07_PATH_COL`, `SDMRES_FIG07_PATH_LWD`, `SDMRES_FIG08_COLOURS`,
+  `SDMRES_FIG08_LWD`, `SDMRES_FIG08_LTY` and `SDMRES_FIG08_STAGE2_MIX`
+  (start values). `circ_check_config_173()` checks them.
+- **Code:** `R/00_functions_circuit.R` (`circ_check_config_173()`,
+  `circ_line_share_in()`, `circ_compare_paths()`,
+  `circ_partial_spearman()`, `circ_compare_summary()`,
+  `circ_self_test_173()`); `R/00_functions_fig.R` (the frame and
+  `fig_self_test_paths()`); `scripts/10` gets STEP 17.3 and sources
+  `R/00_functions_fig.R`. The Stage-2 layer is read with the fields of the
+  comparison only (`FIELDS_S2`); its 1 km exit and entry cells are not
+  kept.
+- **The chat's test** (made-up records; R 4.3.3; `ggplot2` 3.4.4, then
+  4.0.3): a made-up project of 6 reserves and 9 pairs (8 Stage-2 paths: 6
+  compared, 1 contiguous at 0.2°, 1 with no path); all checks pass; a
+  negative cost in the Stage-2 layer stops the script; the console text
+  of STEPs 17.1–17.2 is the same as with the committed script.
+- **Error of the chat (found by the author's first run):** the frame test
+  compared a layer position with `identical(which(...), 8L)`. From
+  `ggplot2` 4.0 the layers of a plot have names, so `which()` gives a
+  named number, and the test failed (5 of 6). The figure code was correct.
+  Fixed with `unname()`. The chat then installed `ggplot2` 4.0.3 (with
+  `gtable` 0.3.6, `S7` 0.2.0 and `scales` 1.4.0) from the GitHub sources
+  into a test library, saw the same failure, and saw the fix pass. The
+  first run stopped before the comparison and wrote no file.
+- **The run** (2026-11-14): Decision 27, "Result of STEP 17.3".
+- **Docs:** Decision 27 (the text fixes D1 and D2, the note R4, TB1, the
+  result, the consequences); `data-dictionary.md` (the two tables and the
+  two figures); `naming-conventions.md` (`tbl_19`, `fig_07`, `fig_08`);
+  `project-plan.md` (task 17.5); `handoff.md`.
+- **Next:** task 17.6 — STEP 17.4, the QA of phase 1 (a hand-made case
+  first; a second path for the surfaces and the comparison; the publish
+  checks; `tbl_19_sdmres_qa.csv`). The QA settings are process choices;
+  the chat raises them before the code.
 
 ### 2026-11-14 — Week 17, task 17.4 complete: STEP 17.2 (phase 1: the circuit and the least-cost paths)
 
