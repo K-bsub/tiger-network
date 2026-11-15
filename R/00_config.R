@@ -1114,5 +1114,95 @@ FIG_FRAME_COLOURS  <- c(ink = "#1e1e1e", paper = "#f7f4ee",
 # about 2 cm) has two cells, and the r2 cell of STEP 16.1 must be one of them
 GISTAR_QA_EDGE_CELLS <- 1e-6
 
+# ---- Stage 3+: SDM-based resistance and the circuit-theory check (Decision 27) ----
+# Fixed BEFORE any resistance surface from the suitability, any effective
+# resistance, any current and any path on such a surface. See
+# docs/methodology.md, Decision 27 (2026-11-14): a2 with k1, b3, c1, d3 with
+# t1 (reading R1), e1 and e3 in two phases (reading R2), f1, g3 with F2, h1;
+# the sub-forks P1b, P2c, Z1, P3a. Process choices of task 17.2
+# (2026-11-14): s1, f1, n1, w1, p1, h1. scripts/10_check_sdm_connectivity.R
+# reads these; do not repeat a value as a literal.
+#
+# Point 1 (a2, k1): the input x = (n - rank) / (n - 1) over the model cells,
+# with rank from sdm_prediction_cell02.csv (Decision 25 point 3). x = 1 for
+# the highest value. The cells outside the training range keep their value
+# and are counted (the paths that cross them)
+SDMRES_INPUT   <- "rank"                     # a2
+SDMRES_HATCHED <- "keep_and_count"           # k1
+# Point 2 (b3): R = 1 at x = 1 and R = 100 at x = 0.
+#   main    (b1): R = R_MIN + (R_MAX - R_MIN) * (1 - x)
+#   negexp8 (b2): R = R_MAX - (R_MAX - R_MIN) * (1 - exp(-c x)) / (1 - exp(-c))
+SDMRES_R_MIN    <- 1                         # as Decision 14 (judgement value)
+SDMRES_R_MAX    <- 100
+SDMRES_SURFACES <- c(main = "linear", negexp8 = "negexp")
+SDMRES_NEGEXP_C <- 8                         # judgement value
+# Point 3 (c1): nodes = the model cells only; 8 neighbours (rook and
+# diagonal) among the model cells; link resistance = d x (R_i + R_j) / 2 with
+# d the distance between the two cell centres on the sphere in km
+# (GISTAR_DIST, GISTAR_EARTH_RADIUS_KM; Decision 26 Amendment 1). The cells
+# of a reserve: the centre rule of Decision 25 h1
+SDMRES_GRAIN             <- "cell02_model"
+SDMRES_NEIGHBOURS        <- 8L
+SDMRES_LINK_RULE         <- "dist_x_mean"
+SDMRES_RESERVE_CELL_RULE <- SDM_RESERVE_CELL_RULE    # "centre"
+# Point 4 (d3, Z1): circuit theory (the cells of the two reserves of a pair
+# joined into one node each, for that pair only; 1 A in at A, B the ground)
+# and least-cost paths on the same graph. Z1: the cells of A and B carry 0
+# current for that pair
+SDMRES_METHODS       <- c("circuit", "lcp")
+SDMRES_FOCAL_CURRENT <- "zero"
+# Point 5 (t1, reading R1): own code (Matrix, igraph); the checks run first.
+# Check (ii) compares with gdistance::commuteDistance on a small grid
+SDMRES_TOOL          <- "own"
+SDMRES_CHECK_TOL_REL <- LCP_VALIDATE_TOL_REL         # 1e-6 (Decision 17)
+# Point 6 (e1, e3; reading R2; P1b, the chat's reading): phase 1 = the pairs
+# of tbl_12_reserve_pairs.csv (Decision 17); phase 2 = all pairs of the
+# reserves with a polygon, on both surfaces, with a path for each pair. Phase
+# 2 runs only with RUN_PHASE2 = TRUE in the script (w1 of task 17.2)
+SDMRES_PHASE1_PAIRS    <- "decision17"
+SDMRES_PHASE2_PAIRS    <- "all_reserves"
+SDMRES_PHASE2_SURFACES <- names(SDMRES_SURFACES)
+SDMRES_PHASE2_PATHS    <- TRUE
+# Point 7 (f1): phase 1 against the Stage-2 baseline paths, by the rule of
+# Decision 18 with the route distance d = SDMRES_COMPARE_ROUTE_D_KM. Labels:
+# "agrees"/"differs" (main against Stage 2); "robust"/"sensitive" (negexp8
+# against main)
+SDMRES_COMPARE_SURFACE          <- "baseline"
+SDMRES_COMPARE_ROUTE_D_KM       <- 20        # judgement value (about one cell)
+SDMRES_COMPARE_ROUTE_D_DESCR_KM <- c(5, 10, 20, 40)
+SDMRES_COMPARE_ROUTE_MATERIAL   <- LCP_COMPARE_ROUTE_MATERIAL     # 0.5
+SDMRES_COMPARE_RANK_MATERIAL    <- LCP_COMPARE_RANK_MATERIAL      # 0.25
+SDMRES_COMPARE_MAX_SHARE        <- LCP_COMPARE_ROBUST_MAX_SHARE   # 0.20
+SDMRES_COMPARE_MIN_RHO          <- LCP_COMPARE_ROBUST_MIN_RHO     # 0.9
+SDMRES_COMPARE_LABELS <- list(stage2  = c("agrees", "differs"),
+                              variant = c("robust", "sensitive"))
+SDMRES_TOP_CURRENT_SHARE        <- SDM_SENS_TOP_SHARE             # 0.2
+# Point 8 (P2c): on main, the share of the Decision-17 pairs among the same
+# number of pairs with the lowest effective resistance (the number comes
+# from tbl_12_reserve_pairs.csv, not from a literal); "agrees" if the share
+# is at least this limit (the limit of Decisions 19 and 20)
+SDMRES_PAIRRULE_MIN_SHARE <- NET_COMPARE_ROBUST_MIN_RETENTION     # 2/3
+SDMRES_PAIRRULE_LABELS    <- c("agrees", "differs")
+# Point 9 (P3a): fig_07 shows the phase-1 total current of main. The phase-2
+# total currents go into a table as statistics only
+SDMRES_FIG07_PHASE <- "phase1"
+# Point 10 (g3, F2): no layer; two static figures (fig_07 the current in
+# classes of equal count by rank, with the Stage-2 paths; fig_08 the paths of
+# main and of Stage 2 on a plain background)
+SDMRES_PUB_LAYER        <- FALSE
+SDMRES_PUB_FIGS         <- c(current = 7L, paths = 8L)
+SDMRES_FIG_N_CLASSES    <- SDM_PUB_N_CLASSES          # 5
+SDMRES_FIG08_BACKGROUND <- "plain"                    # F2
+# Task 17.2 (n1): the names. Layers under data/processed/ (gitignored); one
+# layer of the GeoPackage for each surface and phase (for example main_p1)
+SDMRES_LAYER_SURFACE <- "resist_sdm_%s_cell02.csv"        # surface
+SDMRES_LAYER_PATHS   <- "lcp_sdm_network_7755.gpkg"
+SDMRES_LAYER_CURRENT <- "circ_current_%s_%s_cell02.csv"   # surface, phase
+SDMRES_TABLE_NN      <- 19L
+SDMRES_TABLE_SLUGS   <- c(surface = "sdmres_surface", pairs = "sdmres_pairs",
+                          compare = "sdmres_compare", phase2 = "sdmres_phase2",
+                          qa = "sdmres_qa")
+SDMRES_FIG_SLUGS     <- c(current = "sdm_current", paths = "sdm_paths")
+
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a
