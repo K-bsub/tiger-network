@@ -1201,9 +1201,45 @@ SDMRES_LAYER_PATHS   <- "lcp_sdm_network_7755.gpkg"
 SDMRES_LAYER_CURRENT <- "circ_current_%s_%s_cell02.csv"   # surface, phase
 SDMRES_TABLE_NN      <- 19L
 SDMRES_TABLE_SLUGS   <- c(surface = "sdmres_surface", pairs = "sdmres_pairs",
-                          compare = "sdmres_compare", phase2 = "sdmres_phase2",
-                          qa = "sdmres_qa")
+                          compare = "sdmres_compare",
+                          compare_summary = "sdmres_compare_summary",
+                          phase2 = "sdmres_phase2", qa = "sdmres_qa")
 SDMRES_FIG_SLUGS     <- c(current = "sdm_current", paths = "sdm_paths")
+# Task 17.5 (2026-11-14): the process choices TB1, CC1, FC1, PL1, L7a, L8a,
+# FR1 and SZ1, and the readings R3 and R4 (the author's answer "Tb1, CC1,
+# FC1, PL1, L7a, L8a, FR1, SZ1, R3, R4"; "Tb1" read as TB1).
+#   TB1 the slug compare_summary above: one row per surface, as
+#       tbl_12_lcp_variant_summary.csv (Decision 18). It changes n1 of task
+#       17.2 (a sixth slug)
+#   FC1 the classes of fig_07: sdm_rank_class() on the total current over all
+#       model cells; class SDMRES_FIG_N_CLASSES is then the set of the top
+#       SDMRES_TOP_CURRENT_SHARE cells of point 7 (a guard checks it)
+#   PL1 the palette of the classes of fig_07 (viridisLite option, begin,
+#       end). The chat simulated protanopia, deuteranopia and tritanopia
+#       (Machado et al. 2009, severity 1) on the five colours and the state
+#       fill: the smallest CIE76 difference is 15.9 (tritanopia); viridis as
+#       fig_04: 14.6; the colours of fig_06: 15.2 (task 16.4). A high current
+#       is bright, as a high suitability in fig_04. Start values
+#   L7a the Stage-2 paths on fig_07: cyan on an ink casing. The CIE76
+#       difference of the cyan to each class is 37.0 or more in the four
+#       simulations; the casing gives a dark edge on the bright classes
+#   L8a fig_08: the main paths solid purple, drawn first; the Stage-2 paths
+#       dashed in the link colour of fig_03, drawn last (where the two share
+#       a route, grey dashes on purple). The smallest CIE76 difference of the
+#       two colours and the state fill is 35.8 (tritanopia). The grey is the
+#       mix of the paper and the ink at SDMRES_FIG08_STAGE2_MIX (FIG_LINK_COL
+#       of scripts/07); a guard checks it
+#   SZ1 the size, the resolution and the key of fig_04 to fig_06
+#       (FIG_STAGE3_SIZE_IN, FIG_STAGE3_DPI, FIG_HATCH_KEY_POS,
+#       FIG_HATCH_LINES_PER_CELL)
+SDMRES_FIG07_PALETTE    <- list(option = "inferno", begin = 0.10, end = 0.92)
+SDMRES_FIG07_PATH_COL   <- c(line = "#00B4D8",
+                             casing = FIG_FRAME_COLOURS[["ink"]])
+SDMRES_FIG07_PATH_LWD   <- c(line = 0.45, casing = 0.9)
+SDMRES_FIG08_COLOURS    <- c(sdm = "#762A83", stage2 = "#7F7E7B")
+SDMRES_FIG08_LWD        <- c(sdm = 0.7, stage2 = 0.4)
+SDMRES_FIG08_LTY        <- c(sdm = "solid", stage2 = "dashed")
+SDMRES_FIG08_STAGE2_MIX <- 0.55
 
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a

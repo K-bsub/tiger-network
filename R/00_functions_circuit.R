@@ -23,7 +23,8 @@
 #   circ_surface_summary()  the table tbl_19_sdmres_surface.csv
 #   circ_self_test_171()    the hand-made case of STEP 17.1 (h1 of 17.2)
 # Task 17.4 adds the circuit solver, the least-cost paths and the checks of
-# Decision 27 point 5.
+# Decision 27 point 5 (the list is at its block below). Task 17.5 adds the
+# comparison of point 7 (STEP 17.3; the list is at its block at the end).
 #
 # SENSITIVE DATA: these functions return TRUE/FALSE, counts, statistics and
 # the layers (cell ids and values). None of them prints a coordinate, a cell
@@ -825,5 +826,382 @@ circ_self_test_172 <- function() {
       near(pg$cost, pcg$cost) && identical(pg$nodes, c(1L, 2L, 3L)))
   chk("path line: fewer than 2 cells gives an empty line",
       sf::st_is_empty(circ_path_line(400L, 100L)))
+  do.call(rbind, res)
+}
+
+# =============================================================================
+# Task 17.5 (2026-11-14): STEP 17.3 — the comparison of Decision 27 point 7
+# (process choices TB1, CC1 and FC1, and the reading R4 of task 17.5).
+#   circ_check_config_173()  the settings of task 17.5
+#   circ_line_share_in()     the share of the length of each line inside a
+#                            set of polygons
+#   circ_compare_paths()     per pair: a set of paths against a reference
+#                            set, by the rule of Decision 18 (CC1); one row
+#                            for each pair, a pair that is not compared gets
+#                            NA (R4)
+#   circ_partial_spearman()  the Pearson partial correlation of the ranks
+#   circ_compare_summary()   per surface: the shares, rho, the label and the
+#                            descriptive values (TB1)
+#   circ_self_test_173()     the hand-made case of STEP 17.3, with the test
+#                            of circ_compare_paths() against
+#                            lcp_compare_variant() (one yardstick, CC1)
+# =============================================================================
+
+SDMRES_NEEDED_173 <- c(
+  "SDMRES_TABLE_SLUGS", "SDMRES_FIG_SLUGS", "SDMRES_PUB_FIGS",
+  "SDMRES_FIG_N_CLASSES", "SDMRES_TOP_CURRENT_SHARE",
+  "SDMRES_COMPARE_LABELS", "SDMRES_FIG07_PALETTE", "SDMRES_FIG07_PATH_COL",
+  "SDMRES_FIG07_PATH_LWD", "SDMRES_FIG08_COLOURS", "SDMRES_FIG08_LWD",
+  "SDMRES_FIG08_LTY", "SDMRES_FIG08_STAGE2_MIX", "FIG_STAGE3_SIZE_IN",
+  "FIG_STAGE3_DPI", "FIG_HATCH_KEY_POS", "FIG_HATCH_LINES_PER_CELL",
+  "FIG_FRAME_COLOURS", "DIR_FIGURES"
+)
+
+# The settings of task 17.5. Returns a named list of TRUE/FALSE checks (for
+# sdm_run_guards()). Stops first if a setting is missing.
+circ_check_config_173 <- function() {
+  miss <- SDMRES_NEEDED_173[!vapply(SDMRES_NEEDED_173, exists, logical(1))]
+  if (length(miss) > 0) {
+    stop("Setting(s) missing from R/00_config.R (task 17.5): ",
+         paste(miss, collapse = ", "), call. = FALSE)
+  }
+  is_col <- function(v) {
+    is.character(v) && length(v) > 0 && !anyNA(v) &&
+      !inherits(try(grDevices::col2rgb(v), silent = TRUE), "try-error")
+  }
+  pos_num <- function(v, nm) {
+    is.numeric(v) && identical(names(v), nm) && !anyNA(v) && all(v > 0)
+  }
+  pal <- SDMRES_FIG07_PALETTE
+  mix <- grDevices::rgb(grDevices::colorRamp(c(
+    FIG_FRAME_COLOURS[["paper"]], FIG_FRAME_COLOURS[["ink"]]))(
+      SDMRES_FIG08_STAGE2_MIX), maxColorValue = 255)
+  list(
+    "SDMRES_TABLE_SLUGS must hold compare and compare_summary (TB1 of task 17.5)" =
+      all(c("compare", "compare_summary") %in% names(SDMRES_TABLE_SLUGS)) &&
+      !anyDuplicated(SDMRES_TABLE_SLUGS),
+    "SDMRES_FIG_N_CLASSES x SDMRES_TOP_CURRENT_SHARE must be 1 (FC1: the top class = the top cells of point 7)" =
+      isTRUE(abs(SDMRES_FIG_N_CLASSES * SDMRES_TOP_CURRENT_SHARE - 1) < 1e-12),
+    "SDMRES_COMPARE_LABELS must hold stage2 and variant, two words each" =
+      identical(names(SDMRES_COMPARE_LABELS), c("stage2", "variant")) &&
+      all(lengths(SDMRES_COMPARE_LABELS) == 2L),
+    "SDMRES_FIG07_PALETTE must be a viridisLite option with 0 <= begin < end <= 1 (PL1)" =
+      is.list(pal) && identical(names(pal), c("option", "begin", "end")) &&
+      is.character(pal$option) && length(pal$option) == 1L &&
+      pal$option %in% c("magma", "inferno", "plasma", "viridis", "cividis",
+                        "rocket", "mako", "turbo") &&
+      is.numeric(pal$begin) && is.numeric(pal$end) &&
+      pal$begin >= 0 && pal$begin < pal$end && pal$end <= 1,
+    "SDMRES_FIG07_PATH_COL must be line and casing colours; the casing is the ink (L7a)" =
+      identical(names(SDMRES_FIG07_PATH_COL), c("line", "casing")) &&
+      is_col(SDMRES_FIG07_PATH_COL) &&
+      identical(SDMRES_FIG07_PATH_COL[["casing"]], FIG_FRAME_COLOURS[["ink"]]),
+    "SDMRES_FIG07_PATH_LWD must be line < casing, both above 0 (L7a)" =
+      pos_num(SDMRES_FIG07_PATH_LWD, c("line", "casing")) &&
+      SDMRES_FIG07_PATH_LWD[["line"]] < SDMRES_FIG07_PATH_LWD[["casing"]],
+    "SDMRES_FIG08_COLOURS, _LWD and _LTY must name sdm and stage2 (L8a)" =
+      identical(names(SDMRES_FIG08_COLOURS), c("sdm", "stage2")) &&
+      is_col(SDMRES_FIG08_COLOURS) &&
+      pos_num(SDMRES_FIG08_LWD, c("sdm", "stage2")) &&
+      identical(names(SDMRES_FIG08_LTY), c("sdm", "stage2")) &&
+      all(SDMRES_FIG08_LTY %in% c("solid", "dashed", "dotted", "dotdash",
+                                  "longdash", "twodash")) &&
+      SDMRES_FIG08_LTY[["sdm"]] != SDMRES_FIG08_LTY[["stage2"]],
+    "the Stage-2 grey of fig_08 must be the mix of the paper and the ink (the link colour of fig_03; L8a)" =
+      identical(toupper(SDMRES_FIG08_COLOURS[["stage2"]]), toupper(mix)),
+    "the figure size, resolution and key must be those of fig_04 to fig_06 (SZ1)" =
+      identical(names(FIG_STAGE3_SIZE_IN), c("width", "height")) &&
+      all(FIG_STAGE3_SIZE_IN > 0) && FIG_STAGE3_DPI > 0 &&
+      identical(names(FIG_HATCH_KEY_POS), c("x", "y")) &&
+      all(FIG_HATCH_KEY_POS > 0 & FIG_HATCH_KEY_POS < 1),
+    "no table or figure slug may hold the word tiger" =
+      !any(grepl("tiger", c(SDMRES_TABLE_SLUGS, SDMRES_FIG_SLUGS),
+                 ignore.case = TRUE))
+  )
+}
+
+# ---- Point 7 (descriptive): the share of a line inside polygons ------------------
+# lines : an sfc of LINESTRING; polys : an sfc of POLYGON (the same projected
+# CRS). Returns, for each line, the share of its length inside the union of
+# the polygons (0-1; a part on an edge counts as inside). NA for an empty
+# line or a line of length 0.
+circ_line_share_in <- function(lines, polys) {
+  if (sf::st_crs(lines) != sf::st_crs(polys)) {      # sf: an equivalent CRS
+    stop("circ_line_share_in(): the lines and the polygons must have one CRS.",
+         call. = FALSE)
+  }
+  u <- if (length(polys) == 0) NULL else sf::st_union(polys)
+  vapply(seq_along(lines), function(i) {
+    g <- lines[i]
+    if (sf::st_is_empty(g)) return(NA_real_)
+    lt <- as.numeric(sf::st_length(g))
+    if (lt == 0) return(NA_real_)
+    if (is.null(u)) return(0)
+    ins <- suppressWarnings(sf::st_intersection(g, u))
+    li <- if (length(ins) == 0) 0 else sum(as.numeric(sf::st_length(ins)))
+    min(1, max(0, li / lt))
+  }, numeric(1))
+}
+
+# ---- Point 7 (CC1): one set of paths against a reference set, per pair -------------
+# The rule of Decision 18 as lcp_compare_variant() applies it (route overlap
+# = min of the two shares at d_km with lcp_route_share(); material if below
+# route_material; the percentile rank of the cost among the compared pairs,
+# ties at the average rank; material if the change is rank_material or
+# more), with the Stage-2 fields that do not apply here left out.
+#   base, var : sf (the same projected CRS) with pair_id, cost_rkm, path_km
+#               and a LINESTRING; one row per pair, in one order. base is the
+#               reference, var the surface of the row
+#   info      : a data frame with pair_id, from_name, to_name, gap_km, in the
+#               same order
+#   compared  : TRUE for a pair of point 7 (both have a path); FALSE gives NA
+#               in the columns of Decision 18 (R4 of task 17.5)
+# Returns one row per pair; the column names of tbl_12_lcp_variant_comparison
+# .csv where the meaning is the same.
+circ_compare_paths <- function(base, var, info, compared, surface, reference,
+                               d_km = SDMRES_COMPARE_ROUTE_D_KM,
+                               descr_km = SDMRES_COMPARE_ROUTE_D_DESCR_KM,
+                               route_material = SDMRES_COMPARE_ROUTE_MATERIAL,
+                               rank_material = SDMRES_COMPARE_RANK_MATERIAL) {
+  n <- nrow(info)
+  if (!identical(as.integer(base$pair_id), as.integer(info$pair_id)) ||
+      !identical(as.integer(var$pair_id), as.integer(info$pair_id)) ||
+      length(compared) != n || anyNA(compared)) {
+    stop("circ_compare_paths(): base, var, info and compared must have one ",
+         "row per pair, in one order.", call. = FALSE)
+  }
+  gb <- sf::st_geometry(base)
+  gv <- sf::st_geometry(var)
+  k <- which(compared)
+  bad <- k[sf::st_is_empty(gb[k]) | sf::st_is_empty(gv[k]) |
+             !is.finite(base$cost_rkm[k]) | !is.finite(var$cost_rkm[k]) |
+             base$cost_rkm[k] <= 0 | var$cost_rkm[k] <= 0]
+  if (length(bad) > 0) {
+    stop("circ_compare_paths(): a compared pair has no path or no cost ",
+         "(pair_id ", paste(info$pair_id[bad], collapse = ", "), ").",
+         call. = FALSE)
+  }
+  share_bv <- share_vb <- rep(NA_real_, n)
+  descr <- matrix(NA_real_, n, length(descr_km),
+                  dimnames = list(NULL, paste0("route_overlap_", descr_km, "km")))
+  for (i in k) {
+    share_bv[i] <- lcp_route_share(gb[i], gv[i], d_km)
+    share_vb[i] <- lcp_route_share(gv[i], gb[i], d_km)
+    for (j in seq_along(descr_km)) {
+      descr[i, j] <- min(lcp_route_share(gb[i], gv[i], descr_km[j]),
+                         lcp_route_share(gv[i], gb[i], descr_km[j]))
+    }
+  }
+  pr <- function(x) (rank(x, ties.method = "average") - 1) / (length(x) - 1)
+  rank_b <- rank_v <- rep(NA_real_, n)
+  if (length(k) >= 2L) {
+    rank_b[k] <- pr(base$cost_rkm[k])
+    rank_v[k] <- pr(var$cost_rkm[k])
+  }
+  na_if <- function(v) ifelse(compared, v, NA)
+  out <- data.frame(
+    pair_id = info$pair_id, surface = surface, reference = reference,
+    compared = compared, from_name = info$from_name, to_name = info$to_name,
+    gap_km = info$gap_km,
+    share_base_in_variant = share_bv, share_variant_in_base = share_vb,
+    route_overlap = pmin(share_bv, share_vb),
+    descr,
+    cost_base = na_if(base$cost_rkm), cost_variant = na_if(var$cost_rkm),
+    rank_base = rank_b, rank_variant = rank_v,
+    stringsAsFactors = FALSE, check.names = FALSE)
+  out$rank_change    <- out$rank_variant - out$rank_base
+  out$material_route <- out$route_overlap < route_material
+  out$material_rank  <- abs(out$rank_change) >= rank_material
+  out$material_pair  <- out$material_route | out$material_rank
+  out$path_length_ratio <- na_if(var$path_km / base$path_km)
+  rownames(out) <- NULL
+  out
+}
+
+# The Pearson partial correlation of the ranks of x and y given z (ties at
+# the average rank): the partial Spearman rho. NA if fewer than 4 values or
+# if x or y has a rank correlation of 1 with z.
+circ_partial_spearman <- function(x, y, z) {
+  ok <- is.finite(x) & is.finite(y) & is.finite(z)
+  if (sum(ok) < 4L) return(NA_real_)
+  r <- stats::cor(cbind(rank(x[ok]), rank(y[ok]), rank(z[ok])))
+  den <- (1 - r[1, 3]^2) * (1 - r[2, 3]^2)
+  if (!is.finite(den) || den <= 1e-12) return(NA_real_)
+  (r[1, 2] - r[1, 3] * r[2, 3]) / sqrt(den)
+}
+
+# ---- Point 7: the summary of one surface (TB1) --------------------------------------------
+#   cmp        : the rows of circ_compare_paths() for one surface
+#   status     : the status of each row's pair at 0.2 degrees (STEP 17.1)
+#   reff, redundancy : of the surface of the rows, for each row
+#   cost_stage2: the Stage-2 cost of each row's pair
+#   top_share  : the share of each Stage-2 path in the top cells
+#   top_cells  : the number of the top cells
+#   labels     : the two words of the label (the first = the pass word)
+# The label, rho and the shares use the compared pairs (Decision 18 points
+# 5-6); the descriptive values use the compared pairs too (R4: one n).
+circ_compare_summary <- function(cmp, status, reff, redundancy, cost_stage2,
+                                 top_share, top_cells, labels,
+                                 max_share = SDMRES_COMPARE_MAX_SHARE,
+                                 min_rho = SDMRES_COMPARE_MIN_RHO) {
+  n <- nrow(cmp)
+  if (length(status) != n || length(reff) != n || length(redundancy) != n ||
+      length(cost_stage2) != n || length(top_share) != n ||
+      length(labels) != 2L) {
+    stop("circ_compare_summary(): one value per row is needed.",
+         call. = FALSE)
+  }
+  k <- cmp$compared
+  rho <- if (sum(k) >= 3L) {
+    stats::cor(cmp$cost_base[k], cmp$cost_variant[k], method = "spearman")
+  } else NA_real_
+  sh <- mean(cmp$material_pair[k])
+  data.frame(
+    surface = cmp$surface[1], reference = cmp$reference[1],
+    stage2_paths = n, pairs_compared = sum(k),
+    contiguous_02_excluded = sum(status == "contiguous_02"),
+    no_path_excluded = sum(status == "no_path"),
+    share_material_route = mean(cmp$material_route[k]),
+    share_material_rank = mean(cmp$material_rank[k]),
+    share_material_pair = sh,
+    spearman_rho = rho,
+    median_route_overlap = stats::median(cmp$route_overlap[k]),
+    label = if (isTRUE(sh <= max_share && rho >= min_rho)) labels[1] else
+      labels[2],
+    rho_reff_stage2_cost = if (sum(k) >= 3L) {
+      stats::cor(reff[k], cost_stage2[k], method = "spearman")
+    } else NA_real_,
+    partial_rho_reff_stage2_cost_gap =
+      circ_partial_spearman(reff[k], cost_stage2[k], cmp$gap_km[k]),
+    median_redundancy = stats::median(redundancy[k]),
+    median_top_current_share = stats::median(top_share[k]),
+    top_current_cells = as.integer(top_cells),
+    stringsAsFactors = FALSE)
+}
+
+# ---- The hand-made case of STEP 17.3 (h1 of task 17.2) -----------------------------------
+# Made-up lines, cells and pairs only. Returns a data frame: check, pass.
+circ_self_test_173 <- function() {
+  res <- list()
+  chk <- function(name, ok) res[[length(res) + 1L]] <<-
+    data.frame(check = name, pass = isTRUE(ok), stringsAsFactors = FALSE)
+  near <- function(a, b, tol = 1e-9) {
+    length(a) == length(b) && all(abs(a - b) <= tol * pmax(1, abs(b)))
+  }
+  crs <- sf::st_crs(CRS_ANALYSIS)
+  ln <- function(m) sf::st_linestring(matrix(m, ncol = 2, byrow = TRUE))
+  sq <- function(x0, y0, s) {
+    sf::st_polygon(list(rbind(c(x0, y0), c(x0 + s, y0), c(x0 + s, y0 + s),
+                              c(x0, y0 + s), c(x0, y0))))
+  }
+  # 1. The share of a line inside polygons. Two squares of 10 km side by
+  #    side (0-20 km); a line of 40 km from x = -10 to 30 km at y = 5 km.
+  polys <- sf::st_sfc(sq(0, 0, 1e4), sq(1e4, 0, 1e4), crs = crs)
+  lines <- sf::st_sfc(ln(c(-1e4, 5e3, 3e4, 5e3)), ln(c(2e3, 2e3, 8e3, 8e3)),
+                      sf::st_linestring(), ln(c(5e4, 0, 6e4, 0)), crs = crs)
+  sh <- circ_line_share_in(lines, polys)
+  chk("share in polygons: 20 of 40 km = 0.5; inside = 1; empty = NA; outside = 0",
+      near(sh[c(1, 2, 4)], c(0.5, 1, 0)) && is.na(sh[3]))
+  chk("share in polygons: no polygon gives 0",
+      near(circ_line_share_in(lines[1], sf::st_sfc(crs = crs)), 0))
+  chk("share in polygons: lines and polygons in two CRS stop the function",
+      inherits(try(circ_line_share_in(lines, sf::st_transform(polys, 4326)),
+                   silent = TRUE), "try-error"))
+  # 2. The top cells (FC1). 12 made-up cells; a tie across the class break
+  #    goes to the lower id; the two cells with 0 take the last two ranks
+  #    (the lowest class holds 2 cells: ceiling(12 / 5 x j) steps).
+  ids <- c(105L, 101L, 109L, 103L, 111L, 102L, 104L, 110L, 106L, 108L,
+           107L, 112L)
+  val <- c(5, 9, 9, 1, 0, 3, 2, 7, 0, 4, 6, 0.5)
+  rc <- sdm_rank_class(val, ids, 5L)
+  top <- rc$class == 5L
+  chk("top cells: the top class holds ceiling(n / 5) = 3 cells = ceiling(0.2 n)",
+      sum(top) == 3L && sum(top) == ceiling(0.2 * length(val)))
+  chk("top cells: a tie at the break goes to the lower id (101 and 109 at 9; 110 at 7)",
+      setequal(ids[top], c(101L, 109L, 110L)))
+  chk("top cells: the cells with 0 take the last ranks (106, then 111) and the lowest class",
+      identical(rc$rank[match(c(106L, 111L), ids)], c(11L, 12L)) &&
+      all(rc$class[val == 0] == 1L))
+  # 3. CC1: circ_compare_paths() against lcp_compare_variant() on made-up
+  #    Stage-2 style layers: 6 pairs, pair 6 contiguous (not compared).
+  bl <- list(ln(c(0, 0, 1e5, 0)), ln(c(0, 1e4, 0, 9e4)),
+             ln(c(0, 0, 5e4, 5e4)), ln(c(2e4, 0, 2e4, 6e4, 5e4, 6e4)),
+             ln(c(0, -2e4, 8e4, -2e4)), sf::st_linestring())
+  vl <- list(ln(c(0, 1.5e4, 1e5, 1.5e4)), ln(c(5e4, 1e4, 5e4, 9e4)),
+             ln(c(0, 0, 5e4, 5.5e4)), ln(c(2e4, 0, 2e4, 6e4, 5e4, 6e4)),
+             ln(c(0, -2e4, 4e4, 3e4, 8e4, -2e4)), sf::st_linestring())
+  mk <- function(g, cost, surf) {
+    gg <- sf::st_sfc(g, crs = crs)
+    sf::st_sf(pair_id = 1:6, surface = surf,
+              from_name = paste0("A", 1:6), to_name = paste0("B", 1:6),
+              gap_km = c(10, 20, 30, 40, 50, 0),
+              contiguous = c(rep(FALSE, 5), TRUE),
+              path_status = c(rep("path", 5), "contiguous"),
+              cost_rkm = cost, path_km = as.numeric(sf::st_length(gg)) / 1000,
+              in_network = TRUE, via_unit_ids = "", geometry = gg)
+  }
+  b6 <- mk(bl, c(100, 400, 300, 200, 500, 0), "baseline")
+  v6 <- mk(vl, c(150, 300, 300, 600, 500, 0), "noghm")
+  ref <- lcp_compare_variant(b6, v6, 20, c(5, 10, 20, 40), 0.5, 0.25)
+  own <- circ_compare_paths(b6, v6, sf::st_drop_geometry(b6), !b6$contiguous,
+                            "noghm", "baseline", 20, c(5, 10, 20, 40), 0.5,
+                            0.25)
+  cols <- c("share_base_in_variant", "share_variant_in_base", "route_overlap",
+            "route_overlap_5km", "route_overlap_10km", "route_overlap_20km",
+            "route_overlap_40km", "cost_base", "cost_variant", "rank_base",
+            "rank_variant", "rank_change", "material_route", "material_rank",
+            "material_pair", "path_length_ratio")
+  oc <- own[own$compared, ]
+  same <- all(vapply(cols, function(cn) {
+    a <- oc[[cn]]; b <- ref[[cn]]
+    if (is.logical(b)) identical(as.logical(a), b) else near(a, b, 1e-12)
+  }, logical(1)))
+  chk("CC1: the same values as lcp_compare_variant() (Decision 18) for each compared pair",
+      same && identical(oc$pair_id, ref$pair_id))
+  chk("CC1: the made-up case has material and other pairs (the test has power)",
+      any(ref$material_pair) && !all(ref$material_pair) &&
+      any(ref$material_route) && any(ref$material_rank))
+  chk("R4: a pair that is not compared has a row, with NA in each column of Decision 18",
+      nrow(own) == 6L && !own$compared[6] &&
+      all(is.na(unlist(own[6, cols]))))
+  chk("CC1: a compared pair with no path stops the function",
+      inherits(try(circ_compare_paths(b6, v6, sf::st_drop_geometry(b6),
+                                      rep(TRUE, 6), "x", "y"), silent = TRUE),
+               "try-error"))
+  # 4. The partial Spearman rho: the residual form on made-up values.
+  x <- c(3, 1, 4, 1, 5, 9, 2, 6, 5, 3)
+  y <- c(2, 7, 1, 8, 2, 8, 1, 8, 2, 8)
+  z <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+  rx <- rank(x); ry <- rank(y); rz <- rank(z)
+  by_res <- stats::cor(stats::resid(stats::lm(rx ~ rz)),
+                       stats::resid(stats::lm(ry ~ rz)))
+  chk("partial rho: equal to the correlation of the rank residuals given z",
+      near(circ_partial_spearman(x, y, z), by_res, 1e-12))
+  chk("partial rho: fewer than 4 values, or x equal to z, gives NA",
+      is.na(circ_partial_spearman(1:3, 3:1, 1:3)) &&
+      is.na(circ_partial_spearman(z, y, z)))
+  # 5. The label (Decision 18 points 5-6 with the words of point 7).
+  mk_cmp <- function(mat, cb, cv) {
+    data.frame(surface = "s", reference = "r", compared = TRUE,
+               gap_km = seq_along(mat), material_route = mat,
+               material_rank = FALSE, material_pair = mat,
+               route_overlap = ifelse(mat, 0.2, 0.9), cost_base = cb,
+               cost_variant = cv)
+  }
+  one <- function(cmp) {
+    n <- nrow(cmp)
+    circ_compare_summary(cmp, rep("path", n), seq_len(n), rep(2, n),
+                         seq_len(n), rep(0.5, n), 3L, c("agrees", "differs"),
+                         0.2, 0.9)$label
+  }
+  c10 <- 1:10
+  chk("label: 1 of 10 material and rho 1 -> agrees",
+      one(mk_cmp(c(TRUE, rep(FALSE, 9)), c10, c10)) == "agrees")
+  chk("label: 2 of 10 material (= 20 %) -> agrees; 3 of 10 -> differs",
+      one(mk_cmp(c(TRUE, TRUE, rep(FALSE, 8)), c10, c10)) == "agrees" &&
+      one(mk_cmp(c(TRUE, TRUE, TRUE, rep(FALSE, 7)), c10, c10)) == "differs")
+  chk("label: no material pair but rho below 0.9 -> differs",
+      one(mk_cmp(rep(FALSE, 10), c10, c(2, 1, 4, 3, 6, 5, 8, 7, 10, 9) *
+                   c(1, 1, 1, 1, 1, 1, 1, 1, 1, 0.1))) == "differs")
   do.call(rbind, res)
 }

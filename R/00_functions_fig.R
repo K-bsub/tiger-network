@@ -276,3 +276,159 @@ fig_self_test <- function() {
              pass = vapply(chk, function(v) isTRUE(v), logical(1)),
              stringsAsFactors = FALSE, row.names = NULL)
 }
+
+# =============================================================================
+# Task 17.5 (2026-11-14): the frame of fig_07 and fig_08 (process choice FR1
+# of task 17.5; Decision 27 point 10). scripts/10_check_sdm_connectivity.R
+# STEP 17.3 uses these; scripts/09 does not (its run stays the record).
+#   fig_frame_paths()     the frame of fig_04 to fig_06 (fig_frame() of
+#                         scripts/09 STEP 16.2: the same layers, widths and
+#                         order), with each input as an argument, the cells
+#                         optional (fig_08 has none), and path layers on top
+#   fig_save_png()        ggsave() with the pixel check of fig_save() of
+#                         scripts/09
+#   fig_mix()             the mix of two colours (as scripts/07 STEP 12.7)
+#   fig_self_test_paths() the hand-made case of these three
+# SENSITIVE DATA: the frame draws the state lines, the reserve outlines, the
+# hatch, the model cells (optional) and the path layers that the caller gives.
+# It draws no point and no presence or background mark.
+# =============================================================================
+
+# The frame. st: the states (geometry only); res: the reserve outlines
+# (geometry only); bb: the bounding box of the frame; cols: FIG_FRAME_COLOURS
+# (ink, paper, state_fill, state_line). cells: an sf of cells, drawn with
+# cell_aes (for example aes(fill = class, colour = class)) and linewidth
+# 0.05. hatch: an sf of hatch lines. key: fig_key_box(); key_label: its text.
+# path_layers: a list of ggplot2 layers, drawn after the hatch and before the
+# key. scales: a list of ggplot2 scales.
+fig_frame_paths <- function(st, res, bb, cols, title, subtitle, caption,
+                            cells = NULL, cell_aes = NULL, hatch = NULL,
+                            key = NULL, key_label = NULL, path_layers = list(),
+                            scales = list()) {
+  ink <- cols[["ink"]]
+  paper <- cols[["paper"]]
+  p <- ggplot2::ggplot() +
+    ggplot2::geom_sf(data = st, fill = cols[["state_fill"]], colour = NA)
+  if (!is.null(cells)) {
+    p <- p + ggplot2::geom_sf(data = cells, mapping = cell_aes,
+                              linewidth = 0.05)
+  }
+  p <- p +
+    ggplot2::geom_sf(data = st, fill = NA, colour = cols[["state_line"]],
+                     linewidth = 0.25) +
+    ggplot2::geom_sf(data = res, fill = NA, colour = "white", linewidth = 0.7) +
+    ggplot2::geom_sf(data = res, fill = NA, colour = ink, linewidth = 0.3)
+  if (!is.null(hatch) && nrow(hatch) > 0) {
+    p <- p + ggplot2::geom_sf(data = hatch, colour = "white", linewidth = 0.6) +
+      ggplot2::geom_sf(data = hatch, colour = ink, linewidth = 0.25)
+  }
+  for (ly in path_layers) p <- p + ly
+  if (!is.null(key)) {
+    sb <- sf::st_bbox(key$square)
+    side <- sb[["xmax"]] - sb[["xmin"]]
+    p <- p +
+      ggplot2::geom_sf(data = sf::st_sf(geometry = key$square), fill = paper,
+                       colour = ink, linewidth = 0.3) +
+      ggplot2::geom_sf(data = sf::st_sf(geometry = key$hatch), colour = ink,
+                       linewidth = 0.25) +
+      ggplot2::annotate("text", x = sb[["xmin"]] + 1.2 * side,
+                        y = sb[["ymin"]] + 0.5 * side, label = key_label,
+                        hjust = 0, vjust = 0.5, size = 2.8, colour = ink,
+                        lineheight = 1.05)
+  }
+  for (s in scales) p <- p + s
+  p + ggplot2::coord_sf(crs = sf::st_crs(st), datum = NA,
+                        xlim = c(bb[["xmin"]], bb[["xmax"]]),
+                        ylim = c(bb[["ymin"]], bb[["ymax"]])) +
+    ggplot2::labs(title = title, subtitle = subtitle, caption = caption) +
+    fig_theme(ink, paper)
+}
+
+# Write p as a PNG of size_in (width, height; inches) at dpi, then check its
+# pixel size from the header. Stops if the size differs. Returns the path.
+fig_save_png <- function(p, path, size_in, dpi, bg) {
+  dir <- dirname(path)
+  if (!dir.exists(dir)) dir.create(dir, recursive = TRUE)
+  ggplot2::ggsave(path, plot = p, width = size_in[["width"]],
+                  height = size_in[["height"]], dpi = dpi, bg = bg)
+  want <- round(size_in * dpi)
+  got <- fig_png_size(path)
+  if (!all(got == want)) {
+    stop("The figure ", basename(path), " has ", got[1], " x ", got[2],
+         " pixels, not ", want[1], " x ", want[2], ".", call. = FALSE)
+  }
+  message("Wrote ", path, " (", got[1], " x ", got[2], " pixels)")
+  invisible(path)
+}
+
+# The mix of the colours a and b at w (0 = a, 1 = b), as scripts/07.
+fig_mix <- function(a, b, w) {
+  grDevices::rgb(grDevices::colorRamp(c(a, b))(w), maxColorValue = 255)
+}
+
+# The hand-made case of the frame (made-up squares and lines only). Returns
+# a data frame: check, pass.
+fig_self_test_paths <- function() {
+  crs <- sf::st_crs(7755)
+  sq <- function(x0, y0, s) {
+    sf::st_polygon(list(rbind(c(x0, y0), c(x0 + s, y0), c(x0 + s, y0 + s),
+                              c(x0, y0 + s), c(x0, y0))))
+  }
+  st <- sf::st_sf(geometry = sf::st_sfc(sq(0, 0, 1e5), sq(1e5, 0, 1e5),
+                                        crs = crs))
+  res <- sf::st_sf(geometry = sf::st_sfc(sq(2e4, 2e4, 1e4), crs = crs))
+  cells <- sf::st_sf(class = factor(c("1", "2"), levels = c("2", "1")),
+                     geometry = sf::st_sfc(sq(4e4, 4e4, 2e4),
+                                           sq(6e4, 4e4, 2e4), crs = crs))
+  hatch <- sf::st_sf(geometry = fig_hatch_lines(sf::st_geometry(cells)[1],
+                                                5e3))
+  key <- fig_key_box(1.2e5, 1e4, 1.5e4, 5e3, crs)
+  paths <- sf::st_sf(kind = factor("a"), geometry = sf::st_sfc(
+    sf::st_linestring(rbind(c(1e4, 5e4), c(1.9e5, 5e4))), crs = crs))
+  cols <- c(ink = "#1e1e1e", paper = "#f7f4ee", state_fill = "#e9e4d8",
+            state_line = "#ffffff")
+  bb <- sf::st_bbox(st)
+  lay <- ggplot2::geom_sf(data = paths, ggplot2::aes(linetype = kind),
+                          colour = "#00B4D8", linewidth = 0.45,
+                          key_glyph = "path")
+  p1 <- fig_frame_paths(st, res, bb, cols, "t", "s", "c", cells = cells,
+                        cell_aes = ggplot2::aes(fill = class, colour = class),
+                        hatch = hatch, key = key, key_label = "k",
+                        path_layers = list(lay),
+                        scales = list(ggplot2::scale_fill_manual(
+                          values = c("1" = "#000000", "2" = "#ffffff"))))
+  p2 <- fig_frame_paths(st, res, bb, cols, "t", "s", "c",
+                        path_layers = list(lay))
+  geoms <- function(p) vapply(p$layers, function(l) class(l$geom)[1],
+                              character(1))
+  b1 <- tryCatch({ ggplot2::ggplot_build(p1); TRUE }, error = function(e) FALSE)
+  b2 <- tryCatch({ ggplot2::ggplot_build(p2); TRUE }, error = function(e) FALSE)
+  # The order in p1 (11 layers): state fill, cells, state lines, outlines
+  # (2), hatch (2), the path layer, the key (square, hatch, text). From
+  # ggplot2 4.0 the layers have names, so the positions are compared with
+  # unname().
+  is_path <- vapply(p1$layers, function(l) {
+    is.data.frame(l$data) && "kind" %in% names(l$data)
+  }, logical(1))
+  tf <- tempfile(fileext = ".png")
+  suppressMessages(fig_save_png(p2, tf, c(width = 2, height = 1.5), 100,
+                                cols[["paper"]]))
+  sz <- fig_png_size(tf)
+  unlink(tf)
+  chk <- list(
+    "frame: the plot with cells, hatch, key and a path layer builds" = b1,
+    "frame: the plot with no cells (fig_08) builds" = b2,
+    "frame: 11 layers with cells, hatch and key; 5 with none of them" =
+      length(p1$layers) == 11L && length(p2$layers) == 5L,
+    "frame: the path layer is after the outlines and the hatch, before the key" =
+      identical(unname(which(is_path)), 8L) &&
+      unname(geoms(p1)[9]) == "GeomSf" && unname(geoms(p1)[11]) == "GeomText",
+    "save: a PNG of 2 x 1.5 inches at 100 dpi has 200 x 150 pixels" =
+      identical(unname(sz), c(200, 150)),
+    "mix: the paper and the ink at 0.55 is the link colour of fig_03" =
+      identical(toupper(fig_mix("#f7f4ee", "#1e1e1e", 0.55)), "#7F7E7B")
+  )
+  data.frame(check = names(chk),
+             pass = vapply(chk, function(v) isTRUE(v), logical(1)),
+             stringsAsFactors = FALSE, row.names = NULL)
+}
