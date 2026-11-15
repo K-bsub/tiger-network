@@ -93,11 +93,11 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ---
 
-## Current state  ·  **Week 17 in progress (tasks 17.1–17.5 done)** · 2026-11-14
+## Current state  ·  **Week 17 in progress (tasks 17.1–17.6 done)** · 2026-11-14
 
 ### Where the project is
 
-- **Week 17 so far (2026-11-14; tasks 17.1–17.5; full record: Decision
+- **Week 17 so far (2026-11-14; tasks 17.1–17.6; full record: Decision
   27 and the change log in `methodology.md`):**
   - A text fix before Week 17: the headers of the two one-time scripts
     (kept in git) and three stale "Week 18" statements (commits
@@ -147,10 +147,20 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
     partly a result of the method; a line in the Limitations).
     `tbl_19_sdmres_compare.csv`, `tbl_19_sdmres_compare_summary.csv`,
     `fig_07_sdm_current.png`, `fig_08_sdm_paths.png`.
-  - **Next: task 17.6** — STEP 17.4, the QA of phase 1 (a hand-made case
-    first; a second path for the surfaces and the comparison; the publish
-    checks; `tbl_19_sdmres_qa.csv`). The QA settings are process choices:
-    raise them before the code. Then task 17.6b (phase 2, `RUN_PHASE2`).
+  - Task 17.6: the process choices QS1, QE1, QP1, QO1, QT1, QF (each as
+    the chat recommended). STEP 17.4, a second path for each result of
+    phase 1 (own conjugate-gradient solve, own least-cost search, overlaps
+    by points; `circ_qa_*`). The first run failed 4 of 191 checks: two SDM
+    path costs equal but for the last bits were ranked as two values; the
+    author chose **NT1** (ranks and ρ of point 7 on the values rounded to
+    12 significant digits, `SDMRES_RANK_SIGNIF`). STEP 17.3 ran again (6
+    rows of `tbl_19_sdmres_compare.csv` and the two ρ changed; the labels,
+    the counts and the figures did not). Then 196 of 196.
+    `tbl_19_sdmres_qa.csv`.
+  - **Next: task 17.6b** — STEP 17.5, phase 2 (Decision 27 points 6 and 8;
+    `RUN_PHASE2`): all 1,540 pairs on both surfaces, the check of the pair
+    rule (P2c) and its QA. Its process choices come first. The ranks of
+    point 8 use NT1 too.
 - **Week 17 plan** (the author's choice R4 of task 16.6): a resistance
   surface from the suitability and a circuit-theory check against the
   Stage-2 paths — the pending item "SDM-based resistance + circuit-theory
@@ -361,6 +371,13 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
   chat drafts (d1 of task 16.2) — the author's edit is open. The start
   values of the frame (white state lines, 3 hatch lines for each cell,
   the key box at 0.60 and 0.36 of the frame) were kept on 2026-11-07.
+- **Decision 18 ranks floating near-ties as two values** (found in task
+  17.6): `lcp_compare_variant()` gives two costs that are equal but for
+  the last bits two ranks, not the average rank. The Stage-2 comparisons
+  of Week 10 (`tbl_12_lcp_variant_*`) can have this effect; in task 17.6
+  it moved a rank by 0.5/(n − 1), a ρ by less than 5e-5 and no flag. Not
+  checked for Week 10; no new run is proposed. Decide in Week 20 if a
+  check is wanted.
 - `fig_07`, `fig_08`: the titles, subtitles and captions are chat drafts
   — the author's edit is open. The "Sources" line is the line of
   `fig_04`: check that it also covers the inputs of the Stage-2 baseline
@@ -636,6 +653,11 @@ of closed one-time work are in git history.)*
   effective resistance by `sum(transitionMatrix(x))` (task 17.4). CRAN is
   not open from the chat's workspace; the chat's `gdistance` is 1.6.4 from
   GitHub, the project's 1.6.5.
+- **A CSV keeps 15 significant digits** (task 17.6): two values that
+  differ only in the last bits in memory can be one value after a write
+  and a read. A rank or a ρ of Decision 27 rounds to 12 significant digits
+  first (NT1, `SDMRES_RANK_SIGNIF`); a QA that recomputes a rank from a
+  CSV must do the same.
 - **From `ggplot2` 4.0 the layers of a plot have names** (task 17.5):
   `which()` over `p$layers` gives a named number, so `identical(..., 8L)`
   is FALSE. Compare positions with `unname()`. The chat can install

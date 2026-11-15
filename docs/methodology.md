@@ -64,6 +64,9 @@ total currents and `tbl_19_sdmres_pairs.csv`. **Task 17.5
 STEP 17.3 — point 7: the `main` paths against the Stage-2 baseline paths
 "differs" (46 of 94 pairs material; ρ 0.758); the variant `negexp8`
 against `main` "sensitive" (29 of 94; ρ 0.887); `fig_07` and `fig_08`.
+**Task 17.6 (2026-11-14):** STEP 17.4 — the QA of phase 1, a second path
+for each result: 196 of 196 checks; the author's choice NT1 (ties of
+values equal but for the last bits) after the first run.
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -4885,6 +4888,13 @@ complete):**
      the summary values, the descriptive values too, use the compared
      pairs. TB1: the summary is a sixth table, as
      `tbl_12_lcp_variant_summary.csv`.)*
+   - *(Task 17.6, 2026-11-14, the author's choice NT1, after the first QA
+     run: before a rank or a Spearman ρ of this point, the values are
+     rounded to 12 significant digits (`SDMRES_RANK_SIGNIF`). Two values
+     that are equal in exact arithmetic but differ in the last bits of the
+     floating-point number (for example the same route summed in the other
+     direction) are then a tie at the average rank, as the rule says. The
+     first run of STEP 17.3 ranked them as two values.)*
 8. **Phase 2 and the pair rule of Decision 17 (P2c).** On the `main`
    surface:
    - **Share:** the share of the 106 pairs of Decision 17 among the 106
@@ -5075,6 +5085,62 @@ reading):**
   two figures, by the author and the chat (the author sent the two PNG
   files to the chat). The chat has not read the rows of
   `tbl_19_sdmres_compare.csv`.
+- *(Run again 2026-11-14 with NT1 (task 17.6): the ranks and the ρ of
+  point 7 now use the values rounded to 12 significant digits. The
+  rounding made 1 tie in the `main` costs and 2 in the `negexp8`
+  comparison (1 in its reference cost, 1 in its cost). 6 rows of
+  `tbl_19_sdmres_compare.csv` and the two ρ of the path costs in
+  `tbl_19_sdmres_compare_summary.csv` changed; the change of a ρ is
+  below 5e-5 (the console gives 0.7583 and 0.8867 as above). The labels,
+  the material counts, the other values above and the two figures (the
+  PNG files are the same) do not change.)*
+
+**Result of STEP 17.4 (task 17.6, `scripts/10`, run on the project machine;
+console text sent on 2026-11-14; facts, not a reading):**
+- **The first run** stopped at the QA: 4 of 191 checks failed, all in the
+  comparison (the ranks and the summary). The cause: two SDM path costs
+  that are equal in exact arithmetic differed in the last bits in memory
+  (smallest relative gap 1.34e-16). STEP 17.3 ranked them as two values;
+  the CSV, with 15 significant digits, holds them as one value, so the QA
+  gave them the average rank. Effect: the rank of 2 pairs on each
+  surface by 0.00538; no material flag; ρ by less than 5e-5. The
+  author's choice NT1 (point 7, the dated note): the ranks and the ρ use
+  the values rounded to 12 significant digits.
+- **The run with NT1:** 196 of 196 checks pass (103 hand-made checks of
+  STEPs 17.1–17.4, 89 checks of the second path and 4 information rows).
+  STEP 17.4 took 1.8 min.
+  - **Surfaces and graph:** x and R again from the rank (largest relative
+    difference 9.2e-15); the 26,844 links by `terra::adjacent()` = the
+    links of STEP 17.1; 5 connected sets; the items of
+    `tbl_19_sdmres_surface.csv` again.
+  - **Reserves and pairs:** the model cells of each of the 56 reserves by
+    `terra::rasterize()` = the cells of STEP 17.1; the 1 km counts =
+    `tbl_17_reserve_suitability.csv`; the status of the 106 pairs again.
+  - **Circuit and current (QE1):** each conjugate-gradient solve converged
+    (at most 578 iterations on `main`, 607 on `negexp8`); the effective
+    resistance of the 94 pairs on each surface = the table (largest
+    relative difference 5.6e-13); the same with the two reserves swapped;
+    the energy = the effective resistance; the total current = the
+    current files (largest difference 2.05e-12 of the largest current).
+  - **Paths (QP1):** the cost of the second search = the table for the 94
+    pairs on each surface (largest relative difference 5.9e-15); the 94
+    written lines on each surface again from their cells; the second
+    search gave the same path for 94 of 94 pairs on each surface.
+  - **Comparison (QO1):** the overlaps by points within 0.0057 of the
+    table (limit 0.02); no material route differs by points (1 pair on
+    `main` and 2 on `negexp8` are within 0.02 of the limit 0.5); the
+    shares in the top cells within 0.0022; the ranks, the flags, the
+    summary and the two labels again ("differs", "sensitive"); each tie
+    of the rounding joins values that differ by 3.2e-16 or less.
+  - **Figures and publish (QF):** the two PNG files 2,200 × 2,120 pixels;
+    the classes of `fig_07` again; the four `tbl_19` tables pass
+    `assert_publishable_table()`; 0 of 79 files under `outputs/` with
+    "tiger" in the name; no layer of Decision 27 under `outputs/`; the QA
+    table holds no cell id and no reserve name.
+- **File:** `tbl_19_sdmres_qa.csv` (196 rows).
+- **Seen from this run on:** the console text of STEPs 17.3 and 17.4 and
+  the counts of the diagnosis, by the author and the chat. The chat has
+  not read a row of a `tbl_19` table.
 
 **Reason and sources:**
 - **The national method.** The national report modelled occupancy on
@@ -5199,7 +5265,9 @@ the check limit 1e-6 (Decision 17).
   by itself show that the two surfaces agree.
 
 **Consequences:**
-- `R/00_config.R`: the block `SDMRES_*` (this Decision and task 17.2).
+- `R/00_config.R`: the block `SDMRES_*` (this Decision and task 17.2;
+  the figure settings of task 17.5; the QA limits and `SDMRES_RANK_SIGNIF`
+  of task 17.6).
 - `scripts/10_check_sdm_connectivity.R` with `R/00_functions_circuit.R`
   (s1 and f1 of task 17.2): STEP 17.1 (task 17.3) the two surfaces; STEP
   17.2 (task 17.4) phase 1, the circuit and the paths; STEP 17.3 (task
@@ -5252,6 +5320,82 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-14 — Week 17, task 17.6 complete: STEP 17.4 (the QA of phase 1)
+
+- **The author's choices (2026-11-14), each as the chat recommended:**
+  "QS1, QE1, QP1, QO1, QT1, QF as listed".
+  - **QS1:** a second path for each result of phase 1. It reads the
+    files of STEPs 17.1–17.3 and calls no `circ_*` function of those
+    STEPs. Rejected: QS2 (the surfaces, the comparison and the publish
+    checks only).
+  - **QE1:** an own conjugate-gradient solve (a Jacobi preconditioner;
+    `Matrix` for the sparse product; no CHOLMOD) for each pair on each
+    surface, and three identities (the reserves swapped; the energy; no net
+    current at a node). Rejected: QE2 (the identities only), QE3 (a
+    sample).
+  - **QP1:** an own least-cost search in base R (no `igraph`). Rejected:
+    QP2 (the Bellman–Ford algorithm of `igraph`).
+  - **QO1:** the overlaps and the top-current shares by points every 250 m
+    (a limit of 0.02). Rejected: QO2 (`lcp_route_share()` again).
+  - **QT1:** the QA table of STEP 16.3 (`group`, `check`, `value`,
+    `pass`): written, then a stop if a check fails.
+  - **QF:** the publish checks as listed.
+- **The chat's readings (stated in its reply, before the run):** the links
+  and the cells of the reserves are in no file, so the QA compares them
+  with the objects of STEP 17.1 in memory; two more checks than QF listed
+  — no layer of Decision 27 under `outputs/` (point 10) and check (b) of
+  STEP 16.3 on the QA table.
+- **`R/00_config.R`:** `SDMRES_QA_TOL_REL` (= `SDMRES_CHECK_TOL_REL`,
+  1e-6), `SDMRES_QA_PCG_TOL` (1e-12), `SDMRES_QA_PCG_MAXIT` (50,000),
+  `SDMRES_QA_POINT_STEP_M` (250) and `SDMRES_QA_SHARE_TOL` (0.02): limits
+  of the QA, not values of the analysis. `SDMRES_RANK_SIGNIF` (12; NT1).
+- **Code:** `R/00_functions_circuit.R` gets the `circ_qa_*` functions and
+  their hand-made case (`circ_qa_self_test()`, 21 checks); `scripts/10`
+  gets STEP 17.4 and sources `R/00_functions_occ.R` (for
+  `occ_assert_counts_only()`).
+- **The chat's test** (made-up records; R 4.3.3; `ggplot2` 3.4.4 and
+  4.0.3): 191 of 191, then 196 of 196 with NT1. Five errors put in on
+  purpose between STEP 17.3 and STEP 17.4, one at a time: a changed
+  resistance (the groups surface, circuit and current failed), a removed
+  link (graph), a current changed by 1 % (current), a path cost changed
+  by 0.1 % (paths, comparison), a changed material flag (comparison). On a
+  made-up grid of 6,960 cells one pair took 0.25–0.28 s.
+- **The first run (2026-11-14):** 4 of 191 checks failed (the comparison:
+  the ranks and the summary on each surface). The chat raised a cause and
+  a diagnostic; the author ran the diagnostic (counts only): on `main`, 2
+  ties of the SDM costs in memory and 3 in the CSV (smallest relative gap
+  1.34e-16); on `negexp8`, the same for its reference cost; the ranks of
+  2 pairs on each surface differed by 0.00538; no material flag; the
+  GeoPackage costs = the costs in memory, bit for bit.
+- **NT1 (the author's choice, 2026-11-14, the chat's recommendation):**
+  the ranks and the Spearman ρ of point 7 use the values rounded to 12
+  significant digits (`SDMRES_RANK_SIGNIF`), in `circ_compare_paths()`,
+  `circ_compare_summary()` and the QA; a new hand-made check in each of
+  STEPs 17.3 and 17.4; a QA check that each tie of the rounding joins
+  values that differ by less than 1e-13; an information row with the
+  ties. Rejected: NT2 (keep the analysis; the QA reads the GeoPackage
+  values). STEP 17.3 ran again (Decision 27, the dated note under "Result
+  of STEP 17.3").
+- **Error of the chat:** `circ_compare_paths()` followed
+  `lcp_compare_variant()` (CC1) and ranked two costs that are equal in
+  exact arithmetic as two values; the rule says ties at the average rank.
+  The made-up project had no such pair. The chat's forecast of the ties
+  made by the rounding was "main 0, 1, 0; negexp8 1, 0, 0"; the run gave
+  "1, 1, 0" for `negexp8` (its cost has a gap of 3.17e-16 that the CSV kept
+  as two values). The chat's first estimate of the change of ρ ("the
+  fourth decimal") was too large.
+- **Open item (not done):** `lcp_compare_variant()` of Decision 18 ranks
+  in the same way, so the Stage-2 comparisons of Week 10 can have the same
+  effect. No new run of Week 10 is proposed now (the handoff).
+- **The run** (2026-11-14): Decision 27, "Result of STEP 17.4".
+- **Docs:** Decision 27 (the NT1 note in point 7, the note under "Result
+  of STEP 17.3", "Result of STEP 17.4", the consequences);
+  `data-dictionary.md` (`tbl_19_sdmres_qa.csv`; the rank and ρ columns);
+  `naming-conventions.md`; `project-plan.md` (task 17.6); `handoff.md`.
+- **Next:** task 17.6b — STEP 17.5, phase 2 (Decision 27 points 6 and 8;
+  `RUN_PHASE2`). Its process choices come first; the ranks of point 8 use
+  NT1 too.
 
 ### 2026-11-14 — Week 17, task 17.5 complete: STEP 17.3 (the comparison of point 7 and the figures)
 

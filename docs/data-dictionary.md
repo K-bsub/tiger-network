@@ -1965,7 +1965,7 @@ compared on each).
 | `route_overlap` | numeric | The smaller of the two shares (Decision 18 point 2; d = 20 km) |
 | `route_overlap_5km`, `_10km`, `_20km`, `_40km` | numeric | The same overlap at 5, 10, 20 and 40 km (descriptive) |
 | `cost_base`, `cost_variant` | numeric | The path cost of the reference and of the row, resistance-km (for `main`, two different scales; point 7 compares ranks) |
-| `rank_base`, `rank_variant`, `rank_change` | numeric | Percentile rank of the cost among the compared pairs, (rank − 1)/(n − 1), ties = average rank; the change |
+| `rank_base`, `rank_variant`, `rank_change` | numeric | Percentile rank of the cost among the compared pairs, (rank − 1)/(n − 1), ties = average rank, with the costs rounded to 12 significant digits first (NT1 of task 17.6); the change |
 | `material_route`, `material_rank`, `material_pair` | logical | `route_overlap` < 0.5; abs(`rank_change`) ≥ 0.25; either of the two |
 | `path_length_ratio` | numeric | Path length of the row / path length of the reference |
 | `top_current_share` | numeric | Share of the length of the Stage-2 baseline path inside the top 20 % of the model cells (1,394) by the phase-1 total current of the row's surface (descriptive; a value for each of the 97 Stage-2 paths) |
@@ -1985,7 +1985,7 @@ compared pairs (R4).
 | `surface`, `reference` | character | As in `tbl_19_sdmres_compare.csv` |
 | `stage2_paths`, `pairs_compared`, `contiguous_02_excluded`, `no_path_excluded` | integer | 97, 94, 3 and 0 as built |
 | `share_material_route`, `share_material_rank`, `share_material_pair` | numeric | Shares of the compared pairs |
-| `spearman_rho` | numeric | Spearman ρ of the two path costs |
+| `spearman_rho` | numeric | Spearman ρ of the two path costs (rounded to 12 significant digits first; NT1) |
 | `median_route_overlap` | numeric | Median of `route_overlap` (descriptive) |
 | `label` | character | `main`: `agrees` if `share_material_pair` ≤ 0.20 and `spearman_rho` ≥ 0.9, else `differs`; `negexp8`: `robust` or `sensitive` by the same limits (Decision 27 point 7) |
 | `rho_reff_stage2_cost` | numeric | Spearman ρ of the effective resistance of the surface and the Stage-2 `cost_rkm` (descriptive) |
@@ -1993,5 +1993,23 @@ compared pairs (R4).
 | `median_redundancy` | numeric | Median of path cost / effective resistance (descriptive) |
 | `median_top_current_share` | numeric | Median of `top_current_share` (descriptive) |
 | `top_current_cells` | integer | The number of the top cells (1,394) |
+
+## tbl_19_sdmres_qa.csv  *(Week 17 — built, task 17.6)*
+
+Written by `scripts/10` STEP 17.4 (the QA of phase 1; QS1, QE1, QP1, QO1,
+QT1 and QF of task 17.6). The form of `tbl_18_gistar_qa.csv`: written
+before the stop on a failure. No cell id, no reserve name, no position
+(check (b)).
+
+**As built (2026-11-14):** 196 rows, 196 pass: 103 hand-made checks of
+STEPs 17.1–17.4 (`test case`), 89 checks of the second path, 4
+information rows.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `group` | character | `test case`, `inputs`, `surface`, `graph`, `reserves`, `pairs`, `circuit`, `current`, `paths`, `comparison`, `figures`, `publish`, `info` |
+| `check` | character | What the row checks (or, for `info`, the fact) |
+| `value` | character | A count, a largest difference or a fact; no cell id and no reserve name |
+| `pass` | logical | TRUE if the check passes (`info`: always TRUE) |
 
 *(Further layers — sdm — documented as they are built.)*
