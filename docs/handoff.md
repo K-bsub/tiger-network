@@ -55,6 +55,7 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   | 24 | Model settings: nine candidates summarised over the 1 km cells of a cell; no water cells in the terrain means, elevation floor 0 m; \|r\| > 0.7 removes the later candidate of a fixed order; AICc over `lq`/`lqh`/`lqph` × regmult 1–4 (fewest coefficients within ΔAICc 2); no bias covariate; presences added to the background; 2° blocks in 5 folds (Boyce, test AUC, OR10, AUCdiff; cloglog); gate: mean test Boyce ≤ 0 → no suitability map; reserve check (Week 15); two sensitivity runs; the model file under `data/processed/` |
   | 25 | Prediction and publication: the model file of 2026-10-25, cloglog with clamping; a cell with a covariate outside the training range is flagged, counted and hatched; five equal-count classes by rank (a tie to the lower cell id; class 5 = the top-20 % set of the sensitivity rule), no value in the legend; no published layer before the rule of the pending item "Published layers" (Week 18 in the Decision text; Week 19 since 2026-11-07); tier T1; two static figures, `fig_04` (classes) and `fig_05` (value, label "model output (cloglog), relative; not a probability of presence"); nine caption items; a reserve table (58 rows, no presence column); reserve check: a 1 km cell is inside if its centre is, a 1 km cell outside the model cells has no value and is counted; point 9 (task 15.2): r2 only if each count of the 2 × 2 table is 3 or more, and a QA stop on a reserve whose presence state the outputs show |
 | 26 | Gi\*: four Gi\* — `effort_inat` (the model background, before `maxnet` adds a presence cell) with `tiger_obscured`; `effort_all` (the clean background of all datasets) with `tiger_5km`; no comparison with Phase 1; the 6,969 model cells, value 0/1; a 50 km band on the sphere (Amendment 1), the cell itself included; a class only with 8 neighbours or more; QA bands queen and 75 km (descriptive); the exact p (hypergeometric, random relabelling); Benjamini–Hochberg, q = 0.05; `fig_06` = `effort_inat` (`effort_all`: table only, a reading); the tiger Gi\* never published: counts only (obscured set), and counts by landscape complex by rule L1 (5 km set); all years; own code. The tiger Gi\* cannot show a cold spot |
+| 27 | SDM-based resistance and circuit theory: input = the percentile rank of the cloglog value over the 6,969 model cells (the 32 hatched cells kept and counted); `main` R = 1 + 99 × (1 − x) and the variant `negexp8` (c = 8), range 1–100; a graph of the model cells only (8 neighbours; link = distance on the sphere × mean R; reserve cells by the centre rule); circuit theory (each reserve of a pair joined into one node; zero current in the two reserves of a pair) and least-cost paths on the same graph; own R code, checked by hand-made circuits and `gdistance`; phase 1 = the 106 pairs of D17, compared with the Stage-2 baseline paths by the D18 rule with d = 20 km ("agrees"/"differs"; the variant "robust"/"sensitive") and descriptive values; phase 2 = all 1,540 pairs on both surfaces, a check of the D17 pair rule ("agrees" if 2/3 or more of the D17 pairs are among the same number of lowest effective resistances); no layer; `fig_07` (the phase-1 current, P3a) and `fig_08` (the paths, plain background) |
 
 ## Ways of working (apply every chat)
 
@@ -92,11 +93,32 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ---
 
-## Current state  ·  **Week 16 complete** · 2026-11-07
+## Current state  ·  **Week 17 in progress (tasks 17.1–17.2 done)** · 2026-11-14
 
 ### Where the project is
 
-- **Next: Week 17** (the author's choice R4 of task 16.6): a resistance
+- **Week 17 so far (2026-11-14; tasks 17.1–17.2; full record: Decision
+  27 and the change log in `methodology.md`):**
+  - A text fix before Week 17: the headers of the two one-time scripts
+    (kept in git) and three stale "Week 18" statements (commits
+    `e2cc37c`, `e207687`).
+  - Task 17.1: **Decision 27** — a2 with k1, b3, c1, d3 with t1 (reading
+    R1), e1 and e3 in two phases (reading R2), f1, g3 with F2, h1; the
+    sub-forks P1b (the chat's reading: phase 2 on both surfaces), P2c, Z1
+    and P3a. Not the chat's recommendation: e1 and e3 (the chat: e1), g3
+    (g2), P1b (P1a), F2 (F1).
+  - Task 17.2 (each as the chat recommended): s1
+    `scripts/10_check_sdm_connectivity.R`; f1 `R/00_functions_circuit.R`;
+    n1 the names (`tbl_19_sdmres_*`, `fig_07_sdm_current.png`,
+    `fig_08_sdm_paths.png`, the layers under `data/processed/`); w1
+    `RUN_PHASE2`; p1 no new package (`Matrix` into the `scripts/00a` list
+    with the first code); h1 the hand-made cases first.
+  - The `SDMRES_*` block in `R/00_config.R`. No code and no surface yet.
+  - **Next:** the split-point commit (the config and the docs of tasks
+    17.1–17.2); then **task 17.3** — the script header and guards, the
+    function file with the hand-made cases of Decision 27 point 5, and
+    STEP 17.1 (the two surfaces).
+- **Week 17 plan** (the author's choice R4 of task 16.6): a resistance
   surface from the suitability and a circuit-theory check against the
   Stage-2 paths — the pending item "SDM-based resistance + circuit-theory
   check". Task 17.1: Decision 27 before any surface. The draft task
@@ -182,6 +204,9 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   `predicts` are out of it.)*
 
 ### Week-17 entry point
+
+*(2026-11-14: tasks 17.1 and 17.2 are done; the entry point is now task
+17.3 — see "Where the project is". Read Decision 27 first.)*
 
 - **Done: Week 16** (2026-11-07; tasks 16.1–16.6). The author committed
   each task after it (an `analysis:` and a `docs:` commit for each task
@@ -374,17 +399,17 @@ Full text in `methodology.md` → "Decisions pending".
   (`assert_publishable_rast()` refuses a raster of 0.2° in EPSG:4326); the
   hatch and the caption items in an interactive map. *(2026-11-07, Decision 26: a Gi\*
   layer would wait for the same rule.)*
-- **[Week 17] SDM-based resistance + circuit-theory check.** The author's
-  choice R4 (task 16.6): Week 17 works on it; Decision 27 in task 17.1
-  (the chat's reading: the item keeps its scope as written).
+  *(2026-11-14, Decision 27 point 10: a layer of the SDM-based surfaces,
+  their currents or their paths waits for this rule too.)*
 
-_Resolved (in `methodology.md`): Decisions 7 to 26 closed the earlier
+_Resolved (in `methodology.md`): Decisions 7 to 27 closed the earlier
 items (missing years, area source, zeros, the NA policy, the gHM fill,
 resistance values, barrier roads, water and gHM, the path set-up, the
 comparison metric, the link rule, the pinch-point rule, the cleaning rule,
 the settlement layer, the target-group scope, the model Decisions, the
 uses of the effort surfaces, the terrain variables, the prediction and its
-publication, the Gi\* settings)._
+publication, the Gi\* settings, the SDM-based resistance and the
+circuit-theory check)._
 
 ### Data on disk (raw; via `scripts/01`)
 
@@ -566,6 +591,14 @@ of closed one-time work are in git history.)*
   point 6).
 
 **Process (chat)**
+- **A git command from the chat's shell can leave a lock file**
+  (2026-11-14). The project folder allows no delete from the chat's shell,
+  so git cannot remove its own `.lock` files there. The chat runs only
+  read-only git commands, with `GIT_OPTIONAL_LOCKS=0`, and never `git
+  fetch`; the author runs every git command that writes.
+- **Fork codes repeat across Decisions** (Decision 17 P3, the
+  through-reserve rule; Decision 27 P3a, the current of `fig_07`). Write
+  the Decision with the code: "Decision 27 P3a".
 - **A list of expected `git status` lines starts from the last commit.** Ask
   which tasks are committed (or for `git log -1`) before writing one.
 - **The chat's tests use other versions** (R 4.3.3, `glmnet` 4.1.8 in the

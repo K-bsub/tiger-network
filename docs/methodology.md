@@ -49,6 +49,13 @@ docs of the Stage-3 close; the author's choices R4 and S1. **Next: Week
 17** (R4) — a resistance surface from the suitability and a circuit-theory
 check against the Stage-2 paths (the pending item), with Decision 27
 first. Stage 4 (the story site) moves to Weeks 18–21.
+**Week 17, tasks 17.1–17.2 (2026-11-14): Decision 27** — a resistance
+surface from the rank of the suitability (a linear main surface and a
+negative-exponential variant), circuit theory and least-cost paths on
+the 0.2° model cells, a comparison with the Stage-2 paths (phase 1, the
+106 pairs of Decision 17) and a check of the pair rule (phase 2, all
+1,540 pairs); the process choices of task 17.2. No code and no surface
+yet.
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -4705,6 +4712,373 @@ the 0.2° model cells (Decision 23); the sets (Decisions 21–23).
 
 This closes the **[Week 15–16] Gi\* settings** pending item.
 
+### Decision 27 — SDM-based resistance and the circuit-theory check: input, transform, grain, method and tool, pairs and phases, comparison and reading, published form
+**Date:** 2026-11-14 (fixed **before** any resistance surface from the
+suitability, any effective resistance, any current and any path on such a
+surface — see "What was seen before this Decision")
+**Choice:** Settings in `R/00_config.R` (a new block "Stage 3+:
+SDM-based resistance and the circuit-theory check (Decision 27)" after the
+Gi\* block; prefix `SDMRES_`). `scripts/10_check_sdm_connectivity.R`
+applies them in Week 17 (s1 of task 17.2). Fork codes as raised and chosen
+on 2026-11-14: a2 with k1, b3, c1, d3 with t1 (reading R1), e1 and e3 in
+two phases (reading R2), f1, g3 with F2, the author's statement h1; the
+sub-forks P1b, P2c, Z1 and P3a. *(Earlier Decisions
+use some of the same letters. Write the Decision with the code, for
+example "Decision 27 a2".)*
+
+**Aim.** This closes the pending item raised on 2026-09-26 with Decision
+14 (F1): a resistance surface from the suitability of Decision 25, a
+circuit-theory run between the reserves, least-cost paths on the same
+surface, and a comparison with the Stage-2 least-cost paths.
+- It is a check in the form of the national method (Qureshi et al. 2014;
+  Jhala et al. 2021), not a copy of it. The national input is an occupancy
+  probability Ψ from sign surveys with a detection model, on 10 × 10 km
+  grids. The input here is a relative suitability from presence and
+  background records, at 0.2° (Decisions 23 and 25).
+- No surface of this project is validated with movement data. "Agrees" or
+  "differs" (point 7) compares two models.
+
+**Fixed by earlier Decisions (not forks; stated here so that the record is
+complete):**
+- The suitability: the prediction of Decision 25
+  (`sdm_prediction_cell02.csv`: 6,969 model cells; cloglog with clamping;
+  `rank` with a tie to the lower cell id; 32 cells outside the training
+  range). The 481 other cells of the grid have no value (Decision 23 point
+  3).
+- The Stage-2 side: the baseline surface (Decisions 14–16); the 106 pairs
+  of Decision 17 point 1 (97 not contiguous, 9 contiguous); the baseline
+  paths and their costs (`lcp_reserve_network_7755.gpkg`, layer
+  `baseline`, field `cost_rkm`); the comparison metric of Decision 18.
+- The cells of a reserve at 0.2°: the centre rule of Decision 25 h1.
+- The distance between two 0.2° cells: on the sphere, between the centres
+  in longitude and latitude (Decision 26 Amendment 1 and p1 of task 16.2;
+  `GISTAR_EARTH_RADIUS_KM`).
+- Publication: no layer before the rule of the pending item "Published
+  layers" (Week 19); a modelled path or crossing at a 10 km cell at most
+  in a committed table (sensitive-data policy §3; Decision 20 point 7);
+  the tier of the model output (T1; Decision 25 point 4).
+
+1. **Input (a2, k1).**
+   - x = the percentile rank of the cloglog value over the 6,969 model
+     cells: x = (n − `rank`) / (n − 1), with n = 6,969 and `rank` from
+     `sdm_prediction_cell02.csv` (Decision 25 point 3). x = 1 for the
+     highest value and 0 for the lowest.
+   - This changes the literal text of the pending item ("1 −
+     suitability"): the input is the rank of the value, not the value.
+   - **The 32 cells outside the training range (k1)** keep their clamped
+     value and its rank, as in the figures and the reserve check (Decision
+     25 b2). Reported (counts only): for each surface and phase, the number
+     of these cells that the paths cross and the number of paths that
+     cross one or more of them.
+2. **Transform and range (b3).**
+   - The range is 1 to 100 (`SDMRES_R_MIN`, `SDMRES_R_MAX`), as in Stage 2
+     (Decision 14): R = 1 at x = 1 and R = 100 at x = 0.
+   - **Main surface, `main` (b1):** R = 1 + 99 × (1 − x). The linear form
+     of the national method (1 − Ψ).
+   - **Variant, `negexp8` (b2):** R = 100 − 99 × (1 − exp(−c × x)) / (1 −
+     exp(−c)), with c = 8 (`SDMRES_NEGEXP_C`). Arithmetic, not a result:
+     R is about 45.5 at x = 0.1, 21.0 at x = 0.2 and 2.8 at x = 0.5.
+   - The variant is compared with the main surface by the rule of point 7
+     (label "robust" or "sensitive").
+3. **Grain and graph (c1).**
+   - **Nodes:** the 6,969 model cells. The 481 other cells are not nodes.
+   - **Links:** each model cell to each of its 8 neighbours (rook and
+     diagonal) that is a model cell. A diagonal link needs no other cell.
+   - **Link resistance** (resistance-km) = d × (R_i + R_j) / 2, with d the
+     distance between the two cell centres on the sphere in km. This is
+     the rule of Decision 17 point 3 for orthogonal and diagonal steps. The
+     conductance of a link is 1 / its resistance.
+   - A path cost and an effective resistance are in resistance-km. They
+     are not on the scale of the Stage-2 costs; point 7 compares ranks.
+   - **The cells of a reserve:** the model cells that hold the centre of
+     one or more complete-case 1 km cells of the reserve polygon
+     (Decision 25 h1; `SDM_RESERVE_CELL_RULE`). Each of the 56 reserves
+     with a polygon has one or more (STEP 15.2).
+   - **Contiguous at 0.2°:** a pair whose two reserves share a model cell.
+     Effective resistance 0, path cost 0, no path. Counted; out of the
+     comparisons of point 7.
+   - **No path:** a pair with no route through model cells (a gap of cells
+     that are not model cells). Effective resistance `Inf`, no path.
+     Counted; out of point 7; ranked last in point 8.
+4. **Method (d3; Z1).** On each surface:
+   - **Circuit theory.** For a pair (A, B), the cells of A are joined into
+     one node and the cells of B into one node, for that pair only (the
+     focal regions of Circuitscape). 1 A goes in at A; B is the ground. The
+     effective resistance of the pair is the voltage at A. The cells of
+     the other reserves are ordinary nodes.
+   - **Current (Z1).** The current of a cell for a pair is half the sum of
+     the absolute currents of its links (the node current of
+     Circuitscape). The cells of A and B get 0 for that pair (the
+     Circuitscape option `set_focal_node_currents_to_zero`). The total
+     current of a phase is the sum over its pairs (1 A each).
+   - **Least-cost path.** Dijkstra on the same graph, with the link
+     resistances as weights, from all cells of A to the first cell of B
+     that it reaches (edge to edge, as Decision 17 point 6). A tie goes to
+     the lowest vertex id, as in `lcp_search()`. The line runs through the
+     cell centres in EPSG:7755.
+   - **Redundancy (descriptive).** For each pair: the path cost divided by
+     the effective resistance (1 or more; a higher value shows more
+     parallel routes; McRae et al. 2008).
+5. **Tool and checks (t1; reading R1).**
+   - Own R code: a sparse graph Laplacian (`Matrix`), one solve for each
+     pair; `igraph` for the paths. No new package and no Julia.
+   - **Checks before any real run** (hand-made cases first; a failure
+     stops the script):
+     - (i) circuits with exact values: two resistors in series, two in
+       parallel, a bridge circuit, and a region joined into one node;
+     - (ii) `gdistance::commuteDistance` on a small projected grid with
+       point nodes: the effective resistance of the own code × the volume
+       of the graph against the gdistance value (relative difference ≤
+       1e-6, the limit of Decision 17 point 4);
+     - (iii) each path cost again from the cell values (as `lcp_search()`
+       does).
+6. **Pairs and phases (e1, e3; reading R2; P1b).**
+   - **Phase 1 (e1):** the 106 pairs of Decision 17, on both surfaces.
+     Point 7, the counts of point 1, and the two figures of point 10.
+   - **Phase 2 (e3, P1b):** all pairs of the 56 reserves with a polygon,
+     1,540 pairs, on both surfaces (the chat's reading of P1b, 2026-11-14):
+     on each surface, the effective resistance of each pair, one total
+     current, and a least-cost path for each pair. Phase 2 runs after the
+     QA of phase 1 passes, with its own STEP and its own QA (switch
+     `RUN_PHASE2`, w1 of task 17.2). Point 8 reads it.
+   - Pilibhit and Dholpur-Karauli are out (no polygon; Decision 17 G1).
+7. **Phase 1 against the Stage-2 paths (f1).**
+   - **Pairs compared:** the 97 pairs that are not contiguous in Decision
+     17, less the pairs that are contiguous at 0.2° and the pairs with no
+     path (point 3). The counts are reported.
+   - **Labelled comparison: the `main` paths against the Stage-2 baseline
+     paths.** The rule of Decision 18, with one change (the route
+     distance):
+     - **Route:** the overlap of Decision 18 point 2 (min of share A and
+       share B) at d = 20 km (`SDMRES_COMPARE_ROUTE_D_KM`; about one 0.2°
+       cell); material if below 0.5. Descriptive columns at 5, 10, 20 and
+       40 km.
+     - **Cost rank:** the percentile rank of the `main` path cost and of
+       the Stage-2 `cost_rkm` among the compared pairs (ties at the
+       average rank); material if the change is 0.25 or more. The Spearman
+       ρ of the two costs.
+     - **Material pair:** a material route or a material rank.
+     - **Label:** "agrees" if 20 % of the compared pairs or fewer are
+       material and ρ ≥ 0.9; otherwise "differs".
+   - **Variant:** the `negexp8` paths against the `main` paths, by the
+     same rule, over the pairs compared on both: "robust" or "sensitive".
+   - **Descriptive (no label), for `main` and for `negexp8`:**
+     - the Spearman ρ of the effective resistance and the Stage-2
+       `cost_rkm`; the partial Spearman ρ given `gap_km` (the Pearson
+       partial correlation of the ranks);
+     - the redundancy of point 4 for each pair;
+     - for each Stage-2 baseline path: the share of its length inside the
+       top 20 % of the model cells by the phase-1 total current of the
+       surface (1,394 cells, `SDMRES_TOP_CURRENT_SHARE`; a tie to the
+       lower cell id), with the cells as polygons in EPSG:7755.
+8. **Phase 2 and the pair rule of Decision 17 (P2c).** On the `main`
+   surface:
+   - **Share:** the share of the 106 pairs of Decision 17 among the 106
+     pairs with the lowest effective resistance of the 1,540. A tie goes to
+     the lower `from_unit_id`, then the lower `to_unit_id` (from < to). A
+     pair contiguous at 0.2° (0) is among the lowest; a pair with no path
+     is last.
+   - **Count:** the number of the 56 reserves whose partner of lowest
+     effective resistance is not a pair of Decision 17 (ties as above).
+   - **Label:** "agrees" if the share is 2/3 or more
+     (`SDMRES_PAIRRULE_MIN_SHARE`; the limit of Decisions 19 and 20);
+     otherwise "differs".
+   - For `negexp8`: the same share and count, with no label. For the
+     phase-2 paths: counts and lengths only (no comparison; Stage 2 has no
+     path for 1,434 of the 1,540 pairs).
+9. **The current of `fig_07` (P3a).** The phase-1 total current of the
+   `main` surface (the 97 pairs whose Stage-2 paths the figure draws;
+   `SDMRES_FIG07_PHASE` = `"phase1"`). The phase-2 total currents go into
+   a table as statistics only. *(The author chose P3a on 2026-11-14 in a
+   later reply, before any surface; the first reply did not answer P3.
+   Decision 17 has a sub-fork P3 too: write "Decision 27 P3a".)*
+10. **Published form (g3, F2).**
+    - **No layer.** The surfaces, the currents, the effective resistances
+      by cell and the paths stay under `data/processed/` (gitignored)
+      before the rule of the pending item "Published layers" (Week 19). A
+      current layer waits for the same rule.
+    - **Tables `tbl_19_*`** (slugs: n1 of task 17.2): counts, statistics
+      and pair rows with reserve names; no position
+      (`assert_publishable_table()` with no prefix); no cell id.
+    - **`fig_07`:** the total current of point 9 on the `main` surface, on
+      the 0.2° model cells, in five classes of equal count by rank (as
+      Decision 25 c1; no value in the legend), with the 97 Stage-2
+      baseline paths as lines.
+    - **`fig_08` (F2):** the 97 phase-1 paths of the `main` surface and the
+      97 Stage-2 baseline paths, as lines in two styles, on a plain
+      background.
+    - **Both:** national scale; the reserve outlines and the state lines;
+      the hatch of the 32 cells (Decision 25 point 6); no point and no
+      presence or background mark; each path labelled as modelled, not
+      observed (policy §3). The figure code reads no presence or
+      background field (as Decision 25 point 4). The captions are drafts
+      (the narrative is the author's). Caption items: modelled routes, not
+      observed movement; relative suitability as a rank, not occupancy and
+      not Ψ; the transform; the 0.2° grain; the effort caveat (proposal
+      §7); India only; the label of point 7; the data sources.
+
+**What was seen before this Decision (pre-registration, stated plainly):**
+- **In the documents (the author and the chat):** the Stage-2 and
+  Stage-3 results as the documents quote them, for example the path cost
+  median (577.3 resistance-km), the class breaks of the prediction and 55
+  of the 56 reserve values above the median of the model cells.
+- **By the author (h1, stated on 2026-11-14):** no surface, current or
+  path from the suitability was looked at (none exists). The author has
+  seen `fig_03` (the Stage-2 paths) and `fig_04` and `fig_05` (the
+  suitability). So where a path on the suitability surface goes is partly
+  foreseeable.
+- **By the chat that drafted this Decision:** the documents; the blocks of
+  `R/00_config.R`, `R/00_functions_io.R`, `R/00_functions_sensitive.R` and
+  the engine of `R/00_functions_lcp.R`; the outline of the other code; the
+  committed tables `tbl_12_reserve_pairs.csv` (the gaps: 5 of the 97 pairs
+  that are not contiguous are below 20 km), `tbl_12_lcp_variant_summary.csv`,
+  `tbl_16_sdm_prediction.csv` (the class breaks) and
+  `tbl_17_reserve_suitability.csv` (the cell counts: 18 of the 56 reserves
+  use fewer than 450 valued 1 km cells; the console also showed the value
+  of one reserve); the literature. No data file, no figure and no map.
+- **Not computed by anyone:** a resistance surface from the suitability, an
+  effective resistance, a current, a path on such a surface, the number of
+  pairs that are contiguous at 0.2°.
+- **The choices.** The chat gave one recommended option for each fork and
+  sub-fork. The author took it for each but four: e1 and e3 in two phases
+  (the chat recommended e1), g3 (g2), P1b (P1a) and F2 (F1). The author
+  confirmed the readings R1 ("t1 with some validation") and R2 ("e1 and e3
+  in two phases"). The reading of P1b (phase 2 on both surfaces) is the
+  chat's, stated in its reply of 2026-11-14. The author chose P3a in a
+  later reply on the same day, before any surface.
+
+**Reason and sources:**
+- **The national method.** The national report modelled occupancy on
+  9,309 grids of 10 × 10 km, made the cost surface as 1 − Ψ, made
+  least-cost paths with PATHMATRIX (corridors buffered by 1.5 km) and used
+  Circuitscape, with the core areas of the tiger reserves as sources. The
+  chapter does not state the scaling, the values for non-forest, the cell
+  size or the Circuitscape mode, and it describes no validation of the
+  corridors (Qureshi et al. 2014, "Materials and Methods"). Jhala et al.
+  (2021) state the resistance as 1 − Ψ and the corridors between the
+  reserves as modelled by circuit theory in Circuitscape. In central India
+  the same method gave non-forest cells a higher cost, and the genetic
+  distances agreed better with the linkage costs than with straight-line
+  distance (Yumnam et al. 2014).
+- **The rank as the input (a2).** The value is relative, not a
+  probability of presence (Decision 25). The Maxent output types are
+  monotonically related (Phillips 2017, as Decision 25 a1 quotes), so a
+  rank is the same with each type. A linear transform of the cloglog value
+  would use its scale as a measure; Decision 25 c2 rejected that use for
+  the legend. With a2 the main surface spreads R evenly from 1 to 100.
+- **The hatched cells (k1).** As Decision 25 b2: the flag removes no cell.
+- **Two transforms (b3).** The main surface keeps the national form.
+  Keeley et al. (2016) recommend a negative exponential function for the
+  corridors of long-distance movers: then larger parts of the landscape
+  have a low resistance. The function R = 100 − 99 × (1 − exp(−c × h)) /
+  (1 − exp(−c)) is the form that citing studies give for it (a puma study
+  of the USDA Forest Service with c = 4 and c = 8; Wright et al. 2021 with
+  c = 1 to 32); c = 8 gave the best fit for wolverine dispersal (Carroll
+  et al. 2020). Decision 14 left the transform to this check.
+- **The 0.2° grain (c1).** The information is at 0.2°. On the 1 km frame
+  each 0.2° block is uniform, so a route inside a block would follow the
+  geometry and the ties, not the data. 0.2° is about two times the
+  national 10 km grid. The link rule is the rule of Decision 17; the
+  distance on the sphere is the rule of Decision 26 Amendment 1.
+- **Both methods (d3).** Circuit theory is the national tool. In one test
+  with telemetry, circuit theory predicted dispersal paths better, and
+  cost-distance predicted migration paths a little better (McClure et al.
+  2016). The ratio of the least-cost distance to the effective resistance
+  is a measure of redundancy (McRae et al. 2008, as a review of the
+  circuit-theory literature gives it).
+- **Zero current in the two reserves of a pair (Z1).** Each of the two is
+  one node with the full 1 A, so its cells would show a high current by
+  construction. Circuitscape has the same option.
+- **Own code (t1).** The graph has 6,969 nodes, so a solve for each pair
+  is small. Own code keeps each rule in the code, as the path engine
+  (Decision 17) and the Gi\* (Decision 26) do. `gdistance` takes points
+  only (the commute time: the resistance distance × the volume of the
+  graph; Fouss et al. 2007, Chandra et al. 1996, as its help page gives
+  them), so it is a check, not the engine. Circuitscape.jl needs Julia
+  outside `renv` (the R interface `circuitscaper` 0.1.0 needs Julia 1.9 or
+  later, Circuitscape.jl and Omniscape.jl).
+- **Two phases (e1, e3).** Phase 1 uses the pairs that have a Stage-2
+  path. Phase 2 tests the pair rule of Decision 17, which uses geometry
+  only (Limitations, "The network comes from geometry rules").
+- **The comparison (f1).** The rule of Decision 18 keeps one yardstick. d
+  = 20 km: a path at 0.2° runs through cell centres about 20 km apart, so
+  at 5 km the grain alone would count as a change. The partial ρ given the
+  gap: distance alone makes cost ranks agree (Savary et al. 2022, as in
+  Decision 18). An effective resistance and a path cost measure different
+  things, so their ρ gets no label.
+- **A label for phase 2 (P2c).** A label fixed now keeps the reading from
+  following the result (the reason of f1 over f3). 2/3 is the limit of
+  Decisions 19 and 20.
+- **Two static figures (g3, F2).** Static figures at national scale are
+  the published form of Decisions 20 and 25 before the rule of "Published
+  layers". F2: the author's choice of a plain background for `fig_08`.
+
+**Judgement values:** 1 and 100 (the range; Decision 14); c = 8; d = 20 km;
+the limits 0.5, 0.25, 20 % and 0.9 (Decision 18); 2/3 (Decisions 19 and
+20); the top 20 % of the current (as `SDM_SENS_TOP_SHARE`, Decision 24);
+the check limit 1e-6 (Decision 17).
+
+**Rejected:**
+- *a1 — the cloglog value; a3 — the class.* k2 — no value for the hatched
+  cells.
+- *b1 or b2 alone.*
+- *c2 — the 0.2° value on the 1 km frame; c3 — a 20 km raster in
+  EPSG:7755.*
+- *d1 — circuit theory only; d2 — least-cost paths only.*
+- *t2 — Circuitscape.jl (Julia outside `renv`); t3 — `gdistance` as the
+  engine (points only, no edge to edge); R1b — one Circuitscape.jl run as a
+  check.*
+- *e2 — the 73 edges of Decision 19; e1 only; e3 only.*
+- *f2 — a label on the effective resistance only; f3 — no label; d = 5 km.*
+- *g1 — tables only; g2 — one figure. F1 — `fig_08` over the resistance
+  surface.*
+- *P1a — phase 2 with no paths and on `main` only; P2a — statistics only;
+  P2b — the check with no label. P3b — the phase-2 current in `fig_07`.
+  Z2 — current in the two reserves of a pair (the Circuitscape default).*
+
+**Limitations:**
+- **The input is not Ψ.** It is the rank of a relative suitability from
+  presence and background records. Most presence records are in reserves
+  (the effort caveat): a low resistance in a reserve partly shows where
+  people record tigers. The rank gives equal steps of rank, not of
+  suitability.
+- **The grain is 0.2°.** A route cannot show a corridor narrower than a
+  cell, and a path runs through cell centres about 20 km apart. A small
+  reserve is one or two cells. Two reserves that share a cell are
+  contiguous at 0.2° and are out of the comparison.
+- A diagonal link needs no other cell, so a link can cross the corner of
+  a cell that is not a model cell.
+- The cells that are not model cells (at the coast and the border) are
+  gaps. The graph is in India only: no transboundary link (as Stage 2).
+- Circuit theory assumes a random walker with no knowledge of the
+  landscape; a least-cost path assumes full knowledge. No movement data
+  checks either one.
+- "Agrees" or "differs" compares two models with judgement values.
+- The c of the variant: Keeley et al. (2016) were read through the
+  abstract and citing studies only. No c is known for tigers.
+- Point 8 tests the pair rule against the effective resistance of one
+  model surface.
+- The total current depends on the pairs: each pair adds 1 A, so a
+  reserve with more pairs sends more current.
+
+**Consequences:**
+- `R/00_config.R`: the block `SDMRES_*` (this Decision and task 17.2).
+- `scripts/10_check_sdm_connectivity.R` with `R/00_functions_circuit.R`
+  (s1 and f1 of task 17.2): STEP 17.1 (task 17.3) the two surfaces; STEP
+  17.2 (task 17.4) phase 1, the circuit and the paths; STEP 17.3 (task
+  17.5) the comparison of point 7 and the figures; STEP 17.4 (task 17.6)
+  the QA of phase 1; STEP 17.5 phase 2 (point 8) and its QA, with
+  `RUN_PHASE2`. The hand-made cases of point 5 run first.
+- `scripts/00a_setup_environment.R`: `Matrix` in the list with the first
+  code (p1 of task 17.2; rule S1).
+- `naming-conventions.md`: `fig_07` and `fig_08` reserved; `tbl_19` in
+  use; the prefix `circ_`.
+- `references.md`: a new section "SDM-based resistance and circuit theory
+  (Decision 27)"; the entry of Jhala et al. 2021 completed.
+
+This closes the **[Week 17] SDM-based resistance + circuit-theory check**
+pending item.
+
 ### Decisions pending (raised, not yet made)
 
 These forks are open. Each is decided in the week noted in the project plan,
@@ -4730,37 +5104,88 @@ before the relevant code is written.
   rule too.)*
   *(2026-11-07, task 16.6: Stage 4 moves by one week (the author's choice
   R4); the Leaflet maps, and this item, are in Week 19.)*
-- **[Week 17] SDM-based resistance + circuit-theory check (was "[After
-  Stage 3]" until 2026-11-07).** Raised
-  2026-09-26 (Decision 14, F1). After the SDM exists, build a resistance
-  surface from 1 − suitability and run circuit theory between reserves, to
-  reproduce the national method (Jhala et al. 2021; Qureshi et al. 2014) as
-  closely as the data allow and compare it with the Stage-2 least-cost paths.
-  Decide then: the transform (linear 1 − suitability as in the national method,
-  or a negative exponential as Keeley et al. 2016 recommend for long-distance
-  movers), and the tool (at ~3 million cells, probably Circuitscape or
-  Omniscape outside R). Not yet in the week plan.
-  *(2026-10-25, Decision 23: if task 14.4 allows a model, its suitability
-  surface is at the 0.2° grain (about 20 km), not at 1 km. A resistance
-  surface from it would have that grain. Decide then whether this item
-  still applies.)*
-  *(2026-11-07, task 16.6, the author's choice R4: the item applies; Week
-  17 works on it, and Stage 4 moves to Weeks 18–21. The chat's reading:
-  the item keeps its scope as written above. Decision 27, in task 17.1,
-  fixes before any surface: the input (the value or the class); the
-  transform; the grain (a surface of the 0.2° model cells, or the 0.2°
-  value on the 1 km frame of Stage 2) and the cells with no value; the
-  method and the tool (circuit theory in R, for example with `gdistance`,
-  or Circuitscape or Omniscape outside R; least-cost paths too or not);
-  the pairs; the comparison with the Stage-2 paths and its reading; the
-  published form. "Not yet in the week plan" no longer applies:
-  `project-plan.md` → "Week 17".)*
+  *(2026-11-14, Decision 27 point 10: a layer of the SDM-based surfaces,
+  their currents or their paths waits for this rule too.)*
 
 ---
 
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-14 — Week 17, task 17.2: process choices (no code, no run)
+
+- **The author's choices (2026-11-14), each as the chat recommended:**
+  - **s1 of task 17.2:** a new script, `scripts/10_check_sdm_connectivity.R`,
+    with STEPs 17.1–17.5 (STEP 17.5: phase 2). Rejected: s2 (STEPs in
+    `scripts/09`, now 3,644 lines) and s3 (STEPs in `scripts/07`).
+  - **f1 of task 17.2:** a new function file, `R/00_functions_circuit.R`.
+    It reuses the overlap code of Decision 18 (`lcp_route_share()` in
+    `R/00_functions_lcp.R`) and the reserve-cell code of
+    `R/00_functions_sdm.R`.
+  - **n1 of task 17.2 (the names):**
+    - Layers under `data/processed/` (gitignored):
+      `resist_sdm_<surface>_cell02.csv`; `lcp_sdm_network_7755.gpkg` (one
+      layer for each surface and phase);
+      `circ_current_<surface>_<phase>_cell02.csv`. *The chat's reading:*
+      with P1b each surface has a current in each phase, so the name holds
+      the surface too (the fork text gave `circ_current_<phase>_cell02.csv`).
+      `circ_` is a new theme prefix.
+    - Tables: `tbl_19_sdmres_surface.csv`, `tbl_19_sdmres_pairs.csv`,
+      `tbl_19_sdmres_compare.csv`, `tbl_19_sdmres_phase2.csv` and
+      `tbl_19_sdmres_qa.csv`. The slugs are the chat's, from "the surface
+      statistics, the pairs, the comparison, phase 2 and the QA" of n1.
+    - Figures: `fig_07_sdm_current.png` and `fig_08_sdm_paths.png`. No
+      output name holds "tiger".
+  - **w1 of task 17.2:** one run switch, `RUN_PHASE2`, in the script header
+    (as `RUN_FIT`); `FALSE` until the QA of phase 1 passes. Each run builds
+    the surfaces and phase 1 again (6,969 cells).
+  - **p1 of task 17.2:** no new package. `Matrix` (1.7-4) and `igraph` are
+    in `renv.lock`; `gdistance` and `raster` stay for check (ii) of
+    Decision 27 point 5. `Matrix` goes into the `scripts/00a` list with the
+    first code that calls it (rule S1).
+  - **h1 of task 17.2:** the hand-made cases of Decision 27 point 5 run
+    first; a failure stops the script.
+- `R/00_config.R`: the names and the slugs are in the `SDMRES_*` block.
+- `naming-conventions.md`: §2 (the prefix `circ_`) and §6 (`tbl_19`,
+  `fig_07`, `fig_08`).
+- **Split point** (the plan): the commit of the docs and the config of
+  tasks 17.1–17.2; task 17.3 in the next session.
+
+### 2026-11-14 — Week 17, task 17.1: Decision 27 recorded (no code, no surface)
+
+- **The author's choices (2026-11-14), as written:** "a2, k1, b3, c1, d3,
+  t1 with some validation, e1 and e3 in two phases, f1, g3, h1 confirmed";
+  after the readings and the sub-forks: "R1, and R2 confirmed. P1b, P2c,
+  Z1, F2" (with the choices of task 17.2); in a later reply: "I forgot
+  P3: my choice is P3a".
+- **The chat's readings:**
+  - **R1 (confirmed):** "t1 with some validation" = own R code with the
+    checks of Decision 27 point 5 (hand-made circuits; `gdistance`; each
+    path cost again); no Circuitscape and no Julia.
+  - **R2 (confirmed):** "e1 and e3 in two phases" = phase 1, the 106 pairs
+    of Decision 17, with point 7 and the figures; phase 2, all 1,540 pairs,
+    after the QA of phase 1, with its own STEP and QA. The rules of phase 2
+    are in Decision 27 now, before any surface.
+  - **P1b (the chat's reading; not yet confirmed):** phase 2 runs on both
+    surfaces; on each, the effective resistance, a total current and a
+    least-cost path for each pair.
+- **P3a** (the current of `fig_07`; Decision 27 point 9): given in a
+  later reply on 2026-11-14, before any surface. The first reply did not
+  answer P3; the chat recorded it as open until then.
+- **Not the chat's recommendation:** e1 and e3 (the chat: e1), g3 (g2),
+  P1b (P1a) and F2 (F1).
+- **The facts given with the forks (the chat, 2026-11-14):** the national
+  method (Qureshi et al. 2014, "Materials and Methods"; Jhala et al. 2021;
+  Yumnam et al. 2014) and how the input here differs from Ψ; 5 of the 97
+  pairs that are not contiguous have a gap below 20 km; 18 of the 56
+  reserves use fewer than 450 valued 1 km cells; the arithmetic of the two
+  transforms; what `gdistance`, Circuitscape.jl and `circuitscaper` do.
+- **Docs:** Decision 27; the pending item "[Week 17] SDM-based resistance
+  + circuit-theory check" closed; `references.md` (a new section; the
+  entry of Jhala et al. 2021 completed); `project-plan.md` (tasks 17.1 and
+  17.2); `handoff.md` (the state at the split point).
+- `R/00_config.R`: the block `SDMRES_*`.
 
 ### 2026-11-14 — Text fix before Week 17 (two script headers; three stale statements)
 

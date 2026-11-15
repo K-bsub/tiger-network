@@ -1345,6 +1345,143 @@ The chat used the matrices of severity 1.0 for the three types on the
 colours of `fig_06` and the state fill (`FIG_GISTAR_COLOURS`, task 16.4).)*
 *(The DOI is not in the page text that was read.)*
 
+## SDM-based resistance and circuit theory (Decision 27)
+
+*All entries in this section were read on 2026-11-14, through a search
+tool (snippets) or a fetch tool (summaries of the page), from a report
+chapter, open-access papers and records, a package manual and tool
+documentation. No paper was read in full. Verify each entry before it is
+cited on the site. Jhala et al. (2021), Keeley et al. (2016), Qureshi et
+al. (2014) (the full report) and Dutta et al. (2016) are in the section
+"Tiger movement and landscape resistance (Decision 14)"; Savary et al.
+(2022) is in "Path comparison (Decision 18)".*
+
+Carroll, K.A., et al. (2020). Testing landscape resistance layers and
+modeling connectivity for wolverines in the western United States. *Global
+Ecology and Conservation*.
+https://www.sciencedirect.com/science/article/pii/S2351989419308935 ·
+*(Six circuit-theory maps from a resource selection function, with the
+negative exponential transform at c = 0.25, 1, 4, 8, 16 and 32; c = 8 had
+the best fit to wolverine dispersal on three validation metrics. Decision
+27 b2: the value c = 8.)* *(Abstract and extracts through a search tool.
+The first author is from a citing paper ("Carroll et al. 2020"); the full
+author list, the volume and the article number were not checked.)*
+
+Chandra, A.K., Raghavan, P., Ruzzo, W.L., Smolensky, R., & Tiwari, P.
+(1996). The electrical resistance of a graph captures its commute and cover
+times. *Computational Complexity*, 6(4), 312–340. · *(The link between the
+commute time of a random walk and the effective resistance. Decision 27
+point 5, check (ii).)* *(Not read; as the help page of
+`gdistance::commuteDistance` gives it.)*
+
+Circuitscape.jl documentation: "Options and Flags" and "How Circuitscape
+Works". https://docs.circuitscape.org/Circuitscape.jl/latest/options/ ·
+https://docs.circuitscape.org/Circuitscape.jl/latest/usage/ · *(Pairwise
+mode; a short-circuit region or a focal region is collapsed into one node;
+a focal region is "burned in" only for the pairs that include it; the
+option `set_focal_node_currents_to_zero` (default `False`) gives the active
+focal nodes zero current in the current maps; a GeoTIFF needs ArchGDAL.
+Decision 27 point 4 (the focal regions; Z1) and the reason for t1.)*
+*(Through a search tool; read 2026-11-14. The version of the "latest" page
+was not recorded; a v5.15 page also exists.)*
+
+Fouss, F., Pirotte, A., Renders, J.-M., & Saerens, M. (2007). Random-walk
+computation of similarities between nodes of a graph with application to
+collaborative recommendation. *IEEE Transactions on Knowledge and Data
+Engineering*, 19(3), 355–369. · *(The algorithm of
+`gdistance::commuteDistance`. Decision 27 point 5, check (ii).)* *(Not
+read; as the help page of `gdistance::commuteDistance` gives it.)*
+
+Kling, M. *circuitscaper: 'Circuitscape' and 'Omniscape' Connectivity
+Analysis via 'Julia'*. R package version 0.1.0.
+https://brieger.esalq.usp.br/CRAN/web/packages/circuitscaper/refman/circuitscaper.html
+· *(An R interface to Circuitscape.jl and Omniscape.jl; system
+requirements Julia (≥ 1.9), Circuitscape.jl and Omniscape.jl; `cs_pairwise()`
+takes a raster of focal nodes and a raster of short-circuit regions and
+gives a matrix of effective resistances. Decision 27: the reason for t1 (a
+tool outside `renv`); not used.)* *(A CRAN mirror page and the rdrr.io page
+of `cs_pairwise()`, through a search tool.)*
+
+McClure, M.L., Hansen, A.J., & Inman, R.M. (2016). Connecting models to
+movements: testing connectivity model predictions against empirical
+migration and dispersal data. *Landscape Ecology*, 31(7), 1419–1432.
+https://doi.org/10.1007/s10980-016-0347-0 · *(Cost-distance and circuit
+theory against telemetry in the Greater Yellowstone Ecosystem: circuit
+theory predicted wolverine dispersal paths better; cost-distance predicted
+elk migration paths only a little better than circuit theory. Decision 27
+d3.)* *(The abstract, through a library record and the first page of an
+author copy.)*
+
+McRae, B.H., Dickson, B.G., Keitt, T.H., & Shah, V.B. (2008). Using circuit
+theory to model connectivity in ecology, evolution, and conservation.
+*Ecology*, 89(10), 2712–2724. https://doi.org/10.1890/07-1861.1 · *(The
+effective resistance between two nodes is the resistance of one resistor
+that conducts the same current per unit voltage (R = V/I); the link of
+circuits with random walks. Decision 27 point 4.)* *(The first pages,
+through a search tool. The use of the ratio of the least-cost distance to
+the effective resistance as a measure of redundancy is taken from the
+review below, which cites this paper.)*
+
+Qureshi, Q., Saini, S., Basu, P., Gopal, R., Raza, R., & Jhala, Y. (2014).
+"Materials and Methods". In *Connecting Tiger Populations for Long-term
+Conservation* (TR2014-02). NTCA & WII, Dehradun.
+https://wii.gov.in/uploads/media/software/tiger-reports/conn_tiger_materials_methods.pdf
+· *(Occupancy with the logit link in PRESENCE, from 23 site covariates
+(habitat, prey, disturbance), on 9,309 grids of 10 × 10 km; the cost
+surface as 1 − Ψ; least-cost paths with PATHMATRIX, buffered by 1.5 km;
+Circuitscape (McRae & Shah 2009); the core areas of the tiger reserves as
+sources. The chapter does not state the scaling of the cost, the values for
+non-forest, the cell size or the Circuitscape mode, and it describes no
+validation of the corridors. Decision 27, "Aim" and "Reason".)* *(Through a
+fetch tool (a summary); the page numbers were not recorded.)*
+
+Review: "Circuit-theory applications to connectivity science and
+conservation". https://pmc.ncbi.nlm.nih.gov/articles/PMC6727660 · *(Current
+density and effective resistance as the two main metrics; redundancy as
+the ratio of the least-cost distance to the effective resistance, after
+McRae et al. 2008. Decision 27 point 4.)* *(Through a search tool. The
+authors, the journal and the year were not recorded.)*
+
+USDA Forest Service, Treesearch record 60335 (a puma connectivity study).
+https://research.fs.usda.gov/download/treesearch/60335.pdf · *(Three
+transforms of habitat suitability to resistance: a negative linear one and
+the function R = 100 − 99 × ((1 − exp(−c × h)) / (1 − exp(−c))), "provided
+by Keeley et al. (2016)", with c = 4 and c = 8. Decision 27 b2: the
+form.)* *(A search snippet only; the title, the authors and the year were
+not recorded.)*
+
+van Etten, J. *gdistance: Distances and Routes on Geographical Grids*. R
+package version 1.6.5. https://cran.r-project.org/package=gdistance ·
+*(`commuteDistance()`: the expected random-walk commute time between
+points of a `TransitionLayer`; the manual gives it as the resistance
+distance between the nodes times the volume of the graph (the sum of the
+conductance weights of all the edges); point coordinates only. Decision 27 point 5, check (ii), and the reason that
+`gdistance` is not the engine (t3).)* *(The CRAN reference manual and a
+help page, through a search tool. The project uses 1.6.5, as `renv.lock`.)*
+
+Wright, P.G.R., Bellamy, C., Hamilton, P.B., Schofield, H., Finch, D., &
+Mathews, F. (2021). Characterising the relationship between suitable
+habitat and gene flow for *Myotis bechsteinii* and *Eptesicus serotinus*
+in Britain. *Landscape Ecology*. https://doi.org/10.1007/s10980-021-01317-4
+· *(The negative exponential transform R = 100 − 99 × (1 − exp(−c × H)) /
+(1 − exp(−c)) with c = 1, 2, 4, 8, 16 and 32, after Trainor et al. (2013),
+Mateo-Sánchez et al. (2015) and Keeley et al. (2016); the negative linear
+transforms fit the genetic data worst for both species. Decision 27 b2.)*
+*(Through a fetch tool; the formula text was garbled in the extraction and
+is a reconstruction; the volume and the pages were not checked.)*
+
+Yumnam, B., Jhala, Y.V., Qureshi, Q., Maldonado, J.E., Gopal, R., Saini,
+S., Srinivas, Y., & Fleischer, R.C. (2014). Prioritizing tiger conservation
+through landscape genetics and habitat linkages. *PLoS ONE*, 9(11),
+e111207. https://doi.org/10.1371/journal.pone.0111207 · *(Central India:
+the cost surface as 1 − Ψ from occupancy on 10 × 10 km grids; non-forest
+cells permeable at higher costs (values in Methods S2, not read);
+PATHMATRIX and CIRCUITSCAPE; the core areas of the tiger reserves as
+sources; the genetic distances (FST) were better explained by the modelled
+linkage costs (r > 0.5, p < 0.05) than by straight-line distance. Decision
+27, "Reason".)* *(Through a fetch tool (a summary of the first part of the
+PMC page) and the repository abstract.)*
+
 ## Tiger movement and landscape resistance (Decision 14)
 
 Dutta, S., & Krishnamurthy, R. (2024). Multiphasic movement and step-selection
@@ -1360,18 +1497,30 @@ https://doi.org/10.1007/s10113-015-0877-z · *(Connectivity between 16 central-
 Indian PAs from land cover, human population density and transport networks.
 Context for Stage 2; not used for a specific value.)*
 
-Jhala, Y.V., et al. (2021). Recovery of tigers in India: critical introspection
-and potential lessons. *People and Nature*.
-https://doi.org/10.1002/pan3.10177 · *(National method: resistance = 1 − Ψ,
-corridors by circuit theory. Decision 14: why class values now, and the
-post-Stage-3 check.)* *(Co-authors, volume and pages not verified — complete
-from the DOI.)*
+Jhala, Y., Gopal, R., Mathur, V., Ghosh, P., Negi, H.S., Narain, S., Yadav,
+S.P., Malik, A., Garawad, R., & Qureshi, Q. (2021). Recovery of tigers in
+India: critical introspection and potential lessons. *People and Nature*,
+3(2), 281–293. https://doi.org/10.1002/pan3.10177 · *(National method:
+resistance = 1 − Ψ, corridors by circuit theory. Decision 14: why class
+values now, and the post-Stage-3 check.)* *(2026-11-14, Decision 27: the
+author list, the volume, the issue and the pages from two library records.
+Section 4.1, read through a fetch tool: the habitat resistance to tiger
+movement was estimated as 1 − Ψ; Ψ came from replicate ground surveys,
+modelled with habitat, prey and human-footprint covariates; the corridors
+between the tiger reserves were modelled by circuit theory in Circuitscape
+(the paper cites McRae et al. 2013). The paper itself gives no grain and no
+scaling.)*
 
 Keeley, A.T.H., Beier, P., & Gagnon, J.W. (2016). Estimating landscape resistance
 from habitat suitability: effects of data source and nonlinearities.
 *Landscape Ecology*, 31(9), 2151–2162. https://doi.org/10.1007/s10980-016-0387-5
 · *(Recommends a negative exponential transform for long-distance movers.
-Decision 14: scale; the transform for the post-Stage-3 check.)*
+Decision 14: scale; the transform for the post-Stage-3 check.)* *(2026-11-14,
+Decision 27 b2: the abstract only. The function R = 100 − 99 × (1 −
+exp(−c × h)) / (1 − exp(−c)), with h from 0 to 1, is the form that citing
+studies give for this paper (see "SDM-based resistance and circuit theory
+(Decision 27)"). The c values that the paper tested, and the one that it
+found best, were not read.)*
 
 Krishnamurthy, R., Cushman, S.A., Sarkar, M.S., Malviya, M., Naveen, M.,
 Johnson, J.A., & Sen, S. (2016). Multi-scale prediction of landscape resistance
