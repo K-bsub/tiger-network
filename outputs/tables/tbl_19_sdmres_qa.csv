@@ -1,0 +1,197 @@
+"group","check","value","pass"
+"test case","STEP 17.1: x from ranks 1..5 is 1, 0.75, 0.5, 0.25, 0","pass",TRUE
+"test case","STEP 17.1: x stops on a rank that is not 1..n","pass",TRUE
+"test case","STEP 17.1: linear: R(1) = 1, R(0.5) = 50.5, R(0) = 100","pass",TRUE
+"test case","STEP 17.1: negexp (c = 8): R(1) = 1 and R(0) = 100","pass",TRUE
+"test case","STEP 17.1: negexp (c = 8): R(0.5), R(0.2), R(0.1) as the formula; about 2.78, 20.96, 45.47","pass",TRUE
+"test case","STEP 17.1: transform stops on x outside [0, 1]","pass",TRUE
+"test case","STEP 17.1: surface: ordered by id; x and R from the rank","pass",TRUE
+"test case","STEP 17.1: surface: the checks pass on a correct layer","pass",TRUE
+"test case","STEP 17.1: surface: the checks fail when R rises with x","pass",TRUE
+"test case","STEP 17.1: links: 13 rook and 8 diagonal; each link once","pass",TRUE
+"test case","STEP 17.1: links: the far cell has no link","pass",TRUE
+"test case","STEP 17.1: links: the same set as all pairs of cells that touch","pass",TRUE
+"test case","STEP 17.1: links: north-south length = R x 0.2 degrees","pass",TRUE
+"test case","STEP 17.1: links: east-west length = 2 R asin(cos(lat) sin(0.1 degrees))","pass",TRUE
+"test case","STEP 17.1: links: a diagonal is longer than the rook links of its cells","pass",TRUE
+"test case","STEP 17.1: link resistance = d x (R_i + R_j) / 2","pass",TRUE
+"test case","STEP 17.1: components: 2 sets (the block, the far cell)","pass",TRUE
+"test case","STEP 17.1: reserve cells: unique model cells; a non-model id is left out and counted","pass",TRUE
+"test case","STEP 17.1: pair status: contiguous_02, no_path, no_cells, no_path","pass",TRUE
+"test case","STEP 17.1: pair status: two cells of one set with no shared cell give path","pass",TRUE
+"test case","STEP 17.2: (i) series: R = 3 + 5 = 8","pass",TRUE
+"test case","STEP 17.2: (i) series: the middle node carries 1 A; the two ends 0 (Z1)","pass",TRUE
+"test case","STEP 17.2: (i) series: 1 A leaves a","pass",TRUE
+"test case","STEP 17.2: (i) parallel: R = 4 || (2 + 2) = 2","pass",TRUE
+"test case","STEP 17.2: (i) parallel: the middle node carries 0.5 A","pass",TRUE
+"test case","STEP 17.2: (i) unbalanced bridge: R = 1.4","pass",TRUE
+"test case","STEP 17.2: (i) unbalanced bridge: V_C = 0.8 and V_D = 0.6","pass",TRUE
+"test case","STEP 17.2: (i) unbalanced bridge: C and D carry 0.6 A each","pass",TRUE
+"test case","STEP 17.2: (i) balanced bridge: R = 3 || 6 = 2; V_C = V_D","pass",TRUE
+"test case","STEP 17.2: (i) region: a joined into one node gives R = 2","pass",TRUE
+"test case","STEP 17.2: (i) region: the node 1 alone gives R = 2 || (9 + 2) + 1","pass",TRUE
+"test case","STEP 17.2: (i) a separate set is left out: R = 8; no voltage and no current there","pass",TRUE
+"test case","STEP 17.2: (i) a and b that share a node stop the solve","pass",TRUE
+"test case","STEP 17.2: (iii) path: from 1 to {3, 5}: 1-2-3, cost 2","pass",TRUE
+"test case","STEP 17.2: (iii) path: from the region {1, 4}: 4-3, cost 0.5 (edge to edge)","pass",TRUE
+"test case","STEP 17.2: (iii) path: a tie goes to the lowest node (3)","pass",TRUE
+"test case","STEP 17.2: (iii) path: no route gives cost Inf","pass",TRUE
+"test case","STEP 17.2: (i) the effective resistance is not above the least-cost cost (bridge)","pass",TRUE
+"test case","STEP 17.2: (iii) path cost again: d1 x 2 + d2 x 4","pass",TRUE
+"test case","STEP 17.2: (iii) path cost again: a step that is not to a neighbour fails","pass",TRUE
+"test case","STEP 17.2: (iii) the Dijkstra cost on circ_links() = the cost again from the cells","pass",TRUE
+"test case","STEP 17.2: path line: fewer than 2 cells gives an empty line","pass",TRUE
+"test case","STEP 17.2 (ii): (ii) gdistance, cells 1 and 71 of 72","pass",TRUE
+"test case","STEP 17.2 (ii): (ii) gdistance, cells 12 and 50 of 72","pass",TRUE
+"test case","STEP 17.2 (ii): (ii) gdistance, cells 30 and 31 of 72","pass",TRUE
+"test case","STEP 17.3: share in polygons: 20 of 40 km = 0.5; inside = 1; empty = NA; outside = 0","pass",TRUE
+"test case","STEP 17.3: share in polygons: no polygon gives 0","pass",TRUE
+"test case","STEP 17.3: share in polygons: lines and polygons in two CRS stop the function","pass",TRUE
+"test case","STEP 17.3: top cells: the top class holds ceiling(n / 5) = 3 cells = ceiling(0.2 n)","pass",TRUE
+"test case","STEP 17.3: top cells: a tie at the break goes to the lower id (101 and 109 at 9; 110 at 7)","pass",TRUE
+"test case","STEP 17.3: top cells: the cells with 0 take the last ranks (106, then 111) and the lowest class","pass",TRUE
+"test case","STEP 17.3: CC1: the same values as lcp_compare_variant() (Decision 18) for each compared pair","pass",TRUE
+"test case","STEP 17.3: CC1: the made-up case has material and other pairs (the test has power)","pass",TRUE
+"test case","STEP 17.3: R4: a pair that is not compared has a row, with NA in each column of Decision 18","pass",TRUE
+"test case","STEP 17.3: NT1: two costs that differ only in the last bits get the average rank","pass",TRUE
+"test case","STEP 17.3: CC1: a compared pair with no path stops the function","pass",TRUE
+"test case","STEP 17.3: partial rho: equal to the correlation of the rank residuals given z","pass",TRUE
+"test case","STEP 17.3: partial rho: fewer than 4 values, or x equal to z, gives NA","pass",TRUE
+"test case","STEP 17.3: label: 1 of 10 material and rho 1 -> agrees","pass",TRUE
+"test case","STEP 17.3: label: 2 of 10 material (= 20 %) -> agrees; 3 of 10 -> differs","pass",TRUE
+"test case","STEP 17.3: label: no material pair but rho below 0.9 -> differs","pass",TRUE
+"test case","STEP 16.2 helpers: reader: a file on the list is read","pass",TRUE
+"test case","STEP 16.2 helpers: reader: a file that is not on the list of the figure is refused","pass",TRUE
+"test case","STEP 16.2 helpers: reader: the log holds each read (figure and file), in order","pass",TRUE
+"test case","STEP 16.2 helpers: fields: a presence, record or tiger word is found; plain fields pass","pass",TRUE
+"test case","STEP 16.2 helpers: hatch: 2 or 3 lines in a square of 10 km with a step of 2/3 of its side","pass",TRUE
+"test case","STEP 16.2 helpers: hatch: each line is at 45 degrees and inside the square","pass",TRUE
+"test case","STEP 16.2 helpers: hatch: the lines of two squares side by side meet at the common edge","pass",TRUE
+"test case","STEP 16.2 helpers: hatch: no polygon gives no line","pass",TRUE
+"test case","STEP 16.2 helpers: key box: a square of the given side, with its hatch inside","pass",TRUE
+"test case","STEP 16.2 helpers: labels: five classes, class 5 first, no value in a label","pass",TRUE
+"test case","STEP 16.2 helpers: numbers: 6969 -> 6,969; 0.66826 -> 0.668","pass",TRUE
+"test case","STEP 16.2 helpers: caption: no line is longer than the width","pass",TRUE
+"test case","STEP 16.2 helpers: PNG size: read from the header (123 x 45)","pass",TRUE
+"test case","STEP 16.2 helpers: area: the whole WGS 84 ellipsoid is 510,065,621.7 km2","pass",TRUE
+"test case","STEP 16.2 helpers: area: a 0.2 degree cell is 487.6 km2 at 8.0-8.2 N and 395.6 km2 at 36.8-37.0 N","pass",TRUE
+"test case","STEP 17.3 frame: frame: the plot with cells, hatch, key and a path layer builds","pass",TRUE
+"test case","STEP 17.3 frame: frame: the plot with no cells (fig_08) builds","pass",TRUE
+"test case","STEP 17.3 frame: frame: 11 layers with cells, hatch and key; 5 with none of them","pass",TRUE
+"test case","STEP 17.3 frame: frame: the path layer is after the outlines and the hatch, before the key","pass",TRUE
+"test case","STEP 17.3 frame: save: a PNG of 2 x 1.5 inches at 100 dpi has 200 x 150 pixels","pass",TRUE
+"test case","STEP 17.3 frame: mix: the paper and the ink at 0.55 is the link colour of fig_03","pass",TRUE
+"test case","STEP 17.4: x and R: ranks 1 to 5 give x = 1 to 0 and R = 1, 25.75, 50.5, 75.25, 100","pass",TRUE
+"test case","STEP 17.4: x and R: negexp8 gives about 45.5, 21.0 and 2.8 at x = 0.1, 0.2 and 0.5 (Decision 27 point 2)","pass",TRUE
+"test case","STEP 17.4: distance: 1 degree of latitude = r x pi / 180; 0 for one point","pass",TRUE
+"test case","STEP 17.4: links: 1-2 and 1-3 rook; 2-3 and 2-4 diagonal; the cell alone has no link","pass",TRUE
+"test case","STEP 17.4: links: the length is the distance between the centres","pass",TRUE
+"test case","STEP 17.4: sets: {1, 2, 3}, {4, 5} and {6} (the smallest node of each set)","pass",TRUE
+"test case","STEP 17.4: reserve cells: the centres of columns 2-4 and rows 1-2 give ids 1 and 2 (6 cells of 1 km)","pass",TRUE
+"test case","STEP 17.4: solver: series R = 8, the middle node 1 A, the ends 0","pass",TRUE
+"test case","STEP 17.4: solver: parallel R = 2; the middle node 0.5 A","pass",TRUE
+"test case","STEP 17.4: solver: unbalanced bridge R = 1.4; the same with the ends swapped; energy = R; 1 A out; no net current at C and D","pass",TRUE
+"test case","STEP 17.4: solver: a reserve of two cells (1 || 2 to 3, then 4): R = 1 + 1 = 2; node 5 (a dead end) 0 A","pass",TRUE
+"test case","STEP 17.4: search: 1-2-3-4 at cost 3 (not 1-3-4 at 6)","pass",TRUE
+"test case","STEP 17.4: search: from two nodes, the path starts at the nearer one (3) at cost 1","pass",TRUE
+"test case","STEP 17.4: search: no route gives cost Inf","pass",TRUE
+"test case","STEP 17.4: line cells: the vertices give the cells (400, 100), (401, 100), (402, 101)","pass",TRUE
+"test case","STEP 17.4: share by points: 0.525 (21 of 40 km within 1 km), the same as the exact share","pass",TRUE
+"test case","STEP 17.4: share in polygons by points: 20 of 40 km = 0.5; an empty line gives NA","pass",TRUE
+"test case","STEP 17.4: rank: (rank - 1) / (n - 1) with a tie at the average rank","pass",TRUE
+"test case","STEP 17.4: rank (NT1): 20 and 20 x (1 + 4e-16) are a tie after signif(, 12)","pass",TRUE
+"test case","STEP 17.4: partial rho: the residual form = the formula of the three rank correlations","pass",TRUE
+"test case","STEP 17.4: classes: sizes 3, 2, 3, 2, 2 (classes 5 to 1); the top class 101, 109, 110","pass",TRUE
+"inputs","each input and each file of STEPs 17.1-17.3 exists","18 of 18",TRUE
+"inputs","each surface file and each current file holds each model cell of the grid once, in id order","6,969 cells",TRUE
+"inputs","the prediction holds each model cell once","6,969 cells",TRUE
+"inputs","each path layer and the Stage-2 layer hold each pair of tbl_12_reserve_pairs.csv once","106 pairs",TRUE
+"inputs","tbl_19_sdmres_pairs.csv: one row for each pair and surface","212 rows",TRUE
+"inputs","tbl_19_sdmres_compare.csv: one row for each surface and Stage-2 path","194 rows",TRUE
+"inputs","tbl_19_sdmres_compare_summary.csv: one row for each surface","2 rows",TRUE
+"inputs","tbl_19_sdmres_surface.csv on disk = the table of STEP 17.1","52 rows",TRUE
+"surface","main: x and R again from the rank of the prediction = the surface file","largest relative difference 9.24e-15",TRUE
+"surface","main: R is 1 at rank 1 and 100 at the last rank, and rises with the rank","-",TRUE
+"surface","main: the statistics of tbl_19_sdmres_surface.csv again from the file","8 of 8",TRUE
+"surface","negexp8: x and R again from the rank of the prediction = the surface file","largest relative difference 5.1e-15",TRUE
+"surface","negexp8: R is 1 at rank 1 and 100 at the last rank, and rises with the rank","-",TRUE
+"surface","negexp8: the statistics of tbl_19_sdmres_surface.csv again from the file","8 of 8",TRUE
+"graph","the links by terra::adjacent() = the links of STEP 17.1 (each link and its type)","26,844 and 26,844 links",TRUE
+"graph","the link lengths (the atan2 form of the haversine) = the lengths of STEP 17.1","largest relative difference 2.68e-14",TRUE
+"graph","the graph items of tbl_19_sdmres_surface.csv again from the second path","10 of 10",TRUE
+"graph","the connected sets (the smallest label; no igraph) = the sets of STEP 17.1","5 sets",TRUE
+"graph","main: the link resistances of tbl_19_sdmres_surface.csv again","3 of 3",TRUE
+"graph","negexp8: the link resistances of tbl_19_sdmres_surface.csv again","3 of 3",TRUE
+"reserves","the model cells of each reserve by terra::rasterize() (the cell centres) = the cells of STEP 17.1","56 of 56",TRUE
+"reserves","the 1 km cells of each reserve (in a model cell; in another cell) = tbl_17_reserve_suitability.csv","56 of 56",TRUE
+"reserves","the reserve items of tbl_19_sdmres_surface.csv again from the second path","9 of 9",TRUE
+"pairs","the status of each pair from the second path = tbl_19_sdmres_pairs.csv (each surface)","106 of 106",TRUE
+"pairs","the pair items of tbl_19_sdmres_surface.csv again from the second path","8 of 8",TRUE
+"circuit","main: each conjugate-gradient solve converged","94 of 94",TRUE
+"circuit","main: the effective resistance of the second solve = tbl_19_sdmres_pairs.csv","94 of 94 pairs; largest relative difference 5.6e-13",TRUE
+"circuit","main: the same effective resistance with the two reserves swapped","largest relative difference 2.19e-14",TRUE
+"circuit","main: the energy (sum of g dV^2 with 1 A) = the effective resistance","largest relative difference 1.78e-14",TRUE
+"circuit","main: 1 A out of the first reserve; no net current at another node","largest differences 4.37e-13 and 5.14e-13 A",TRUE
+"circuit","main: a pair contiguous at 0.2 degrees has 0; a pair with no path has Inf","12 and 0 pairs",TRUE
+"current","main: the total current of the second solves = the current file","largest difference / largest current 9.84e-13",TRUE
+"current","main: the cells with no current in the file carry no current in the second path","13 cells; largest second-path current there 3.28e-13",TRUE
+"circuit","negexp8: each conjugate-gradient solve converged","94 of 94",TRUE
+"circuit","negexp8: the effective resistance of the second solve = tbl_19_sdmres_pairs.csv","94 of 94 pairs; largest relative difference 3.86e-13",TRUE
+"circuit","negexp8: the same effective resistance with the two reserves swapped","largest relative difference 1.28e-13",TRUE
+"circuit","negexp8: the energy (sum of g dV^2 with 1 A) = the effective resistance","largest relative difference 1.24e-13",TRUE
+"circuit","negexp8: 1 A out of the first reserve; no net current at another node","largest differences 2.82e-13 and 2.99e-13 A",TRUE
+"circuit","negexp8: a pair contiguous at 0.2 degrees has 0; a pair with no path has Inf","12 and 0 pairs",TRUE
+"current","negexp8: the total current of the second solves = the current file","largest difference / largest current 2.05e-12",TRUE
+"current","negexp8: the cells with no current in the file carry no current in the second path","13 cells; largest second-path current there 3.13e-13",TRUE
+"paths","main: the cost of the second search (base R) = tbl_19_sdmres_pairs.csv","94 of 94 pairs; largest relative difference 5.69e-15",TRUE
+"paths","main: the written line: its vertices are cell centres; the cost again from its cells = the table","94 of 94 lines",TRUE
+"paths","main: the written line starts in the first reserve, ends in the second, and each step is to a neighbour","94 of 94",TRUE
+"paths","main: n_path_cells, n_hatched_cells and path_km of the table = the written line","94 of 94",TRUE
+"paths","main: each path cost is not below the effective resistance","94 of 94",TRUE
+"paths","main: a pair with no path at 0.2 degrees has an empty line and no cell","12 pairs",TRUE
+"paths","negexp8: the cost of the second search (base R) = tbl_19_sdmres_pairs.csv","94 of 94 pairs; largest relative difference 5.89e-15",TRUE
+"paths","negexp8: the written line: its vertices are cell centres; the cost again from its cells = the table","94 of 94 lines",TRUE
+"paths","negexp8: the written line starts in the first reserve, ends in the second, and each step is to a neighbour","94 of 94",TRUE
+"paths","negexp8: n_path_cells, n_hatched_cells and path_km of the table = the written line","94 of 94",TRUE
+"paths","negexp8: each path cost is not below the effective resistance","94 of 94",TRUE
+"paths","negexp8: a pair with no path at 0.2 degrees has an empty line and no cell","12 pairs",TRUE
+"comparison","main: each Stage-2 path has a row; the reference is stage2_baseline; compared = a path at 0.2 degrees","97 rows; 94 compared",TRUE
+"comparison","main: a pair that is not compared has NA in each column of Decision 18","3 rows",TRUE
+"comparison","main: the two shares and the overlap at 20 km by points (every 250 m) are within 0.02 of the table","largest difference 0.0057",TRUE
+"comparison","main: the overlap at 5, 10, 20, 40 km by points is within 0.02 of the table","largest difference 0.0057",TRUE
+"comparison","main: material_route = route_overlap < 0.5 in the table; by points the same, except a pair within 0.02 of the limit","0 differ by points; 1 pairs near the limit",TRUE
+"comparison","main: each tie made by the rounding to 12 significant digits joins values that differ by less than 1e-13 (NT1)","largest relative spread 1.34e-16",TRUE
+"comparison","main: the costs from the files; the ranks, the rank change and the material flags again","94 pairs",TRUE
+"comparison","main: path_length_ratio = the two path lengths of the files","94 pairs",TRUE
+"comparison","main: the share of each Stage-2 path in the top cells by points is within 0.02 of the table","largest difference 0.0022",TRUE
+"comparison","main: tbl_19_sdmres_compare_summary.csv again from the per-pair table and the files","14 of 14",TRUE
+"comparison","main: the label again by the rule of point 7","differs",TRUE
+"comparison","negexp8: each Stage-2 path has a row; the reference is main; compared = a path at 0.2 degrees","97 rows; 94 compared",TRUE
+"comparison","negexp8: a pair that is not compared has NA in each column of Decision 18","3 rows",TRUE
+"comparison","negexp8: the two shares and the overlap at 20 km by points (every 250 m) are within 0.02 of the table","largest difference 0.0028",TRUE
+"comparison","negexp8: the overlap at 5, 10, 20, 40 km by points is within 0.02 of the table","largest difference 0.0033",TRUE
+"comparison","negexp8: material_route = route_overlap < 0.5 in the table; by points the same, except a pair within 0.02 of the limit","0 differ by points; 2 pairs near the limit",TRUE
+"comparison","negexp8: each tie made by the rounding to 12 significant digits joins values that differ by less than 1e-13 (NT1)","largest relative spread 3.17e-16",TRUE
+"comparison","negexp8: the costs from the files; the ranks, the rank change and the material flags again","94 pairs",TRUE
+"comparison","negexp8: path_length_ratio = the two path lengths of the files","94 pairs",TRUE
+"comparison","negexp8: the share of each Stage-2 path in the top cells by points is within 0.02 of the table","largest difference 0.0022",TRUE
+"comparison","negexp8: tbl_19_sdmres_compare_summary.csv again from the per-pair table and the files","14 of 14",TRUE
+"comparison","negexp8: the label again by the rule of point 7","sensitive",TRUE
+"figures","fig_07_sdm_current.png: the size of fig_04 to fig_06","2200 x 2120 pixels",TRUE
+"figures","fig_08_sdm_paths.png: the size of fig_04 to fig_06","2200 x 2120 pixels",TRUE
+"figures","fig_07: the classes again from the current file = the classes drawn; the class sizes by the rule","1394, 1394, 1394, 1394, 1393",TRUE
+"figures","fig_07: the cells with no current are in the lowest class","13 cells",TRUE
+"figures","fig_07 and fig_08: the Stage-2 lines drawn = the Stage-2 paths; the main lines drawn = the compared pairs","97 and 94 lines",TRUE
+"figures","the reads of STEP 17.3: each file is on the list of its use (k1 of task 16.2)","sdm_grid_cell02_7755.gpkg, boundary_states_7755.gpkg, gbif_tiger_download_doi.txt, background_download_doi.txt",TRUE
+"figures","no field of a drawn table holds a presence, record or tiger word","-",TRUE
+"publish","tbl_19_sdmres_surface.csv: assert_publishable_table() passes; no column is a cell id or a coordinate; no value is a model cell id","5 columns",TRUE
+"publish","tbl_19_sdmres_pairs.csv: assert_publishable_table() passes; no column is a cell id or a coordinate; no value is a model cell id","14 columns",TRUE
+"publish","tbl_19_sdmres_compare.csv: assert_publishable_table() passes; no column is a cell id or a coordinate; no value is a model cell id","24 columns",TRUE
+"publish","tbl_19_sdmres_compare_summary.csv: assert_publishable_table() passes; no column is a cell id or a coordinate; no value is a model cell id","17 columns",TRUE
+"publish","(c) no file under outputs/ has tiger in its name","0 of 79 files",TRUE
+"publish","no layer of Decision 27 is under outputs/ (point 10: no layer)","5 layers",TRUE
+"info","the largest number of iterations of one conjugate-gradient solve","main 578; negexp8 607",TRUE
+"info","the paths of the second search that are the same as the written paths (a tie can give another path at the same cost)","main 94 of 94; negexp8 94 of 94",TRUE
+"info","the ties made by the rounding to 12 significant digits (NT1): the reference cost, the cost, the effective resistance","main 0, 1, 0; negexp8 1, 1, 0",TRUE
+"info","the compared pairs with route_overlap within 0.02 of the limit 0.5","main 1; negexp8 2",TRUE
+"publish","tbl_19_sdmres_qa.csv: (b) no value is a cell id; no reserve name","0 and 0",TRUE

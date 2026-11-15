@@ -24,7 +24,8 @@
 #   circ_self_test_171()    the hand-made case of STEP 17.1 (h1 of 17.2)
 # Task 17.4 adds the circuit solver, the least-cost paths and the checks of
 # Decision 27 point 5 (the list is at its block below). Task 17.5 adds the
-# comparison of point 7 (STEP 17.3; the list is at its block at the end).
+# comparison of point 7 (STEP 17.3) and task 17.6 the QA of phase 1 (STEP
+# 17.4); the lists are at their blocks below.
 #
 # SENSITIVE DATA: these functions return TRUE/FALSE, counts, statistics and
 # the layers (cell ids and values). None of them prints a coordinate, a cell
@@ -854,7 +855,7 @@ SDMRES_NEEDED_173 <- c(
   "SDMRES_FIG07_PATH_LWD", "SDMRES_FIG08_COLOURS", "SDMRES_FIG08_LWD",
   "SDMRES_FIG08_LTY", "SDMRES_FIG08_STAGE2_MIX", "FIG_STAGE3_SIZE_IN",
   "FIG_STAGE3_DPI", "FIG_HATCH_KEY_POS", "FIG_HATCH_LINES_PER_CELL",
-  "FIG_FRAME_COLOURS", "DIR_FIGURES"
+  "FIG_FRAME_COLOURS", "DIR_FIGURES", "SDMRES_RANK_SIGNIF"
 )
 
 # The settings of task 17.5. Returns a named list of TRUE/FALSE checks (for
@@ -916,7 +917,11 @@ circ_check_config_173 <- function() {
       all(FIG_HATCH_KEY_POS > 0 & FIG_HATCH_KEY_POS < 1),
     "no table or figure slug may hold the word tiger" =
       !any(grepl("tiger", c(SDMRES_TABLE_SLUGS, SDMRES_FIG_SLUGS),
-                 ignore.case = TRUE))
+                 ignore.case = TRUE)),
+    "SDMRES_RANK_SIGNIF must be a whole number from 10 to 14 (NT1 of task 17.6)" =
+      is.numeric(SDMRES_RANK_SIGNIF) && length(SDMRES_RANK_SIGNIF) == 1L &&
+      SDMRES_RANK_SIGNIF == round(SDMRES_RANK_SIGNIF) &&
+      SDMRES_RANK_SIGNIF >= 10 && SDMRES_RANK_SIGNIF <= 14
   )
 }
 
@@ -962,7 +967,8 @@ circ_compare_paths <- function(base, var, info, compared, surface, reference,
                                d_km = SDMRES_COMPARE_ROUTE_D_KM,
                                descr_km = SDMRES_COMPARE_ROUTE_D_DESCR_KM,
                                route_material = SDMRES_COMPARE_ROUTE_MATERIAL,
-                               rank_material = SDMRES_COMPARE_RANK_MATERIAL) {
+                               rank_material = SDMRES_COMPARE_RANK_MATERIAL,
+                               digits = SDMRES_RANK_SIGNIF) {
   n <- nrow(info)
   if (!identical(as.integer(base$pair_id), as.integer(info$pair_id)) ||
       !identical(as.integer(var$pair_id), as.integer(info$pair_id)) ||
@@ -995,8 +1001,8 @@ circ_compare_paths <- function(base, var, info, compared, surface, reference,
   pr <- function(x) (rank(x, ties.method = "average") - 1) / (length(x) - 1)
   rank_b <- rank_v <- rep(NA_real_, n)
   if (length(k) >= 2L) {
-    rank_b[k] <- pr(base$cost_rkm[k])
-    rank_v[k] <- pr(var$cost_rkm[k])
+    rank_b[k] <- pr(signif(base$cost_rkm[k], digits))   # NT1 of task 17.6
+    rank_v[k] <- pr(signif(var$cost_rkm[k], digits))
   }
   na_if <- function(v) ifelse(compared, v, NA)
   out <- data.frame(
@@ -1043,7 +1049,8 @@ circ_partial_spearman <- function(x, y, z) {
 circ_compare_summary <- function(cmp, status, reff, redundancy, cost_stage2,
                                  top_share, top_cells, labels,
                                  max_share = SDMRES_COMPARE_MAX_SHARE,
-                                 min_rho = SDMRES_COMPARE_MIN_RHO) {
+                                 min_rho = SDMRES_COMPARE_MIN_RHO,
+                                 digits = SDMRES_RANK_SIGNIF) {
   n <- nrow(cmp)
   if (length(status) != n || length(reff) != n || length(redundancy) != n ||
       length(cost_stage2) != n || length(top_share) != n ||
@@ -1052,8 +1059,10 @@ circ_compare_summary <- function(cmp, status, reff, redundancy, cost_stage2,
          call. = FALSE)
   }
   k <- cmp$compared
+  sg <- function(v) signif(v, digits)        # NT1 of task 17.6: ties first
   rho <- if (sum(k) >= 3L) {
-    stats::cor(cmp$cost_base[k], cmp$cost_variant[k], method = "spearman")
+    stats::cor(sg(cmp$cost_base[k]), sg(cmp$cost_variant[k]),
+               method = "spearman")
   } else NA_real_
   sh <- mean(cmp$material_pair[k])
   data.frame(
@@ -1069,10 +1078,10 @@ circ_compare_summary <- function(cmp, status, reff, redundancy, cost_stage2,
     label = if (isTRUE(sh <= max_share && rho >= min_rho)) labels[1] else
       labels[2],
     rho_reff_stage2_cost = if (sum(k) >= 3L) {
-      stats::cor(reff[k], cost_stage2[k], method = "spearman")
+      stats::cor(sg(reff[k]), sg(cost_stage2[k]), method = "spearman")
     } else NA_real_,
     partial_rho_reff_stage2_cost_gap =
-      circ_partial_spearman(reff[k], cost_stage2[k], cmp$gap_km[k]),
+      circ_partial_spearman(sg(reff[k]), sg(cost_stage2[k]), cmp$gap_km[k]),
     median_redundancy = stats::median(redundancy[k]),
     median_top_current_share = stats::median(top_share[k]),
     top_current_cells = as.integer(top_cells),
@@ -1164,6 +1173,15 @@ circ_self_test_173 <- function() {
   chk("R4: a pair that is not compared has a row, with NA in each column of Decision 18",
       nrow(own) == 6L && !own$compared[6] &&
       all(is.na(unlist(own[6, cols]))))
+  vn <- v6
+  vn$cost_rkm[c(2, 3)] <- c(300, 300 * (1 + 4e-16))   # equal but for the last bits
+  own_n <- circ_compare_paths(b6, vn, sf::st_drop_geometry(b6), !b6$contiguous,
+                              "noghm", "baseline", 20, c(5, 10, 20, 40), 0.5,
+                              0.25)
+  chk("NT1: two costs that differ only in the last bits get the average rank",
+      vn$cost_rkm[2] != vn$cost_rkm[3] &&
+        near(own_n$rank_variant[2], own_n$rank_variant[3], 0) &&
+        near(own_n$rank_variant[2], 0.375, 1e-12))
   chk("CC1: a compared pair with no path stops the function",
       inherits(try(circ_compare_paths(b6, v6, sf::st_drop_geometry(b6),
                                       rep(TRUE, 6), "x", "y"), silent = TRUE),
@@ -1203,5 +1221,436 @@ circ_self_test_173 <- function() {
   chk("label: no material pair but rho below 0.9 -> differs",
       one(mk_cmp(rep(FALSE, 10), c10, c(2, 1, 4, 3, 6, 5, 8, 7, 10, 9) *
                    c(1, 1, 1, 1, 1, 1, 1, 1, 1, 0.1))) == "differs")
+  do.call(rbind, res)
+}
+
+# =============================================================================
+# Task 17.6 (2026-11-14): STEP 17.4 — the QA of phase 1 (process choices QS1,
+# QE1, QP1, QO1, QT1 and QF of task 17.6). A second path: these functions
+# call no circ_* function of STEPs 17.1 to 17.3, no igraph function and not
+# lcp_route_share(). STEP 17.4 gives them the files that STEPs 17.1 to 17.3
+# wrote.
+#   circ_qa_check_config()   the SDMRES_QA_* settings
+#   circ_qa_x_r()            the input x and the resistance from the rank
+#   circ_qa_dist_km()        the distance between two points on the sphere
+#                            (the atan2 form of the haversine)
+#   circ_qa_links()          the 8-neighbour links by terra::adjacent()
+#   circ_qa_components()     the connected sets by the smallest label (no
+#                            igraph)
+#   circ_qa_reserve_cells()  the model cells of a reserve by
+#                            terra::rasterize() (the cell centres)
+#   circ_qa_pcg()            a conjugate-gradient solve with a Jacobi
+#                            preconditioner (no CHOLMOD)
+#   circ_qa_solve_pair()     the effective resistance, the node currents and
+#                            three identities of one pair (QE1)
+#   circ_qa_dijkstra()       a least-cost search in base R (QP1)
+#   circ_qa_line_cells()     the cells (ix, iy) of a written path line
+#   circ_qa_point_share()    the share of a line within d of another line,
+#                            by points (QO1)
+#   circ_qa_point_share_in() the share of a line inside polygons, by points
+#   circ_qa_rank01()         the percentile rank, ties at the average rank
+#   circ_qa_partial_rho()    the partial rho from the residuals of the ranks
+#   circ_qa_classes()        the classes of equal count by rank
+#   circ_qa_self_test()      the hand-made case of STEP 17.4
+# =============================================================================
+
+SDMRES_QA_NEEDED <- c("SDMRES_QA_TOL_REL", "SDMRES_QA_PCG_TOL",
+                      "SDMRES_QA_PCG_MAXIT", "SDMRES_QA_POINT_STEP_M",
+                      "SDMRES_QA_SHARE_TOL")
+
+circ_qa_check_config <- function() {
+  miss <- SDMRES_QA_NEEDED[!vapply(SDMRES_QA_NEEDED, exists, logical(1))]
+  if (length(miss) > 0) {
+    stop("Setting(s) missing from R/00_config.R (task 17.6): ",
+         paste(miss, collapse = ", "), call. = FALSE)
+  }
+  one_num <- function(v) is.numeric(v) && length(v) == 1L && !is.na(v)
+  list(
+    "SDMRES_QA_TOL_REL must be SDMRES_CHECK_TOL_REL (the limit of Decision 17)" =
+      identical(SDMRES_QA_TOL_REL, SDMRES_CHECK_TOL_REL),
+    "SDMRES_QA_PCG_TOL must be above 0 and below SDMRES_QA_TOL_REL / 1000" =
+      one_num(SDMRES_QA_PCG_TOL) && SDMRES_QA_PCG_TOL > 0 &&
+      SDMRES_QA_PCG_TOL < SDMRES_QA_TOL_REL / 1000,
+    "SDMRES_QA_PCG_MAXIT must be a whole number of 1,000 or more" =
+      one_num(SDMRES_QA_PCG_MAXIT) &&
+      SDMRES_QA_PCG_MAXIT == round(SDMRES_QA_PCG_MAXIT) &&
+      SDMRES_QA_PCG_MAXIT >= 1000,
+    "SDMRES_QA_POINT_STEP_M must be above 0 and 1,000 m or less (QO1)" =
+      one_num(SDMRES_QA_POINT_STEP_M) && SDMRES_QA_POINT_STEP_M > 0 &&
+      SDMRES_QA_POINT_STEP_M <= 1000,
+    "SDMRES_QA_SHARE_TOL must be above 0 and 0.1 or less (QO1)" =
+      one_num(SDMRES_QA_SHARE_TOL) && SDMRES_QA_SHARE_TOL > 0 &&
+      SDMRES_QA_SHARE_TOL <= 0.1
+  )
+}
+
+# The input x and the resistance from the rank (Decision 27 points 1-2),
+# written again: x = (n - rank) / (n - 1); linear: R = R_MAX - (R_MAX -
+# R_MIN) x; negexp: R = R_MAX - (R_MAX - R_MIN) (1 - e^(-c x)) / (1 - e^(-c)).
+circ_qa_x_r <- function(rank, n, form, r_min = SDMRES_R_MIN,
+                        r_max = SDMRES_R_MAX, c = SDMRES_NEGEXP_C) {
+  x <- (n - rank) / (n - 1)
+  r <- if (identical(form, "linear")) {
+    r_max - (r_max - r_min) * x
+  } else if (identical(form, "negexp")) {
+    r_max - (r_max - r_min) * (1 - exp(-c * x)) / (1 - exp(-c))
+  } else {
+    stop("circ_qa_x_r(): unknown form.", call. = FALSE)
+  }
+  list(x = x, r = r)
+}
+
+# The distance (km) between two points on the sphere of radius r_km: the
+# atan2 form of the haversine.
+circ_qa_dist_km <- function(lon1, lat1, lon2, lat2,
+                            r_km = GISTAR_EARTH_RADIUS_KM) {
+  k <- pi / 180
+  h <- sin((lat2 - lat1) * k / 2)^2 +
+    cos(lat1 * k) * cos(lat2 * k) * sin((lon2 - lon1) * k / 2)^2
+  2 * r_km * atan2(sqrt(h), sqrt(1 - h))
+}
+
+# The 8-neighbour links of the cells (ix, iy) by terra::adjacent() on a plane
+# raster of the index frame. Returns a data frame: from, to (the positions
+# in the input; from < to), type, d_km (circ_qa_dist_km() between the
+# centres).
+circ_qa_links <- function(ix, iy, deg = SDM_GRAIN_DEG) {
+  n <- length(ix)
+  x0 <- min(ix); y1 <- max(iy)
+  nx <- max(ix) - x0 + 1L; ny <- y1 - min(iy) + 1L
+  r <- terra::rast(nrows = ny, ncols = nx, xmin = 0, xmax = nx, ymin = 0,
+                   ymax = ny, crs = "local")
+  cell <- (y1 - iy) * nx + (ix - x0) + 1          # row-major from the top left
+  pos <- rep(NA_integer_, nx * ny)
+  pos[cell] <- seq_len(n)
+  adj <- terra::adjacent(r, cell, directions = "queen", pairs = TRUE)
+  p1 <- pos[adj[, 1]]; p2 <- pos[adj[, 2]]
+  keep <- !is.na(p1) & !is.na(p2)
+  a <- pmin(p1[keep], p2[keep]); b <- pmax(p1[keep], p2[keep])
+  u <- !duplicated(paste(a, b))
+  a <- a[u]; b <- b[u]
+  type <- ifelse(ix[a] == ix[b] | iy[a] == iy[b], "rook", "diagonal")
+  d <- circ_qa_dist_km((ix[a] + 0.5) * deg, (iy[a] + 0.5) * deg,
+                       (ix[b] + 0.5) * deg, (iy[b] + 0.5) * deg)
+  o <- order(a, b)
+  data.frame(from = a[o], to = b[o], type = type[o], d_km = d[o],
+             stringsAsFactors = FALSE)
+}
+
+# The connected sets: each node takes the smallest label of its neighbours
+# until no label changes (no igraph). Returns the smallest node number of
+# the set of each node.
+circ_qa_components <- function(n, from, to) {
+  lab <- seq_len(n)
+  f <- c(from, to); t <- c(to, from)
+  repeat {
+    cand <- lab[t]
+    o <- order(f, cand)
+    ff <- f[o]; cc <- cand[o]
+    first <- !duplicated(ff)
+    new <- lab
+    new[ff[first]] <- pmin(lab[ff[first]], cc[first])
+    if (identical(new, lab)) break
+    lab <- new
+  }
+  lab
+}
+
+# The model cells of one reserve polygon (the centre rule of Decision 25 h1)
+# by terra::rasterize() of the polygon on the cell-id raster (a cell counts if
+# its centre is inside). Returns list(ids = the sorted 0.2 degree cell ids,
+# id_1km = the 0.2 degree cell id of each 1 km cell; NA cells left out).
+circ_qa_reserve_cells <- function(geom, cellid_r) {
+  v <- terra::vect(sf::st_sf(geometry = geom))
+  cr <- terra::crop(cellid_r, terra::ext(v), snap = "out")
+  m <- terra::rasterize(v, cr, field = 1, touches = FALSE, background = NA)
+  ids <- terra::values(cr, mat = FALSE)[!is.na(terra::values(m, mat = FALSE))]
+  ids <- ids[!is.na(ids)]
+  list(ids = sort(unique(as.integer(ids))), id_1km = as.integer(ids))
+}
+
+# A conjugate-gradient solve of A x = b (A symmetric positive definite, a
+# sparse Matrix) with a Jacobi preconditioner. Stops when the residual is
+# tol x |b| or less. Returns list(x, it, converged).
+circ_qa_pcg <- function(A, b, tol = SDMRES_QA_PCG_TOL,
+                        maxit = SDMRES_QA_PCG_MAXIT) {
+  dinv <- 1 / Matrix::diag(A)
+  x <- numeric(length(b)); r <- b; z <- dinv * r; p <- z
+  rz <- sum(r * z); nb <- sqrt(sum(b^2))
+  for (it in seq_len(maxit)) {
+    Ap <- as.vector(A %*% p)
+    al <- rz / sum(p * Ap)
+    x <- x + al * p
+    r <- r - al * Ap
+    if (sqrt(sum(r^2)) <= tol * nb) {
+      return(list(x = x, it = it, converged = TRUE))
+    }
+    z <- dinv * r
+    rz2 <- sum(r * z)
+    p <- z + (rz2 / rz) * p
+    rz <- rz2
+  }
+  list(x = x, it = maxit, converged = FALSE)
+}
+
+# One pair by the second engine (QE1). The nodes of a are joined into one
+# node with 1 A in; the nodes of b are the ground; only the connected set of
+# a (comp) is used. Returns list(reff, reff_swap (b in, a the ground),
+# energy (sum of g dV^2 with 1 A), kirchhoff (the largest net current at a
+# node that is not in a or b), out_a (the current out of a), current (the
+# node current, 1/2 sum |I|, 0 in a and b), it, converged).
+circ_qa_solve_pair <- function(n, from, to, g, a, b, comp) {
+  keep <- which(comp == comp[a[1]])
+  if (!all(b %in% keep)) stop("circ_qa_solve_pair(): b is not in the set of a.",
+                              call. = FALSE)
+  one <- function(src, gnd) {
+    others <- setdiff(keep, c(src, gnd))
+    map <- rep(NA_integer_, n)
+    map[src] <- 1L
+    map[others] <- seq_along(others) + 1L
+    k <- length(others) + 1L
+    use <- from %in% keep & to %in% keep
+    mf <- map[from[use]]; mt <- map[to[use]]; gu <- g[use]
+    both <- !is.na(mf) & !is.na(mt) & mf != mt
+    ii <- c(mf[both], mt[both], mf[both], mt[both])
+    jj <- c(mt[both], mf[both], mf[both], mt[both])
+    xx <- c(-gu[both], -gu[both], gu[both], gu[both])
+    to_gnd <- xor(is.na(mf), is.na(mt))         # a link to the ground
+    dn <- ifelse(is.na(mf), mt, mf)[to_gnd]
+    ii <- c(ii, dn); jj <- c(jj, dn); xx <- c(xx, gu[to_gnd])
+    A <- Matrix::sparseMatrix(i = ii, j = jj, x = xx, dims = c(k, k))
+    rhs <- numeric(k); rhs[1] <- 1
+    s <- circ_qa_pcg(A, rhs)
+    v <- numeric(n)
+    v[src] <- s$x[1]
+    v[others] <- s$x[-1]
+    list(v = v, it = s$it, converged = s$converged)
+  }
+  s1 <- one(a, b)
+  s2 <- one(b, a)
+  v <- s1$v
+  use <- from %in% keep & to %in% keep
+  I <- ifelse(use, g * (v[from] - v[to]), 0)   # the current from -> to
+  rs <- rowsum(c(I, -I), c(from, to))          # the net current out of a node
+  net <- numeric(n)
+  net[as.integer(rownames(rs))] <- rs[, 1]
+  ab <- c(a, b)
+  out_a <- sum(net[a])
+  cur <- numeric(n)
+  s <- rowsum(c(abs(I), abs(I)), c(from, to), reorder = TRUE)
+  cur[as.integer(rownames(s))] <- 0.5 * s[, 1]
+  cur[ab] <- 0
+  list(reff = v[a[1]], reff_swap = s2$v[b[1]],
+       energy = sum(g[use] * (v[from[use]] - v[to[use]])^2),
+       kirchhoff = max(abs(net[setdiff(keep, ab)])), out_a = out_a,
+       current = cur, it = max(s1$it, s2$it),
+       converged = s1$converged && s2$converged)
+}
+
+# A least-cost search in base R (QP1): from all nodes of a (cost 0) to the
+# first node of b that the search settles. Returns list(cost, nodes (the
+# path from a node of a to a node of b)). cost Inf and no nodes if b cannot
+# be reached.
+circ_qa_dijkstra <- function(n, from, to, w, a, b) {
+  f <- c(from, to); t <- c(to, from); ww <- c(w, w)
+  o <- order(f); f <- f[o]; t <- t[o]; ww <- ww[o]
+  cnt <- tabulate(f, n); start <- cumsum(c(1L, cnt))[seq_len(n)]
+  dist <- rep(Inf, n); pred <- rep(NA_integer_, n); done <- rep(FALSE, n)
+  dist[a] <- 0
+  open <- dist
+  isb <- rep(FALSE, n); isb[b] <- TRUE
+  repeat {
+    u <- which.min(open)
+    if (!is.finite(open[u])) return(list(cost = Inf, nodes = integer(0)))
+    if (isb[u]) break
+    done[u] <- TRUE; open[u] <- Inf
+    if (cnt[u] > 0L) {
+      idx <- start[u]:(start[u] + cnt[u] - 1L)
+      v <- t[idx]; nd <- dist[u] + ww[idx]
+      better <- !done[v] & nd < dist[v]
+      dist[v[better]] <- nd[better]; open[v[better]] <- nd[better]
+      pred[v[better]] <- u
+    }
+  }
+  path <- u
+  while (!is.na(pred[path[1]])) path <- c(pred[path[1]], path)
+  list(cost = dist[u], nodes = path)
+}
+
+# The cells (ix, iy) of a written path line: its vertices from the CRS of
+# the line to longitude and latitude. Returns a data frame: ix, iy, ok (each
+# vertex is at a cell centre, within 1e-6 of a cell).
+circ_qa_line_cells <- function(line, deg = SDM_GRAIN_DEG) {
+  xy <- sf::st_coordinates(line)[, 1:2, drop = FALSE]
+  ll <- sf::sf_project(from = sf::st_crs(line), to = sf::st_crs(4326),
+                       pts = xy)
+  fx <- ll[, 1] / deg; fy <- ll[, 2] / deg
+  ix <- floor(fx); iy <- floor(fy)
+  data.frame(ix = as.integer(ix), iy = as.integer(iy),
+             ok = abs(fx - ix - 0.5) < 1e-6 & abs(fy - iy - 0.5) < 1e-6)
+}
+
+# The points along a line at a step of step_m: the centres of n equal parts
+# (n = the length / step_m, rounded up). An empty line gives no point.
+circ_qa_points <- function(line, step_m) {
+  len <- as.numeric(sf::st_length(line))
+  if (sf::st_is_empty(line) || len == 0) return(NULL)
+  n <- max(1L, as.integer(ceiling(len / step_m)))
+  sf::st_cast(sf::st_line_sample(line, sample = (seq_len(n) - 0.5) / n),
+              "POINT")
+}
+
+# The share of the line a within d_km of the line b, by points (QO1).
+circ_qa_point_share <- function(a, b, d_km, step_m = SDMRES_QA_POINT_STEP_M) {
+  pts <- circ_qa_points(a, step_m)
+  if (is.null(pts) || sf::st_is_empty(b)) return(NA_real_)
+  mean(lengths(sf::st_is_within_distance(pts, b, dist = d_km * 1000)) > 0)
+}
+
+# The share of the line a inside the polygons u (one geometry, a union), by
+# points (QO1).
+circ_qa_point_share_in <- function(a, u, step_m = SDMRES_QA_POINT_STEP_M) {
+  pts <- circ_qa_points(a, step_m)
+  if (is.null(pts)) return(NA_real_)
+  if (length(u) == 0) return(0)
+  mean(lengths(sf::st_intersects(pts, u)) > 0)
+}
+
+# The percentile rank (rank - 1) / (n - 1), ties at the average rank.
+circ_qa_rank01 <- function(x) (rank(x, ties.method = "average") - 1) /
+  (length(x) - 1)
+
+# The partial rho of x and y given z: the Pearson correlation of the
+# residuals of the ranks of x and of y on the ranks of z.
+circ_qa_partial_rho <- function(x, y, z) {
+  rx <- rank(x); ry <- rank(y); rz <- rank(z)
+  stats::cor(stats::resid(stats::lm(rx ~ rz)), stats::resid(stats::lm(ry ~ rz)))
+}
+
+# The classes of equal count by rank: the cells in the order of the value
+# (highest first; a tie to the lower id); position p is in class k - j + 1,
+# with j the smallest j such that p <= ceiling(j n / k).
+circ_qa_classes <- function(value, id, k) {
+  n <- length(value)
+  p <- integer(n)
+  p[order(-value, id)] <- seq_len(n)
+  bounds <- ceiling(seq_len(k) * n / k)
+  j <- findInterval(p - 1, bounds) + 1L
+  as.integer(k - j + 1L)
+}
+
+# ---- The hand-made case of STEP 17.4 ----------------------------------------------------
+# Made-up values, cells, circuits, graphs and lines only. Returns a data
+# frame: check, pass.
+circ_qa_self_test <- function() {
+  res <- list()
+  chk <- function(name, ok) res[[length(res) + 1L]] <<-
+    data.frame(check = name, pass = isTRUE(ok), stringsAsFactors = FALSE)
+  near <- function(a, b, tol = 1e-9) {
+    length(a) == length(b) && all(abs(a - b) <= tol * pmax(1, abs(b)))
+  }
+  # 1. The resistance from the rank.
+  lin <- circ_qa_x_r(1:5, 5L, "linear", 1, 100, 8)
+  chk("x and R: ranks 1 to 5 give x = 1 to 0 and R = 1, 25.75, 50.5, 75.25, 100",
+      near(lin$x, c(1, 0.75, 0.5, 0.25, 0)) &&
+      near(lin$r, c(1, 25.75, 50.5, 75.25, 100)))
+  ne <- circ_qa_x_r(c(10, 9, 6), 11L, "negexp", 1, 100, 8)  # x = 0.1, 0.2, 0.5
+  chk("x and R: negexp8 gives about 45.5, 21.0 and 2.8 at x = 0.1, 0.2 and 0.5 (Decision 27 point 2)",
+      identical(round(ne$r, 1), c(45.5, 21.0, 2.8)))
+  # 2. The distance on the sphere.
+  chk("distance: 1 degree of latitude = r x pi / 180; 0 for one point",
+      near(circ_qa_dist_km(80, 20, 80, 21, 6371.0088), 6371.0088 * pi / 180) &&
+      circ_qa_dist_km(80, 20, 80, 20) == 0)
+  # 3. The links: an L of 3 cells and a cell on a diagonal; a cell alone.
+  ix <- c(10L, 11L, 10L, 12L, 20L); iy <- c(5L, 5L, 6L, 6L, 5L)
+  L <- circ_qa_links(ix, iy, 0.2)
+  key <- paste(L$from, L$to, L$type)
+  chk("links: 1-2 and 1-3 rook; 2-3 and 2-4 diagonal; the cell alone has no link",
+      setequal(key, c("1 2 rook", "1 3 rook", "2 3 diagonal", "2 4 diagonal")))
+  chk("links: the length is the distance between the centres",
+      near(L$d_km[1], circ_qa_dist_km(2.1, 1.1, 2.3, 1.1)))
+  # 4. The connected sets.
+  cm <- circ_qa_components(6L, c(1L, 2L, 4L), c(2L, 3L, 5L))
+  chk("sets: {1, 2, 3}, {4, 5} and {6} (the smallest node of each set)",
+      identical(cm, c(1L, 1L, 1L, 4L, 4L, 6L)))
+  # 5. The cells of a reserve: a made-up raster of 10 x 10 cells of 1 km with
+  #    ids by column pair; a square that covers the centres of 3 x 2 cells.
+  cr <- terra::rast(nrows = 10, ncols = 10, xmin = 0, xmax = 1e4, ymin = 0,
+                    ymax = 1e4, crs = "EPSG:7755")
+  terra::values(cr) <- rep(c(1L, 1L, 2L, 2L, 3L, 3L, 4L, 4L, NA, 5L), 10)
+  sq <- sf::st_sfc(sf::st_polygon(list(rbind(c(1200, 7200), c(4200, 7200),
+    c(4200, 9200), c(1200, 9200), c(1200, 7200)))), crs = 7755)
+  rq <- circ_qa_reserve_cells(sq, cr)
+  chk("reserve cells: the centres of columns 2-4 and rows 1-2 give ids 1 and 2 (6 cells of 1 km)",
+      identical(rq$ids, c(1L, 2L)) && length(rq$id_1km) == 6L)
+  # 6. The second solver (QE1): series, parallel, bridge.
+  sp <- function(n, L, a, b) {
+    circ_qa_solve_pair(n, L[, 1], L[, 2], 1 / L[, 3], a, b,
+                       circ_qa_components(n, L[, 1], L[, 2]))
+  }
+  s1 <- sp(3L, rbind(c(1, 2, 3), c(2, 3, 5)), 1L, 3L)
+  chk("solver: series R = 8, the middle node 1 A, the ends 0",
+      near(s1$reff, 8, 1e-9) && near(s1$current, c(0, 1, 0), 1e-9))
+  s2 <- sp(3L, rbind(c(1, 2, 4), c(1, 3, 2), c(3, 2, 2)), 1L, 2L)
+  chk("solver: parallel R = 2; the middle node 0.5 A",
+      near(s2$reff, 2, 1e-9) && near(s2$current[3], 0.5, 1e-9))
+  s3 <- sp(4L, rbind(c(1, 3, 1), c(1, 4, 2), c(3, 2, 2), c(4, 2, 1),
+                     c(3, 4, 1)), 1L, 2L)
+  chk("solver: unbalanced bridge R = 1.4; the same with the ends swapped; energy = R; 1 A out; no net current at C and D",
+      near(s3$reff, 1.4, 1e-9) && near(s3$reff_swap, 1.4, 1e-9) &&
+      near(s3$energy, 1.4, 1e-9) && near(s3$out_a, 1, 1e-9) &&
+      s3$kirchhoff < 1e-9 && isTRUE(s3$converged))
+  s4 <- sp(5L, rbind(c(1, 3, 2), c(2, 3, 2), c(3, 4, 1), c(4, 5, 7)),
+           c(1L, 2L), 4L)
+  chk("solver: a reserve of two cells (1 || 2 to 3, then 4): R = 1 + 1 = 2; node 5 (a dead end) 0 A",
+      near(s4$reff, 2, 1e-9) && near(s4$current[5], 0, 1e-9) &&
+      near(s4$current[3], 1, 1e-9))
+  # 7. The least-cost search (QP1).
+  Lw <- rbind(c(1, 2, 1), c(2, 3, 1), c(1, 3, 5), c(3, 4, 1), c(5, 6, 1))
+  d1 <- circ_qa_dijkstra(6L, Lw[, 1], Lw[, 2], Lw[, 3], 1L, 4L)
+  chk("search: 1-2-3-4 at cost 3 (not 1-3-4 at 6)",
+      d1$cost == 3 && identical(d1$nodes, c(1L, 2L, 3L, 4L)))
+  d2 <- circ_qa_dijkstra(6L, Lw[, 1], Lw[, 2], Lw[, 3], c(1L, 3L), 4L)
+  chk("search: from two nodes, the path starts at the nearer one (3) at cost 1",
+      d2$cost == 1 && identical(d2$nodes, c(3L, 4L)))
+  chk("search: no route gives cost Inf",
+      is.infinite(circ_qa_dijkstra(6L, Lw[, 1], Lw[, 2], Lw[, 3], 1L, 6L)$cost))
+  # 8. The cells of a line through cell centres (EPSG:7755).
+  ll <- cbind(c(80.1, 80.3, 80.5), c(20.1, 20.1, 20.3))
+  xy <- sf::sf_project(from = sf::st_crs(4326), to = sf::st_crs(7755), pts = ll)
+  lc <- circ_qa_line_cells(sf::st_sfc(sf::st_linestring(xy), crs = 7755), 0.2)
+  chk("line cells: the vertices give the cells (400, 100), (401, 100), (402, 101)",
+      identical(lc$ix, c(400L, 401L, 402L)) && identical(lc$iy, c(100L, 100L, 101L)) &&
+      all(lc$ok))
+  # 9. The shares by points (QO1): a line of 40 km and one of 40 km that
+  #    starts 20 km to the east; within 1 km: 21 of 40 km.
+  la <- sf::st_sfc(sf::st_linestring(rbind(c(-1e4, 0), c(3e4, 0))), crs = 7755)
+  lb <- sf::st_sfc(sf::st_linestring(rbind(c(1e4, 0), c(5e4, 0))), crs = 7755)
+  chk("share by points: 0.525 (21 of 40 km within 1 km), the same as the exact share",
+      near(circ_qa_point_share(la, lb, 1, 250), 0.525, 1e-12))
+  u <- sf::st_union(sf::st_sfc(sf::st_polygon(list(rbind(c(0, -5e3), c(2e4, -5e3),
+    c(2e4, 5e3), c(0, 5e3), c(0, -5e3)))), crs = 7755))
+  chk("share in polygons by points: 20 of 40 km = 0.5; an empty line gives NA",
+      near(circ_qa_point_share_in(la, u, 250), 0.5, 1e-12) &&
+      is.na(circ_qa_point_share_in(sf::st_sfc(sf::st_linestring(), crs = 7755), u)))
+  # 10. Ranks, partial rho and classes.
+  chk("rank: (rank - 1) / (n - 1) with a tie at the average rank",
+      near(circ_qa_rank01(c(10, 20, 20, 40)), c(0, 0.5, 0.5, 1)))
+  chk("rank (NT1): 20 and 20 x (1 + 4e-16) are a tie after signif(, 12)",
+      near(circ_qa_rank01(signif(c(10, 20, 20 * (1 + 4e-16), 40), 12)),
+           c(0, 0.5, 0.5, 1)))
+  x <- c(3, 1, 4, 1, 5, 9, 2, 6, 5, 3); y <- c(2, 7, 1, 8, 2, 8, 1, 8, 2, 8)
+  z <- 1:10
+  r3 <- stats::cor(cbind(rank(x), rank(y), rank(z)))
+  pf <- (r3[1, 2] - r3[1, 3] * r3[2, 3]) / sqrt((1 - r3[1, 3]^2) * (1 - r3[2, 3]^2))
+  chk("partial rho: the residual form = the formula of the three rank correlations",
+      near(circ_qa_partial_rho(x, y, z), pf, 1e-12))
+  ids <- c(105L, 101L, 109L, 103L, 111L, 102L, 104L, 110L, 106L, 108L,
+           107L, 112L)
+  val <- c(5, 9, 9, 1, 0, 3, 2, 7, 0, 4, 6, 0.5)
+  cl <- circ_qa_classes(val, ids, 5L)
+  chk("classes: sizes 3, 2, 3, 2, 2 (classes 5 to 1); the top class 101, 109, 110",
+      identical(as.integer(table(factor(cl, levels = 5:1))), c(3L, 2L, 3L, 2L, 2L)) &&
+      setequal(ids[cl == 5L], c(101L, 109L, 110L)))
   do.call(rbind, res)
 }

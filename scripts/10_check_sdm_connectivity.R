@@ -35,6 +35,17 @@
 #   Stage-2 paths) and R4 (a row for each Stage-2 path; the summary uses the
 #   compared pairs)
 #
+# Process choices of task 17.6 (2026-11-14; STEP 17.4): QS1 a second path for
+#   each result of phase 1, from the files on disk, with no circ_* function
+#   of STEPs 17.1-17.3; QE1 an own conjugate-gradient solve and three
+#   identities; QP1 an own least-cost search in base R; QO1 the overlap and
+#   the top-current share by points every SDMRES_QA_POINT_STEP_M m; QT1 the
+#   QA table of STEP 16.3 (written, then a stop if a check fails); QF the
+#   publish checks. NT1 (after the first QA run): the ranks and the
+#   Spearman rho of point 7 use the values rounded to SDMRES_RANK_SIGNIF
+#   significant digits, so that values equal but for the last bits are a
+#   tie (circ_compare_paths(), circ_compare_summary(); STEP 17.3 and 17.4)
+#
 # STEPS (each task adds its block):
 #   STEP 17.1 (task 17.3)  the two surfaces of Decision 27 points 1-2, from
 #              the rank of the prediction of STEP 15.1 (scripts/09); the graph
@@ -60,7 +71,12 @@
 #              fig_self_test_paths()) -> tbl_19_sdmres_compare.csv,
 #              tbl_19_sdmres_compare_summary.csv, fig_07_sdm_current.png,
 #              fig_08_sdm_paths.png
-#   STEP 17.4 (task 17.6)  the QA of phase 1
+#   STEP 17.4 (task 17.6)  the QA of phase 1: a second path for the
+#              surfaces, the graph, the cells of the reserves and the status
+#              of the pairs, the effective resistances and the currents, the
+#              paths, the comparison and the figures; the publish checks;
+#              the hand-made cases of STEPs 17.1-17.4 (circ_qa_self_test())
+#              -> tbl_19_sdmres_qa.csv
 #   STEP 17.5 (task 17.6b) phase 2 (points 6 and 8) and its QA; only with
 #              RUN_PHASE2 = TRUE
 #
@@ -121,6 +137,11 @@
 #     status, reff, cost_rkm, path_km, n_path_cells, n_hatched_cells,
 #     redundancy. No position and no cell id
 #
+# OUTPUTS (STEP 17.4, task 17.6; QT1):
+#   outputs/tables/tbl_19_sdmres_qa.csv   group, check, value, pass: the
+#     hand-made cases ("test case"), the checks by group, the information
+#     rows ("info"). No cell id, no reserve name, no position
+#
 # OUTPUTS (STEP 17.3, task 17.5; TB1):
 #   outputs/tables/tbl_19_sdmres_compare.csv   one row per surface and
 #     Stage-2 path: pair_id, surface, reference, compared, the reserve
@@ -165,6 +186,7 @@ source(here("R", "00_functions_gistar.R"))   # gistar_centres, gistar_dist_km
 source(here("R", "00_functions_lcp.R"))      # lcp_write_layer (task 17.4)
 source(here("R", "00_functions_circuit.R"))  # circ_* (task 17.3)
 source(here("R", "00_functions_fig.R"))      # fig_* (task 17.5, STEP 17.3)
+source(here("R", "00_functions_occ.R"))      # occ_assert_counts_only (task 17.6)
 
 options(width = 120)
 rule <- function(txt) cat("\n", strrep("=", 78), "\n", txt, "\n",
@@ -1069,3 +1091,641 @@ for (fg in list(c("fig_07", fig_title07, fig_sub07, fig_cap07),
 cat(sprintf("\nSTEP 17.3 time: %.1f min\n",
             as.numeric(difftime(Sys.time(), t_step173, units = "mins"))))
 rule("STEP 17.3 done. Next: STEP 17.4 (task 17.6): the QA of phase 1.")
+
+# =============================================================================
+# STEP 17.4 — the QA of phase 1 (task 17.6; Decision 27 points 1 to 7, 9
+#             and 10)
+# =============================================================================
+# Process choices of task 17.6 (2026-11-14): QS1, QE1, QP1, QO1, QT1 and QF.
+# A second path for each result of phase 1. It reads the files that STEPs
+# 17.1 to 17.3 wrote and calls no circ_* function of those STEPs (only the
+# circ_qa_* functions; no igraph; not lcp_route_share()). The links and the
+# cells of the reserves are not in a file: they are compared with the
+# objects of STEP 17.1.
+#   1. the settings; the hand-made cases of STEPs 17.1 to 17.4 (rows "test
+#      case")
+#   2. the inputs and the files of STEPs 17.1 to 17.3, read from disk
+#   3. the surfaces (points 1-2)
+#   4. the graph and the connected sets (point 3)
+#   5. the cells of the reserves and the status of the pairs (point 3)
+#   6. the circuit and the current (point 4; QE1)
+#   7. the paths (point 4; QP1)
+#   8. the comparison (point 7; QO1)
+#   9. the figures (points 9-10)
+#  10. the publish checks (QF); the QA table (QT1): written, then a stop if a
+#      check fails
+# Console text: the counts of the checks by group, the information rows and
+# the checks that fail. No pair row, no cell id, no reserve name.
+
+rule("STEP 17.4 — the QA of phase 1 (task 17.6)")
+t_step174 <- Sys.time()
+
+# ---- 1. The settings and the hand-made cases ----------------------------------------
+n_q174 <- sdm_run_guards(circ_qa_check_config(),
+                         what = "the SDMRES_QA_* settings (task 17.6)")
+q7 <- list()
+add_q7 <- function(group, check, value, pass) {
+  q7[[length(q7) + 1L]] <<- data.frame(group = group, check = check,
+                                        value = as.character(value),
+                                        pass = isTRUE(pass),
+                                        stringsAsFactors = FALSE)
+}
+qa_tol <- SDMRES_QA_TOL_REL
+qa_stol <- SDMRES_QA_SHARE_TOL
+fmt_rel <- function(v) format(signif(v, 3), scientific = TRUE)
+of_n <- function(ok) sprintf("%d of %d", sum(ok), length(ok))
+qa_rel <- function(a, b) abs(a - b) / pmax(1, abs(b))
+qa_same <- function(a, b) {
+  length(a) == length(b) && isTRUE(all(qa_rel(a, b) <= qa_tol))
+}
+tests7 <- list(
+  "STEP 17.1" = circ_self_test_171(),
+  "STEP 17.2" = circ_self_test_172(),
+  "STEP 17.2 (ii)" = gd172[, c("check", "pass")],
+  "STEP 17.3" = circ_self_test_173(),
+  "STEP 16.2 helpers" = fig_self_test(),
+  "STEP 17.3 frame" = fig_self_test_paths(),
+  "STEP 17.4" = circ_qa_self_test())
+for (s7 in names(tests7)) {
+  tt <- tests7[[s7]]
+  for (i in seq_len(nrow(tt))) {
+    add_q7("test case", paste0(s7, ": ", tt$check[i]),
+           if (tt$pass[i]) "pass" else "FAIL", tt$pass[i])
+  }
+}
+cat("hand-made cases:", paste(vapply(names(tests7), function(s7) {
+  paste0(s7, " ", sum(tests7[[s7]]$pass), " of ", nrow(tests7[[s7]]))
+}, character(1)), collapse = " | "), "\n")
+
+# ---- 2. The inputs and the files of STEPs 17.1 to 17.3, from disk -----------------------
+qa_tab_path <- function(slug) {
+  file.path(DIR_TABLES, sprintf("tbl_%02d_%s.csv", SDMRES_TABLE_NN,
+                                SDMRES_TABLE_SLUGS[[slug]]))
+}
+qa_slugs <- c("surface", "pairs", "compare", "compare_summary")
+qa_surf_f <- file.path(DIR_PROCESSED, sprintf(SDMRES_LAYER_SURFACE, names(surf)))
+qa_cur_f  <- file.path(DIR_PROCESSED, sprintf(SDMRES_LAYER_CURRENT, names(surf),
+                                              PHASE1))
+qa_files <- c(grid_in, pred_in, pairs_in, s2_in, cellid_in, reserves_in,
+              tbl17_in, paths_out, qa_surf_f, qa_cur_f,
+              vapply(qa_slugs, qa_tab_path, character(1)),
+              fig_path_of("current"), fig_path_of("paths"))
+qa_miss <- qa_files[!file.exists(qa_files)]
+if (length(qa_miss) > 0) {
+  stop("STEP 17.4 needs:\n  ", paste(qa_miss, collapse = "\n  "),
+       call. = FALSE)
+}
+add_q7("inputs", "each input and each file of STEPs 17.1-17.3 exists",
+       of_n(file.exists(qa_files)), TRUE)
+qa_g <- sf::st_read(grid_in, quiet = TRUE)
+qa_g <- qa_g[as.logical(qa_g$model), c("id", "ix", "iy")]
+qa_g <- qa_g[order(qa_g$id), ]
+qa_cells_g <- sf::st_geometry(qa_g)
+qa_g <- sf::st_drop_geometry(qa_g)
+qa_ids <- as.integer(qa_g$id)
+qa_n <- length(qa_ids)
+qa_pred <- utils::read.csv(pred_in)
+qa_pred <- qa_pred[match(qa_ids, qa_pred$id), ]
+qa_oor <- as.logical(qa_pred$out_of_range)
+qa_surf <- stats::setNames(lapply(qa_surf_f, utils::read.csv), names(surf))
+qa_cur  <- stats::setNames(lapply(qa_cur_f, utils::read.csv), names(surf))
+qa_p12 <- utils::read.csv(pairs_in, stringsAsFactors = FALSE)
+qa_np  <- nrow(qa_p12)
+qa_lines <- stats::setNames(lapply(names(surf), function(nm) {
+  x <- sf::st_read(paths_out, layer = paste0(nm, "_", PHASE1), quiet = TRUE)
+  x[match(qa_p12$pair_id, x$pair_id), ]
+}), names(surf))
+qa_t <- stats::setNames(lapply(qa_slugs, function(sl) {
+  utils::read.csv(qa_tab_path(sl), stringsAsFactors = FALSE)
+}), qa_slugs)
+qa_tp <- stats::setNames(lapply(names(surf), function(nm) {
+  x <- qa_t$pairs[qa_t$pairs$surface == nm, ]
+  x[match(qa_p12$pair_id, x$pair_id), ]
+}), names(surf))
+qa_s2 <- sf::st_read(s2_in, layer = SDMRES_COMPARE_SURFACE, quiet = TRUE)
+qa_s2 <- qa_s2[match(qa_p12$pair_id, qa_s2$pair_id), FIELDS_S2]
+qa_t17 <- utils::read.csv(tbl17_in, stringsAsFactors = FALSE)
+qa_ns  <- length(surf)
+qa_s2p <- which(qa_s2$path_status == "path")        # the Stage-2 paths
+add_q7("inputs", "each surface file and each current file holds each model cell of the grid once, in id order",
+       sprintf("%s cells", fig_fmt_int(qa_n)),
+       all(vapply(names(surf), function(nm) {
+         identical(as.integer(qa_surf[[nm]]$id), qa_ids) &&
+           identical(as.integer(qa_cur[[nm]]$id), qa_ids)
+       }, logical(1))))
+add_q7("inputs", "the prediction holds each model cell once",
+       sprintf("%s cells", fig_fmt_int(sum(!is.na(qa_pred$id)))),
+       !anyNA(qa_pred$id) && !anyNA(qa_pred$rank))
+add_q7("inputs", "each path layer and the Stage-2 layer hold each pair of tbl_12_reserve_pairs.csv once",
+       sprintf("%d pairs", qa_np),
+       all(vapply(qa_lines, function(x) !anyNA(x$pair_id), logical(1))) &&
+         !anyNA(qa_s2$pair_id) &&
+         all(vapply(qa_lines, nrow, integer(1)) == qa_np))
+add_q7("inputs", "tbl_19_sdmres_pairs.csv: one row for each pair and surface",
+       sprintf("%d rows", nrow(qa_t$pairs)),
+       nrow(qa_t$pairs) == qa_ns * qa_np &&
+         all(vapply(qa_tp, function(x) !anyNA(x$pair_id), logical(1))))
+add_q7("inputs", "tbl_19_sdmres_compare.csv: one row for each surface and Stage-2 path",
+       sprintf("%d rows", nrow(qa_t$compare)),
+       nrow(qa_t$compare) == qa_ns * length(qa_s2p))
+add_q7("inputs", "tbl_19_sdmres_compare_summary.csv: one row for each surface",
+       sprintf("%d rows", nrow(qa_t$compare_summary)),
+       nrow(qa_t$compare_summary) == qa_ns)
+add_q7("inputs", "tbl_19_sdmres_surface.csv on disk = the table of STEP 17.1",
+       sprintf("%d rows", nrow(qa_t$surface)),
+       nrow(qa_t$surface) == nrow(tbl171) &&
+         identical(qa_t$surface$item, tbl171$item) &&
+         isTRUE(all.equal(qa_t$surface$value, tbl171$value,
+                          tolerance = 1e-12)))
+qa_tv <- function(group, item, surface = "") {
+  t <- qa_t$surface
+  s <- ifelse(is.na(t$surface), "", t$surface)
+  v <- t$value[t$group == group & t$item == item & s == surface]
+  if (length(v) != 1L) NA_real_ else v
+}
+
+# ---- 3. The surfaces (points 1-2) --------------------------------------------------------
+for (nm in names(surf)) {
+  q <- circ_qa_x_r(qa_pred$rank, qa_n, SDMRES_SURFACES[[nm]])
+  f <- qa_surf[[nm]]
+  add_q7("surface", paste0(nm, ": x and R again from the rank of the prediction = the surface file"),
+         paste("largest relative difference",
+               fmt_rel(max(qa_rel(q$x, f$x), qa_rel(q$r, f$resistance)))),
+         qa_same(q$x, f$x) && qa_same(q$r, f$resistance))
+  o <- order(qa_pred$rank)
+  add_q7("surface", paste0(nm, ": R is ", SDMRES_R_MIN, " at rank 1 and ",
+                           SDMRES_R_MAX, " at the last rank, and rises with the rank"),
+         "-", qa_same(f$resistance[o[1]], SDMRES_R_MIN) &&
+           qa_same(f$resistance[o[qa_n]], SDMRES_R_MAX) &&
+           all(diff(f$resistance[o]) >= -qa_tol))
+  r <- f$resistance
+  qq <- stats::quantile(r, c(0.25, 0.5, 0.75), names = FALSE)
+  st <- c(r_min = min(r), r_q25 = qq[1], r_median = qq[2], r_mean = mean(r),
+          r_q75 = qq[3], r_max = max(r),
+          r_min_outside_range = if (any(qa_oor)) min(r[qa_oor]) else NA,
+          r_max_outside_range = if (any(qa_oor)) max(r[qa_oor]) else NA)
+  tb <- vapply(names(st), function(it) qa_tv("surface", it, nm), numeric(1))
+  add_q7("surface", paste0(nm, ": the statistics of tbl_19_sdmres_surface.csv again from the file"),
+         of_n(!is.na(st) & qa_rel(st, tb) <= qa_tol), qa_same(st, tb))
+}
+
+# ---- 4. The graph and the connected sets (point 3) -------------------------------------
+qL <- circ_qa_links(qa_g$ix, qa_g$iy)
+qm <- match(paste(qL$from, qL$to),
+            paste(pmin(links$from, links$to), pmax(links$from, links$to)))
+add_q7("graph", "the links by terra::adjacent() = the links of STEP 17.1 (each link and its type)",
+       sprintf("%s and %s links", fig_fmt_int(nrow(qL)), fig_fmt_int(nrow(links))),
+       nrow(qL) == nrow(links) && !anyNA(qm) && !anyDuplicated(qm) &&
+         identical(qL$type, links$type[qm]))
+add_q7("graph", "the link lengths (the atan2 form of the haversine) = the lengths of STEP 17.1",
+       paste("largest relative difference",
+             fmt_rel(if (anyNA(qm)) NA else max(qa_rel(qL$d_km, links$d_km[qm])))),
+       !anyNA(qm) && qa_same(qL$d_km, links$d_km[qm]))
+qC <- circ_qa_components(qa_n, qL$from, qL$to)
+qcs <- as.vector(table(qC))
+qdeg <- tabulate(c(qL$from, qL$to), qa_n)
+gst <- c(nodes = qa_n, links_rook = sum(qL$type == "rook"),
+         links_diagonal = sum(qL$type == "diagonal"),
+         link_km_min = min(qL$d_km), link_km_median = stats::median(qL$d_km),
+         link_km_max = max(qL$d_km), components = length(qcs),
+         largest_component_cells = max(qcs),
+         cells_outside_largest_component = qa_n - max(qcs),
+         isolated_cells = sum(qdeg == 0L))
+gtb <- vapply(names(gst), function(it) qa_tv("graph", it), numeric(1))
+add_q7("graph", "the graph items of tbl_19_sdmres_surface.csv again from the second path",
+       of_n(qa_rel(gst, gtb) <= qa_tol), qa_same(gst, gtb))
+add_q7("graph", "the connected sets (the smallest label; no igraph) = the sets of STEP 17.1",
+       sprintf("%d sets", length(qcs)),
+       length(unique(paste(qC, memb))) == length(unique(qC)) &&
+         length(unique(qC)) == length(unique(memb)))
+for (nm in names(surf)) {
+  r <- qa_surf[[nm]]$resistance
+  lr <- qL$d_km * (r[qL$from] + r[qL$to]) / 2
+  st <- c(link_r_min = min(lr), link_r_median = stats::median(lr),
+          link_r_max = max(lr))
+  tb <- vapply(names(st), function(it) qa_tv("surface", it, nm), numeric(1))
+  add_q7("graph", paste0(nm, ": the link resistances of tbl_19_sdmres_surface.csv again"),
+         of_n(qa_rel(st, tb) <= qa_tol), qa_same(st, tb))
+}
+
+# ---- 5. The cells of the reserves and the status of the pairs (point 3) -----------------
+qa_rc <- vector("list", nrow(res_sf))
+qa_n1m <- qa_n1o <- rep(NA_integer_, nrow(res_sf))
+for (i in which(has_geom)) {
+  rr <- circ_qa_reserve_cells(sf::st_geometry(res_sf)[i], cellid_r)
+  qa_rc[[i]] <- rr$ids[rr$ids %in% qa_ids]
+  qa_n1m[i] <- sum(rr$id_1km %in% qa_ids)
+  qa_n1o[i] <- sum(!rr$id_1km %in% qa_ids)
+}
+same_rc <- vapply(which(has_geom), function(i) {
+  identical(qa_rc[[i]], as.integer(rcl$cells[[i]]))
+}, logical(1))
+add_q7("reserves", "the model cells of each reserve by terra::rasterize() (the cell centres) = the cells of STEP 17.1",
+       of_n(same_rc), all(same_rc))
+t17q <- qa_t17[match(res_d$unit_id, qa_t17$unit_id), ]
+ok17 <- qa_n1m[has_geom] == t17q$n_1km_cells_used[has_geom] &
+  qa_n1o[has_geom] == t17q$n_1km_cells_no_value[has_geom]
+add_q7("reserves", "the 1 km cells of each reserve (in a model cell; in another cell) = tbl_17_reserve_suitability.csv",
+       of_n(ok17), all(ok17))
+qnc <- lengths(qa_rc)[has_geom]
+qall <- unlist(qa_rc[has_geom])
+rst <- c(reserves_with_polygon = sum(has_geom),
+         reserves_with_model_cell = sum(qnc > 0L),
+         model_cells_per_reserve_min = min(qnc),
+         model_cells_per_reserve_median = stats::median(qnc),
+         model_cells_per_reserve_max = max(qnc),
+         reserves_with_one_model_cell = sum(qnc == 1L),
+         model_cells_in_two_or_more_reserves = sum(table(qall) >= 2L),
+         reserve_1km_cells_in_model_cells = sum(qa_n1m[has_geom]),
+         reserve_1km_cells_not_in_model_cells = sum(qa_n1o[has_geom]))
+rtb <- vapply(names(rst), function(it) qa_tv("reserves", it), numeric(1))
+add_q7("reserves", "the reserve items of tbl_19_sdmres_surface.csv again from the second path",
+       of_n(qa_rel(rst, rtb) <= qa_tol), qa_same(rst, rtb))
+qa_ia <- match(qa_p12$from_unit_id, res_d$unit_id)
+qa_ib <- match(qa_p12$to_unit_id, res_d$unit_id)
+qa_status <- vapply(seq_len(qa_np), function(k) {
+  a <- qa_rc[[qa_ia[k]]]
+  b <- qa_rc[[qa_ib[k]]]
+  if (length(a) == 0L || length(b) == 0L) return("no_cells")
+  if (length(intersect(a, b)) > 0L) return("contiguous_02")
+  ca <- qC[match(a, qa_ids)]
+  cb <- qC[match(b, qa_ids)]
+  if (length(intersect(ca, cb)) > 0L) "path" else "no_path"
+}, character(1))
+add_q7("pairs", "the status of each pair from the second path = tbl_19_sdmres_pairs.csv (each surface)",
+       of_n(qa_status == qa_tp[[1]]$status),
+       all(vapply(qa_tp, function(x) identical(x$status, qa_status), logical(1))))
+qc17 <- as.logical(qa_p12$contiguous)
+pst <- c(phase1_pairs = qa_np, contiguous_decision17 = sum(qc17),
+         not_contiguous_decision17 = sum(!qc17),
+         contiguous_02_of_not_contiguous = sum(qa_status[!qc17] == "contiguous_02"),
+         no_path_of_not_contiguous = sum(qa_status[!qc17] == "no_path"),
+         to_compare = sum(qa_status[!qc17] == "path"),
+         contiguous_02_of_contiguous_decision17 = sum(qa_status[qc17] == "contiguous_02"),
+         no_cells = sum(qa_status == "no_cells"))
+ptb <- vapply(names(pst), function(it) qa_tv("pairs", it), numeric(1))
+add_q7("pairs", "the pair items of tbl_19_sdmres_surface.csv again from the second path",
+       of_n(qa_rel(pst, ptb) <= qa_tol), qa_same(pst, ptb))
+
+# ---- 6. The circuit and the current (point 4; QE1) ---------------------------------------
+qa_todo <- which(qa_status == "path")
+qa_its <- integer(0)
+for (nm in names(surf)) {
+  r  <- qa_surf[[nm]]$resistance
+  gq <- 1 / (qL$d_km * (r[qL$from] + r[qL$to]) / 2)
+  tp <- qa_tp[[nm]]
+  cur <- numeric(qa_n)
+  nt <- length(qa_todo)
+  d_reff <- d_swap <- d_en <- kir <- d_out <- rep(NA_real_, nt)
+  conv <- logical(nt)
+  its <- integer(nt)
+  for (j in seq_len(nt)) {
+    k <- qa_todo[j]
+    a <- match(qa_rc[[qa_ia[k]]], qa_ids)
+    b <- match(qa_rc[[qa_ib[k]]], qa_ids)
+    s <- circ_qa_solve_pair(qa_n, qL$from, qL$to, gq, a, b, qC)
+    d_reff[j] <- qa_rel(s$reff, tp$reff[k])
+    d_swap[j] <- qa_rel(s$reff_swap, s$reff)
+    d_en[j]   <- qa_rel(s$energy, s$reff)
+    kir[j]    <- s$kirchhoff
+    d_out[j]  <- abs(s$out_a - 1)
+    conv[j]   <- s$converged
+    its[j]    <- s$it
+    cur <- cur + s$current
+  }
+  qa_its <- c(qa_its, stats::setNames(max(its), nm))
+  add_q7("circuit", paste0(nm, ": each conjugate-gradient solve converged"),
+         of_n(conv), all(conv))
+  add_q7("circuit", paste0(nm, ": the effective resistance of the second solve = tbl_19_sdmres_pairs.csv"),
+         paste0(of_n(d_reff <= qa_tol), " pairs; largest relative difference ",
+                fmt_rel(max(d_reff))), all(d_reff <= qa_tol))
+  add_q7("circuit", paste0(nm, ": the same effective resistance with the two reserves swapped"),
+         paste("largest relative difference", fmt_rel(max(d_swap))),
+         all(d_swap <= qa_tol))
+  add_q7("circuit", paste0(nm, ": the energy (sum of g dV^2 with 1 A) = the effective resistance"),
+         paste("largest relative difference", fmt_rel(max(d_en))),
+         all(d_en <= qa_tol))
+  add_q7("circuit", paste0(nm, ": 1 A out of the first reserve; no net current at another node"),
+         paste("largest differences", fmt_rel(max(d_out)), "and",
+               fmt_rel(max(kir)), "A"),
+         all(d_out <= qa_tol) && all(kir <= qa_tol))
+  add_q7("circuit", paste0(nm, ": a pair contiguous at 0.2 degrees has 0; a pair with no path has Inf"),
+         sprintf("%d and %d pairs", sum(qa_status == "contiguous_02"),
+                 sum(qa_status == "no_path")),
+         all(tp$reff[qa_status == "contiguous_02"] == 0) &&
+           all(is.infinite(tp$reff[qa_status == "no_path"])))
+  f <- qa_cur[[nm]]$current
+  add_q7("current", paste0(nm, ": the total current of the second solves = the current file"),
+         paste("largest difference / largest current",
+               fmt_rel(max(abs(cur - f)) / max(f))),
+         max(abs(cur - f)) <= qa_tol * max(f))
+  add_q7("current", paste0(nm, ": the cells with no current in the file carry no current in the second path"),
+         sprintf("%d cells; largest second-path current there %s", sum(f == 0),
+                 fmt_rel(if (any(f == 0)) max(cur[f == 0]) else 0)),
+         all(cur[f == 0] <= qa_tol * max(f)))
+}
+
+# ---- 7. The paths (point 4; QP1) ----------------------------------------------------------
+qa_same_paths <- integer(0)
+for (nm in names(surf)) {
+  r  <- qa_surf[[nm]]$resistance
+  wq <- qL$d_km * (r[qL$from] + r[qL$to]) / 2
+  tp <- qa_tp[[nm]]
+  gl <- sf::st_geometry(qa_lines[[nm]])
+  nt <- length(qa_todo)
+  d_cost <- d_line <- d_km <- rep(NA_real_, nt)
+  ok_end <- ok_step <- ok_n <- ok_hat <- ok_ray <- same <- logical(nt)
+  for (j in seq_len(nt)) {
+    k <- qa_todo[j]
+    a <- match(qa_rc[[qa_ia[k]]], qa_ids)
+    b <- match(qa_rc[[qa_ib[k]]], qa_ids)
+    d <- circ_qa_dijkstra(qa_n, qL$from, qL$to, wq, a, b)
+    d_cost[j] <- qa_rel(d$cost, tp$cost_rkm[k])
+    lc <- circ_qa_line_cells(gl[k])
+    pos <- match(as.integer(lc$iy) * SDM_ID_BASE + as.integer(lc$ix), qa_ids)
+    okv <- all(lc$ok) && !anyNA(pos) && length(pos) >= 2L
+    if (okv) {
+      m <- length(pos)
+      dk <- circ_qa_dist_km((lc$ix[-m] + 0.5) * SDM_GRAIN_DEG,
+                            (lc$iy[-m] + 0.5) * SDM_GRAIN_DEG,
+                            (lc$ix[-1] + 0.5) * SDM_GRAIN_DEG,
+                            (lc$iy[-1] + 0.5) * SDM_GRAIN_DEG)
+      d_line[j] <- qa_rel(sum(dk * (r[pos[-m]] + r[pos[-1]]) / 2),
+                          tp$cost_rkm[k])
+      ok_end[j]  <- pos[1] %in% a && pos[m] %in% b
+      ok_step[j] <- all(pmax(abs(diff(lc$ix)), abs(diff(lc$iy))) == 1L)
+      ok_n[j]    <- m == tp$n_path_cells[k]
+      ok_hat[j]  <- sum(qa_oor[pos]) == tp$n_hatched_cells[k]
+      same[j]    <- identical(as.integer(pos), as.integer(d$nodes))
+    }
+    d_km[j] <- qa_rel(as.numeric(sf::st_length(gl[k])) / 1000, tp$path_km[k])
+    ok_ray[j] <- tp$cost_rkm[k] >= tp$reff[k] * (1 - qa_tol)
+  }
+  qa_same_paths <- c(qa_same_paths, stats::setNames(sum(same), nm))
+  add_q7("paths", paste0(nm, ": the cost of the second search (base R) = tbl_19_sdmres_pairs.csv"),
+         paste0(of_n(d_cost <= qa_tol), " pairs; largest relative difference ",
+                fmt_rel(max(d_cost))), all(d_cost <= qa_tol))
+  add_q7("paths", paste0(nm, ": the written line: its vertices are cell centres; the cost again from its cells = the table"),
+         paste0(of_n(!is.na(d_line) & d_line <= qa_tol), " lines"),
+         all(!is.na(d_line) & d_line <= qa_tol))
+  add_q7("paths", paste0(nm, ": the written line starts in the first reserve, ends in the second, and each step is to a neighbour"),
+         of_n(ok_end & ok_step), all(ok_end & ok_step))
+  add_q7("paths", paste0(nm, ": n_path_cells, n_hatched_cells and path_km of the table = the written line"),
+         of_n(ok_n & ok_hat & d_km <= qa_tol), all(ok_n & ok_hat & d_km <= qa_tol))
+  add_q7("paths", paste0(nm, ": each path cost is not below the effective resistance"),
+         of_n(ok_ray), all(ok_ray))
+  zero <- qa_status %in% c("contiguous_02", "no_path")
+  add_q7("paths", paste0(nm, ": a pair with no path at 0.2 degrees has an empty line and no cell"),
+         sprintf("%d pairs", sum(zero)),
+         all(sf::st_is_empty(gl[zero])) && all(tp$n_path_cells[zero] == 0L))
+}
+
+# ---- 8. The comparison (point 7; QO1) -----------------------------------------------------
+qa_d0 <- SDMRES_COMPARE_ROUTE_D_KM
+qa_dd <- SDMRES_COMPARE_ROUTE_D_DESCR_KM
+qa_lim <- SDMRES_COMPARE_ROUTE_MATERIAL
+qa_d18 <- c("share_base_in_variant", "share_variant_in_base", "route_overlap",
+            paste0("route_overlap_", qa_dd, "km"), "cost_base", "cost_variant",
+            "rank_base", "rank_variant", "rank_change", "material_route",
+            "material_rank", "material_pair", "path_length_ratio")
+qa_cmp <- qa_status[qa_s2p] == "path"
+qa_near <- integer(0)
+qa_nt <- character(0)
+for (nm in names(surf)) {
+  is_main <- identical(nm, "main")
+  ref_nm <- if (is_main) "stage2_baseline" else "main"
+  labs <- if (is_main) SDMRES_COMPARE_LABELS$stage2 else SDMRES_COMPARE_LABELS$variant
+  tc <- qa_t$compare[qa_t$compare$surface == nm, ]
+  tc <- tc[match(qa_p12$pair_id[qa_s2p], tc$pair_id), ]
+  gref <- if (is_main) sf::st_geometry(qa_s2)[qa_s2p] else
+    sf::st_geometry(qa_lines$main)[qa_s2p]
+  gvar <- sf::st_geometry(qa_lines[[nm]])[qa_s2p]
+  cref <- if (is_main) qa_s2$cost_rkm[qa_s2p] else qa_tp$main$cost_rkm[qa_s2p]
+  kref <- if (is_main) qa_s2$path_km[qa_s2p] else qa_tp$main$path_km[qa_s2p]
+  cvar <- qa_tp[[nm]]$cost_rkm[qa_s2p]
+  kvar <- qa_tp[[nm]]$path_km[qa_s2p]
+  add_q7("comparison", paste0(nm, ": each Stage-2 path has a row; the reference is ", ref_nm,
+                              "; compared = a path at 0.2 degrees"),
+         sprintf("%d rows; %d compared", nrow(tc), sum(qa_cmp)),
+         !anyNA(tc$pair_id) && all(tc$reference == ref_nm) &&
+           identical(as.logical(tc$compared), qa_cmp))
+  add_q7("comparison", paste0(nm, ": a pair that is not compared has NA in each column of Decision 18"),
+         sprintf("%d rows", sum(!qa_cmp)),
+         all(is.na(unlist(tc[!qa_cmp, qa_d18]))))
+  kk <- which(qa_cmp)
+  pb <- pv <- rep(NA_real_, length(kk))
+  pd <- matrix(NA_real_, length(kk), length(qa_dd))
+  for (j in seq_along(kk)) {
+    i <- kk[j]
+    pb[j] <- circ_qa_point_share(gref[i], gvar[i], qa_d0)
+    pv[j] <- circ_qa_point_share(gvar[i], gref[i], qa_d0)
+    for (h in seq_along(qa_dd)) {
+      pd[j, h] <- min(circ_qa_point_share(gref[i], gvar[i], qa_dd[h]),
+                      circ_qa_point_share(gvar[i], gref[i], qa_dd[h]))
+    }
+  }
+  tk <- tc[kk, ]
+  dsh <- c(abs(pb - tk$share_base_in_variant), abs(pv - tk$share_variant_in_base),
+           abs(pmin(pb, pv) - tk$route_overlap))
+  ddd <- abs(pd - as.matrix(tk[, paste0("route_overlap_", qa_dd, "km")]))
+  add_q7("comparison", paste0(nm, ": the two shares and the overlap at ", qa_d0,
+                              " km by points (every ", SDMRES_QA_POINT_STEP_M,
+                              " m) are within ", qa_stol, " of the table"),
+         paste("largest difference", format(round(max(dsh), 4), nsmall = 4)),
+         all(dsh <= qa_stol))
+  add_q7("comparison", paste0(nm, ": the overlap at ", paste(qa_dd, collapse = ", "),
+                              " km by points is within ", qa_stol, " of the table"),
+         paste("largest difference", format(round(max(ddd), 4), nsmall = 4)),
+         all(ddd <= qa_stol))
+  mism <- (pmin(pb, pv) < qa_lim) != tk$material_route
+  nearl <- abs(tk$route_overlap - qa_lim) <= qa_stol
+  qa_near <- c(qa_near, stats::setNames(sum(nearl), nm))
+  add_q7("comparison", paste0(nm, ": material_route = route_overlap < ", qa_lim,
+                              " in the table; by points the same, except a pair within ",
+                              qa_stol, " of the limit"),
+         sprintf("%d differ by points; %d pairs near the limit", sum(mism),
+                 sum(nearl)),
+         identical(tk$material_route, tk$route_overlap < qa_lim) &&
+           all(!mism | nearl))
+  rb <- circ_qa_rank01(signif(cref[kk], SDMRES_RANK_SIGNIF))   # NT1
+  rv <- circ_qa_rank01(signif(cvar[kk], SDMRES_RANK_SIGNIF))
+  # NT1: a tie made by the rounding must join values that differ only in the
+  # last bits (the exact values of the GeoPackage layers).
+  xb <- if (is_main) cref[kk] else qa_lines$main$cost_rkm[qa_s2p][kk]
+  xv <- qa_lines[[nm]]$cost_rkm[qa_s2p][kk]
+  xr <- qa_lines[[nm]]$reff[qa_s2p][kk]
+  spread <- function(x) {
+    g <- signif(x, SDMRES_RANK_SIGNIF)
+    max(vapply(split(x, g), function(v) (max(v) - min(v)) / max(abs(v)),
+               numeric(1)))
+  }
+  nties <- function(x) sum(duplicated(signif(x, SDMRES_RANK_SIGNIF))) -
+    sum(duplicated(x))
+  qa_nt <- c(qa_nt, stats::setNames(paste0(nties(xb), ", ", nties(xv), ", ",
+                                           nties(xr)), nm))
+  add_q7("comparison", paste0(nm, ": each tie made by the rounding to ", SDMRES_RANK_SIGNIF,
+                              " significant digits joins values that differ by less than 1e-13 (NT1)"),
+         paste("largest relative spread", fmt_rel(max(spread(xb), spread(xv),
+                                                      spread(xr)))),
+         max(spread(xb), spread(xv), spread(xr)) < 1e-13)
+  ok_c <- qa_same(tk$cost_base, cref[kk]) && qa_same(tk$cost_variant, cvar[kk])
+  ok_r <- qa_same(tk$rank_base, rb) && qa_same(tk$rank_variant, rv) &&
+    qa_same(tk$rank_change, rv - rb)
+  ok_m <- identical(tk$material_rank,
+                    abs(rv - rb) >= SDMRES_COMPARE_RANK_MATERIAL) &&
+    identical(tk$material_pair, tk$material_route | tk$material_rank)
+  add_q7("comparison", paste0(nm, ": the costs from the files; the ranks, the rank change and the material flags again"),
+         sprintf("%d pairs", length(kk)), ok_c && ok_r && ok_m)
+  add_q7("comparison", paste0(nm, ": path_length_ratio = the two path lengths of the files"),
+         sprintf("%d pairs", length(kk)),
+         qa_same(tk$path_length_ratio, kvar[kk] / kref[kk]))
+  # The share of each Stage-2 path inside the top cells of the surface.
+  cls_q <- circ_qa_classes(qa_cur[[nm]]$current, qa_ids, K173)
+  topu <- sf::st_union(qa_cells_g[cls_q == K173])
+  g2 <- sf::st_geometry(qa_s2)[qa_s2p]
+  ps <- vapply(seq_along(g2), function(i) circ_qa_point_share_in(g2[i], topu),
+               numeric(1))
+  dts <- abs(ps - tc$top_current_share)
+  add_q7("comparison", paste0(nm, ": the share of each Stage-2 path in the top cells by points is within ",
+                              qa_stol, " of the table"),
+         paste("largest difference", format(round(max(dts), 4), nsmall = 4)),
+         all(dts <= qa_stol))
+  # The summary row again from the per-pair table and the files.
+  ts <- qa_t$compare_summary[qa_t$compare_summary$surface == nm, ]
+  rf <- qa_tp[[nm]]$reff[qa_s2p][kk]
+  c2 <- qa_s2$cost_rkm[qa_s2p][kk]
+  gp <- qa_p12$gap_km[qa_s2p][kk]
+  shp <- mean(tk$material_pair)
+  sgq <- function(v) signif(v, SDMRES_RANK_SIGNIF)   # NT1
+  rho <- stats::cor(sgq(tk$cost_base), sgq(tk$cost_variant), method = "spearman")
+  exp_num <- c(stage2_paths = length(qa_s2p), pairs_compared = length(kk),
+               contiguous_02_excluded = sum(qa_status[qa_s2p] == "contiguous_02"),
+               no_path_excluded = sum(qa_status[qa_s2p] == "no_path"),
+               share_material_route = mean(tk$material_route),
+               share_material_rank = mean(tk$material_rank),
+               share_material_pair = shp, spearman_rho = rho,
+               median_route_overlap = stats::median(tk$route_overlap),
+               rho_reff_stage2_cost = stats::cor(sgq(rf), sgq(c2),
+                                                 method = "spearman"),
+               partial_rho_reff_stage2_cost_gap = circ_qa_partial_rho(sgq(rf),
+                                                                      sgq(c2), gp),
+               median_redundancy = stats::median(qa_tp[[nm]]$redundancy[qa_s2p][kk]),
+               median_top_current_share = stats::median(tk$top_current_share),
+               top_current_cells = sum(cls_q == K173))
+  got_num <- vapply(names(exp_num), function(cn) as.numeric(ts[[cn]]), numeric(1))
+  lab <- if (shp <= SDMRES_COMPARE_MAX_SHARE && rho >= SDMRES_COMPARE_MIN_RHO)
+    labs[1] else labs[2]
+  add_q7("comparison", paste0(nm, ": tbl_19_sdmres_compare_summary.csv again from the per-pair table and the files"),
+         of_n(qa_rel(got_num, exp_num) <= qa_tol),
+         nrow(ts) == 1L && ts$reference == ref_nm && qa_same(got_num, exp_num))
+  add_q7("comparison", paste0(nm, ": the label again by the rule of point 7"),
+         lab, nrow(ts) == 1L && identical(ts$label, lab))
+}
+
+# ---- 9. The figures (points 9-10) ---------------------------------------------------------
+qa_want <- round(FIG_STAGE3_SIZE_IN * FIG_STAGE3_DPI)
+for (w in c("current", "paths")) {
+  sz <- fig_png_size(fig_path_of(w))
+  add_q7("figures", paste0(basename(fig_path_of(w)), ": the size of fig_04 to fig_06"),
+         sprintf("%d x %d pixels", sz[1], sz[2]), all(sz == qa_want))
+}
+cls_m <- circ_qa_classes(qa_cur$main$current, qa_ids, K173)
+want_sz7 <- vapply(seq_len(K173), function(j) {
+  ceiling(j * qa_n / K173) - ceiling((j - 1) * qa_n / K173)
+}, numeric(1))
+add_q7("figures", "fig_07: the classes again from the current file = the classes drawn; the class sizes by the rule",
+       paste(as.integer(table(factor(cls_m, levels = K173:1))), collapse = ", "),
+       identical(cls_m, as.integer(cls07)) &&
+         identical(as.numeric(table(factor(cls_m, levels = K173:1))), want_sz7))
+add_q7("figures", "fig_07: the cells with no current are in the lowest class",
+       sprintf("%d cells", sum(qa_cur$main$current == 0)),
+       all(cls_m[qa_cur$main$current == 0] == 1L))
+add_q7("figures", "fig_07 and fig_08: the Stage-2 lines drawn = the Stage-2 paths; the main lines drawn = the compared pairs",
+       sprintf("%d and %d lines", nrow(s2_lines07), nrow(sdm_lines08)),
+       nrow(s2_lines07) == length(qa_s2p) && nrow(s2_lines08) == length(qa_s2p) &&
+         nrow(sdm_lines08) == sum(qa_cmp))
+add_q7("figures", "the reads of STEP 17.3: each file is on the list of its use (k1 of task 16.2)",
+       paste(rd173$log()$file, collapse = ", "),
+       all(rd173$log()$file %in% basename(c(grid_in, states_in, tiger_doi_in,
+                                             bg_doi_in))))
+add_q7("figures", "no field of a drawn table holds a presence, record or tiger word",
+       "-", fig_fields_ok(fig_c07) && fig_fields_ok(s2_lines07) &&
+         fig_fields_ok(s2_lines08) && fig_fields_ok(sdm_lines08))
+
+# ---- 10. The publish checks (QF), the QA table (QT1) ---------------------------------------
+qa_pos_col <- function(x) {
+  grepl(paste0("^(id|ix|iy|x|y|lon|lat|longitude|latitude|geom|geometry|",
+               "cell|cells)$|^cell_|cell02|_cell$"), tolower(names(x)))
+}
+for (sl in qa_slugs) {
+  x <- qa_t[[sl]]
+  ap <- tryCatch({
+    assert_publishable_table(x, prefix = NULL, name = basename(qa_tab_path(sl)))
+    TRUE
+  }, error = function(e) FALSE)
+  add_q7("publish", paste0(basename(qa_tab_path(sl)),
+                           ": assert_publishable_table() passes; no column is a cell id or a coordinate; no value is a model cell id"),
+         sprintf("%d columns", ncol(x)),
+         ap && !any(qa_pos_col(x)) && sdm_qa_id_hits(x, qa_ids) == 0)
+}
+qa_outs <- list.files(dirname(DIR_TABLES), recursive = TRUE)
+add_q7("publish", "(c) no file under outputs/ has tiger in its name",
+       sprintf("%d of %d files", sum(grepl("tiger", basename(qa_outs),
+                                           ignore.case = TRUE)), length(qa_outs)),
+       !any(grepl("tiger", basename(qa_outs), ignore.case = TRUE)))
+qa_layers <- c(basename(qa_surf_f), basename(qa_cur_f), SDMRES_LAYER_PATHS)
+add_q7("publish", "no layer of Decision 27 is under outputs/ (point 10: no layer)",
+       sprintf("%d layers", length(qa_layers)),
+       !any(basename(qa_outs) %in% qa_layers))
+add_q7("info", "the largest number of iterations of one conjugate-gradient solve",
+       paste(names(qa_its), qa_its, collapse = "; "), TRUE)
+add_q7("info", "the paths of the second search that are the same as the written paths (a tie can give another path at the same cost)",
+       paste(names(qa_same_paths), paste(qa_same_paths, "of", length(qa_todo)),
+             collapse = "; "), TRUE)
+add_q7("info", paste0("the ties made by the rounding to ", SDMRES_RANK_SIGNIF,
+                      " significant digits (NT1): the reference cost, the cost, the effective resistance"),
+       paste(names(qa_nt), qa_nt, collapse = "; "), TRUE)
+add_q7("info", paste0("the compared pairs with route_overlap within ", qa_stol,
+                      " of the limit ", qa_lim),
+       paste(names(qa_near), qa_near, collapse = "; "), TRUE)
+qa7_tbl <- do.call(rbind, q7)
+h7  <- sdm_qa_id_hits(qa7_tbl, qa_ids)
+rh7 <- sdm_qa_reserve_hits(qa7_tbl, res_d$unit_name)
+add_q7("publish", "tbl_19_sdmres_qa.csv: (b) no value is a cell id; no reserve name",
+       sprintf("%d and %d", h7, rh7), h7 == 0 && rh7 == 0)
+qa7_tbl <- do.call(rbind, q7)
+rownames(qa7_tbl) <- NULL
+occ_assert_counts_only(qa7_tbl, cols = c("group", "check", "value", "pass"),
+                       count_cols = character(0), name = "tbl_19_sdmres_qa.csv")
+assert_publishable_table(qa7_tbl, prefix = NULL, name = "tbl_19_sdmres_qa.csv")
+write_table(qa7_tbl, SDMRES_TABLE_NN, SDMRES_TABLE_SLUGS[["qa"]])
+cat("\n--- QA by group ---\n")
+grp7 <- unique(qa7_tbl$group)
+print(data.frame(group = grp7,
+                 checks = vapply(grp7, function(g) sum(qa7_tbl$group == g),
+                                 integer(1)),
+                 pass = vapply(grp7, function(g) {
+                   sum(qa7_tbl$pass[qa7_tbl$group == g])
+                 }, integer(1))), row.names = FALSE)
+cat("\n--- the checks (not the test cases) ---\n")
+sh7 <- qa7_tbl[!qa7_tbl$group %in% c("test case", "info"), ]
+cat(paste0(ifelse(sh7$pass, "  ok   ", "  FAIL "), sh7$group, " | ", sh7$check,
+           " | ", sh7$value, collapse = "\n"), "\n")
+cat("\n--- information (facts, not checks) ---\n")
+inf7 <- qa7_tbl[qa7_tbl$group == "info", ]
+cat(paste0(inf7$check, ":\n  ", inf7$value, collapse = "\n"), "\n")
+n_bad7 <- sum(!qa7_tbl$pass)
+if (n_bad7 > 0) {
+  cat("\n--- checks that FAIL ---\n")
+  bad7 <- qa7_tbl[!qa7_tbl$pass, ]
+  cat(paste0(bad7$group, " | ", bad7$check, " | ", bad7$value,
+             collapse = "\n"), "\n")
+  stop("QA of phase 1: ", n_bad7, " of ", nrow(qa7_tbl), " checks fail. ",
+       "tbl_19_sdmres_qa.csv is written; find the cause before any commit.",
+       call. = FALSE)
+}
+rule(paste0("STEP 17.4 complete: QA ", nrow(qa7_tbl), " of ", nrow(qa7_tbl),
+            " checks pass (", round(as.numeric(difftime(Sys.time(), t_step174,
+                                                     units = "mins")), 1),
+            " min).\nCheck `git status --short` before a commit: nothing ",
+            "under data/ may be staged."))

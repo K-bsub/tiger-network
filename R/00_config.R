@@ -1240,6 +1240,31 @@ SDMRES_FIG08_COLOURS    <- c(sdm = "#762A83", stage2 = "#7F7E7B")
 SDMRES_FIG08_LWD        <- c(sdm = 0.7, stage2 = 0.4)
 SDMRES_FIG08_LTY        <- c(sdm = "solid", stage2 = "dashed")
 SDMRES_FIG08_STAGE2_MIX <- 0.55
+# Task 17.6 (2026-11-14): the QA of phase 1 (STEP 17.4), the process choices
+# QS1, QE1, QP1, QO1, QT1 and QF (the author's answer "QS1, QE1, QP1, QO1,
+# QT1, QF as listed"). Limits of the QA, not values of the analysis.
+#   SDMRES_QA_TOL_REL      the relative limit of a second path that computes
+#                          the same value (the effective resistance, a cost,
+#                          a current, a resistance): as Decision 17
+#   SDMRES_QA_PCG_TOL      the relative residual at which the conjugate-
+#                          gradient solve stops (QE1)
+#   SDMRES_QA_PCG_MAXIT    the most iterations of one solve (QE1)
+#   SDMRES_QA_POINT_STEP_M the step of the points along a line (QO1)
+#   SDMRES_QA_SHARE_TOL    the absolute limit of a share by points against
+#                          the exact share (QO1)
+SDMRES_QA_TOL_REL      <- SDMRES_CHECK_TOL_REL      # 1e-6
+SDMRES_QA_PCG_TOL      <- 1e-12
+SDMRES_QA_PCG_MAXIT    <- 50000L
+SDMRES_QA_POINT_STEP_M <- 250
+SDMRES_QA_SHARE_TOL    <- 0.02
+# Task 17.6 (2026-11-14), the author's choice NT1 (after the first QA run of
+# STEP 17.4): before a rank or a Spearman rho of point 7, the values are
+# rounded to this number of significant digits, so that two values that are
+# equal in exact arithmetic but differ in the last bits of the floating-point
+# number (for example the same route summed in the other direction) are a tie
+# at the average rank (Decision 27 point 7; Decision 18). The CSV files keep
+# 15 significant digits
+SDMRES_RANK_SIGNIF <- 12L
 
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a
