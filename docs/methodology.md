@@ -5189,6 +5189,14 @@ the check limit 1e-6 (Decision 17).
   model surface.
 - The total current depends on the pairs: each pair adds 1 A, so a
   reserve with more pairs sends more current.
+- *(Added 2026-11-14, task 17.5, the author's choice LS1, after the run of
+  STEP 17.3.)* The share of a Stage-2 path inside the top 20 % of the
+  cells by the current (point 7, descriptive) is partly a result of the
+  method. The current comes from the same pairs; all of the 1 A of a pair
+  goes through the cells around its two reserves, on any surface; and
+  each Stage-2 path starts and ends in those cells. The top 20 % is also a
+  large area (1,394 cells, about 0.6 million km²). A high share does not
+  by itself show that the two surfaces agree.
 
 **Consequences:**
 - `R/00_config.R`: the block `SDMRES_*` (this Decision and task 17.2).
@@ -5314,6 +5322,11 @@ before the relevant code is written.
   into a test library, saw the same failure, and saw the fix pass. The
   first run stopped before the comparison and wrote no file.
 - **The run** (2026-11-14): Decision 27, "Result of STEP 17.3".
+- **LS1 (the author's choice, 2026-11-14, after the run; the chat's
+  recommendation):** a dated line in the Limitations of Decision 27 — the
+  share of a Stage-2 path in the top cells by the current is partly a
+  result of the method. Rejected: LS2 (no line). It came after the docs
+  commit of task 17.5 (`d7cc9b2`), so it has its own commit.
 - **Docs:** Decision 27 (the text fixes D1 and D2, the note R4, TB1, the
   result, the consequences); `data-dictionary.md` (the two tables and the
   two figures); `naming-conventions.md` (`tbl_19`, `fig_07`, `fig_08`);

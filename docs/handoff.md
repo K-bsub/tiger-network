@@ -143,7 +143,8 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
     overlap 0.711); `negexp8` against `main` **"sensitive"** (29 of 94;
     ρ 0.887). Descriptive: the ρ of the effective resistance and the
     Stage-2 cost 0.570 (partial, given the gap, 0.346); the median share
-    of a Stage-2 path inside the top 20 % cells by current 0.937.
+    of a Stage-2 path inside the top 20 % cells by current 0.937 (LS1:
+    partly a result of the method; a line in the Limitations).
     `tbl_19_sdmres_compare.csv`, `tbl_19_sdmres_compare_summary.csv`,
     `fig_07_sdm_current.png`, `fig_08_sdm_paths.png`.
   - **Next: task 17.6** — STEP 17.4, the QA of phase 1 (a hand-made case
