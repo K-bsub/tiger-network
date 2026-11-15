@@ -1,5 +1,9 @@
 # =============================================================================
-# One-off check for task 10.3b (Decision 17, D1a state split). Not committed.
+# split_rerun_check.R
+# One-off check for task 10.3b (Decision 17, D1a state split). Kept in git as a
+# record since 2026-10-03, commit a04af55; the author's choice of 2026-11-14.
+# Not a pipeline stage. Its backup folder (data/interim/pre_split_backup_20261002)
+# is gitignored.
 # PART A: run BEFORE the re-run (backs up the current outputs).
 # PART B: run AFTER scripts/02 -> 03 -> 04 -> 05 (compares new vs backup).
 # Expected: only unit_id 1 (Nagarjunsagar-Srisailam) and 51 (Amrabad) change,

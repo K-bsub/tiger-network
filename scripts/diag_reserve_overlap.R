@@ -1,5 +1,7 @@
 # =============================================================================
-# diag_reserve_overlap.R  (one-time check for task 13.8; do NOT commit)
+# diag_reserve_overlap.R  (one-time check for task 13.8; kept in git as a
+# record since 2026-10-18, commit 4241674; the author's choice of 2026-11-14.
+# Not a pipeline stage: no script reads it, and it writes nothing)
 # Why did STEP 13.6 find background records in two reserve polygons?
 # Reads the reserve layer and the clean background and tiger layers. Writes
 # nothing. Prints names, unit_ids, counts and areas only: no coordinate, no
