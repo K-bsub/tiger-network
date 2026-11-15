@@ -4762,6 +4762,35 @@ before the relevant code is written.
 
 *(Records as-built changes to data, code, or scope during execution.)*
 
+### 2026-11-14 — Text fix before Week 17 (two script headers; three stale statements)
+
+Found when the Week-17 chat read the files. No rule, value, data layer or
+script logic changed; no run.
+
+- **`scripts/diag_reserve_overlap.R` and `scripts/split_rerun_check.R`.**
+  Their headers said "do NOT commit" and "Not committed", but each is in
+  git (`split_rerun_check.R` since `a04af55`, Week 10;
+  `diag_reserve_overlap.R` since `4241674`, Week 13). The author's choice
+  (2026-11-14): keep both in git as records of one-time checks. The
+  headers now say so. Neither is a pipeline stage.
+- **The week of the rule "Published layers".** The pending item moved from
+  Week 18 to Week 19 on 2026-11-07 (task 16.6). Three texts still gave
+  Week 18:
+  - "Limitations", the Week-15 item "Static figures only, so far": now
+    names the pending item and Week 19, with a dated correction note.
+  - `handoff.md`, the table "Files that later weeks read" (the row of the
+    Stage-2 surfaces and paths): "pending [Week 19]".
+  - `handoff.md`, the row of Decision 25 in the table of fixed Decisions:
+    the short form now names the pending item, Week 18 in the Decision
+    text and Week 19 since 2026-11-07.
+  - The text of Decision 25 (point 4, "Reason", "Consequences") and the
+    dated notes of `proposal.md` §8 are records and are not changed.
+- **The chat's error (2026-11-14):** a `git fetch --dry-run` of the chat
+  left an empty `.git/objects/maintenance.lock` (the project folder does
+  not allow a delete from the chat's shell). The chat moved it to
+  `.git/stale-maintenance-lock-claude-20261115` (0 bytes; the author can
+  delete it). No commit, branch or file of the repository changed.
+
 ### 2026-11-07 — Week 16 complete: task 16.6 (docs close; the Week-17 plan)
 
 - **Docs, and one list in a script.** No rule, value, data layer or table
@@ -6393,7 +6422,9 @@ prediction and the reserve check needs.)*
   where visitors go, mostly in reserves, and the mammal background may not
   correct all of that effort (not tested).
 - **Static figures only, so far.** No layer that a reader can zoom or
-  download before the Week-18 rule (pending item "Published layers").
+  download before the rule of the pending item "Published layers" (Week
+  19 since 2026-11-07; *corrected 2026-11-14: the text said "the Week-18
+  rule"*).
 
 *(Week 16, added 2026-11-07 at the Week-16 close. Decision 26 keeps its
 own list of limitations; the items below are the ones that a reader of the
