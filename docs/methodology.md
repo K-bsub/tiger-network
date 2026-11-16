@@ -66,7 +66,11 @@ STEP 17.3 — point 7: the `main` paths against the Stage-2 baseline paths
 against `main` "sensitive" (29 of 94; ρ 0.887); `fig_07` and `fig_08`.
 **Task 17.6 (2026-11-14):** STEP 17.4 — the QA of phase 1, a second path
 for each result: 196 of 196 checks; the author's choice NT1 (ties of
-values equal but for the last bits) after the first run.
+values equal but for the last bits) after the first run. **Task 17.6b
+(2026-11-15):** STEP 17.5 — phase 2 on both surfaces: the 1,540 pairs of
+the 56 reserves (12 contiguous at 0.2°, 1,528 solved); point 8 on
+`main`: 51 of the 106 pairs of Decision 17 are among the 106 pairs with
+the lowest effective resistance (share 0.481) — "differs"; QA 62 of 62.
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -4853,6 +4857,14 @@ complete):**
      QA of phase 1 passes, with its own STEP and its own QA (switch
      `RUN_PHASE2`, w1 of task 17.2). Point 8 reads it.
    - Pilibhit and Dholpur-Karauli are out (no polygon; Decision 17 G1).
+   - *(Task 17.6b, 2026-11-14, the author's reading R5 and choice F2a: a
+     phase-2 pair goes from the lower `unit_id` to the higher one, so the
+     1,540 pairs are choose(56, 2) in that order (`p2_id`). The columns
+     `decision17` and `pair_id_decision17` link a pair to its pair of
+     Decision 17, in either direction. Phase 2 uses `circ_run_pairs()`,
+     with the checks of STEP 17.2 for each pair; STEP 17.2 does not
+     change. F2a is a process choice of task 17.6b, not the F2 of point
+     10.)*
 7. **Phase 1 against the Stage-2 paths (f1).**
    - **Pairs compared:** the 97 pairs that are not contiguous in Decision
      17, less the pairs that are contiguous at 0.2° and the pairs with no
@@ -4910,6 +4922,9 @@ complete):**
    - For `negexp8`: the same share and count, with no label. For the
      phase-2 paths: counts and lengths only (no comparison; Stage 2 has no
      path for 1,434 of the 1,540 pairs).
+   - *(Task 17.6b, 2026-11-14, the author's reading R6: the rank uses the
+     effective resistance rounded to 12 significant digits
+     (`SDMRES_RANK_SIGNIF`; NT1 of task 17.6), then the tie rule above.)*
 9. **The current of `fig_07` (P3a).** The phase-1 total current of the
    `main` surface (`SDMRES_FIG07_PHASE` = `"phase1"`): the phase-1 pairs
    with a path at 0.2°. The phase-2 total currents go into
@@ -4929,7 +4944,9 @@ complete):**
     - **Tables `tbl_19_*`** (slugs: n1 of task 17.2): counts, statistics
       and pair rows with reserve names; no position
       (`assert_publishable_table()` with no prefix); no cell id. *(Task
-      17.5, TB1: a sixth slug, `sdmres_compare_summary`.)*
+      17.5, TB1: a sixth slug, `sdmres_compare_summary`.)* *(Task 17.6b,
+      T2a: two more slugs, `sdmres_phase2_summary` and
+      `sdmres_phase2_qa`; `sdmres_phase2` was in n1.)*
     - **`fig_07`:** the total current of point 9 on the `main` surface, on
       the 0.2° model cells, in five classes of equal count by rank (as
       Decision 25 c1; no value in the legend), with the 97 Stage-2
@@ -5142,6 +5159,83 @@ console text sent on 2026-11-14; facts, not a reading):**
   the counts of the diagnosis, by the author and the chat. The chat has
   not read a row of a `tbl_19` table.
 
+**Result of STEP 17.5 (task 17.6b, `scripts/10` with `RUN_PHASE2 =
+TRUE`, run on the project machine; console text of STEP 17.5 sent on
+2026-11-15; facts, not a reading):**
+- STEPs 17.1–17.4 ran first. After the run, `git status --short` showed
+  no change in their tables and figures (only the three code files of
+  task 17.6b and the three new tables).
+- **The checks:** the hand-made case of STEP 17.5, 9 of 9; the checks of
+  STEP 17.2 for each of the 1,528 solved pairs on each surface (1 A out
+  of the first reserve; the path cost again from the cells; the path
+  cost not below the effective resistance; the path from one reserve to
+  the other).
+- **The pairs (point 6; R5):** 1,540 pairs of the 56 reserves; 106 pairs
+  of Decision 17 (none from the higher `unit_id` to the lower one); 12
+  contiguous at 0.2° (all pairs of Decision 17: the 12 of STEP 17.1); no
+  pair with no path; **1,528 solved** on each surface.
+- **Point 8 on `main` (labelled):** 51 of the 106 pairs with the lowest
+  effective resistance are pairs of Decision 17: **share 0.4811**. The 12
+  pairs contiguous at 0.2° (effective resistance 0) are among the 106;
+  so 39 of the other 94 are pairs of Decision 17 (arithmetic from the
+  counts). For 2 of the 56 reserves, the partner of lowest effective
+  resistance is not a pair of Decision 17. **Label: "differs"** (0.4811
+  is below 2/3).
+- **Point 8 on `negexp8` (no label):** 61 of 106 (share 0.5755); 2
+  reserves.
+- **The rounding (NT1; R6):** no tie of the effective resistance on
+  either surface.
+- **`main`** (the 1,528 solved pairs; median, then the range):
+  effective resistance 661.9 resistance-km (20.05 to 5,361; quartiles
+  387.4 and 3,467); path length 1,418 km (21.89 to 3,784); redundancy
+  22.77.
+- **`negexp8`:** effective resistance 72.85 (3.689 to 767.1; quartiles
+  32.95 and 558.2); path length 1,253 km (21.75 to 3,573); redundancy
+  24.61.
+- **Hatched cells (k1):** on `main`, 5 paths cross a hatched cell (1 cell
+  in total); on `negexp8`, 39 paths (3 cells).
+- **The total current of phase 2** (1,528 A on each surface): 6,956 of
+  the 6,969 model cells carry current; 13 do not (phase 1: also 13;
+  whether they are the same cells was not checked). The largest cell
+  current is 288.3 on `main` and 300.45 on `negexp8`; the median 12.66
+  and 11.78 (in units of the 1 A of each pair).
+- **QA of phase 2 (Q2a): 62 of 62** — 30 hand-made checks (9 of STEP
+  17.5; 21 of the engines of STEP 17.4), 29 checks and 3 information
+  rows.
+  - **Pairs:** the 1,540 pairs once, in the order of R5; the link to the
+    106 pairs of Decision 17; the status of each pair from the second
+    path of STEP 17.4 = the table.
+  - **The pairs of Decision 17 against phase 1:** the status, the
+    effective resistance and the cost = the phase-1 table (largest
+    relative difference 0 on each surface); their current = the phase-1
+    current file (largest difference 1.28e-15 and 2.45e-15 of the largest
+    current).
+  - **Sample:** 100 of the 1,434 other pairs with a path on each surface
+    (equal steps over the pair order; no seed). The conjugate-gradient
+    solve of STEP 17.4 (at most 577 iterations on `main`, 607 on
+    `negexp8`) and the own search = the table (largest relative
+    difference of the effective resistance 2.83e-12 and 3.85e-12; of the
+    cost 2.83e-15 and 4.18e-15).
+  - **Paths:** each of the 1,540 written lines on each surface again
+    from its cells.
+  - **Point 8 again** from the table on disk (ranks by pairwise counts):
+    the ranks, `in_lowest`, the lowest partner of each reserve, the share
+    and the count, the label "differs".
+  - **Summary and publish:** the items of the summary again from the
+    files; the two tables pass `assert_publishable_table()` (no cell id);
+    0 of 81 files under `outputs/` with "tiger" in the name; no layer of
+    Decision 27 under `outputs/`; the QA table holds no cell id and no
+    reserve name.
+- **Files:** the layers `main_phase2` and `negexp8_phase2` of
+  `lcp_sdm_network_7755.gpkg` (1,540 features each); the two phase-2
+  current files (6,969 rows each); `tbl_19_sdmres_phase2.csv` (3,080
+  rows), `tbl_19_sdmres_phase2_summary.csv` (48 rows) and
+  `tbl_19_sdmres_phase2_qa.csv` (62 rows). STEP 17.5 took 2.6 min (the
+  solves 0.7 min on each surface).
+- **Seen from this run on:** the console text of STEP 17.5 (counts and
+  statistics), by the author and the chat. The chat has not read a row
+  of a `tbl_19` table. No map of phase 2 was made.
+
 **Reason and sources:**
 - **The national method.** The national report modelled occupancy on
   9,309 grids of 10 × 10 km, made the cost surface as 1 − Ψ, made
@@ -5267,13 +5361,14 @@ the check limit 1e-6 (Decision 17).
 **Consequences:**
 - `R/00_config.R`: the block `SDMRES_*` (this Decision and task 17.2;
   the figure settings of task 17.5; the QA limits and `SDMRES_RANK_SIGNIF`
-  of task 17.6).
+  of task 17.6; two slugs and `SDMRES_QA2_SAMPLE_N` of task 17.6b).
 - `scripts/10_check_sdm_connectivity.R` with `R/00_functions_circuit.R`
   (s1 and f1 of task 17.2): STEP 17.1 (task 17.3) the two surfaces; STEP
   17.2 (task 17.4) phase 1, the circuit and the paths; STEP 17.3 (task
   17.5) the comparison of point 7 and the figures; STEP 17.4 (task 17.6)
-  the QA of phase 1; STEP 17.5 phase 2 (point 8) and its QA, with
-  `RUN_PHASE2`. The hand-made cases of point 5 run first.
+  the QA of phase 1; STEP 17.5 (task 17.6b) phase 2 (point 8) and its QA,
+  with `RUN_PHASE2` (`TRUE` in the committed script since task 17.6b;
+  RS2). The hand-made cases of point 5 run first.
 - `R/00_functions_fig.R` (FR1 of task 17.5): the frame of `fig_07` and
   `fig_08` (`fig_frame_paths()`), with each input as an argument;
   `scripts/09` does not use it.
@@ -5320,6 +5415,83 @@ before the relevant code is written.
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-15 — Week 17, task 17.6b complete: STEP 17.5 (phase 2 and its QA)
+
+- **The author's answer (2026-11-14):** "R5, R6 confirmed; F2a, T2a,
+  Q2a, new QA slug".
+  - **R5** (a reading of the chat, confirmed): a phase-2 pair goes from
+    the lower `unit_id` to the higher one; `decision17` and
+    `pair_id_decision17` link it to its pair of Decision 17 (Decision 27
+    point 6, the dated note).
+  - **R6** (a reading of the chat, confirmed): the rank of point 8 uses
+    NT1, then the tie rule of point 8 (point 8, the dated note).
+  - **F2a:** a new function `circ_run_pairs()` runs the circuit and the
+    path of each phase-2 pair, with the checks of STEP 17.2; STEP 17.2
+    does not change. (Not the F2 of Decision 27 point 10.)
+  - **T2a:** two tables: `tbl_19_sdmres_phase2.csv` (a row for each
+    surface and pair) and `tbl_19_sdmres_phase2_summary.csv` (the long
+    form of `tbl_19_sdmres_surface.csv`).
+  - **Q2a with a new slug:** the QA of phase 2 in its own table,
+    `tbl_19_sdmres_phase2_qa.csv`: the pairs of Decision 17 against phase
+    1; the second engine of STEP 17.4 on a sample of the other pairs on
+    each surface; point 8 again; the publish checks.
+  - The other options of F2, T2 and Q2 are in the chat's reply of
+    2026-11-14; this entry does not repeat them.
+- **RS2 (the author's choice, 2026-11-15, the chat's recommendation):**
+  `RUN_PHASE2 = TRUE` stays in the committed script. A new run makes all
+  committed tables of Week 17 again; a failure of the QA of phase 1 still
+  stops the script before phase 2. Rejected: RS1 (`FALSE` in the
+  commit).
+- **`R/00_config.R`:** the slugs `phase2_summary` and `phase2_qa`
+  (`phase2` since n1 of task 17.2); `SDMRES_QA2_SAMPLE_N` (100; a limit of
+  the QA, not a value of the analysis).
+- **Code:** `R/00_functions_circuit.R` gets `circ_phase2_pairs()`,
+  `circ_run_pairs()`, `circ_pair_rule()`, `circ_phase2_summary()`, the
+  hand-made case `circ_self_test_175()` (9 checks) and
+  `circ_qa_pair_rule()` (the ranks of point 8 by pairwise counts, for the
+  QA). `scripts/10` gets STEP 17.5; the stop for `RUN_PHASE2 = TRUE` is
+  removed.
+- **Three changes after the author's answer, stated in the chat's reply
+  before the run (no change of a result):** a progress line after each
+  250 solved pairs (the count and the minutes; no id, no name; an
+  argument of `circ_run_pairs()`, so STEP 17.2 does not change); the
+  console prints the summary without the column `reading` (the file has
+  it); three QA rows of point 8 show more values (for example the share
+  again and the share of the summary).
+- **The chat's test** (made-up records; R 4.3.3; `ggplot2` 3.4.4 and
+  4.0.3): 62 of 62; a second made-up project with one pair of Decision
+  17 from the higher `unit_id` to the lower one: 62 of 62; with
+  `RUN_PHASE2 = FALSE` the console of STEPs 17.1–17.4 was that of task
+  17.6. Six errors put in on purpose, one at a time; each was found (the
+  check that found it in brackets):
+  - the pairs of Decision 17 matched in one direction only (the
+    hand-made case of STEP 17.5);
+  - `lowest_of_from` from the wrong column (the lowest partner);
+  - the current of all pairs in the sum of the pairs of Decision 17 (the
+    phase-1 current file);
+  - the share in the summary × 0.99 (the share and the count);
+  - `in_lowest` with 107 pairs (the ranks);
+  - the effective resistance of the other pairs × (1 + 1e-5) (the sample
+    and the summary).
+- **Not covered by the made-up project:** a sample of 100 from more than
+  100 pairs (it had 2; the rule of the steps was tested apart) and a tie
+  of the effective resistance (the hand-made case only).
+- **The chat's estimate of the run time** was "less than 10 min"; STEP
+  17.5 took 2.6 min.
+- **The run:** Decision 27, "Result of STEP 17.5". Point 8 on `main`:
+  "differs" (share 0.4811).
+- **Text fix:** an open item of `handoff.md` said that an edit of the
+  text of `fig_07` and `fig_08` needs a change of `scripts/09`; the
+  figures are drawn in `scripts/10` (STEP 17.3).
+- **Docs:** Decision 27 (the notes R5 and F2a in point 6, R6 in point 8,
+  T2a in point 10; "Result of STEP 17.5"; the consequences);
+  `data-dictionary.md` (the phase-2 layers and current files; the three
+  tables); `naming-conventions.md`; `project-plan.md` (task 17.6b);
+  `handoff.md`.
+- **Next:** task 17.7 — the docs of the Week-17 close (§5.3–5.4, the
+  Limitations, `proposal.md` §8, `README.md`, `references.md`, the
+  handoff) and the Week-18 plan (Stage 4); then task 17.8.
 
 ### 2026-11-14 — Week 17, task 17.6 complete: STEP 17.4 (the QA of phase 1)
 

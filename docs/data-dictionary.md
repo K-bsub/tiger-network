@@ -1390,7 +1390,7 @@ run of STEP 17.1 writes it again.
 | `x` | numeric | The input of Decision 27 point 1: (6,969 − `rank`) / 6,968, with `rank` from `sdm_prediction_cell02.csv`. 1 for the highest value, 0 for the lowest |
 | `resistance` | numeric | 1 to 100 (`SDMRES_R_MIN`, `SDMRES_R_MAX`). `main`: 1 + 99 × (1 − x); `negexp8`: 100 − 99 × (1 − exp(−8x)) / (1 − exp(−8)). A cell outside the training range keeps its value (Decision 27 k1) |
 
-## lcp_sdm_network_7755.gpkg  *(data/processed; Week 17 — layers `main_phase1` and `negexp8_phase1` built, task 17.4; gitignored)*
+## lcp_sdm_network_7755.gpkg  *(data/processed; Week 17 — layers `main_phase1` and `negexp8_phase1` built, task 17.4; `main_phase2` and `negexp8_phase2` built, task 17.6b; gitignored)*
 
 Written by `scripts/10` STEP 17.2 (Decision 27 points 4 to 6). One layer per
 surface and phase; one LINESTRING per pair of Decision 17, through the 0.2°
@@ -1403,12 +1403,23 @@ modelled path: never published at a position finer than a 10 km cell
 **As built (2026-11-14):** `main_phase1` and `negexp8_phase1`, 106 features
 each (94 paths, 12 contiguous at 0.2°).
 
+**Phase 2** (`scripts/10` STEP 17.5; Decision 27 points 6 and 8; R5 and F2a
+of task 17.6b): one LINESTRING per pair of the 56 reserves with a polygon,
+from the lower `unit_id` to the higher one. The phase-2 layers have
+`p2_id`, `decision17` and `pair_id_decision17` in place of `pair_id` and
+`contiguous_decision17`. **As built (2026-11-15):** `main_phase2` and
+`negexp8_phase2`, 1,540 features each (1,528 paths, 12 contiguous at 0.2°,
+no pair with no path).
+
 | Field | Type | Meaning |
 |---|---|---|
-| `pair_id` | integer | Join key to `tbl_12_reserve_pairs.csv` |
-| `surface`, `phase` | character | `main` or `negexp8`; `phase1` |
-| `from_unit_id`, `from_name`, `to_unit_id`, `to_name` | integer / character | The two reserves (from the pair table); the search runs from `from_unit_id` |
-| `contiguous_decision17` | logical | `contiguous` of Decision 17 |
+| `pair_id` | integer | Phase 1: join key to `tbl_12_reserve_pairs.csv` |
+| `p2_id` | integer | Phase 2: the pair, 1 to 1,540, in the order of the unit ids (R5) |
+| `surface`, `phase` | character | `main` or `negexp8`; `phase1` or `phase2` |
+| `from_unit_id`, `from_name`, `to_unit_id`, `to_name` | integer / character | The two reserves (phase 1: from the pair table; phase 2: `from_unit_id` < `to_unit_id`); the search runs from `from_unit_id` |
+| `contiguous_decision17` | logical | Phase 1: `contiguous` of Decision 17 |
+| `decision17` | logical | Phase 2: TRUE if the pair is a pair of Decision 17, in either direction |
+| `pair_id_decision17` | integer | Phase 2: the `pair_id` of that pair in `tbl_12_reserve_pairs.csv`; NA if `decision17` is FALSE |
 | `status` | character | `path`, `contiguous_02` (the two reserves share a model cell) or `no_path` (Decision 27 point 3) |
 | `reff` | numeric | The effective resistance of the pair (resistance-km); 0 for `contiguous_02`, `Inf` for `no_path` |
 | `cost_rkm` | numeric | The least cost (resistance-km); 0 for `contiguous_02`, `Inf` for `no_path` |
@@ -1417,7 +1428,7 @@ each (94 paths, 12 contiguous at 0.2°).
 | `n_hatched_cells` | integer | The cells of the path outside the training range (Decision 27 k1) |
 | `redundancy` | numeric | `cost_rkm` / `reff` (1 or more); `NA` with no path |
 
-## circ_current_<surface>_<phase>_cell02.csv  *(data/processed; Week 17 — `phase1` built, task 17.4; gitignored)*
+## circ_current_<surface>_<phase>_cell02.csv  *(data/processed; Week 17 — `phase1` built, task 17.4; `phase2` built, task 17.6b; gitignored)*
 
 Written by `scripts/10` STEP 17.2 (Decision 27 point 4, Z1). One row per
 model cell, ordered by `id`. The total current of the pairs of the phase (1 A
@@ -1426,7 +1437,10 @@ geometry. It holds the 0.2° cell id, so it stays under `data/`; no table holds
 a row of it. Written, then read back and checked.
 
 **As built (2026-11-14):** `circ_current_main_phase1_cell02.csv` and
-`circ_current_negexp8_phase1_cell02.csv`, 6,969 rows each.
+`circ_current_negexp8_phase1_cell02.csv`, 6,969 rows each. *(2026-11-15,
+task 17.6b, STEP 17.5: `circ_current_main_phase2_cell02.csv` and
+`circ_current_negexp8_phase2_cell02.csv`, 6,969 rows each; the 1,528
+solved pairs of phase 2, 1 A each.)*
 
 | Field | Type | Meaning |
 |---|---|---|
@@ -2011,5 +2025,55 @@ information rows.
 | `check` | character | What the row checks (or, for `info`, the fact) |
 | `value` | character | A count, a largest difference or a fact; no cell id and no reserve name |
 | `pass` | logical | TRUE if the check passes (`info`: always TRUE) |
+
+## tbl_19_sdmres_phase2.csv  *(Week 17 — built, task 17.6b)*
+
+Written by `scripts/10` STEP 17.5 (Decision 27 points 6 and 8; R5, R6 and
+T2a of task 17.6b), with `RUN_PHASE2 = TRUE`. One row per surface and
+phase-2 pair: the fields of the phase-2 layers of
+`lcp_sdm_network_7755.gpkg` without the geometry and `phase`, and the
+columns of point 8. Reserve names and values; no position and no cell id
+(`assert_publishable_table()`, no prefix).
+
+**As built (2026-11-15):** 3,080 rows (1,540 pairs × 2 surfaces).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `p2_id`, `from_unit_id`, `from_name`, `to_unit_id`, `to_name`, `decision17`, `pair_id_decision17`, `surface`, `status`, `reff`, `cost_rkm`, `path_km`, `n_path_cells`, `n_hatched_cells`, `redundancy` | — | As in the phase-2 layers of `lcp_sdm_network_7755.gpkg` |
+| `rank_reff` | integer | The rank of the pair on its surface (1 = the lowest effective resistance): `reff` rounded to 12 significant digits (NT1), then the lower `from_unit_id`, then the lower `to_unit_id` (R6). 0 (`contiguous_02`) first |
+| `in_lowest` | logical | `rank_reff` ≤ 106 (the number of the pairs of Decision 17; point 8) |
+| `lowest_of_from`, `lowest_of_to` | logical | TRUE if the pair is the partner of lowest `rank_reff` of its `from_unit_id` (or of its `to_unit_id`); one TRUE for each reserve on each surface |
+
+## tbl_19_sdmres_phase2_summary.csv  *(Week 17 — built, task 17.6b)*
+
+Written by `scripts/10` STEP 17.5 (T2a). The long form of
+`tbl_19_sdmres_surface.csv`. Counts and statistics only: no cell id, no
+position and no reserve name.
+
+**As built (2026-11-15):** 48 rows. Point 8 on `main`: share 0.4811,
+"differs"; `negexp8`: 0.5755 (no label).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `group` | character | `pairs`, `pair_rule`, `reff`, `paths` or `current` |
+| `item` | character | `pairs`: the reserves, the phase-2 pairs, the pairs of Decision 17 (and those from the higher id), contiguous at 0.2°, no path, solved. `pair_rule`: `lowest_pairs` (106), `decision17_in_lowest`, `share`, `reserves_lowest_partner_not_decision17` and, on `main` only, `label_agrees` (1 or 0). `reff`: min, quartiles, max (resistance-km; solved pairs). `paths`: the count; length min, median, max (km); the median redundancy; the paths with a hatched cell and the hatched cells on the paths (k1). `current`: the cells with and without current; the median and the largest current |
+| `surface` | character | `main` or `negexp8`; empty for the group `pairs` |
+| `value` | numeric | The count or the statistic |
+| `reading` | character | A short note; for `label_agrees`, the label (`agrees` or `differs`) |
+
+## tbl_19_sdmres_phase2_qa.csv  *(Week 17 — built, task 17.6b)*
+
+Written by `scripts/10` STEP 17.5 (the QA of phase 2; Q2a of task 17.6b).
+The form of `tbl_19_sdmres_qa.csv`: written before the stop on a failure.
+No cell id, no reserve name, no position (check (b)).
+
+**As built (2026-11-15):** 62 rows, 62 pass: 30 hand-made checks (9 of
+STEP 17.5, 21 of the engines of STEP 17.4), 29 checks, 3 information
+rows.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `group` | character | `test case`, `inputs`, `pairs`, `decision17`, `sample`, `paths`, `pair rule`, `summary`, `publish`, `info` |
+| `check`, `value`, `pass` | — | As in `tbl_19_sdmres_qa.csv` |
 
 *(Further layers — sdm — documented as they are built.)*

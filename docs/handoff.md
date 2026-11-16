@@ -93,12 +93,12 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ---
 
-## Current state  ·  **Week 17 in progress (tasks 17.1–17.6 done)** · 2026-11-14
+## Current state  ·  **Week 17 in progress (tasks 17.1–17.6b done)** · 2026-11-15
 
 ### Where the project is
 
-- **Week 17 so far (2026-11-14; tasks 17.1–17.6; full record: Decision
-  27 and the change log in `methodology.md`):**
+- **Week 17 so far (2026-11-14 to 2026-11-15; tasks 17.1–17.6b; full
+  record: Decision 27 and the change log in `methodology.md`):**
   - A text fix before Week 17: the headers of the two one-time scripts
     (kept in git) and three stale "Week 18" statements (commits
     `e2cc37c`, `e207687`).
@@ -157,10 +157,24 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
     rows of `tbl_19_sdmres_compare.csv` and the two ρ changed; the labels,
     the counts and the figures did not). Then 196 of 196.
     `tbl_19_sdmres_qa.csv`.
-  - **Next: task 17.6b** — STEP 17.5, phase 2 (Decision 27 points 6 and 8;
-    `RUN_PHASE2`): all 1,540 pairs on both surfaces, the check of the pair
-    rule (P2c) and its QA. Its process choices come first. The ranks of
-    point 8 use NT1 too.
+  - Task 17.6b: the author's answer "R5, R6 confirmed; F2a, T2a, Q2a,
+    new QA slug" and RS2 (`RUN_PHASE2 = TRUE` stays in the committed
+    script). STEP 17.5, phase 2
+    (2.6 min on the project machine): the 1,540 pairs of the 56 reserves
+    (12 contiguous at 0.2°, 1,528 solved on each surface). Point 8 on
+    `main` **"differs"**: 51 of the 106 pairs of Decision 17 are among
+    the 106 pairs with the lowest effective resistance (share 0.481; the
+    12 contiguous pairs are among them); `negexp8` 0.575 (no label); for
+    2 of the 56 reserves the partner of lowest effective resistance is
+    not a pair of Decision 17 (each surface). Path length median 1,418 km
+    (`main`). QA 62 of 62 (the pairs of Decision 17 = phase 1; the second
+    engine of STEP 17.4 on 100 other pairs on each surface; point 8
+    again). `tbl_19_sdmres_phase2.csv`, `tbl_19_sdmres_phase2_summary.csv`,
+    `tbl_19_sdmres_phase2_qa.csv`.
+  - **Next: task 17.7** — the docs of the Week-17 close: `methodology.md`
+    §5.3–5.4 and the Limitations, `proposal.md` §8, `README.md`,
+    `references.md`, "Results by stage" in this file; the Week-18 plan
+    (Stage 4). Then task 17.8 (commit and push).
 - **Week 17 plan** (the author's choice R4 of task 16.6): a resistance
   surface from the suitability and a circuit-theory check against the
   Stage-2 paths — the pending item "SDM-based resistance + circuit-theory
@@ -248,8 +262,8 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ### Week-17 entry point
 
-*(2026-11-14: tasks 17.1 to 17.4 are done; the entry point is now task
-17.5 — see "Where the project is". Read Decision 27 first, with its
+*(2026-11-15: tasks 17.1 to 17.6b are done; the entry point is now task
+17.7 — see "Where the project is". Read Decision 27 first, with its
 "Result" parts.)*
 
 - **Done: Week 16** (2026-11-07; tasks 16.1–16.6). The author committed
@@ -354,7 +368,7 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
 | `data/processed/sdm_prediction_cell02.csv` | The prediction: `id`, `value` (cloglog), `rank`, `class`, `out_of_range`; 6,969 rows | No presence or background field; holds cell ids: no table row from it; not published as a layer (D25 d1) |
 | `data/processed/hot_<gistar>_cell02.csv` (4 files: `effort_inat`, `tiger_obscured`, `effort_all`, `tiger_5km`) | The Gi\* at 50 km (Decision 26): `id`, `value`, `n_nb`, `n_win`, `k`, `gistar`, `p_hot`, `p_cold`, `p_two`, `p_adj`, `class`; 6,969 rows each | No geometry; holds cell ids; the two tiger layers are never published or committed; the `fig_06` code reads `hot_effort_inat_cell02.csv` only (k1 of task 16.2) |
 | `data/processed/resist_sdm_<surface>_cell02.csv` (2 files: `main`, `negexp8`) | The SDM-based resistance of Decision 27 (STEP 17.1): `id`, `x`, `resistance`; 6,969 rows each | No geometry; holds cell ids: no table row from it; no layer published (Decision 27 point 10) |
-| `data/processed/lcp_sdm_network_7755.gpkg` (layers `<surface>_phase1`) and `circ_current_<surface>_phase1_cell02.csv` | The paths on the SDM-based surfaces and the total currents of phase 1 (STEP 17.2) | Modelled paths: never a position finer than 10 km in a committed table or figure; no layer on the site; the current files hold cell ids |
+| `data/processed/lcp_sdm_network_7755.gpkg` (layers `<surface>_phase1` and `<surface>_phase2`) and `circ_current_<surface>_<phase>_cell02.csv` | The paths on the SDM-based surfaces and the total currents of phase 1 (STEP 17.2) and phase 2 (STEP 17.5) | Modelled paths: never a position finer than 10 km in a committed table or figure; no layer on the site; the current files hold cell ids |
 | `data/processed/boundary_states_7755.gpkg` | Natural Earth states (36), for the state boundaries of the figures | State and district can disagree at a border (gotcha) |
 | `outputs/tables/tbl_00`–`tbl_19_*`, `outputs/figures/fig_01`–`fig_08` | Committed tables and figures | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `tbl_18_gistar.csv` holds only the tiger counts of D26 point 7; `fig_04`–`fig_06` (STEP 16.2) show 0.2° model cells only: no point, no presence or background mark; `tbl_18_gistar_qa.csv` is the QA of STEP 16.3; `tbl_19_*` (Decision 27): counts, statistics and pair rows with reserve names, no position, no cell id; `fig_07`–`fig_08` (STEP 17.3): 0.2° cells and modelled path lines at national scale only |
 
@@ -383,7 +397,7 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
   `fig_04`: check that it also covers the inputs of the Stage-2 baseline
   surface. The colours and widths (PL1, L7a, L8a) are start values.
   The text is drawn in the PNG files: an edit needs a change of
-  `scripts/09` and a new run (or the caption as page text on the site,
+  `scripts/10` (STEP 17.3; text fix of task 17.6b) and a new run (or the caption as page text on the site,
   a fork for Week 18). The narrative week is Week 20.
 - `sensitive-data-policy.md`: the sentence "Bobcat-style finer
   publication…" was not reviewed against the rule for modelled paths and
