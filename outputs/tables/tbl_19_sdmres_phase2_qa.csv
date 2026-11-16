@@ -1,0 +1,63 @@
+"group","check","value","pass"
+"test case","STEP 17.5: pairs: 6 pairs, from < to, in the order (3,5), (3,7), (3,9), (5,7), (5,9), (7,9)","pass",TRUE
+"test case","STEP 17.5: pairs: the link to Decision 17 in either direction (R5)","pass",TRUE
+"test case","STEP 17.5: pair rule: the ranks 4, 1, 5, 2, 6, 3 (0 first; the tie at 4 and the near-tie at 10 by the ids)","pass",TRUE
+"test case","STEP 17.5: pair rule: with 17 digits the near-tie is not a tie (rank 6 for (3,9))","pass",TRUE
+"test case","STEP 17.5: pair rule: the share of the pairs of Decision 17 among the 2 lowest = 1/2","pass",TRUE
+"test case","STEP 17.5: pair rule: the lowest partner of 3 and 7 is (3,7); of 5 is (5,7); of 9 is (7,9); count = 2","pass",TRUE
+"test case","STEP 17.5: pair rule: the QA count gives the same ranks, share and count","pass",TRUE
+"test case","STEP 17.5: run: (A, B) in series, (A, C) one link, (C, D) contiguous at 0.2 degrees (0)","pass",TRUE
+"test case","STEP 17.5: run: the total current 0, 1, 1, 1, 0 (only (A, B) has nodes between); the sum of the pairs in sub the same","pass",TRUE
+"test case","STEP 17.4 engines: x and R: ranks 1 to 5 give x = 1 to 0 and R = 1, 25.75, 50.5, 75.25, 100","pass",TRUE
+"test case","STEP 17.4 engines: x and R: negexp8 gives about 45.5, 21.0 and 2.8 at x = 0.1, 0.2 and 0.5 (Decision 27 point 2)","pass",TRUE
+"test case","STEP 17.4 engines: distance: 1 degree of latitude = r x pi / 180; 0 for one point","pass",TRUE
+"test case","STEP 17.4 engines: links: 1-2 and 1-3 rook; 2-3 and 2-4 diagonal; the cell alone has no link","pass",TRUE
+"test case","STEP 17.4 engines: links: the length is the distance between the centres","pass",TRUE
+"test case","STEP 17.4 engines: sets: {1, 2, 3}, {4, 5} and {6} (the smallest node of each set)","pass",TRUE
+"test case","STEP 17.4 engines: reserve cells: the centres of columns 2-4 and rows 1-2 give ids 1 and 2 (6 cells of 1 km)","pass",TRUE
+"test case","STEP 17.4 engines: solver: series R = 8, the middle node 1 A, the ends 0","pass",TRUE
+"test case","STEP 17.4 engines: solver: parallel R = 2; the middle node 0.5 A","pass",TRUE
+"test case","STEP 17.4 engines: solver: unbalanced bridge R = 1.4; the same with the ends swapped; energy = R; 1 A out; no net current at C and D","pass",TRUE
+"test case","STEP 17.4 engines: solver: a reserve of two cells (1 || 2 to 3, then 4): R = 1 + 1 = 2; node 5 (a dead end) 0 A","pass",TRUE
+"test case","STEP 17.4 engines: search: 1-2-3-4 at cost 3 (not 1-3-4 at 6)","pass",TRUE
+"test case","STEP 17.4 engines: search: from two nodes, the path starts at the nearer one (3) at cost 1","pass",TRUE
+"test case","STEP 17.4 engines: search: no route gives cost Inf","pass",TRUE
+"test case","STEP 17.4 engines: line cells: the vertices give the cells (400, 100), (401, 100), (402, 101)","pass",TRUE
+"test case","STEP 17.4 engines: share by points: 0.525 (21 of 40 km within 1 km), the same as the exact share","pass",TRUE
+"test case","STEP 17.4 engines: share in polygons by points: 20 of 40 km = 0.5; an empty line gives NA","pass",TRUE
+"test case","STEP 17.4 engines: rank: (rank - 1) / (n - 1) with a tie at the average rank","pass",TRUE
+"test case","STEP 17.4 engines: rank (NT1): 20 and 20 x (1 + 4e-16) are a tie after signif(, 12)","pass",TRUE
+"test case","STEP 17.4 engines: partial rho: the residual form = the formula of the three rank correlations","pass",TRUE
+"test case","STEP 17.4 engines: classes: sizes 3, 2, 3, 2, 2 (classes 5 to 1); the top class 101, 109, 110","pass",TRUE
+"inputs","each file of STEP 17.5 and of phase 1 exists","8 of 8",TRUE
+"inputs","each phase-2 layer and each surface of tbl_19_sdmres_phase2.csv hold the pairs once, in p2_id order","1540 pairs; 3080 rows",TRUE
+"inputs","each phase-2 current file holds each model cell once, in id order","6,969 cells",TRUE
+"pairs","each pair of the reserves with a polygon once, from the lower unit_id to the higher one (R5)","1540 of choose(56, 2) = 1540",TRUE
+"pairs","decision17 and pair_id_decision17 = the pairs of tbl_12_reserve_pairs.csv in either direction","106 pairs",TRUE
+"pairs","the status of each pair from the second path of STEP 17.4 = the table (each surface)","1540 of 1540",TRUE
+"decision17","main: the pairs of Decision 17 in phase 2 = phase 1: the status, the effective resistance, the cost (either direction)","106 of 106 status; largest relative difference 0e+00",TRUE
+"decision17","main: the current of the pairs of Decision 17 in phase 2 = the phase-1 current file","largest difference / largest current 1.28e-15",TRUE
+"decision17","negexp8: the pairs of Decision 17 in phase 2 = phase 1: the status, the effective resistance, the cost (either direction)","106 of 106 status; largest relative difference 0e+00",TRUE
+"decision17","negexp8: the current of the pairs of Decision 17 in phase 2 = the phase-1 current file","largest difference / largest current 2.45e-15",TRUE
+"sample","main: the conjugate-gradient solve and the own search on the sample (equal steps over the other pairs) = the table","100 pairs; largest relative differences 2.83e-12 and 2.83e-15",TRUE
+"sample","negexp8: the conjugate-gradient solve and the own search on the sample (equal steps over the other pairs) = the table","100 pairs; largest relative differences 3.85e-12 and 4.18e-15",TRUE
+"paths","main: each written line: cell centres, from the first reserve to the second, steps to a neighbour, the cost again, the cell counts, the cost not below the effective resistance","1540 of 1540",TRUE
+"paths","negexp8: each written line: cell centres, from the first reserve to the second, steps to a neighbour, the cost again, the cell counts, the cost not below the effective resistance","1540 of 1540",TRUE
+"pair rule","main: the ranks (NT1, then the ids; R6) again = rank_reff; in_lowest = the 106 lowest","ranks 1540 of 1540; in_lowest 1540 of 1540",TRUE
+"pair rule","main: the lowest partner of each reserve again = lowest_of_from / lowest_of_to","56 of 56; flags set 56 (one per reserve: 56)",TRUE
+"pair rule","main: the share and the count of the summary again","again: share 0.4811, count 2; summary: share 0.4811, count 2",TRUE
+"pair rule","main: the label again by the rule of point 8 (P2c)","differs",TRUE
+"pair rule","negexp8: the ranks (NT1, then the ids; R6) again = rank_reff; in_lowest = the 106 lowest","ranks 1540 of 1540; in_lowest 1540 of 1540",TRUE
+"pair rule","negexp8: the lowest partner of each reserve again = lowest_of_from / lowest_of_to","56 of 56; flags set 56 (one per reserve: 56)",TRUE
+"pair rule","negexp8: the share and the count of the summary again","again: share 0.5755, count 2; summary: share 0.5755, count 2",TRUE
+"summary","the pair items of the summary again","7 of 7",TRUE
+"summary","main: the effective resistance, path and current items of the summary again from the files","16 of 16",TRUE
+"summary","negexp8: the effective resistance, path and current items of the summary again from the files","16 of 16",TRUE
+"publish","tbl_19_sdmres_phase2.csv: assert_publishable_table() passes; no column is a cell id or a coordinate; no value is a model cell id","19 columns",TRUE
+"publish","tbl_19_sdmres_phase2_summary.csv: assert_publishable_table() passes; no column is a cell id or a coordinate; no value is a model cell id","5 columns",TRUE
+"publish","(c) no file under outputs/ has tiger in its name","0 of 81 files",TRUE
+"publish","no layer of Decision 27 is under outputs/ (point 10: no layer)","3 layers",TRUE
+"info","the sample of the second engine (equal steps over the other pairs with a path)","100 of 1434 pairs",TRUE
+"info","the largest number of iterations of one conjugate-gradient solve","main 577; negexp8 607",TRUE
+"info","the ties made by the rounding to 12 significant digits (NT1) in the effective resistance","main 0; negexp8 0",TRUE
+"publish","tbl_19_sdmres_phase2_qa.csv: (b) no value is a cell id; no reserve name","0 and 0",TRUE

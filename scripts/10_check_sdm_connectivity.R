@@ -46,6 +46,13 @@
 #   significant digits, so that values equal but for the last bits are a
 #   tie (circ_compare_paths(), circ_compare_summary(); STEP 17.3 and 17.4)
 #
+# Process choices of task 17.6b (2026-11-14; STEP 17.5): R5 a phase-2 pair
+#   goes from the lower unit_id to the higher one; R6 the rank of point 8
+#   uses NT1, then the tie rule of point 8; F2a circ_run_pairs() (STEP 17.2
+#   not changed); T2a the per-pair table and a summary table; Q2a the QA of
+#   phase 2 (the pairs of Decision 17 against phase 1; the second engine on
+#   a sample; point 8 again; the publish checks) in its own table
+#
 # STEPS (each task adds its block):
 #   STEP 17.1 (task 17.3)  the two surfaces of Decision 27 points 1-2, from
 #              the rank of the prediction of STEP 15.1 (scripts/09); the graph
@@ -77,8 +84,15 @@
 #              paths, the comparison and the figures; the publish checks;
 #              the hand-made cases of STEPs 17.1-17.4 (circ_qa_self_test())
 #              -> tbl_19_sdmres_qa.csv
-#   STEP 17.5 (task 17.6b) phase 2 (points 6 and 8) and its QA; only with
-#              RUN_PHASE2 = TRUE
+#   STEP 17.5 (task 17.6b) phase 2 (points 6, 8 and 9) and its QA; only
+#              with RUN_PHASE2 = TRUE: all pairs of the reserves with a
+#              polygon (from the lower unit_id to the higher one; R5) on both
+#              surfaces, with the checks of STEP 17.2 for each pair
+#              (circ_run_pairs(); F2a); point 8 (circ_pair_rule(); R6); the
+#              QA of phase 2 (Q2a) -> the layers <surface>_phase2,
+#              circ_current_<surface>_phase2_cell02.csv,
+#              tbl_19_sdmres_phase2.csv, tbl_19_sdmres_phase2_summary.csv,
+#              tbl_19_sdmres_phase2_qa.csv
 #
 # SENSITIVE DATA (docs/sensitive-data-policy.md; Decision 27 point 10):
 #   The surfaces, the currents and the paths stay under data/processed/
@@ -137,6 +151,23 @@
 #     status, reff, cost_rkm, path_km, n_path_cells, n_hatched_cells,
 #     redundancy. No position and no cell id
 #
+# OUTPUTS (STEP 17.5, task 17.6b; only with RUN_PHASE2 = TRUE; T2a):
+#   data/processed/lcp_sdm_network_7755.gpkg, layers main_phase2 and
+#     negexp8_phase2: one LINESTRING per pair (p2_id, the unit ids and
+#     names, decision17, pair_id_decision17, surface, phase, status, reff,
+#     cost_rkm, path_km, n_path_cells, n_hatched_cells, redundancy).
+#     Gitignored
+#   data/processed/circ_current_<surface>_phase2_cell02.csv   id, current.
+#     Gitignored
+#   outputs/tables/tbl_19_sdmres_phase2.csv   one row per surface and pair:
+#     the fields of the layer without the geometry and phase, and rank_reff,
+#     in_lowest, lowest_of_from, lowest_of_to (point 8). No position
+#   outputs/tables/tbl_19_sdmres_phase2_summary.csv   group, item, surface,
+#     value, reading: the pairs, point 8 and its label, the effective
+#     resistance, the paths, the current. Counts and statistics only
+#   outputs/tables/tbl_19_sdmres_phase2_qa.csv   the QA of phase 2 (Q2a), as
+#     tbl_19_sdmres_qa.csv
+#
 # OUTPUTS (STEP 17.4, task 17.6; QT1):
 #   outputs/tables/tbl_19_sdmres_qa.csv   group, check, value, pass: the
 #     hand-made cases ("test case"), the checks by group, the information
@@ -194,9 +225,10 @@ rule <- function(txt) cat("\n", strrep("=", 78), "\n", txt, "\n",
 
 # ---- Run switch (w1 of task 17.2, 2026-11-14) ----------------------------------
 # TRUE  : STEP 17.5 runs phase 2 (all pairs of the reserves; Decision 27
-#         points 6 and 8). Set TRUE only after the QA of phase 1 passes.
+#         points 6 and 8) after STEPs 17.1-17.4; it starts only if the QA
+#         of phase 1 (STEP 17.4) passes (a failure there stops the script).
 # FALSE : phase 2 does not run.
-RUN_PHASE2 <- FALSE
+RUN_PHASE2 <- TRUE
 
 # ---- Paths --------------------------------------------------------------------
 grid_in     <- file.path(DIR_PROCESSED, "sdm_grid_cell02_7755.gpkg")
@@ -226,10 +258,6 @@ FIELDS_S2    <- c("pair_id", "from_unit_id", "to_unit_id", "contiguous",
 # 0) The run switch.
 if (!is.logical(RUN_PHASE2) || length(RUN_PHASE2) != 1L || is.na(RUN_PHASE2)) {
   stop("RUN_PHASE2 must be TRUE or FALSE.", call. = FALSE)
-}
-if (RUN_PHASE2) {
-  stop("STEP 17.5 (phase 2) is not in this script yet (task 17.6b). Keep ",
-       "RUN_PHASE2 <- FALSE.", call. = FALSE)
 }
 
 # 1) The settings of Decision 27 and task 17.2.
@@ -1729,3 +1757,457 @@ rule(paste0("STEP 17.4 complete: QA ", nrow(qa7_tbl), " of ", nrow(qa7_tbl),
                                                      units = "mins")), 1),
             " min).\nCheck `git status --short` before a commit: nothing ",
             "under data/ may be staged."))
+
+# =============================================================================
+# STEP 17.5 — phase 2 and its QA (task 17.6b; Decision 27 points 6, 8 and 9)
+# =============================================================================
+# Only with RUN_PHASE2 = TRUE (w1 of task 17.2). It runs after STEP 17.4, so
+# the QA of phase 1 has passed (a failure there stops the script). The
+# author's answer of task 17.6b: R5, R6, F2a, T2a, Q2a and the slug
+# phase2_qa.
+#   1. the hand-made case (circ_self_test_175())
+#   2. the pairs (R5) and their status from geometry
+#   3. on each surface: the circuit and the path of each pair, with the
+#      checks of STEP 17.2 (circ_run_pairs(); F2a)
+#   4. point 8 on each surface (circ_pair_rule(); R6); the label on main
+#   5. the layers and the current files, written and read back
+#   6. tbl_19_sdmres_phase2.csv and tbl_19_sdmres_phase2_summary.csv (T2a)
+#   7. the QA of phase 2 (Q2a), with the second path of STEP 17.4 ->
+#      tbl_19_sdmres_phase2_qa.csv, written; then a stop if a check fails
+# Console text: counts, statistics and the label. No pair row.
+
+if (!RUN_PHASE2) {
+  rule("STEP 17.5 (phase 2) does not run: RUN_PHASE2 = FALSE.")
+} else {
+rule("STEP 17.5 — phase 2 (task 17.6b)")
+t_step175 <- Sys.time()
+
+# ---- 1. The hand-made case ----------------------------------------------------------------
+st175 <- circ_self_test_175()
+cat("hand-made case of STEP 17.5:", sum(st175$pass), "of", nrow(st175),
+    "checks pass.\n")
+if (!all(st175$pass)) {
+  stop("The hand-made case of STEP 17.5 failed:\n  ",
+       paste(st175$check[!st175$pass], collapse = "\n  "), call. = FALSE)
+}
+
+# ---- 2. The pairs (R5) and their status ---------------------------------------------------
+PHASE2 <- "phase2"
+p2 <- circ_phase2_pairs(res_d$unit_id[has_geom], res_d$unit_name[has_geom],
+                        pairs_d)
+ia2 <- match(p2$from_unit_id, res_d$unit_id)
+ib2 <- match(p2$to_unit_id, res_d$unit_id)
+status2 <- circ_pair_status(rcl$cells[ia2], rcl$cells[ib2], model_ids, memb)
+n_low <- nrow(pairs_d)
+n_rev <- sum(pairs_d$from_unit_id > pairs_d$to_unit_id)
+sdm_run_guards(list(
+  "phase 2 must hold each pair of the reserves with a polygon once" =
+    nrow(p2) == choose(sum(has_geom), 2) &&
+    !anyDuplicated(paste(p2$from_unit_id, p2$to_unit_id)) &&
+    all(p2$from_unit_id < p2$to_unit_id),
+  "each pair of Decision 17 must be in phase 2 once" =
+    sum(p2$decision17) == n_low &&
+    setequal(p2$pair_id_decision17[p2$decision17], pairs_d$pair_id),
+  "no pair may have a reserve with no model cell" =
+    !any(status2 == "no_cells")
+), what = "the pairs of phase 2")
+na2 <- lapply(ia2, function(i) match(rcl$cells[[i]], model_ids))
+nb2 <- lapply(ib2, function(i) match(rcl$cells[[i]], model_ids))
+cat("phase 2:", nrow(p2), "pairs of", sum(has_geom), "reserves |",
+    sum(status2 == "contiguous_02"), "contiguous at 0.2 degrees |",
+    sum(status2 == "no_path"), "with no path |", sum(status2 == "path"),
+    "to solve | pairs of Decision 17:", n_low, "(", n_rev,
+    "in the other direction )\n")
+
+# ---- 3. The circuit and the paths of each pair (F2a) ---------------------------------------
+run2  <- list()
+rule2 <- list()
+for (nm in names(surf)) {
+  run2[[nm]] <- circ_run_pairs(p2, "p2_id", status2, na2, nb2, links, memb,
+                               surf[[nm]]$resistance, grid_m$ix, grid_m$iy,
+                               oor, nm, PHASE2, sub = p2$decision17,
+                               progress = 250L)
+  d <- run2[[nm]]$out
+  # ---- 4. Point 8 (R6) ----
+  rule2[[nm]] <- circ_pair_rule(d$reff, d$from_unit_id, d$to_unit_id,
+                                d$decision17, n_low)
+  cat(sprintf(paste0("%s: %d pairs solved; each passed the checks of STEP ",
+                     "17.2 (current out = 1 A; (iii) the cost again; cost not ",
+                     "below the effective resistance)\n"), nm,
+              sum(d$status == "path")))
+}
+
+# ---- 5. The layers and the current files, written and read back --------------------------
+for (nm in names(run2)) {
+  lay <- sf::st_sf(run2[[nm]]$out, geometry = run2[[nm]]$geoms)
+  lcp_write_layer(lay, paths_out, paste0(nm, "_", PHASE2))
+  f_cur <- file.path(DIR_PROCESSED, sprintf(SDMRES_LAYER_CURRENT, nm, PHASE2))
+  cur_d <- data.frame(id = model_ids, current = run2[[nm]]$current)
+  utils::write.csv(cur_d, f_cur, row.names = FALSE)
+  back <- utils::read.csv(f_cur)
+  sdm_run_guards(list(
+    "the current layer must have the fields id and current" =
+      identical(names(back), c("id", "current")),
+    "the current layer must hold each model cell once, in id order" =
+      identical(as.integer(back$id), model_ids),
+    "each current must be 0 or more" =
+      !anyNA(back$current) && all(back$current >= 0),
+    "the file must hold the values in memory" =
+      isTRUE(all.equal(back$current, cur_d$current, tolerance = 1e-12))
+  ), what = paste0("the file ", basename(f_cur), " (read back)"))
+  cat("wrote", basename(f_cur), "-", format(nrow(back), big.mark = ","),
+      "rows; read back and checked\n")
+}
+
+# ---- 6. The tables (T2a) -------------------------------------------------------------------
+tbl175 <- do.call(rbind, lapply(names(run2), function(nm) {
+  d <- run2[[nm]]$out
+  ru <- rule2[[nm]]
+  d$rank_reff <- ru$rank
+  d$in_lowest <- ru$in_lowest
+  d$lowest_of_from <- ru$lowest_of_from
+  d$lowest_of_to <- ru$lowest_of_to
+  d[, setdiff(names(d), "phase")]
+}))
+rownames(tbl175) <- NULL
+assert_publishable_table(tbl175, prefix = NULL,
+                         name = "tbl_19_sdmres_phase2.csv")
+write_table(tbl175, SDMRES_TABLE_NN, SDMRES_TABLE_SLUGS[["phase2"]])
+sum175 <- circ_phase2_summary(lapply(run2, `[[`, "out"), rule2,
+                              lapply(run2, `[[`, "current"),
+                              lapply(run2, `[[`, "hatched"), sum(has_geom),
+                              n_low, n_rev)
+assert_publishable_table(sum175, prefix = NULL,
+                         name = "tbl_19_sdmres_phase2_summary.csv")
+write_table(sum175, SDMRES_TABLE_NN, SDMRES_TABLE_SLUGS[["phase2_summary"]])
+show175 <- sum175
+show175$value <- vapply(sum175$value, function(v) {
+  if (is.finite(v) && abs(v - round(v)) < 1e-9 && abs(v) < 1e9) {
+    format(round(v), big.mark = ",", scientific = FALSE)
+  } else {
+    format(signif(v, 6), scientific = FALSE)
+  }
+}, character(1))
+print(show175[, c("group", "item", "surface", "value")], row.names = FALSE,
+      right = FALSE)
+cat("(the column reading is in the file)\n")
+
+# ---- 7. The QA of phase 2 (Q2a) -------------------------------------------------------------
+# It uses the second path of STEP 17.4 (qL, qC, qa_rc, qa_surf, qa_oor;
+# circ_qa_* functions) and reads the files of this STEP from disk.
+q8 <- list()
+add_q8 <- function(group, check, value, pass) {
+  q8[[length(q8) + 1L]] <<- data.frame(group = group, check = check,
+                                        value = as.character(value),
+                                        pass = isTRUE(pass),
+                                        stringsAsFactors = FALSE)
+}
+tests8 <- list("STEP 17.5" = st175, "STEP 17.4 engines" = circ_qa_self_test())
+for (s8 in names(tests8)) {
+  tt <- tests8[[s8]]
+  for (i in seq_len(nrow(tt))) {
+    add_q8("test case", paste0(s8, ": ", tt$check[i]),
+           if (tt$pass[i]) "pass" else "FAIL", tt$pass[i])
+  }
+}
+q2_tab <- function(slug) qa_tab_path(slug)
+q2_files <- c(paths_out,
+              file.path(DIR_PROCESSED, sprintf(SDMRES_LAYER_CURRENT,
+                                               names(surf), PHASE2)),
+              q2_tab("phase2"), q2_tab("phase2_summary"), q2_tab("pairs"),
+              qa_cur_f)
+add_q8("inputs", "each file of STEP 17.5 and of phase 1 exists",
+       of_n(file.exists(q2_files)), all(file.exists(q2_files)))
+q2_lines <- stats::setNames(lapply(names(surf), function(nm) {
+  sf::st_read(paths_out, layer = paste0(nm, "_", PHASE2), quiet = TRUE)
+}), names(surf))
+q2_cur <- stats::setNames(lapply(names(surf), function(nm) {
+  utils::read.csv(file.path(DIR_PROCESSED, sprintf(SDMRES_LAYER_CURRENT, nm,
+                                                   PHASE2)))
+}), names(surf))
+q2_t  <- utils::read.csv(q2_tab("phase2"), stringsAsFactors = FALSE)
+q2_s  <- utils::read.csv(q2_tab("phase2_summary"), stringsAsFactors = FALSE)
+q2_p1 <- utils::read.csv(q2_tab("pairs"), stringsAsFactors = FALSE)
+q2_n  <- nrow(p2)
+q2_tp <- stats::setNames(lapply(names(surf), function(nm) {
+  x <- q2_t[q2_t$surface == nm, ]
+  x[order(x$p2_id), ]
+}), names(surf))
+add_q8("inputs", "each phase-2 layer and each surface of tbl_19_sdmres_phase2.csv hold the pairs once, in p2_id order",
+       sprintf("%d pairs; %d rows", q2_n, nrow(q2_t)),
+       all(vapply(q2_lines, function(x) identical(as.integer(x$p2_id), seq_len(q2_n)),
+                  logical(1))) &&
+         all(vapply(q2_tp, function(x) identical(as.integer(x$p2_id), seq_len(q2_n)),
+                    logical(1))) &&
+         nrow(q2_t) == length(surf) * q2_n)
+add_q8("inputs", "each phase-2 current file holds each model cell once, in id order",
+       sprintf("%s cells", fig_fmt_int(qa_n)),
+       all(vapply(q2_cur, function(x) identical(as.integer(x$id), qa_ids),
+                  logical(1))))
+# The pairs (R5).
+q2_res <- sort(as.integer(res_d$unit_id[has_geom]))
+q2_f <- q2_tp[[1]]$from_unit_id
+q2_to <- q2_tp[[1]]$to_unit_id
+add_q8("pairs", "each pair of the reserves with a polygon once, from the lower unit_id to the higher one (R5)",
+       sprintf("%d of choose(%d, 2) = %d", q2_n, length(q2_res),
+               choose(length(q2_res), 2)),
+       q2_n == choose(length(q2_res), 2) && all(q2_f < q2_to) &&
+         all(q2_f %in% q2_res) && all(q2_to %in% q2_res) &&
+         !anyDuplicated(paste(q2_f, q2_to)))
+q2_dk <- paste(pmin(qa_p12$from_unit_id, qa_p12$to_unit_id),
+               pmax(qa_p12$from_unit_id, qa_p12$to_unit_id))
+q2_m <- match(paste(q2_f, q2_to), q2_dk)
+add_q8("pairs", "decision17 and pair_id_decision17 = the pairs of tbl_12_reserve_pairs.csv in either direction",
+       sprintf("%d pairs", sum(!is.na(q2_m))),
+       all(vapply(q2_tp, function(x) {
+         identical(as.logical(x$decision17), !is.na(q2_m)) &&
+           identical(as.integer(x$pair_id_decision17),
+                     as.integer(qa_p12$pair_id[q2_m]))
+       }, logical(1))) && sum(!is.na(q2_m)) == qa_np)
+q2_st <- vapply(seq_len(q2_n), function(k) {
+  a <- qa_rc[[match(q2_f[k], res_d$unit_id)]]
+  b <- qa_rc[[match(q2_to[k], res_d$unit_id)]]
+  if (length(intersect(a, b)) > 0L) return("contiguous_02")
+  if (length(intersect(qC[match(a, qa_ids)], qC[match(b, qa_ids)])) > 0L) {
+    "path"
+  } else "no_path"
+}, character(1))
+add_q8("pairs", "the status of each pair from the second path of STEP 17.4 = the table (each surface)",
+       of_n(q2_st == q2_tp[[1]]$status),
+       all(vapply(q2_tp, function(x) identical(x$status, q2_st), logical(1))))
+# (i) The pairs of Decision 17 against phase 1.
+q2_d <- which(!is.na(q2_m))
+for (nm in names(surf)) {
+  x <- q2_tp[[nm]][q2_d, ]
+  y <- q2_p1[q2_p1$surface == nm, ]
+  y <- y[match(x$pair_id_decision17, y$pair_id), ]
+  okp <- x$status == "path"
+  add_q8("decision17", paste0(nm, ": the pairs of Decision 17 in phase 2 = phase 1: the status, the effective resistance, the cost (either direction)"),
+         paste0(of_n(x$status == y$status), " status; largest relative difference ",
+                fmt_rel(max(c(0, qa_rel(x$reff[okp], y$reff[okp]),
+                              qa_rel(x$cost_rkm[okp], y$cost_rkm[okp]))))),
+         identical(x$status, y$status) && qa_same(x$reff[okp], y$reff[okp]) &&
+           qa_same(x$cost_rkm[okp], y$cost_rkm[okp]) &&
+           all(x$reff[!okp] == y$reff[!okp]))
+  f1 <- qa_cur[[nm]]$current
+  dsub <- max(abs(run2[[nm]]$current_sub - f1))
+  add_q8("decision17", paste0(nm, ": the current of the pairs of Decision 17 in phase 2 = the phase-1 current file"),
+         paste("largest difference / largest current", fmt_rel(dsub / max(f1))),
+         dsub <= qa_tol * max(f1))
+}
+# (ii) The second engine of STEP 17.4 on a sample of the other pairs.
+q2_cand <- which(is.na(q2_m) & q2_st == "path")
+q2_take <- q2_cand[unique(round(seq(1, length(q2_cand),
+                                    length.out = min(SDMRES_QA2_SAMPLE_N,
+                                                     length(q2_cand)))))]
+q2_its <- integer(0)
+for (nm in names(surf)) {
+  r  <- qa_surf[[nm]]$resistance
+  gq <- 1 / (qL$d_km * (r[qL$from] + r[qL$to]) / 2)
+  x <- q2_tp[[nm]]
+  d_r <- d_c <- rep(NA_real_, length(q2_take))
+  conv <- logical(length(q2_take)); its <- integer(length(q2_take))
+  for (j in seq_along(q2_take)) {
+    k <- q2_take[j]
+    a <- match(qa_rc[[match(q2_f[k], res_d$unit_id)]], qa_ids)
+    b <- match(qa_rc[[match(q2_to[k], res_d$unit_id)]], qa_ids)
+    s <- circ_qa_solve_pair(qa_n, qL$from, qL$to, gq, a, b, qC)
+    dq <- circ_qa_dijkstra(qa_n, qL$from, qL$to, 1 / gq, a, b)
+    d_r[j] <- qa_rel(s$reff, x$reff[k])
+    d_c[j] <- qa_rel(dq$cost, x$cost_rkm[k])
+    conv[j] <- s$converged
+    its[j] <- s$it
+  }
+  q2_its <- c(q2_its, stats::setNames(if (length(its)) max(its) else 0L, nm))
+  add_q8("sample", paste0(nm, ": the conjugate-gradient solve and the own search on the sample (equal steps over the other pairs) = the table"),
+         paste0(length(q2_take), " pairs; largest relative differences ",
+                fmt_rel(max(c(0, d_r))), " and ", fmt_rel(max(c(0, d_c)))),
+         all(conv) && all(d_r <= qa_tol) && all(d_c <= qa_tol))
+}
+# All written lines: the cells, the ends, the steps and the cost again.
+for (nm in names(surf)) {
+  r <- qa_surf[[nm]]$resistance
+  x <- q2_tp[[nm]]
+  gl <- sf::st_geometry(q2_lines[[nm]])
+  okl <- logical(q2_n); hat2 <- integer(0)
+  for (k in seq_len(q2_n)) {
+    if (x$status[k] != "path") {
+      okl[k] <- sf::st_is_empty(gl[k]) && x$n_path_cells[k] == 0L
+      next
+    }
+    lc <- circ_qa_line_cells(gl[k])
+    pos <- match(as.integer(lc$iy) * SDM_ID_BASE + as.integer(lc$ix), qa_ids)
+    m <- length(pos)
+    if (!all(lc$ok) || anyNA(pos) || m < 2L) next
+    a <- match(qa_rc[[match(q2_f[k], res_d$unit_id)]], qa_ids)
+    b <- match(qa_rc[[match(q2_to[k], res_d$unit_id)]], qa_ids)
+    dk <- circ_qa_dist_km((lc$ix[-m] + 0.5) * SDM_GRAIN_DEG,
+                          (lc$iy[-m] + 0.5) * SDM_GRAIN_DEG,
+                          (lc$ix[-1] + 0.5) * SDM_GRAIN_DEG,
+                          (lc$iy[-1] + 0.5) * SDM_GRAIN_DEG)
+    okl[k] <- pos[1] %in% a && pos[m] %in% b &&
+      all(pmax(abs(diff(lc$ix)), abs(diff(lc$iy))) == 1L) &&
+      qa_rel(sum(dk * (r[pos[-m]] + r[pos[-1]]) / 2), x$cost_rkm[k]) <= qa_tol &&
+      m == x$n_path_cells[k] && sum(qa_oor[pos]) == x$n_hatched_cells[k] &&
+      x$cost_rkm[k] >= x$reff[k] * (1 - qa_tol)
+    hat2 <- union(hat2, pos[qa_oor[pos]])
+  }
+  assign(paste0("q2_hat_", nm), hat2)
+  add_q8("paths", paste0(nm, ": each written line: cell centres, from the first reserve to the second, steps to a neighbour, the cost again, the cell counts, the cost not below the effective resistance"),
+         of_n(okl), all(okl))
+}
+# (iii) Point 8 again from the table on disk.
+for (nm in names(surf)) {
+  x <- q2_tp[[nm]]
+  qr <- circ_qa_pair_rule(x$reff, x$from_unit_id, x$to_unit_id,
+                          as.logical(x$decision17), qa_np)
+  units <- sort(unique(c(x$from_unit_id, x$to_unit_id)))
+  ok_low <- vapply(units, function(u) {
+    w <- which(x$from_unit_id == u | x$to_unit_id == u)
+    b <- w[qr$rank[w] == min(qr$rank[w])]
+    length(b) == 1L &&
+      ((x$from_unit_id[b] == u && isTRUE(x$lowest_of_from[b])) ||
+         (x$to_unit_id[b] == u && isTRUE(x$lowest_of_to[b])))
+  }, logical(1))
+  add_q8("pair rule", paste0(nm, ": the ranks (NT1, then the ids; R6) again = rank_reff; in_lowest = the ", qa_np, " lowest"),
+         paste0("ranks ", of_n(qr$rank == x$rank_reff), "; in_lowest ",
+                of_n(as.logical(x$in_lowest) == (qr$rank <= qa_np))),
+         identical(qr$rank, as.integer(x$rank_reff)) &&
+           identical(as.logical(x$in_lowest), qr$rank <= qa_np))
+  add_q8("pair rule", paste0(nm, ": the lowest partner of each reserve again = lowest_of_from / lowest_of_to"),
+         paste0(of_n(ok_low), "; flags set ",
+                sum(x$lowest_of_from) + sum(x$lowest_of_to),
+                " (one per reserve: ", length(units), ")"),
+         all(ok_low) && sum(x$lowest_of_from) + sum(x$lowest_of_to) == length(units))
+  sv <- function(item) {
+    v <- q2_s$value[q2_s$group == "pair_rule" & q2_s$item == item &
+                      q2_s$surface == nm]
+    if (length(v) == 1L) v else NA_real_
+  }
+  add_q8("pair rule", paste0(nm, ": the share and the count of the summary again"),
+         sprintf("again: share %s, count %d; summary: share %s, count %s",
+                 format(round(qr$share, 4), nsmall = 4), qr$count,
+                 format(round(sv("share"), 4), nsmall = 4),
+                 format(sv("reserves_lowest_partner_not_decision17"))),
+         qa_same(sv("share"), qr$share) &&
+           isTRUE(sv("reserves_lowest_partner_not_decision17") == qr$count) &&
+           isTRUE(sv("decision17_in_lowest") == round(qr$share * qa_np)))
+  if (identical(nm, "main")) {
+    lab <- if (qr$share >= SDMRES_PAIRRULE_MIN_SHARE) SDMRES_PAIRRULE_LABELS[1] else
+      SDMRES_PAIRRULE_LABELS[2]
+    lr <- q2_s[q2_s$group == "pair_rule" & q2_s$item == "label_agrees" &
+                 q2_s$surface == nm, ]
+    add_q8("pair rule", "main: the label again by the rule of point 8 (P2c)", lab,
+           nrow(lr) == 1L && identical(lr$reading, lab) &&
+             lr$value == as.numeric(lab == SDMRES_PAIRRULE_LABELS[1]))
+  }
+}
+# (iv) The summary again from the files.
+q2_sv <- function(group, item, surface = "") {
+  s <- ifelse(is.na(q2_s$surface), "", q2_s$surface)
+  v <- q2_s$value[q2_s$group == group & q2_s$item == item & s == surface]
+  if (length(v) == 1L) v else NA_real_
+}
+x1 <- q2_tp[[1]]
+pst2 <- c(reserves = length(q2_res), phase2_pairs = q2_n,
+          decision17_pairs = sum(!is.na(q2_m)),
+          decision17_other_direction = sum(qa_p12$from_unit_id > qa_p12$to_unit_id),
+          contiguous_02 = sum(x1$status == "contiguous_02"),
+          no_path = sum(x1$status == "no_path"), solved = sum(x1$status == "path"))
+ptb2 <- vapply(names(pst2), function(it) q2_sv("pairs", it), numeric(1))
+add_q8("summary", "the pair items of the summary again", of_n(pst2 == ptb2),
+       isTRUE(all(pst2 == ptb2)))
+for (nm in names(surf)) {
+  x <- q2_tp[[nm]]
+  s <- x$status == "path"
+  f <- q2_cur[[nm]]$current
+  qq <- stats::quantile(x$reff[s], c(0.25, 0.5, 0.75), names = FALSE)
+  hat2 <- get(paste0("q2_hat_", nm))
+  e <- c(reff_min = min(x$reff[s]), reff_q25 = qq[1], reff_median = qq[2],
+         reff_q75 = qq[3], reff_max = max(x$reff[s]), paths = sum(s),
+         path_km_min = min(x$path_km[s]), path_km_median = stats::median(x$path_km[s]),
+         path_km_max = max(x$path_km[s]),
+         redundancy_median = stats::median(x$redundancy[s]),
+         paths_with_hatched = sum(x$n_hatched_cells[s] > 0),
+         hatched_cells_on_paths = length(hat2),
+         cells_with_current = sum(f > 0), cells_without_current = sum(f == 0),
+         current_median = stats::median(f), current_max = max(f))
+  grp <- c(rep("reff", 5), rep("paths", 7), rep("current", 4))
+  g <- vapply(seq_along(e), function(i) q2_sv(grp[i], names(e)[i], nm), numeric(1))
+  add_q8("summary", paste0(nm, ": the effective resistance, path and current items of the summary again from the files"),
+         of_n(qa_rel(e, g) <= qa_tol), qa_same(e, g))
+}
+# Publish (QF).
+for (sl in c("phase2", "phase2_summary")) {
+  x <- if (sl == "phase2") q2_t else q2_s
+  ap <- tryCatch({
+    assert_publishable_table(x, prefix = NULL, name = basename(q2_tab(sl)))
+    TRUE
+  }, error = function(e) FALSE)
+  add_q8("publish", paste0(basename(q2_tab(sl)),
+                           ": assert_publishable_table() passes; no column is a cell id or a coordinate; no value is a model cell id"),
+         sprintf("%d columns", ncol(x)),
+         ap && !any(qa_pos_col(x)) && sdm_qa_id_hits(x, qa_ids) == 0)
+}
+q2_outs <- list.files(dirname(DIR_TABLES), recursive = TRUE)
+add_q8("publish", "(c) no file under outputs/ has tiger in its name",
+       sprintf("%d of %d files", sum(grepl("tiger", basename(q2_outs),
+                                           ignore.case = TRUE)), length(q2_outs)),
+       !any(grepl("tiger", basename(q2_outs), ignore.case = TRUE)))
+q2_layers <- c(basename(q2_files[2:3]), SDMRES_LAYER_PATHS)
+add_q8("publish", "no layer of Decision 27 is under outputs/ (point 10: no layer)",
+       sprintf("%d layers", length(q2_layers)),
+       !any(basename(q2_outs) %in% q2_layers))
+add_q8("info", "the sample of the second engine (equal steps over the other pairs with a path)",
+       sprintf("%d of %d pairs", length(q2_take), length(q2_cand)), TRUE)
+add_q8("info", "the largest number of iterations of one conjugate-gradient solve",
+       paste(names(q2_its), q2_its, collapse = "; "), TRUE)
+add_q8("info", "the ties made by the rounding to 12 significant digits (NT1) in the effective resistance",
+       paste(names(surf), vapply(names(surf), function(nm) {
+         v <- q2_tp[[nm]]$reff
+         sum(duplicated(signif(v, SDMRES_RANK_SIGNIF))) - sum(duplicated(v))
+       }, numeric(1)), collapse = "; "), TRUE)
+qa8_tbl <- do.call(rbind, q8)
+h8  <- sdm_qa_id_hits(qa8_tbl, qa_ids)
+rh8 <- sdm_qa_reserve_hits(qa8_tbl, res_d$unit_name)
+add_q8("publish", "tbl_19_sdmres_phase2_qa.csv: (b) no value is a cell id; no reserve name",
+       sprintf("%d and %d", h8, rh8), h8 == 0 && rh8 == 0)
+qa8_tbl <- do.call(rbind, q8)
+rownames(qa8_tbl) <- NULL
+occ_assert_counts_only(qa8_tbl, cols = c("group", "check", "value", "pass"),
+                       count_cols = character(0),
+                       name = "tbl_19_sdmres_phase2_qa.csv")
+assert_publishable_table(qa8_tbl, prefix = NULL,
+                         name = "tbl_19_sdmres_phase2_qa.csv")
+write_table(qa8_tbl, SDMRES_TABLE_NN, SDMRES_TABLE_SLUGS[["phase2_qa"]])
+cat("\n--- QA of phase 2 by group ---\n")
+grp8 <- unique(qa8_tbl$group)
+print(data.frame(group = grp8,
+                 checks = vapply(grp8, function(g) sum(qa8_tbl$group == g),
+                                 integer(1)),
+                 pass = vapply(grp8, function(g) {
+                   sum(qa8_tbl$pass[qa8_tbl$group == g])
+                 }, integer(1))), row.names = FALSE)
+cat("\n--- the checks (not the test cases) ---\n")
+sh8 <- qa8_tbl[!qa8_tbl$group %in% c("test case", "info"), ]
+cat(paste0(ifelse(sh8$pass, "  ok   ", "  FAIL "), sh8$group, " | ", sh8$check,
+           " | ", sh8$value, collapse = "\n"), "\n")
+cat("\n--- information (facts, not checks) ---\n")
+inf8 <- qa8_tbl[qa8_tbl$group == "info", ]
+cat(paste0(inf8$check, ":\n  ", inf8$value, collapse = "\n"), "\n")
+n_bad8 <- sum(!qa8_tbl$pass)
+if (n_bad8 > 0) {
+  cat("\n--- checks that FAIL ---\n")
+  bad8 <- qa8_tbl[!qa8_tbl$pass, ]
+  cat(paste0(bad8$group, " | ", bad8$check, " | ", bad8$value,
+             collapse = "\n"), "\n")
+  stop("QA of phase 2: ", n_bad8, " of ", nrow(qa8_tbl), " checks fail. ",
+       "tbl_19_sdmres_phase2_qa.csv is written; find the cause before any ",
+       "commit.", call. = FALSE)
+}
+rule(paste0("STEP 17.5 complete: phase 2 written; QA ", nrow(qa8_tbl), " of ",
+            nrow(qa8_tbl), " checks pass (",
+            round(as.numeric(difftime(Sys.time(), t_step175, units = "mins")), 1),
+            " min).\nCheck `git status --short` before a commit: nothing ",
+            "under data/ may be staged."))
+}

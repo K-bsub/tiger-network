@@ -1203,7 +1203,9 @@ SDMRES_TABLE_NN      <- 19L
 SDMRES_TABLE_SLUGS   <- c(surface = "sdmres_surface", pairs = "sdmres_pairs",
                           compare = "sdmres_compare",
                           compare_summary = "sdmres_compare_summary",
-                          phase2 = "sdmres_phase2", qa = "sdmres_qa")
+                          phase2 = "sdmres_phase2",
+                          phase2_summary = "sdmres_phase2_summary",
+                          qa = "sdmres_qa", phase2_qa = "sdmres_phase2_qa")
 SDMRES_FIG_SLUGS     <- c(current = "sdm_current", paths = "sdm_paths")
 # Task 17.5 (2026-11-14): the process choices TB1, CC1, FC1, PL1, L7a, L8a,
 # FR1 and SZ1, and the readings R3 and R4 (the author's answer "Tb1, CC1,
@@ -1265,6 +1267,21 @@ SDMRES_QA_SHARE_TOL    <- 0.02
 # at the average rank (Decision 27 point 7; Decision 18). The CSV files keep
 # 15 significant digits
 SDMRES_RANK_SIGNIF <- 12L
+# Task 17.6b (2026-11-14): phase 2 (STEP 17.5), the author's answer "R5, R6
+# confirmed; F2a, T2a, Q2a, new QA slug".
+#   R5   a phase-2 pair goes from the lower unit_id to the higher one; a
+#        column links it to its pair of Decision 17
+#   R6   the rank of point 8 uses NT1 (SDMRES_RANK_SIGNIF), then the tie rule
+#        of point 8 (the lower from_unit_id, then the lower to_unit_id)
+#   F2a  circ_run_pairs() for phase 2; STEP 17.2 is not changed
+#   T2a  two tables: phase2 (a row for each surface and pair) and
+#        phase2_summary (the long form of tbl_19_sdmres_surface.csv); the
+#        slugs above
+#   Q2a  the QA of phase 2: the pairs of Decision 17 against phase 1; the
+#        second engine of STEP 17.4 on SDMRES_QA2_SAMPLE_N other pairs on
+#        each surface (equal steps over the pair order; no seed); point 8
+#        again; the publish checks. Its own table (the slug phase2_qa)
+SDMRES_QA2_SAMPLE_N <- 100L                # a limit of the QA
 
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a

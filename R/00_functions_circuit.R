@@ -1654,3 +1654,334 @@ circ_qa_self_test <- function() {
       setequal(ids[cl == 5L], c(101L, 109L, 110L)))
   do.call(rbind, res)
 }
+
+# =============================================================================
+# Task 17.6b (2026-11-14): STEP 17.5 — phase 2 (Decision 27 points 6, 8 and
+# 9; the author's answer "R5, R6 confirmed; F2a, T2a, Q2a, new QA slug").
+#   circ_phase2_pairs()    all pairs of the reserves with a polygon, from the
+#                          lower unit_id to the higher one (R5), with the link
+#                          to the pairs of Decision 17
+#   circ_run_pairs()       the circuit and the least-cost path of each pair,
+#                          with the checks of STEP 17.2 (F2a)
+#   circ_pair_rule()       point 8: the rank of the effective resistance
+#                          (NT1, then the tie rule; R6), the lowest pairs, the
+#                          lowest partner of each reserve, the share, the count
+#   circ_phase2_summary()  tbl_19_sdmres_phase2_summary.csv (T2a)
+#   circ_self_test_175()   the hand-made case of STEP 17.5
+#   circ_qa_pair_rule()    point 8 again by a count of the pairs before each
+#                          pair (the QA of phase 2, Q2a)
+# =============================================================================
+
+# All pairs of the reserves (unit_id, unit_name; one row per reserve with a
+# polygon), from the lower unit_id to the higher one (R5), in that order.
+# d17: tbl_12_reserve_pairs.csv (pair_id, from_unit_id, to_unit_id). Returns
+# a data frame: p2_id, from_unit_id, from_name, to_unit_id, to_name,
+# decision17, pair_id_decision17.
+circ_phase2_pairs <- function(unit_id, unit_name, d17) {
+  if (anyDuplicated(unit_id) || length(unit_id) < 2L) {
+    stop("circ_phase2_pairs(): two or more reserves, each once.", call. = FALSE)
+  }
+  o <- order(unit_id)
+  u <- as.integer(unit_id[o])
+  nm <- unit_name[o]
+  cmb <- utils::combn(length(u), 2L)
+  p <- data.frame(p2_id = seq_len(ncol(cmb)),
+                  from_unit_id = u[cmb[1, ]], from_name = nm[cmb[1, ]],
+                  to_unit_id = u[cmb[2, ]], to_name = nm[cmb[2, ]],
+                  stringsAsFactors = FALSE)
+  dk <- paste(pmin(d17$from_unit_id, d17$to_unit_id),
+              pmax(d17$from_unit_id, d17$to_unit_id))
+  m <- match(paste(p$from_unit_id, p$to_unit_id), dk)
+  p$decision17 <- !is.na(m)
+  p$pair_id_decision17 <- as.integer(d17$pair_id[m])
+  p
+}
+
+# The circuit (Z1) and the least-cost path of each pair, with the checks of
+# STEP 17.2 for each pair (1 A out of the first reserve; (iii) the cost again
+# from the cells; the cost not below the effective resistance; the path from
+# one reserve to the other). A failure stops with the row id.
+#   info   : a data frame, one row per pair (copied to the output); id_col
+#            names its id column
+#   status : the status of each pair (circ_pair_status())
+#   node_a, node_b : lists of the node indices of the two reserves
+#   r      : the resistance of each node; ix, iy: the cells of the nodes
+#   oor    : the flag of the cells outside the training range (k1)
+#   sub    : a logical per pair; the current of these pairs is summed apart
+#   progress : 0 = no progress lines; k > 0 = one line after each k solved
+#              pairs (the number of pairs and the minutes; no id, no name)
+# Returns list(out, geoms (sfc LINESTRING in the analysis CRS), current,
+# current_sub, hatched (the hatched nodes on the paths)).
+circ_run_pairs <- function(info, id_col, status, node_a, node_b, links, memb,
+                           r, ix, iy, oor, surface, phase, sub = NULL,
+                           tol = SDMRES_CHECK_TOL_REL, progress = 0L) {
+  n <- nrow(info)
+  t0 <- Sys.time()
+  n_solve <- sum(status == "path")
+  n_done <- 0L
+  n_nodes <- length(r)
+  if (length(status) != n || length(node_a) != n || length(node_b) != n) {
+    stop("circ_run_pairs(): one status and one node set per pair.",
+         call. = FALSE)
+  }
+  if (is.null(sub)) sub <- rep(FALSE, n)
+  lr <- circ_link_resistance(links, r)
+  cur <- numeric(n_nodes)
+  cur_sub <- numeric(n_nodes)
+  hat <- integer(0)
+  geoms <- vector("list", n)
+  out <- data.frame(info, surface = surface, phase = phase, status = status,
+                    reff = NA_real_, cost_rkm = NA_real_, path_km = NA_real_,
+                    n_path_cells = NA_integer_, n_hatched_cells = NA_integer_,
+                    redundancy = NA_real_, stringsAsFactors = FALSE)
+  for (k in seq_len(n)) {
+    if (status[k] %in% c("contiguous_02", "no_path")) {
+      z <- if (status[k] == "contiguous_02") 0 else Inf
+      out$reff[k] <- z
+      out$cost_rkm[k] <- z
+      out$path_km[k] <- if (z == 0) 0 else NA_real_
+      out$n_path_cells[k] <- 0L
+      out$n_hatched_cells[k] <- 0L
+      geoms[[k]] <- sf::st_linestring()
+      next
+    }
+    if (status[k] != "path") {
+      stop("circ_run_pairs(): ", id_col, " ", info[[id_col]][k],
+           " has the status ", status[k], ".", call. = FALSE)
+    }
+    a <- node_a[[k]]
+    b <- node_b[[k]]
+    keep <- which(memb == memb[a[1]])
+    sol <- circ_solve_pair(n_nodes, links$from, links$to, 1 / lr, a, b, keep)
+    p <- circ_lcp_pair(n_nodes, links$from, links$to, lr, a, b)
+    pc <- circ_path_cost(ix[p$nodes], iy[p$nodes], r[p$nodes])
+    ok <- c(
+      "the current out of the first reserve is 1 A" =
+        abs(sol$out_a - 1) <= tol,
+      "the effective resistance is finite and above 0" =
+        is.finite(sol$reff) && sol$reff > 0,
+      "the path has 2 cells or more" =
+        is.finite(p$cost) && length(p$nodes) >= 2L,
+      "the path starts in the first reserve and ends in the second" =
+        p$nodes[1] %in% a && p$nodes[length(p$nodes)] %in% b,
+      "(iii) the path cost again from the cells" =
+        isTRUE(pc$steps_ok) && abs(pc$cost - p$cost) <= tol * max(1, p$cost),
+      "the path cost is not below the effective resistance" =
+        p$cost >= sol$reff * (1 - tol))
+    if (!all(ok)) {
+      stop("circ_run_pairs(): ", id_col, " ", info[[id_col]][k], " on ",
+           surface, ": ", paste(names(ok)[!ok], collapse = "; "),
+           call. = FALSE)
+    }
+    cur <- cur + sol$current
+    if (sub[k]) cur_sub <- cur_sub + sol$current
+    hat <- union(hat, p$nodes[oor[p$nodes]])
+    ln <- circ_path_line(ix[p$nodes], iy[p$nodes])
+    geoms[[k]] <- ln
+    out$reff[k] <- sol$reff
+    out$cost_rkm[k] <- p$cost
+    out$path_km[k] <- as.numeric(sf::st_length(
+      sf::st_sfc(ln, crs = CRS_ANALYSIS))) / 1000
+    out$n_path_cells[k] <- length(p$nodes)
+    out$n_hatched_cells[k] <- sum(oor[p$nodes])
+    out$redundancy[k] <- p$cost / sol$reff
+    n_done <- n_done + 1L
+    if (progress > 0L && (n_done %% progress == 0L || n_done == n_solve)) {
+      cat(sprintf("  %s: %s of %s pairs solved (%.1f min)\n", surface,
+                  format(n_done, big.mark = ","), format(n_solve, big.mark = ","),
+                  as.numeric(difftime(Sys.time(), t0, units = "mins"))))
+    }
+  }
+  list(out = out, geoms = sf::st_sfc(geoms, crs = CRS_ANALYSIS), current = cur,
+       current_sub = cur_sub, hatched = hat)
+}
+
+# Point 8 on one surface (P2c; R6). The order: the effective resistance
+# rounded to `digits` significant digits (NT1; 0 first, Inf last), then the
+# lower from_unit_id, then the lower to_unit_id. n_low: the number of the
+# pairs of Decision 17. Returns list(rank, in_lowest, lowest_of_from,
+# lowest_of_to, share (of the pairs of Decision 17 among the n_low lowest),
+# count (the reserves whose lowest partner is not a pair of Decision 17)).
+circ_pair_rule <- function(reff, from, to, is_d17, n_low,
+                           digits = SDMRES_RANK_SIGNIF) {
+  n <- length(reff)
+  if (anyNA(reff) || length(from) != n || length(to) != n ||
+      length(is_d17) != n || any(from >= to) || n_low < 1L || n_low > n) {
+    stop("circ_pair_rule(): one value per pair, from < to, 1 <= n_low <= n.",
+         call. = FALSE)
+  }
+  o <- order(signif(reff, digits), from, to)
+  rank <- integer(n)
+  rank[o] <- seq_len(n)
+  units <- sort(unique(c(from, to)))
+  best <- vapply(units, function(u) {
+    w <- which(from == u | to == u)
+    w[which.min(rank[w])]
+  }, integer(1))
+  lof <- lot <- logical(n)
+  for (j in seq_along(units)) {
+    if (from[best[j]] == units[j]) lof[best[j]] <- TRUE else lot[best[j]] <- TRUE
+  }
+  list(rank = rank, in_lowest = rank <= n_low, lowest_of_from = lof,
+       lowest_of_to = lot, share = sum(is_d17 & rank <= n_low) / n_low,
+       count = sum(!is_d17[best]))
+}
+
+# tbl_19_sdmres_phase2_summary.csv (T2a): group, item, surface, value,
+# reading. Counts and statistics only: no cell id, no position, no reserve
+# name.
+#   runs  : a named list (by surface) of the out tables of circ_run_pairs()
+#   rules : a named list (by surface) of circ_pair_rule() results
+#   curs, hats : named lists of the total currents and the hatched nodes
+circ_phase2_summary <- function(runs, rules, curs, hats, n_res, n_low, n_rev,
+                                min_share = SDMRES_PAIRRULE_MIN_SHARE,
+                                labels = SDMRES_PAIRRULE_LABELS,
+                                label_surface = "main") {
+  rows <- list()
+  add <- function(group, item, value, surface = "", reading = "") {
+    rows[[length(rows) + 1L]] <<- data.frame(
+      group = group, item = item, surface = surface, value = value,
+      reading = reading, stringsAsFactors = FALSE)
+  }
+  d1 <- runs[[1]]
+  add("pairs", "reserves", n_res, reading = "the reserves with a polygon")
+  add("pairs", "phase2_pairs", nrow(d1), reading = "all pairs (from < to; R5)")
+  add("pairs", "decision17_pairs", sum(d1$decision17),
+      reading = "the pairs of tbl_12_reserve_pairs.csv")
+  add("pairs", "decision17_other_direction", n_rev,
+      reading = "pairs of Decision 17 whose from_unit_id is the higher id")
+  add("pairs", "contiguous_02", sum(d1$status == "contiguous_02"),
+      reading = "effective resistance 0 (Decision 27 point 3)")
+  add("pairs", "no_path", sum(d1$status == "no_path"), reading = "Inf")
+  add("pairs", "solved", sum(d1$status == "path"))
+  q3 <- function(v) stats::quantile(v, c(0.25, 0.5, 0.75), names = FALSE)
+  for (nm in names(runs)) {
+    d <- runs[[nm]]
+    ru <- rules[[nm]]
+    s <- d$status == "path"
+    add("pair_rule", "lowest_pairs", n_low, nm,
+        "the number of the pairs of Decision 17")
+    add("pair_rule", "decision17_in_lowest", sum(d$decision17 & ru$in_lowest), nm)
+    add("pair_rule", "share", ru$share, nm,
+        "pairs of Decision 17 among the lowest (Decision 27 point 8)")
+    add("pair_rule", "reserves_lowest_partner_not_decision17", ru$count, nm,
+        "of the reserves")
+    if (identical(nm, label_surface)) {
+      lab <- if (ru$share >= min_share) labels[1] else labels[2]
+      add("pair_rule", "label_agrees", as.numeric(lab == labels[1]), nm, lab)
+    }
+    q <- q3(d$reff[s])
+    add("reff", "reff_min", min(d$reff[s]), nm, "resistance-km; solved pairs")
+    add("reff", "reff_q25", q[1], nm)
+    add("reff", "reff_median", q[2], nm)
+    add("reff", "reff_q75", q[3], nm)
+    add("reff", "reff_max", max(d$reff[s]), nm)
+    add("paths", "paths", sum(s), nm)
+    add("paths", "path_km_min", min(d$path_km[s]), nm)
+    add("paths", "path_km_median", stats::median(d$path_km[s]), nm)
+    add("paths", "path_km_max", max(d$path_km[s]), nm)
+    add("paths", "redundancy_median", stats::median(d$redundancy[s]), nm,
+        "path cost / effective resistance")
+    add("paths", "paths_with_hatched", sum(d$n_hatched_cells[s] > 0), nm,
+        "k1 (Decision 27 point 1)")
+    add("paths", "hatched_cells_on_paths", length(hats[[nm]]), nm, "k1")
+    cu <- curs[[nm]]
+    add("current", "cells_with_current", sum(cu > 0), nm,
+        "the total current of phase 2 (1 A per pair)")
+    add("current", "cells_without_current", sum(cu == 0), nm)
+    add("current", "current_median", stats::median(cu), nm)
+    add("current", "current_max", max(cu), nm)
+  }
+  out <- do.call(rbind, rows)
+  rownames(out) <- NULL
+  out
+}
+
+# The hand-made case of STEP 17.5. Returns a data frame: check, pass.
+circ_self_test_175 <- function() {
+  res <- list()
+  chk <- function(name, ok) res[[length(res) + 1L]] <<-
+    data.frame(check = name, pass = isTRUE(ok), stringsAsFactors = FALSE)
+  near <- function(a, b, tol = 1e-9) {
+    length(a) == length(b) && all(abs(a - b) <= tol * pmax(1, abs(b)))
+  }
+  # 1. The pairs (R5): 4 reserves with ids 7, 3, 9, 5; Decision 17 has (7, 3)
+  #    in the other direction and (5, 9).
+  d17 <- data.frame(pair_id = c(11L, 12L), from_unit_id = c(7L, 5L),
+                    to_unit_id = c(3L, 9L))
+  p <- circ_phase2_pairs(c(7L, 3L, 9L, 5L), c("G", "C", "I", "E"), d17)
+  chk("pairs: 6 pairs, from < to, in the order (3,5), (3,7), (3,9), (5,7), (5,9), (7,9)",
+      nrow(p) == 6L && identical(p$from_unit_id, c(3L, 3L, 3L, 5L, 5L, 7L)) &&
+        identical(p$to_unit_id, c(5L, 7L, 9L, 7L, 9L, 9L)) &&
+        identical(p$from_name[2], "C") && identical(p$to_name[2], "G"))
+  chk("pairs: the link to Decision 17 in either direction (R5)",
+      identical(p$decision17, c(FALSE, TRUE, FALSE, FALSE, TRUE, FALSE)) &&
+        identical(p$pair_id_decision17[c(2, 5)], c(11L, 12L)))
+  # 2. Point 8 (R6): a 0, an exact tie broken by the ids, a near-tie that
+  #    NT1 makes a tie.
+  reff <- c(10, 0, 10 * (1 + 4e-16), 4, 10, 4)
+  ru <- circ_pair_rule(reff, p$from_unit_id, p$to_unit_id, p$decision17, 2L,
+                       digits = 12L)
+  chk("pair rule: the ranks 4, 1, 5, 2, 6, 3 (0 first; the tie at 4 and the near-tie at 10 by the ids)",
+      identical(ru$rank, c(4L, 1L, 5L, 2L, 6L, 3L)))
+  ru15 <- circ_pair_rule(reff, p$from_unit_id, p$to_unit_id, p$decision17, 2L,
+                         digits = 17L)
+  chk("pair rule: with 17 digits the near-tie is not a tie (rank 6 for (3,9))",
+      ru15$rank[3] == 6L)
+  chk("pair rule: the share of the pairs of Decision 17 among the 2 lowest = 1/2",
+      near(ru$share, 0.5) && identical(ru$in_lowest,
+                                       c(FALSE, TRUE, FALSE, TRUE, FALSE, FALSE)))
+  chk("pair rule: the lowest partner of 3 and 7 is (3,7); of 5 is (5,7); of 9 is (7,9); count = 2",
+      ru$count == 2L &&
+        identical(ru$lowest_of_from, c(FALSE, TRUE, FALSE, TRUE, FALSE, FALSE)) &&
+        identical(ru$lowest_of_to, c(FALSE, TRUE, FALSE, FALSE, FALSE, TRUE)))
+  qr <- circ_qa_pair_rule(reff, p$from_unit_id, p$to_unit_id, p$decision17, 2L,
+                          digits = 12L)
+  chk("pair rule: the QA count gives the same ranks, share and count",
+      identical(qr$rank, ru$rank) && near(qr$share, ru$share) &&
+        qr$count == ru$count)
+  # 3. The run of the pairs on a row of 5 made-up cells: A = {1}, B = {5},
+  #    C = {2, 3}, D = {3, 4}. (A, B) in series; (A, C) one link; (C, D)
+  #    contiguous at 0.2 degrees.
+  ix <- 400L:404L; iy <- rep(100L, 5)
+  r <- c(1, 3, 5, 7, 9)
+  L <- circ_links(ix, iy, 0.2)
+  lr <- circ_link_resistance(L, r)
+  memb <- circ_components(5L, L)
+  ids <- sdm_cell_id(ix, iy)
+  cells <- list(A = ids[1], B = ids[5], C = ids[2:3], D = ids[3:4])
+  info <- data.frame(p2_id = 1:3, from = c("A", "A", "C"), to = c("B", "C", "D"),
+                     stringsAsFactors = FALSE)
+  st <- circ_pair_status(cells[info$from], cells[info$to], ids, memb)
+  na <- lapply(cells[info$from], function(v) match(v, ids))
+  nb <- lapply(cells[info$to], function(v) match(v, ids))
+  rp <- circ_run_pairs(info, "p2_id", st, na, nb, L, memb, r, ix, iy,
+                       rep(FALSE, 5), "test", "phase2", sub = c(TRUE, FALSE, FALSE))
+  chk("run: (A, B) in series, (A, C) one link, (C, D) contiguous at 0.2 degrees (0)",
+      identical(st, c("path", "path", "contiguous_02")) &&
+        near(rp$out$reff, c(sum(lr), lr[1], 0)) &&
+        near(rp$out$cost_rkm, c(sum(lr), lr[1], 0)))
+  chk("run: the total current 0, 1, 1, 1, 0 (only (A, B) has nodes between); the sum of the pairs in sub the same",
+      near(rp$current, c(0, 1, 1, 1, 0)) && near(rp$current_sub, c(0, 1, 1, 1, 0)))
+  do.call(rbind, res)
+}
+
+# Point 8 again for the QA (Q2a): the rank of a pair = 1 + the number of the
+# pairs before it (a lower rounded value, or the same value and a lower
+# from_unit_id, or the same value and from_unit_id and a lower to_unit_id).
+circ_qa_pair_rule <- function(reff, from, to, is_d17, n_low,
+                              digits = SDMRES_RANK_SIGNIF) {
+  k <- signif(reff, digits)
+  n <- length(k)
+  rank <- vapply(seq_len(n), function(i) {
+    1L + sum(k < k[i] | (k == k[i] & (from < from[i] |
+                                        (from == from[i] & to < to[i]))))
+  }, integer(1))
+  units <- sort(unique(c(from, to)))
+  low_d17 <- vapply(units, function(u) {
+    w <- which(from == u | to == u)
+    is_d17[w[rank[w] == min(rank[w])]]
+  }, logical(1))
+  list(rank = as.integer(rank), share = sum(is_d17 & rank <= n_low) / n_low,
+       count = sum(!low_d17))
+}
