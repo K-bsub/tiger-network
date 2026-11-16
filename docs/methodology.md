@@ -2,7 +2,9 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** **Week 16 complete (2026-11-07; tasks 16.1–16.6, each
+**Status:** **Week 17 complete (2026-11-14 to 2026-11-15; tasks
+17.1–17.7; the author committed each task with code; the commit of task
+17.7 is task 17.8).** **Week 16 complete (2026-11-07; tasks 16.1–16.6, each
 committed by the author); Stage 3 (habitat suitability) complete.**
 **Week 15 complete (2026-11-01; tasks 15.1–15.2 on 2026-10-31,
 tasks 15.3–15.6 on 2026-11-01; the commit, task 15.7, by the author);
@@ -71,6 +73,10 @@ values equal but for the last bits) after the first run. **Task 17.6b
 the 56 reserves (12 contiguous at 0.2°, 1,528 solved); point 8 on
 `main`: 51 of the 106 pairs of Decision 17 are among the 106 pairs with
 the lowest effective resistance (share 0.481) — "differs"; QA 62 of 62.
+**Task 17.7 (2026-11-15):** the docs of the Week-17 close and the Week-18
+plan (the author's answer "W1 + W2"). **Next: Week 18** — the open
+analysis items first, then Decision 28 (the form of the story site) and
+the site skeleton.
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -130,9 +136,35 @@ All Stage-2 steps (Weeks 9–12: resistance, least-cost paths, network graph,
 pinch points) are built in **one script, `scripts/07_connectivity.R`**, with one
 STEP block per task.
 
+**A check from the suitability (Decision 27; Week 17;
+`scripts/10_check_sdm_connectivity.R`).** *(Added 2026-11-15 at the
+Week-17 close.)*
+- **Surfaces:** two resistance surfaces on the 6,969 model cells of 0.2°,
+  from the rank of the suitability of §5.4: `main`, R = 1 + 99 × (1 − x),
+  and the variant `negexp8`, a negative exponential with c = 8. R is 1 to
+  100, as in Stage 2.
+- **Method:** a graph of the model cells (8 neighbours; distance on the
+  sphere). For each pair: circuit theory (the effective resistance and
+  the current; own code with `Matrix`) and a least-cost path (`igraph`).
+- **Phase 1** (the 106 pairs of Decision 17): the `main` paths against
+  the Stage-2 baseline paths by the rule of Decision 18 at d = 20 km:
+  **"differs"** (46 of 94 compared pairs material; ρ of the path costs
+  0.758). `negexp8` against `main`: **"sensitive"** (29 of 94; ρ 0.887).
+  12 pairs share a model cell and have no path.
+- **Phase 2** (all 1,540 pairs of the 56 reserves): a check of the pair
+  rule of Decision 17. 51 of its 106 pairs are among the 106 pairs with
+  the lowest effective resistance on `main` (share 0.481): **"differs"**.
+- **Published form:** `fig_07_sdm_current.png`, `fig_08_sdm_paths.png`
+  (caption drafts) and the `tbl_19_sdmres_*` tables; no layer. QA 196 of
+  196 (phase 1) and 62 of 62 (phase 2).
+- The Stage-2 outputs (`tbl_03`, `tbl_03b`, `fig_03`) do not change:
+  Decision 27 is a check.
+
 ### 5.4 Habitat suitability (priority 3)
 
-*(2026-11-07, Week-16 close: the figures and the cell range of the model
+*(2026-11-15, Week-17 close: the rank of the prediction is also the input
+of the resistance surfaces of Decision 27; see §5.3.)* *(2026-11-07,
+Week-16 close: the figures and the cell range of the model
 cells.)* *(Written again 2026-11-01 at the Week-15 close; the dated notes of
 Decision 25 are in this text now. Earlier texts: 2026-10-25 (Week 14) and
 the first text, which named a `maxnet` SDM at 1 km on the cleaned
@@ -5416,6 +5448,73 @@ before the relevant code is written.
 
 *(Records as-built changes to data, code, or scope during execution.)*
 
+### 2026-11-15 — Week 17 complete: task 17.7 (docs close; the Week-18 plan)
+
+- **Docs only.** No rule, value, data layer, table or script changed; no
+  run.
+- **The author's answer (2026-11-15): "W1 + W2".** The chat had given
+  three options for Week 18, with W1 recommended: W1, the site skeleton
+  in Week 18 with a Decision 28 on the site form first (Stage 4 as
+  planned); W2, the open analysis items first in Week 18 and the site in
+  Weeks 19–22; W3, the skeleton and the "Published layers" Decision
+  together in Week 18.
+  - **The chat's reading** (stated in its reply of 2026-11-15): Week 18
+    holds both, in this order: the open items of W2 (a fork for each,
+    then the work), a split point, then Decision 28 and the skeleton of
+    W1. Stage 4 stays in Weeks 18–21, and Week 18 is larger (an estimate
+    of 5–7 h). If Week 18 runs long, the skeleton continues in Week 19
+    and Stage 4 moves by one week (the schedule of W2). Not chosen: W3.
+  - **The open items of W2:** the near-ties of Decision 18 in the Week-10
+    comparisons; the `I()` fix of `scripts/03`; the "Sources" line of
+    `fig_07` and `fig_08`; the six overlaps of the reserve polygons. The
+    other open items of `handoff.md` keep their place.
+- **The facts given with fork W (the chat; read-only checks of the repo,
+  2026-11-15):** `.github/workflows/publish.yml` renders `site/` with
+  Quarto, with no R, and deploys it to the branch `gh-pages` on each push
+  to `main` that changes `site/**`; `_quarto.yml` has `freeze: auto`, so a
+  page with R code needs a committed `site/_freeze/` (none exists; the six
+  pages are placeholders); `renv.lock` has no `knitr`, `rmarkdown`,
+  `quarto`, `leaflet` or `htmlwidgets`; the figures and tables are in
+  `outputs/`, outside the Quarto project `site/`.
+- **§5.3:** a block "A check from the suitability" (Decision 27). **§5.4:**
+  a dated note (the rank of the prediction is the input of Decision 27).
+  **"Limitations":** ten Week-17 items at the end.
+- **Week 17 against proposal questions 2 and 3 (a record, not text for the
+  site):**
+  - **Q2:** "Where are the likely movement corridors between reserves?
+    Which reserves are connectivity linchpins, and which are isolated?
+    Where do corridors cross major roads?"
+    - A second model of the routes, from the suitability at 0.2°: point 7
+      "differs" — 46 of the 94 compared pairs are material (route 29,
+      cost rank 25); ρ of the path costs 0.758. The variant transform:
+      "sensitive" (29 of 94; ρ 0.887).
+    - The pair rule of Decision 17 (geometry) against the effective
+      resistance on the suitability surface: point 8 "differs" (51 of
+      106; share 0.481). For 54 of the 56 reserves, the partner of lowest
+      effective resistance is a pair of Decision 17.
+    - Decision 27 gives no linchpin, isolation or road result, and the
+      Stage-2 answers (Decisions 17–20) do not change.
+    - Two models; no movement data checks either one.
+  - **Q3:** Week 17 uses the suitability as an input; it adds no answer to
+    Q3.
+  - The effort caveat (proposal §7) applies to each of these statements.
+- **`proposal.md` §8:** a dated note on the entry "SDM-based resistance and
+  a circuit-theory check" (as built; not a new deviation).
+- **`README.md`:** the status, written again: Week 17 first; Weeks 14–16
+  in one short line each (the full text: this file). The stack: `Matrix`
+  and the circuit code of Decision 27.
+- **`references.md`:** no change (no new source after task 17.4).
+  **`data-dictionary.md`, `naming-conventions.md`:** no change in this task
+  (task 17.6b).
+- **`project-plan.md`:** Week 17 ticked (task 17.7, the milestone, the
+  progress row); a new **Week 18** task breakdown with its pitfalls (a
+  plan, not a Decision); the Stage-4 row of Week 18.
+- **`handoff.md`:** written for Week 18 (the current state, the Week-18
+  entry point, the Week-17 block of "Results by stage", the open items of
+  W2 marked for Week 18, the weekly log of Week 17, two gotchas).
+- **Next:** the commit of task 17.7 (task 17.8, by the author); then Week
+  18, task 18.1 — the forks of the open items.
+
 ### 2026-11-15 — Week 17, task 17.6b complete: STEP 17.5 (phase 2 and its QA)
 
 - **The author's answer (2026-11-14):** "R5, R6 confirmed; F2a, T2a,
@@ -7505,3 +7604,50 @@ Gi\* and the figures needs.)*
   CIE76 15.2). The state lines are from Natural Earth (approximate).
 - **No Gi\* layer and no suitability layer is published** before the rule
   of the pending item "Published layers" (Week 19).
+
+*(Week 17, added 2026-11-15 at the Week-17 close. Decision 27 keeps its
+own list of limitations; the items below are the ones that a reader of the
+SDM-based check needs.)*
+
+- **Two models, and no movement data (Decision 27).** "Agrees",
+  "differs", "robust" and "sensitive" compare the SDM-based surface with
+  the Stage-2 surface, or one transform with the other, by judgement
+  values (Decision 18; 2/3). No telemetry, genetic or road-kill data
+  checks either surface.
+- **The SDM-based paths differ from the Stage-2 paths (point 7).** 46 of
+  the 94 compared pairs are material (route 29, cost rank 25); the ρ of
+  the path costs is 0.758. The two surfaces have different inputs (land
+  cover, gHM and roads at 1 km; the rank of the suitability at 0.2°), so
+  "differs" does not show which surface is nearer to tiger movement.
+- **The result depends on the transform (the variant is "sensitive").**
+  `negexp8` against `main`: 29 of 94 pairs material, ρ 0.887. No value of
+  c is known for tigers.
+- **The pair rule of Decision 17 differs from the effective resistance
+  (point 8).** On `main`, 51 of the 106 pairs of Decision 17 are among
+  the 106 pairs with the lowest effective resistance (share 0.481; the
+  limit is 2/3). For 54 of the 56 reserves, the partner of lowest
+  effective resistance is a pair of Decision 17. The check uses one model
+  surface. The Stage-2 network (Decision 19) does not change.
+- **The phase-2 paths are not corridors.** Phase 2 has a path for each
+  pair of the 56 reserves, also for pairs across India (median 1,418 km on
+  `main`, up to 3,784 km). They give counts and lengths only (point 8).
+- **The grain is 0.2°.** A path runs through cell centres about 20 km
+  apart and cannot show a corridor narrower than a cell. 12 of the 106
+  pairs of Decision 17 share a model cell, so they have no SDM-based path
+  and are out of the comparison of point 7.
+- **The current shows the pairs as well as the surface.** Each pair adds
+  1 A, so a reserve with more pairs sends more current. The share of a
+  Stage-2 path inside the top 20 % of the cells by current is partly a
+  result of the method (LS1).
+- **The effort caveat applies.** The input is the rank of a relative
+  suitability from presence and background records. Most presences are in
+  reserves, so a low resistance in a reserve partly shows where people
+  record tigers.
+- **The figure text is a draft, and it is in the image.** The titles, the
+  subtitles and the captions of `fig_07` and `fig_08` are drafts of the
+  chat, drawn in the PNG files; an edit needs a change of `scripts/10`
+  (STEP 17.3) and a new run. The "Sources" line is the line of `fig_04`;
+  a check that it also covers the inputs of the Stage-2 surface is open.
+- **No layer of Decision 27 is published** (the surfaces, the currents,
+  the paths) before the rule of the pending item "Published layers" (Week
+  19).

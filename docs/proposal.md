@@ -186,3 +186,12 @@ open are documented as numbered Decisions in `docs/methodology.md`, not here.*
   suitability at 0.2° and a circuit-theory check against the Stage-2
   paths. **Decision 27** fixes the settings before any surface. The story
   site (deliverable 1) moves one week later (Weeks 18–21).
+  *(2026-11-15, Week 17 as built: own R code (`Matrix` for the circuit,
+  `igraph` for the paths), not Circuitscape; two surfaces from the rank of
+  the suitability on the 0.2° model cells. Phase 1, the 106 pairs of
+  Decision 17: the paths against the Stage-2 paths "differ" (46 of 94
+  pairs material), and the variant is "sensitive". Phase 2, all 1,540
+  pairs: the pair rule of Decision 17 "differs" from the pairs of lowest
+  effective resistance (share 0.481). Two static figures (`fig_07`,
+  `fig_08`) and the `tbl_19` tables; no layer. The Stage-2 outputs do not
+  change. Not a new deviation.)*

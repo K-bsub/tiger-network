@@ -1621,7 +1621,7 @@ measured). A split point is marked after task 17.2.
 | 17.5 ✅ | STEP 17.3 — the comparison with the Stage-2 paths by the rule of Decision 27; a figure if Decision 27 says so | The comparison table; the reading by the rule *(2026-11-14: done — the process choices TB1, CC1, FC1, PL1, L7a, L8a, FR1, SZ1 and the readings R3, R4; `main` against the Stage-2 baseline paths "differs" (46 of 94 pairs material; ρ 0.758); `negexp8` against `main` "sensitive" (29 of 94; ρ 0.887); `tbl_19_sdmres_compare.csv`, `tbl_19_sdmres_compare_summary.csv`, `fig_07`, `fig_08`)* | 30–45 min |
 | 17.6 ✅ | STEP 17.4 — QA: a hand-made case first; a second path for the surface and the comparison; the publish checks | QA passes *(2026-11-14: done — QS1, QE1, QP1, QO1, QT1, QF; a second path for each result of phase 1; the first run found floating near-ties in the ranks of point 7 (NT1: ranks on 12 significant digits; STEP 17.3 ran again, the labels did not change); 196 of 196; `tbl_19_sdmres_qa.csv`)* | 30–45 min |
 | 17.6b ✅ | STEP 17.5 — phase 2 (Decision 27 points 6 and 8): all 1,540 pairs on both surfaces, the effective resistance, the total current and a path for each pair; the check of the pair rule (label of P2c); its own QA. Runs with `RUN_PHASE2` = `TRUE` after the phase-1 QA passes *(added 2026-11-14 by Decision 27 e3)* | The phase-2 table written; its QA passes *(2026-11-15: done — R5, R6, F2a, T2a, Q2a and RS2 (`RUN_PHASE2 = TRUE` stays in the script); 1,540 pairs (12 contiguous at 0.2°, 1,528 solved on each surface); point 8 on `main` "differs" (51 of the 106 pairs of Decision 17 among the 106 lowest; share 0.481); QA 62 of 62; `tbl_19_sdmres_phase2.csv`, `tbl_19_sdmres_phase2_summary.csv`, `tbl_19_sdmres_phase2_qa.csv`; STEP 17.5 took 2.6 min)* | 30–60 min (an estimate) |
-| 17.7 | Docs: `methodology.md` (Decision 27 and its result, change log, Limitations, §5.3–5.4), `proposal.md` §8, `README.md`, `data-dictionary.md`, `naming-conventions.md`, `references.md`, the handoff; the Week-18 plan (Stage 4) | Docs match as-built | 30–45 min |
+| 17.7 ✅ | Docs: `methodology.md` (Decision 27 and its result, change log, Limitations, §5.3–5.4), `proposal.md` §8, `README.md`, `data-dictionary.md`, `naming-conventions.md`, `references.md`, the handoff; the Week-18 plan (Stage 4) | Docs match as-built *(2026-11-15: done — §5.3 and §5.4, ten Limitations, `proposal.md` §8, `README.md`, the handoff; `references.md` no change; the Week-18 plan after the author's answer "W1 + W2")* | 30–45 min |
 | 17.8 | Commit (`analysis:`; `docs:` separate) | Committed and pushed; `git status --short` shows nothing under `data/` staged | 10 min |
 
 **Week 17 pitfalls:**
@@ -1667,10 +1667,90 @@ Weeks 17–20. Each row below has its new week number.)*
 
 | Week | Focus | Exit state (deliverable) | Est. |
 |---|---|---|---|
-| **18** | Site skeleton | Quarto site structure; one page per track; navigation *(2026-11-07: the site has placeholder pages and a navbar since the first commit (`site/`). The captions of `fig_03`–`fig_06` are drawn in the PNG files; an edit needs a new run, unless the site gives the caption as page text — a fork for the Week-18 plan)* | 3–4 h |
+| **18** | Open items + site skeleton *(2026-11-15)* | The four open analysis items closed or recorded; Decision 28 (the site form); the Quarto site structure; one page per track; navigation *(2026-11-15, task 17.7: the author's answer "W1 + W2" — the open items first, then the skeleton; see "Week 18 — task breakdown")* *(2026-11-07: the site has placeholder pages and a navbar since the first commit (`site/`). The captions of `fig_03`–`fig_06` are drawn in the PNG files; an edit needs a new run, unless the site gives the caption as page text — a fork for the Week-18 plan)* | 5–7 h *(was 3–4 h; 2026-11-15, with the open items)* |
 | **19** | Leaflet maps | Interactive maps wired in (reuse Bay Area Leaflet recipe) *(2026-10-31: first the pending item "[Week 18] Published layers" (`methodology.md`) — whether a path layer and the suitability surface at 0.2° go on an interactive map, and in which form; Decision 25 point 4)* *(2026-11-07: the item is now "[Week 19] Published layers")* | 3–4 h |
 | **20** | Narrative + QC | Author-written narrative; figure alt text; accessibility pass *(2026-11-07: the author's edit of the caption drafts of `fig_03`–`fig_06`)* | 3–4 h |
 | **21** | Publish + docs close | Site deployed to GitHub Pages; final report; decision log closed | 3–4 h |
+
+*(2026-11-15, task 17.7: Week 18 is larger (5–7 h, an estimate). If it
+runs long, the skeleton continues in Week 19, and Weeks 19–21 move by one
+week (Weeks 20–22).)*
+
+### Week 18 — task breakdown
+
+*(Written 2026-11-15 at the Week-17 close (task 17.7), after the author's
+answer "W1 + W2". This is a draft plan. It makes no Decision. The chat's
+reading: Week 18 holds both — the open analysis items first (W2), then
+Decision 28 and the site skeleton (W1).)*
+
+Entry state (as of the Week-17 close, 2026-11-15):
+
+- **Committed:** `fig_01`–`fig_08`; the tables `tbl_00`–`tbl_19` (with
+  `tbl_03`, `tbl_03b` and `tbl_03_notes.md` for Stage 2, `tbl_17` for the
+  reserve values, `tbl_18_gistar.csv` and the `tbl_19_sdmres_*` tables);
+  `scripts/01`–`scripts/10`.
+- **The site:** `site/` is a Quarto website with six placeholder pages
+  (Story, Growth, Connectivity, Habitat, Methods, Data & References) and
+  a navbar; `freeze: auto`; no `_freeze/` yet.
+- **The deploy:** `.github/workflows/publish.yml` renders `site/` with
+  Quarto (no R) and deploys it to the branch `gh-pages` on each push to
+  `main` that changes `site/**`, or by hand (`workflow_dispatch`).
+- **`renv.lock`:** no `knitr`, `rmarkdown`, `quarto`, `leaflet` or
+  `htmlwidgets`.
+
+**Size.** The estimates add up to about 5–7 hours (estimates, not
+measured). A split point is marked after task 18.2. If Week 18 runs long,
+the skeleton continues in Week 19 and Stage 4 moves by one week.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 18.1 | **The open items (W2): the forks, before any code.** For each item, the facts and the options; the author's choice. (a) The near-ties of Decision 18 in the Week-10 comparisons (`lcp_compare_variant()`; `tbl_12_lcp_variant_*`): a read-only count of the costs that are equal to 12 significant digits, and, if there are any, the effect on the ranks, the flags and the labels; a change of a rule only by a Decision. (b) The `I()` fix of `scripts/03` (line 101; for `readr` 2.2 or later; no output change): how to check it without a new extraction. (c) The "Sources" line of `fig_07` and `fig_08`: does it name the inputs of the Stage-2 surface (WorldCover, gHM, OpenStreetMap)? A change needs `scripts/10` and a run of STEPs 17.3–17.4. (d) The six overlaps of the reserve polygons (20.7 km²): a fix in `scripts/02` (then the runs of Weeks 10–12, 15 and 17 again, and their QA) or a limitation only; the size of each option first | The author's choice for each item, in the change log | 20–30 min |
+| 18.2 | The open items as chosen: the code, the runs on the project machine, the QA | Each item closed, or recorded as a limitation | 30–90 min (depends on 18.1) |
+| — | **Split point**: commit tasks 18.1–18.2 (`analysis:`; `docs:` separate) | — | — |
+| 18.3 | **Decision 28 (numbered), the form of the story site, before any page.** (a) The pages and the place of each committed figure and table (the Week-17 results too: on the Connectivity page, the Habitat page or a page of their own); (b) the captions: in the PNG files, as now, or as page text (the fork carried since task 16.6; page text needs figures without the text and a run of `scripts/07`, `09` and `10`); (c) how a page gets the figures and the tables: a copy step into `site/`, or another path rule; tables as Markdown written by a script, or R code in the page with `knitr` and the freeze; any new package and `renv.lock` (rule S1); (d) the deploy trigger: on each push, as now, or by hand only until Week 21; (e) the publish check of the site (sensitive-data policy §3: a position at a 10 km cell at most; no layer before the rule of "Published layers"; no tiger Gi\*; the `<3` rule of `tbl_15_occ_by_reserve.csv`); (f) the alt text: a draft or a placeholder (the narrative is the author's, Week 20); (g) what was seen | Decision 28 recorded in `methodology.md` | 45–60 min |
+| 18.4 | Process choices before code (not numbered): a script for the copy step (if any), the names, a hand-made check of the site build | Choices recorded in the change log | 15–20 min |
+| 18.5 | The skeleton pages: each page with its figures, tables and caption text as Decision 28 says, and a marked place for the author's text; no narrative; a local render | The site renders on the project machine; each page shows its outputs | 45–60 min |
+| 18.6 | Site QA: each image and link resolves; no file from `data/` in `site/` or `_site/`; the publish check of Decision 28 (e); a render as the Action does it (from the freeze, with no R) | QA passes | 30 min |
+| 18.7 | Docs; the Week-19 plan (the Leaflet maps; the pending item "Published layers" first) | Docs match as-built | 30 min |
+| 18.8 | Commit (`analysis:`, the site and `docs:` separate). With the trigger of today, the first push that changes `site/**` deploys the site | Committed and pushed; `git status --short` shows nothing under `data/` staged | 10 min |
+
+**Week 18 pitfalls:**
+- **A push deploys.** With `publish.yml` as it is, each push to `main`
+  that changes `site/**` puts the site on GitHub Pages at once. The
+  publish check must pass before such a commit (Decision 28 (d) and (e)).
+- **The Action has no R.** A page with R code needs `site/_freeze/`,
+  rendered on the project machine and committed.
+- **Packages.** `knitr`, `rmarkdown` and `quarto` are not in `renv.lock`;
+  `leaflet` and `htmlwidgets` are in the `scripts/00a` list but not in
+  `renv.lock`. A new package changes `renv.lock` and the `scripts/00a`
+  list (S1).
+- **Quarto is not on the Windows PATH:** render from R with
+  `quarto::quarto_render("site", as_job = FALSE)`; check how the R package
+  `quarto` is installed (it is not in `renv.lock`).
+- **The outputs are outside the Quarto project.** `outputs/` is not under
+  `site/`; a path such as `../outputs/...` may not be copied into
+  `_site/`. Check before any page uses it.
+- **The figure text is in the image** (`fig_03`–`fig_08`): an edit needs a
+  change of `scripts/07`, `09` or `10` and a new run, unless Decision 28
+  (b) moves the captions to page text.
+- **The narrative is the author's** (Week 20). The skeleton holds the
+  outputs, the caption drafts and marked places for the author's text.
+- **The open item (d) is large if fixed:** a change of the reserve
+  polygons changes the inputs of Stages 2 and 3 and of Week 17.
+- **Sensitive data** (policy §3): no position finer than a 10 km cell; the
+  tiger Gi\* never; no layer before the rule of "Published layers" (Week
+  19).
+- **Numbers.** Decision 28 is the next Decision number; `tbl_20` and
+  `fig_09` are the next free numbers.
+- **PROJ `proj.db` clash still applies** — fresh session.
+
+**Decisions due this week:** **28** (the form of the story site), before
+any page; a Decision for an open item only if it changes a rule.
+
+**Exit state:** the four open items closed or recorded; Decision 28
+recorded; the skeleton renders on the project machine (and is deployed if
+a push changed `site/**`); the site QA passed; docs updated; the Week-19
+plan written; Week 18 ticked.
 
 ---
 
@@ -1683,7 +1763,7 @@ Weeks 17–20. Each row below has its new week number.)*
 | **Growth track complete** | 7 | ✅ Achieved Week 7 — priority-1 deliverable done and publishable (tbl_01, tbl_02, fig_01, fig_02) |
 | **Connectivity track complete** | 12 | ✅ Achieved Week 12 — priority-2 deliverable done (`tbl_03`, `tbl_03b`, `fig_03`; working tables `tbl_11`–`tbl_14`). The figure text is a draft; the path layer for the site needs its own rule (Week 18) |
 | **Suitability track complete** | 16 | ✅ Achieved Week 16 (2026-11-07) — a relative suitability surface at 0.2° (`fig_04`, `fig_05`), the reserve check (r1 "agrees"; `tbl_17`), the effort Gi\* (`fig_06`, `tbl_18`); the figure text is a draft. Earlier notes: Priority-3 deliverable done *(2026-10-25: a model is fitted at the 0.2° grain (Week 14); the prediction, the reserve check, the Gi* and the figure in Weeks 15–16)* *(2026-11-01: the prediction and the reserve check are done (Week 15; r1 "agrees"); the Gi* and the two figures in Week 16)* |
-| SDM-based resistance check | 17 | Decision 27; a resistance surface from the suitability and a circuit-theory check against the Stage-2 paths *(added 2026-11-07, the author's choice R4)* |
+| SDM-based resistance check | 17 | ✅ Achieved Week 17 (2026-11-15) — Decision 27; two surfaces from the suitability; phase 1 against the Stage-2 paths "differs" (the variant "sensitive"); phase 2, the pair rule of Decision 17 "differs"; `fig_07`, `fig_08`, the `tbl_19` tables; the figure text is a draft. *(Added 2026-11-07, the author's choice R4)* |
 | **Site published** | 21 *(was 20; 2026-11-07)* | Full project live |
 
 ---
@@ -1721,5 +1801,5 @@ deliverable exists.
 | 11 | Reserve network graph (Decision 19) | ✅ Complete |
 | 12 | Pinch points + network figure (Decision 20) | ✅ Complete |
 | 13–16 | Suitability track | ✅ Complete (2026-11-07) — Week 13 complete (Decisions 21–22; outcome `no_1km_model`; committed 2026-10-18). **Week 14 complete (2026-10-25)** — Decision 23, a model at the 0.2° grain on the obscured set; `scripts/09`; the count: `planned_model` (104 presence cells, 1,486 background cells); Decision 24 (the model settings); the fit: `lq`, multiplier 1, mean test Boyce 0.668 over 5 spatial folds; QA 133 of 133; the commit by the author (task 14.8). **Week 15:** tasks 15.1–15.2 done (2026-10-31) — Decision 25 (the prediction and its published form; point 9 added in task 15.2) and the process choices; task 15.3 done (2026-11-01) — the prediction; the gate open; task 15.4 done (2026-11-01) — the reserve check: r1 "agrees"; task 15.5 done (2026-11-01) — QA 84 of 84. **Week 15 complete (2026-11-01)**; the commit (task 15.7) by the author. **Week 15 committed** (`7ae300a`). **Week 16:** task 16.1 done (2026-11-07) — Decision 26 (the Gi* settings). Task 16.2 done (2026-11-07) — the process choices and Amendment 1 of Decision 26. Task 16.3 done (2026-11-07) — STEP 16.1, the four Gi\*. Task 16.4 done (2026-11-07) — STEP 16.2, the figures `fig_04`, `fig_05` and `fig_06`. Task 16.5 done (2026-11-07) — STEP 16.3, QA 113 of 113. Task 16.6 done (2026-11-07) — the docs of the Stage-3 close. **Week 16 complete** |
-| 17 | SDM-based resistance + circuit-theory check (Decision 27; added 2026-11-07) | 🟡 In progress — tasks 17.1–17.6b done (2026-11-14 to 2026-11-15): Decision 27, the process choices, STEPs 17.1–17.5 (point 7: "differs"; the variant "sensitive"; point 8: "differs"; QA 196 of 196 and 62 of 62); next task 17.7 (the docs and the Week-18 plan) |
+| 17 | SDM-based resistance + circuit-theory check (Decision 27; added 2026-11-07) | ✅ Complete (2026-11-15) — Decision 27, the process choices, STEPs 17.1–17.5 (point 7: "differs"; the variant "sensitive"; point 8: "differs"; QA 196 of 196 and 62 of 62), the docs close and the Week-18 plan (task 17.7); the author committed each task; the commit of task 17.7 is task 17.8 |
 | 18–21 | Site + close *(was Weeks 17–20; moved 2026-11-07)* | ⚪ Not started |

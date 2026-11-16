@@ -93,11 +93,11 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ---
 
-## Current state  ·  **Week 17 in progress (tasks 17.1–17.6b done)** · 2026-11-15
+## Current state  ·  **Week 17 complete (tasks 17.1–17.7)** · 2026-11-15
 
 ### Where the project is
 
-- **Week 17 so far (2026-11-14 to 2026-11-15; tasks 17.1–17.6b; full
+- **Week 17 in short (2026-11-14 to 2026-11-15; tasks 17.1–17.7; full
   record: Decision 27 and the change log in `methodology.md`):**
   - A text fix before Week 17: the headers of the two one-time scripts
     (kept in git) and three stale "Week 18" statements (commits
@@ -171,16 +171,24 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
     engine of STEP 17.4 on 100 other pairs on each surface; point 8
     again). `tbl_19_sdmres_phase2.csv`, `tbl_19_sdmres_phase2_summary.csv`,
     `tbl_19_sdmres_phase2_qa.csv`.
-  - **Next: task 17.7** — the docs of the Week-17 close: `methodology.md`
-    §5.3–5.4 and the Limitations, `proposal.md` §8, `README.md`,
-    `references.md`, "Results by stage" in this file; the Week-18 plan
-    (Stage 4). Then task 17.8 (commit and push).
-- **Week 17 plan** (the author's choice R4 of task 16.6): a resistance
-  surface from the suitability and a circuit-theory check against the
-  Stage-2 paths — the pending item "SDM-based resistance + circuit-theory
-  check". Task 17.1: Decision 27 before any surface. The draft task
-  breakdown is in `project-plan.md` → "Week 17". Stage 4 (the story
-  site) moves to Weeks 18–21; the project can go past Week 20.
+  - Task 17.7: the docs of the Week-17 close (§5.3–5.4, ten items in
+    the Limitations, `proposal.md` §8, `README.md`, this file) and the
+    Week-18 plan. The author's answer "W1 + W2"; the chat's reading:
+    Week 18 holds both, the open items first, then the site skeleton.
+    The commit is task 17.8.
+  - **Next: Week 18, task 18.1** — the forks of the four open items (see
+    "Week-18 entry point").
+- **Week 18 plan** (the author's answer "W1 + W2" of task 17.7): first the
+  four open analysis items (W2: the near-ties of Decision 18 in Week 10;
+  the `I()` fix of `scripts/03`; the "Sources" line of `fig_07` and
+  `fig_08`; the reserve-polygon overlaps), a split point, then **Decision
+  28** (the form of the story site) and the site skeleton (W1). Stage 4
+  stays in Weeks 18–21; if Week 18 runs long, the skeleton continues in
+  Week 19 and Stage 4 moves by one week. The draft task breakdown is in
+  `project-plan.md` → "Week 18 — task breakdown".
+- **Week 17 plan** (the author's choice R4 of task 16.6; done): a
+  resistance surface from the suitability and a circuit-theory check
+  against the Stage-2 paths. Stage 4 moved to Weeks 18–21.
 - **Week 16 in short (2026-11-07; full record: Decision 26 and the change
   log in `methodology.md`):** Week 15 is committed and pushed
   (`7ae300a`; one commit, not the planned `analysis:` and `docs:` pair;
@@ -260,43 +268,37 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   `scripts/00a` list follows the code; `sfdep`, `spatstat.*` and
   `predicts` are out of it.)*
 
-### Week-17 entry point
+### Week-18 entry point
 
-*(2026-11-15: tasks 17.1 to 17.6b are done; the entry point is now task
-17.7 — see "Where the project is". Read Decision 27 first, with its
-"Result" parts.)*
+*(Written 2026-11-15 at the Week-17 close. Read the Week-18 plan in
+`project-plan.md` first; the chat's reading of "W1 + W2" is in the change
+log of `methodology.md`, 2026-11-15, task 17.7.)*
 
-- **Done: Week 16** (2026-11-07; tasks 16.1–16.6). The author committed
-  each task after it (an `analysis:` and a `docs:` commit for each task
-  with code; the last pair, task 16.5: `fa9cc04`, `a9b2766`). Task 16.7:
-  the commit of task 16.6 and a push. Nothing under `data/` may be
-  staged.
-- **Next: task 17.1 — Decision 27** (the SDM-based resistance and the
-  circuit-theory check; the author's choice R4 of task 16.6), before any
-  surface. The forks are in `project-plan.md` → "Week 17 — task
-  breakdown" (a draft): the input (the value or the class; the hatched
-  cells), the transform, the grain and the cells with no value, the
-  method and the tool (in R, or Circuitscape or Omniscape outside R), the
-  nodes and the pairs, the comparison with the Stage-2 paths and its
-  reading, the published form, what was seen.
-- **Then:** 17.2 (process choices), 17.3–17.5 (STEPs 17.1–17.3: the
-  surface, the circuit-theory run, the comparison), 17.6 (QA), 17.7 (docs;
-  the Week-18 plan), 17.8 (commit). Split point after task 17.2. Stage 4
-  (the story site) is in Weeks 18–21.
-- **Read before Week 17:** the pending item in `methodology.md` →
-  "Decisions pending"; Decision 14 (F1) and Decisions 17–18 (the pairs,
-  the path engine, the comparison metric); Decision 25 (the prediction,
-  the classes, the cells outside the training range) and its "Result"
-  parts; §5.3 and §5.4; the Week-17 pitfalls of the plan;
-  `docs/sensitive-data-policy.md` §3 (modelled paths); the Stage-2 and
-  Stage-3 items of "Limitations"; `references.md` → "Tiger movement and
-  landscape resistance (Decision 14)".
-- **Files for the Week-17 chat:** the docs; `R/00_config.R`,
-  `R/00_functions_lcp.R`, `R/00_functions_network.R`,
-  `R/00_functions_sdm.R`, `R/00_functions_io.R`,
-  `R/00_functions_sensitive.R`; `scripts/07_connectivity.R` (the Stage-2
-  STEPs) and `scripts/09_model_suitability.R`; the `tbl_12`, `tbl_13` and
-  `tbl_16` tables if a value is needed. No data file (rule d1).
+- **Done: Week 17** (2026-11-14 to 2026-11-15; tasks 17.1–17.7). The
+  author committed each task with code (an `analysis:` and a `docs:`
+  commit; the last pair, task 17.6b: `4454621`, `422ca5f`, pushed).
+  Task 17.8: the commit of task 17.7 and a push. Nothing under `data/`
+  may be staged.
+- **Next: task 18.1 — the open items (W2)**, a fork for each before any
+  code: (a) the near-ties of Decision 18 in the Week-10 comparisons; (b)
+  the `I()` fix of `scripts/03`; (c) the "Sources" line of `fig_07` and
+  `fig_08`; (d) the six overlaps of the reserve polygons (a fix needs the
+  runs of Weeks 10–12, 15 and 17 again). Then 18.2 (the work), a split
+  point, 18.3 **Decision 28** (the form of the story site) before any
+  page, 18.4 (process choices), 18.5 (the skeleton pages), 18.6 (site
+  QA), 18.7 (docs; the Week-19 plan), 18.8 (commit).
+- **Read before Week 18:** the Week-18 plan and pitfalls in
+  `project-plan.md`; the open items below; `docs/sensitive-data-policy.md`
+  §3; the pending item "Published layers" (it stays in Week 19); the
+  "Published form" points of Decisions 20, 25, 26 and 27; Decision 18
+  (the rank rule) and the NT1 note of Decision 27 point 7, for item (a);
+  the gotcha "A push under `site/` deploys the site".
+- **Files for the Week-18 chat:** the docs; `site/_quarto.yml` and the six
+  `.qmd` pages; `.github/workflows/publish.yml`; `R/00_config.R`,
+  `R/00_functions_lcp.R` (for item (a)), `R/00_functions_fig.R`;
+  `scripts/02_prepare_boundaries.R` and `scripts/03` (items (b) and (d)),
+  `scripts/10_check_sdm_connectivity.R` (item (c)); the names of the
+  committed figures and tables (`outputs/`). No data file (rule d1).
 
 ### Results by stage (a record for the write-up of Weeks 17–20)
 
@@ -346,6 +348,26 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   counts. `tbl_18_gistar.csv`; `fig_04`, `fig_05`, `fig_06` (caption
   drafts); QA 113 of 113. Record against proposal questions 3 and 4:
   `methodology.md`, change log, 2026-11-07, Week 16 complete.
+- **Week 17 — SDM-based check of the connectivity result (Decision 27).**
+  Two resistance surfaces from the rank of the suitability on the 6,969
+  model cells (`main` linear; `negexp8`, c = 8); circuit theory and
+  least-cost paths in own R code. Phase 1 (the 106 pairs of Decision 17;
+  12 share a model cell): the `main` paths against the Stage-2 baseline
+  paths **"differs"** (46 of 94 compared pairs material: route 29, cost
+  rank 25; ρ of the costs 0.758; median route overlap at 20 km 0.711);
+  `negexp8` against `main` **"sensitive"** (29 of 94; ρ 0.887).
+  Descriptive: ρ of the effective resistance and the Stage-2 cost 0.570
+  (partial, given the gap, 0.346); median redundancy 12.32; median share
+  of a Stage-2 path in the top 20 % cells by current 0.937 (partly a
+  result of the method, LS1). Phase 2 (all 1,540 pairs; 1,528 solved):
+  the pair rule of Decision 17 **"differs"** — 51 of its 106 pairs among
+  the 106 pairs of lowest effective resistance on `main` (share 0.481;
+  `negexp8` 0.575); for 54 of the 56 reserves the partner of lowest
+  effective resistance is a pair of Decision 17. Outputs:
+  `fig_07_sdm_current.png`, `fig_08_sdm_paths.png` (caption drafts),
+  `tbl_19_sdmres_*` (8 tables); no layer; QA 196 of 196 and 62 of 62. The
+  Stage-2 outputs do not change. Record against proposal questions 2 and
+  3: `methodology.md`, change log, 2026-11-15, Week 17 complete.
 
 ### Files that later weeks read
 
@@ -370,12 +392,14 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
 | `data/processed/resist_sdm_<surface>_cell02.csv` (2 files: `main`, `negexp8`) | The SDM-based resistance of Decision 27 (STEP 17.1): `id`, `x`, `resistance`; 6,969 rows each | No geometry; holds cell ids: no table row from it; no layer published (Decision 27 point 10) |
 | `data/processed/lcp_sdm_network_7755.gpkg` (layers `<surface>_phase1` and `<surface>_phase2`) and `circ_current_<surface>_<phase>_cell02.csv` | The paths on the SDM-based surfaces and the total currents of phase 1 (STEP 17.2) and phase 2 (STEP 17.5) | Modelled paths: never a position finer than 10 km in a committed table or figure; no layer on the site; the current files hold cell ids |
 | `data/processed/boundary_states_7755.gpkg` | Natural Earth states (36), for the state boundaries of the figures | State and district can disagree at a border (gotcha) |
+| `site/` (`_quarto.yml`, six `.qmd` pages) and `.github/workflows/publish.yml` | The Quarto story site (placeholders) and its deploy | Each push to `main` that changes `site/**` deploys to `gh-pages` (Week 18: Decision 28 (d)) |
 | `outputs/tables/tbl_00`–`tbl_19_*`, `outputs/figures/fig_01`–`fig_08` | Committed tables and figures | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `tbl_18_gistar.csv` holds only the tiger counts of D26 point 7; `fig_04`–`fig_06` (STEP 16.2) show 0.2° model cells only: no point, no presence or background mark; `tbl_18_gistar_qa.csv` is the QA of STEP 16.3; `tbl_19_*` (Decision 27): counts, statistics and pair rows with reserve names, no position, no cell id; `fig_07`–`fig_08` (STEP 17.3): 0.2° cells and modelled path lines at national scale only |
 
 ### Open items (carried)
 
 - `scripts/03` line 101: wrap the literal text in `I()` for `readr` ≥ 2.2
-  (no output change; not done).
+  (no output change; not done). *(2026-11-15: in Week 18, task 18.1 (b);
+  the author's answer "W1 + W2".)*
 - The NTCA overlap has no buffer (Decision 17). Transboundary links are
   absent (India-only surface).
 - `fig_03`: the title, subtitle and caption, and the wording of
@@ -391,11 +415,13 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
   of Week 10 (`tbl_12_lcp_variant_*`) can have this effect; in task 17.6
   it moved a rank by 0.5/(n − 1), a ρ by less than 5e-5 and no flag. Not
   checked for Week 10; no new run is proposed. Decide in Week 20 if a
-  check is wanted.
+  check is wanted. *(2026-11-15: moved to Week 18, task 18.1 (a); the
+  author's answer "W1 + W2".)*
 - `fig_07`, `fig_08`: the titles, subtitles and captions are chat drafts
   — the author's edit is open. The "Sources" line is the line of
   `fig_04`: check that it also covers the inputs of the Stage-2 baseline
-  surface. The colours and widths (PL1, L7a, L8a) are start values.
+  surface *(2026-11-15: in Week 18, task 18.1 (c))*. The colours and
+  widths (PL1, L7a, L8a) are start values.
   The text is drawn in the PNG files: an edit needs a change of
   `scripts/10` (STEP 17.3; text fix of task 17.6b) and a new run (or the caption as page text on the site,
   a fork for Week 18). The narrative week is Week 20.
@@ -406,9 +432,15 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
   10.9 km², Parambikulam–Anamalai 5.5, Periyar–Srivilliputhur-Megamalai
   3.0, Manas–Buxa 0.85, Pakke–Nameri 0.34, Bandipur–Mudumalai 0.09).
   `scripts/02` is not changed; a fix would need the runs of Weeks 10–12
-  again. Decide when the reserve layer is next touched.
+  again. Decide when the reserve layer is next touched. *(2026-11-15: in
+  Week 18, task 18.1 (d); a fix would now also need the runs of Weeks 15
+  and 17 again.)*
 - The 18 records of the tiger 1 km set from 2018–2022 are in one cell
   outside all reserve polygons; the cause is not known (not a model input).
+- 13 of the 6,969 model cells carry no current in phase 1 and in phase 2
+  of Decision 27: 11 are outside the largest connected set; the cause for
+  the other 2 was not checked, and whether the 13 are the same cells in
+  the two phases was not checked (no output depends on it).
 - The AI-word list is an image-only PDF; the checks use the list of the
   source web page (humanizeai.io) as a search pattern. A text file in the
   repo would make the check exact.
@@ -681,6 +713,14 @@ of closed one-time work are in git history.)*
   so git cannot remove its own `.lock` files there. The chat runs only
   read-only git commands, with `GIT_OPTIONAL_LOCKS=0`, and never `git
   fetch`; the author runs every git command that writes.
+- **A push under `site/` deploys the site** (found 2026-11-15, task 17.7):
+  `.github/workflows/publish.yml` renders `site/` with Quarto (no R) and
+  deploys it to `gh-pages` on each push to `main` that changes
+  `site/**`. A page is public at the push. Pages with R code need a
+  committed `site/_freeze/`.
+- **RStudio on Windows saves with CRLF line endings** (task 17.6b: after
+  an edit of `scripts/10`). `.gitattributes` has `* text=auto`, so git
+  stores LF and warns "CRLF will be replaced by LF". No action.
 - **Fork codes repeat across Decisions** (Decision 17 P3, the
   through-reserve rule; Decision 27 P3a, the current of `fig_07`). Write
   the Decision with the code: "Decision 27 P3a".
@@ -731,6 +771,48 @@ of closed one-time work are in git history.)*
 
 *(Weeks 0–13: git history, and the change log of `methodology.md` with its
 archive.)*
+
+### Week 17 — SDM-based resistance and the circuit-theory check (Decision 27) · 2026-11-14 to 2026-11-15
+- Entry state: Week 16 complete and committed; the text fix before Week
+  17 (`e2cc37c`, `e207687`).
+- Did: task 17.1 Decision 27; task 17.2 the process choices; task 17.3
+  STEP 17.1 (the surfaces, the graph, the cells of the reserves); task
+  17.4 STEP 17.2 (phase 1: the circuit and the paths); task 17.5 STEP
+  17.3 (point 7; `fig_07`, `fig_08`); task 17.6 STEP 17.4 (the QA of
+  phase 1; NT1); task 17.6b STEP 17.5 (phase 2, point 8, its QA); task
+  17.7 the docs close and the Week-18 plan.
+- Decisions made: **Decision 27** (a2 with k1, b3, c1, d3 with t1, e1 and
+  e3 in two phases, f1, g3 with F2, h1; P1b, P2c, Z1, P3a; e1 and e3, g3,
+  P1b and F2 are not the chat's recommendation). Process choices: task
+  17.2 s1, f1, n1, w1, p1, h1; task 17.5 TB1, CC1, FC1, PL1, L7a, L8a,
+  FR1, SZ1, the readings R3 and R4, LS1; task 17.6 QS1, QE1, QP1, QO1,
+  QT1, QF, NT1; task 17.6b R5, R6, F2a, T2a, Q2a, RS2; task 17.7 "W1 +
+  W2".
+- Outputs: the `SDMRES_*` block in `R/00_config.R`;
+  `R/00_functions_circuit.R` (new; with the QA second path) and
+  `fig_frame_paths()` in `R/00_functions_fig.R`;
+  `scripts/10_check_sdm_connectivity.R` (new; STEPs 17.1–17.5;
+  `RUN_PHASE2 = TRUE`); `Matrix` in the `scripts/00a` list; the surfaces,
+  the paths and the currents under `data/processed/` (gitignored); eight
+  `tbl_19_sdmres_*` tables; `fig_07_sdm_current.png`,
+  `fig_08_sdm_paths.png`; the docs. Commits by the author: `977d128`,
+  `0fc73be`, `48c672b`, `6447076`, `c782e8d`, `041e3c4`, `6aa8b59`,
+  `d7cc9b2`, `fc479f0`, `f9856d8`, `5f29355`, `4454621`, `422ca5f`.
+- Gotchas found: see "Known gotchas" (`gdistance` grounds the last cell;
+  a CSV keeps 15 significant digits; `ggplot2` 4.0 names the layers; a
+  git command from the chat's shell can leave a lock file; a push under
+  `site/` deploys the site; Windows line endings).
+- Errors of the chat: two counts in the text of Decision 27 (points 9 and
+  10: 97 for 94; D1, D2); a frame test that `ggplot2` 4.0 broke; the
+  ranks of point 7 gave two values to costs equal but for the last bits
+  (NT1), with a wrong forecast of the ties and too large an estimate of
+  the change of ρ; a file name in the handoff (`scripts/09` for
+  `scripts/10`). Errors found by the chat's own tests before delivery are
+  in the change log. Each is recorded there.
+- Carried forward / next session: the commit of task 17.7 (task 17.8, by
+  the author); then Week 18, task 18.1 — the forks of the four open items;
+  then Decision 28. The caption drafts of `fig_03`–`fig_08` (the author's
+  edit; Week 20, or page text by Decision 28).
 
 ### Week 16 — Stage 3: Decision 26, the Gi*, the figures and the QA · 2026-11-07
 - Entry state: Week 15 complete and committed (`7ae300a`).
