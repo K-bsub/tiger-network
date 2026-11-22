@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>data – India’s Tiger Network</title>
+<title>Data &amp; References – India’s Tiger Network</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -45,7 +45,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-3e9b1289f5f353c49b617ce48ad2bc38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-50eb5b89b0de81519140945548e2bba6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -111,6 +111,10 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Habitat</span></a>
   </li>  
   <li class="nav-item">
+    <a class="nav-link" href="./check.html"> 
+<span class="menu-text">Check</span></a>
+  </li>  
+  <li class="nav-item">
     <a class="nav-link" href="./methods.html"> 
 <span class="menu-text">Methods</span></a>
   </li>  
@@ -129,20 +133,28 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#data-sources" id="toc-data-sources" class="nav-link active" data-scroll-target="#data-sources">Data sources</a></li>
+  <li><a href="#all-committed-tables" id="toc-all-committed-tables" class="nav-link" data-scroll-target="#all-committed-tables">All committed tables</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content">
+<main class="content column-page-left" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">data</h1>
+<h1 class="title">Data &amp; References</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-left">
 
     
   
@@ -154,9 +166,134 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p><em>Placeholder — content added in Stage 4 (site build).</em></p>
+<!-- Skeleton of Week 18 (Decision 28 m1; t1 of task 18.4). The list of the
+data sources is a draft of the chat from docs/data-sources.md; the author's
+edit is in Week 20. The list of the tables comes from scripts/11_build_site.R:
+do not edit the files in tables/ by hand. -->
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Placeholder</strong> — the author’s text (Week 20).</p>
+</div>
+</div>
+</div>
+<section id="data-sources" class="level2">
+<h2 class="anchored" data-anchor-id="data-sources">Data sources</h2>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Draft (chat)</strong> — from <code>docs/data-sources.md</code>. The author’s edit is in Week 20.</p>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>Tiger population.</strong> National Tiger Conservation Authority and Wildlife Institute of India, All India Tiger Estimation reports, 2006–2022 (<a href="https://ntca.gov.in" class="uri">https://ntca.gov.in</a>). Government of India. The census series of this project is the within-reserve estimate of 2014, 2018 and 2022.</li>
+<li><strong>Reserve and corridor outlines.</strong> National Tiger Conservation Authority (2022), <em>PA_TR_Corridor_Final</em> (KML), Decision Support System (<a href="https://ntca.gov.in/dss/" class="uri">https://ntca.gov.in/dss/</a>). Government of India; attribution required. The outlines are the core protected areas, not the notified area of the reserve.</li>
+<li><strong>Reserve area.</strong> The NTCA-notified core and buffer total of each reserve.</li>
+<li><strong>Tiger records.</strong> GBIF.org (2026-09-07), GBIF Occurrence Download, <a href="https://doi.org/10.15468/dl.npxmxx" class="uri">https://doi.org/10.15468/dl.npxmxx</a>. CC BY or CC0 for each record.</li>
+<li><strong>Mammal records (the background).</strong> GBIF.org (2026-09-07), GBIF Occurrence Download, <a href="https://doi.org/10.15468/dl.2d523e" class="uri">https://doi.org/10.15468/dl.2d523e</a>. CC BY or CC0 for each record.</li>
+<li><strong>Land cover.</strong> ESA WorldCover 2021 v200, <a href="https://doi.org/10.5281/zenodo.7254221" class="uri">https://doi.org/10.5281/zenodo.7254221</a>. CC BY 4.0.</li>
+<li><strong>Human pressure.</strong> Global Human Modification 2022 (Theobald et al., v3), <a href="https://doi.org/10.5281/zenodo.14502573" class="uri">https://doi.org/10.5281/zenodo.14502573</a>. CC BY 4.0.</li>
+<li><strong>Roads, settlements and zoos.</strong> OpenStreetMap data, © OpenStreetMap contributors (ODbL), from the Geofabrik India extract (<a href="https://download.geofabrik.de/asia/india.html" class="uri">https://download.geofabrik.de/asia/india.html</a>).</li>
+<li><strong>Terrain.</strong> AWS Terrain Tiles (<a href="https://registry.opendata.aws/terrain-tiles/" class="uri">https://registry.opendata.aws/terrain-tiles/</a>).</li>
+<li><strong>States.</strong> Natural Earth admin-1 boundaries (public domain).</li>
+<li><strong>Districts.</strong> DataMeet Census-2011 districts (CC BY 4.0).</li>
+<li><strong>Forest (a cross-check of the reserve area only).</strong> Forest Survey of India, India State of Forest Report 2021 (<a href="https://fsi.nic.in" class="uri">https://fsi.nic.in</a>).</li>
+</ul>
+</section>
+<section id="all-committed-tables" class="level2">
+<h2 class="anchored" data-anchor-id="all-committed-tables">All committed tables</h2>
+<p>Files: 75.</p>
+<ul>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_00_data_audit.csv"><code>tbl_00_data_audit.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_00_kba_tr_match.csv"><code>tbl_00_kba_tr_match.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_01_reserve_growth.csv"><code>tbl_01_reserve_growth.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_02_regional_rollup.csv"><code>tbl_02_regional_rollup.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_02_reserve_build_report.csv"><code>tbl_02_reserve_build_report.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_03_notes.md"><code>tbl_03_notes.md</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_03_reserve_network.csv"><code>tbl_03_reserve_network.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_03b_pinch_points.csv"><code>tbl_03b_pinch_points.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_04_census_source_map.csv"><code>tbl_04_census_source_map.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_04_secondary_sources_2006_2010.md"><code>tbl_04_secondary_sources_2006_2010.md</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_04_spotcheck_log.md"><code>tbl_04_spotcheck_log.md</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_05_area_source_map.csv"><code>tbl_05_area_source_map.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_05b_isfr_area_crosscheck.csv"><code>tbl_05b_isfr_area_crosscheck.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_06_census_wide_check.csv"><code>tbl_06_census_wide_check.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_07_census_join_check.csv"><code>tbl_07_census_join_check.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_08_area_overwrite_check.csv"><code>tbl_08_area_overwrite_check.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_09_density_check.csv"><code>tbl_09_density_check.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_10_covariate_stack_qa.csv"><code>tbl_10_covariate_stack_qa.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_11_ghm_gap_relevance_postfill.csv"><code>tbl_11_ghm_gap_relevance_postfill.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_11_ghm_gap_relevance_postfill_d12.csv"><code>tbl_11_ghm_gap_relevance_postfill_d12.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_11_ghm_gap_relevance_postfill_d13.csv"><code>tbl_11_ghm_gap_relevance_postfill_d13.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_11_ghm_gap_relevance_postfill_d13f.csv"><code>tbl_11_ghm_gap_relevance_postfill_d13f.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_11_ghm_gap_relevance_prefill.csv"><code>tbl_11_ghm_gap_relevance_prefill.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_11_resistance_qa.csv"><code>tbl_11_resistance_qa.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_11_resistance_qa_pred16.csv"><code>tbl_11_resistance_qa_pred16.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_12_lcp_ntca_corridors.csv"><code>tbl_12_lcp_ntca_corridors.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_12_lcp_ntca_overlap.csv"><code>tbl_12_lcp_ntca_overlap.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_12_lcp_qa.csv"><code>tbl_12_lcp_qa.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_12_lcp_validation.csv"><code>tbl_12_lcp_validation.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_12_lcp_variant_comparison.csv"><code>tbl_12_lcp_variant_comparison.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_12_lcp_variant_summary.csv"><code>tbl_12_lcp_variant_summary.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_12_reserve_pairs.csv"><code>tbl_12_reserve_pairs.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_13_network_links.csv"><code>tbl_13_network_links.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_13_network_metrics.csv"><code>tbl_13_network_metrics.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_13_network_qa.csv"><code>tbl_13_network_qa.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_13_network_threshold_scan.csv"><code>tbl_13_network_threshold_scan.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_13_network_variant_comparison.csv"><code>tbl_13_network_variant_comparison.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_14_pinch_link_summary.csv"><code>tbl_14_pinch_link_summary.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_14_pinch_points.csv"><code>tbl_14_pinch_points.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_14_pinch_qa.csv"><code>tbl_14_pinch_qa.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_14_pinch_variant_comparison.csv"><code>tbl_14_pinch_variant_comparison.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_14_road_crossings.csv"><code>tbl_14_road_crossings.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_15_background_taxa.csv"><code>tbl_15_background_taxa.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_15_kde_radius_compare.csv"><code>tbl_15_kde_radius_compare.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_15_kde_summary.csv"><code>tbl_15_kde_summary.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_15_occ_by_reserve.csv"><code>tbl_15_occ_by_reserve.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_15_occ_cleaning.csv"><code>tbl_15_occ_cleaning.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_15_occ_cleaning_by_dataset.csv"><code>tbl_15_occ_cleaning_by_dataset.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_15_occ_dataset_check.csv"><code>tbl_15_occ_dataset_check.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_15_occ_qa.csv"><code>tbl_15_occ_qa.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_15_occ_raw_counts.csv"><code>tbl_15_occ_raw_counts.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_15_occ_sets.csv"><code>tbl_15_occ_sets.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_15_occ_window_counts.csv"><code>tbl_15_occ_window_counts.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_16_sdm_aicc.csv"><code>tbl_16_sdm_aicc.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_16_sdm_counts.csv"><code>tbl_16_sdm_counts.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_16_sdm_covariate_cor.csv"><code>tbl_16_sdm_covariate_cor.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_16_sdm_covariates.csv"><code>tbl_16_sdm_covariates.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_16_sdm_cv.csv"><code>tbl_16_sdm_cv.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_16_sdm_pred_qa.csv"><code>tbl_16_sdm_pred_qa.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_16_sdm_prediction.csv"><code>tbl_16_sdm_prediction.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_16_sdm_qa.csv"><code>tbl_16_sdm_qa.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_16_sdm_reserve_check.csv"><code>tbl_16_sdm_reserve_check.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_16_sdm_sensitivity.csv"><code>tbl_16_sdm_sensitivity.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_17_reserve_suitability.csv"><code>tbl_17_reserve_suitability.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_18_gistar.csv"><code>tbl_18_gistar.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_18_gistar_qa.csv"><code>tbl_18_gistar_qa.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_19_sdmres_compare.csv"><code>tbl_19_sdmres_compare.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_19_sdmres_compare_summary.csv"><code>tbl_19_sdmres_compare_summary.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_19_sdmres_pairs.csv"><code>tbl_19_sdmres_pairs.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_19_sdmres_phase2.csv"><code>tbl_19_sdmres_phase2.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_19_sdmres_phase2_qa.csv"><code>tbl_19_sdmres_phase2_qa.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_19_sdmres_phase2_summary.csv"><code>tbl_19_sdmres_phase2_summary.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_19_sdmres_qa.csv"><code>tbl_19_sdmres_qa.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_19_sdmres_surface.csv"><code>tbl_19_sdmres_surface.csv</code></a></li>
+<li><a href="https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_20_site_qa.csv"><code>tbl_20_site_qa.csv</code></a></li>
+</ul>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<p>The reference list follows in Week 20, after each entry is verified (Decision 28 point 3).</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

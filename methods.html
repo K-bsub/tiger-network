@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>methods – India’s Tiger Network</title>
+<title>Methods – India’s Tiger Network</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -45,7 +45,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-3e9b1289f5f353c49b617ce48ad2bc38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-50eb5b89b0de81519140945548e2bba6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -111,6 +111,10 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Habitat</span></a>
   </li>  
   <li class="nav-item">
+    <a class="nav-link" href="./check.html"> 
+<span class="menu-text">Check</span></a>
+  </li>  
+  <li class="nav-item">
     <a class="nav-link active" href="./methods.html" aria-current="page"> 
 <span class="menu-text">Methods</span></a>
   </li>  
@@ -129,20 +133,26 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#decisions" id="toc-decisions" class="nav-link active" data-scroll-target="#decisions">Decisions</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content">
+<main class="content column-page-left" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">methods</h1>
+<h1 class="title">Methods</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-left">
 
     
   
@@ -154,9 +164,153 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p><em>Placeholder — content added in Stage 4 (site build).</em></p>
+<!-- Skeleton of Week 18 (Decision 28 m1; t1 of task 18.4). The table below
+is a draft of the chat: rows 1-27 are the table "Fixed Decisions" of
+docs/handoff.md (2026-11-21), word for word; row 28 is new. The author's edit
+is in Week 20. -->
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Placeholder</strong> — the author’s text (Week 20).</p>
+</div>
+</div>
+</div>
+<section id="decisions" class="level2">
+<h2 class="anchored" data-anchor-id="decisions">Decisions</h2>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Draft (chat)</strong> — the short form of each numbered Decision. The full text, with the reasons and the sources: <a href="https://github.com/K-bsub/tiger-network/blob/main/docs/methodology.md"><code>docs/methodology.md</code></a>.</p>
+</div>
+</div>
+</div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>D</th>
+<th>Rule (short form)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Habitat suitability (SDM), not occupancy</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Unit = the reserve, rolled up to landscape complex and state</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>CRS EPSG:7755</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>NTCA DSS KML for the geometry only; area and density from the NTCA census</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Target-group background = Mammalia (tiger excluded)</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Census series = within-reserve SECR 2014/2018/2022 only; 2006/2010 are context, not a baseline</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>A missing (reserve, round) cell is <code>NA</code>; no imputation</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>Reserve area = the NTCA-notified core + buffer total (ISFR 2021 Ch. 4 is a cross-check only)</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>Real zeros: <code>change_abs</code> always valid; a ratio is <code>NA</code> with a flag only when the baseline is 0; a real 2022 zero is −100 %</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>Covariate stack: a common NA mask (any band <code>NA</code> → all bands <code>NA</code>)</td>
+</tr>
+<tr class="odd">
+<td>11–13</td>
+<td>gHM gap fill by a relevance rule; gHM closed; land cover from the unmasked tile cache; terrain from the raw DEM; 7 tile-corner no-class cells accepted (12 and 13 post-result)</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td>Resistance: set-B class values × (1 + 4 × gHM), cap 100; Sundarban water 10 (50 elsewhere); variant <code>noghm</code></td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td>Road barrier: motorway to secondary, value 30, maximum rule, <code>touches = TRUE</code>; variants <code>road15</code>, <code>road50</code></td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td>Water exempt from the gHM multiplier (post-result)</td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td>Least-cost paths: pairs by allocation adjacency + gap ≤ 315 km; through-reserve rule P3; 16 neighbours with the crossed-cells knight rule; own engine, validated; edge to edge; contiguous = a shared footprint cell; Amrabad from the state split; Pilibhit and Dholpur-Karauli out (no polygon)</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td>Variant comparison: “material” if the 5 km route overlap &lt; 0.5 or the rank change ≥ 0.25; “robust” if ≤ 20 % material and ρ ≥ 0.9 (the road value only if both road variants are)</td>
+</tr>
+<tr class="odd">
+<td>19</td>
+<td>Network: each in-network pair is a link (cost = weight, no threshold); contiguous reserves merge (56 reserves → 47 nodes); betweenness normalised in the node’s own set; <code>linchpin</code> = top 3 in the set with a value &gt; 0; <code>isolated</code> = degree 0, <code>pendant</code> = degree 1; “robust” if the sets are the same, ρ ≥ 0.9 and linchpin retention ≥ 2/3</td>
+</tr>
+<tr class="even">
+<td>20</td>
+<td>Road pinch points: crossings of the in-network paths with the D15 barrier cells; crossings ≤ 5 km apart = one site; a pinch point is a site on a bridge edge or a site that ≥ 2 edges use (tiers 1–3); “robust” if the site overlap ≥ 2/3; published as a 10 km grid cell + state + district; a network label, not the pinch point of circuit-theory mapping</td>
+</tr>
+<tr class="odd">
+<td>21</td>
+<td>Occurrence cleaning: one rule of nine steps for the tiger and the background; the 1 km set (main) and the 5 km set; the obscured set (iNaturalist, uncertainty ≥ 25 km, with its 0.2° cell; never a 1 km presence); one presence per cell; the limits 25 and 80 cells (point 8); a dataset check by a word list; outcome <code>no_1km_model</code> (locked)</td>
+</tr>
+<tr class="even">
+<td>22</td>
+<td>Effort surfaces: effort, tiger records and city/town settlement; the 5 km sets; one unit per 1 km cell; quartic kernel of 20 km radius (σ 7,071 m), QA surfaces at 10 and 30 km; three time windows; the tiger surface is never published or committed; the published tiger product is the count by reserve (1 or 2 → <code>&lt;3</code>)</td>
+</tr>
+<tr class="odd">
+<td>23</td>
+<td>A <code>maxnet</code> model at the 0.2° grain on the obscured set; model cell = complete-case cover ≥ 50 %; the limits 25 and 80 presence cells; background = the clean iNaturalist Mammalia records (two parts), ≥ 10 × the presence cells; the Facebook dataset is a check (0 records); Gi* of the effort and of the tiger records (tiger Gi* never published); no ratio. Outcome <code>planned_model</code> (locked)</td>
+</tr>
+<tr class="even">
+<td>24</td>
+<td>Model settings: nine candidates summarised over the 1 km cells of a cell; no water cells in the terrain means, elevation floor 0 m; |r| &gt; 0.7 removes the later candidate of a fixed order; AICc over <code>lq</code>/<code>lqh</code>/<code>lqph</code> × regmult 1–4 (fewest coefficients within ΔAICc 2); no bias covariate; presences added to the background; 2° blocks in 5 folds (Boyce, test AUC, OR10, AUCdiff; cloglog); gate: mean test Boyce ≤ 0 → no suitability map; reserve check (Week 15); two sensitivity runs; the model file under <code>data/processed/</code></td>
+</tr>
+<tr class="odd">
+<td>25</td>
+<td>Prediction and publication: the model file of 2026-10-25, cloglog with clamping; a cell with a covariate outside the training range is flagged, counted and hatched; five equal-count classes by rank (a tie to the lower cell id; class 5 = the top-20 % set of the sensitivity rule), no value in the legend; no published layer before the rule of the pending item “Published layers” (Week 18 in the Decision text; Week 19 since 2026-11-07); tier T1; two static figures, <code>fig_04</code> (classes) and <code>fig_05</code> (value, label “model output (cloglog), relative; not a probability of presence”); nine caption items; a reserve table (58 rows, no presence column); reserve check: a 1 km cell is inside if its centre is, a 1 km cell outside the model cells has no value and is counted; point 9 (task 15.2): r2 only if each count of the 2 × 2 table is 3 or more, and a QA stop on a reserve whose presence state the outputs show</td>
+</tr>
+<tr class="even">
+<td>26</td>
+<td>Gi*: four Gi* — <code>effort_inat</code> (the model background, before <code>maxnet</code> adds a presence cell) with <code>tiger_obscured</code>; <code>effort_all</code> (the clean background of all datasets) with <code>tiger_5km</code>; no comparison with Phase 1; the 6,969 model cells, value 0/1; a 50 km band on the sphere (Amendment 1), the cell itself included; a class only with 8 neighbours or more; QA bands queen and 75 km (descriptive); the exact p (hypergeometric, random relabelling); Benjamini–Hochberg, q = 0.05; <code>fig_06</code> = <code>effort_inat</code> (<code>effort_all</code>: table only, a reading); the tiger Gi* never published: counts only (obscured set), and counts by landscape complex by rule L1 (5 km set); all years; own code. The tiger Gi* cannot show a cold spot</td>
+</tr>
+<tr class="odd">
+<td>27</td>
+<td>SDM-based resistance and circuit theory: input = the percentile rank of the cloglog value over the 6,969 model cells (the 32 hatched cells kept and counted); <code>main</code> R = 1 + 99 × (1 − x) and the variant <code>negexp8</code> (c = 8), range 1–100; a graph of the model cells only (8 neighbours; link = distance on the sphere × mean R; reserve cells by the centre rule); circuit theory (each reserve of a pair joined into one node; zero current in the two reserves of a pair) and least-cost paths on the same graph; own R code, checked by hand-made circuits and <code>gdistance</code>; phase 1 = the 106 pairs of D17, compared with the Stage-2 baseline paths by the D18 rule with d = 20 km (“agrees”/“differs”; the variant “robust”/“sensitive”) and descriptive values; phase 2 = all 1,540 pairs on both surfaces, a check of the D17 pair rule (“agrees” if 2/3 or more of the D17 pairs are among the same number of lowest effective resistances); no layer; <code>fig_07</code> (the phase-1 current, P3a) and <code>fig_08</code> (the paths, plain background)</td>
+</tr>
+<tr class="even">
+<td>28</td>
+<td>Story site: seven pages (a page of its own for the check of Decision 27); interactive maps, and an interactive <code>fig_01</code>, where the rule of “Published layers” allows, with the PNG files as the record in the repository; captions as page text with the numbers from code; no R code in the pages; deploy on each push that changes <code>site/**</code>; a publish check in code</td>
+</tr>
+</tbody>
+</table>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
