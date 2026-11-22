@@ -98,9 +98,13 @@ rule("STEP 1 - read census_reserve_long.csv (skip commented header block)")
 # The file carries a block of quoted '#'-prefixed comment lines before the real
 # header. read_csv's comment = "#" does not strip quoted '#'; drop them by hand,
 # then parse the remainder.
+# 2026-11-21 (task 18.2; b1 of task 18.1): the text is literal data, so it is
+# wrapped in I(). readr 2.2.0 gives a deprecation warning for literal data
+# without I(). The console check of task 18.2 compares the table with and
+# without I().
 raw_lines <- read_lines(census_long_path)
 data_lines <- raw_lines[!str_detect(raw_lines, '^\\s*"?#')]
-census_long <- read_csv(paste(data_lines, collapse = "\n"),
+census_long <- read_csv(I(paste(data_lines, collapse = "\n")),
                         show_col_types = FALSE, progress = FALSE)
 
 cat("rows read:", nrow(census_long),
