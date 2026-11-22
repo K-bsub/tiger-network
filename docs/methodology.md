@@ -4,7 +4,7 @@
 **Author:** Kiran Balasubramanian
 **Status:** **Week 17 complete (2026-11-14 to 2026-11-15; tasks
 17.1–17.7; the author committed each task with code; the commit of task
-17.7 is task 17.8).** **Week 16 complete (2026-11-07; tasks 16.1–16.6, each
+17.7 is task 17.8, done on 2026-11-15: `0ee2243`).** **Week 16 complete (2026-11-07; tasks 16.1–16.6, each
 committed by the author); Stage 3 (habitat suitability) complete.**
 **Week 15 complete (2026-11-01; tasks 15.1–15.2 on 2026-10-31,
 tasks 15.3–15.6 on 2026-11-01; the commit, task 15.7, by the author);
@@ -77,6 +77,12 @@ the lowest effective resistance (share 0.481) — "differs"; QA 62 of 62.
 plan (the author's answer "W1 + W2"). **Next: Week 18** — the open
 analysis items first, then Decision 28 (the form of the story site) and
 the site skeleton.
+**Week 18, task 18.1 (2026-11-21):** the author's choices for the four
+open items — a1, b1, c3, d1 (the change log). No rule changed.
+**Task 18.2 (2026-11-21):** the four items are closed. b1: `scripts/03`
+reads the census text in `I()`; the author's console check passed (the
+same table, no warning). (a), (c) and (d): docs only. **Next:** the
+split point, then task 18.3 (Decision 28, the form of the story site).
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -5448,6 +5454,139 @@ before the relevant code is written.
 
 *(Records as-built changes to data, code, or scope during execution.)*
 
+### 2026-11-21 — Week 18, task 18.2 complete: the four open items closed
+
+- **No rule, value, data layer, table or figure changed.** One line of
+  code changed (`scripts/03`). No run of a project script.
+- **(b) — b1 of task 18.1.** `scripts/03_prepare_census.R` STEP 1 now
+  reads the census text as `read_csv(I(paste(data_lines, collapse =
+  "\n")), ...)` (line 107), with a dated comment. **The author's console
+  check (2026-11-21, a new R session; it wrote nothing):**
+  - `readr` 2.2.0. The load gave the warning "package 'readr' was built
+    under R version 4.5.3" (the project R is 4.5.2); no action.
+  - `scripts/03` parses; the call with `I()` is in it, and the call
+    without `I()` is not.
+  - The table with `I()` and the table without it: 155 rows and 16
+    columns each; the same column names and classes; identical values
+    (`identical()` after the `spec` and `problems` attributes were
+    removed); 0 read problems each.
+  - Warnings: 1 without `I()` (the deprecation warning of `readr` 2.2.0),
+    0 with `I()`.
+  - Thus the edit does not change the table that STEP 1 reads. The
+    outputs of `scripts/03`–`05` on disk stay the record; they are not
+    written again.
+- **(a) — a1 of task 18.1.** Closed by the chat's read-only check (the
+  entry of task 18.1). `R/00_functions_lcp.R` does not change.
+- **(c) — c3 of task 18.1.** Closed: the "Sources" line of `fig_07` and
+  `fig_08` names the three inputs of the Stage-2 surface. The text of the
+  "Sources" lines of `fig_04`–`fig_08` is a part of Decision 28 (b). The
+  Week-17 item "The figure text is a draft" of the Limitations says so
+  now.
+- **(d) — d1 of task 18.1.** Closed as a limitation. The Limitations item
+  "Reserve polygons overlap" has the facts of task 18.1 now.
+- **`handoff.md`:** the four open items are marked closed; the Week-18
+  state and the entry point are brought up to date. Two text fixes (found
+  in the read of the repository at the start of Week 18): task 17.8 was
+  given as open (it is done: `0ee2243`); the gotcha "renv records only the
+  packages that a script loads" named `sfdep` as the package that is in
+  the `scripts/00a` list and not in `renv.lock` (S1 of task 16.6 removed
+  it; the packages now are `leaflet` and `htmlwidgets`).
+- **`project-plan.md`:** task 18.2 ticked; the progress rows of Weeks 17
+  and 18.
+- **Next:** the split point (the commit of tasks 18.1–18.2, by the
+  author); then task 18.3 — Decision 28 (the form of the story site),
+  before any page.
+
+### 2026-11-21 — Week 18, task 18.1: the open items (the author's choices; no run)
+
+- **No rule changed.** No Decision; no run of a project script.
+- **The author's answer (2026-11-21): "a1, b1, c3, d1".** Each is the
+  chat's recommendation. *(These are fork codes of task 18.1; other tasks
+  use the same letters. Write "a1 of task 18.1".)*
+- **(a) The near-ties of Decision 18 in the Week-10 comparisons — a1.**
+  The item is closed. No code change. The record is the chat's read-only
+  check of 2026-11-21:
+  - **Method:** Python 3 (`pandas` 2.3.3) in the shell of the desktop app
+    on the project machine; read-only; committed tables only. It is not an
+    R run of the project. The costs are rounded to 12 significant digits
+    first (as NT1 of task 17.6); then the ranks of Decision 18 point 4,
+    the flags, the ρ and the labels are calculated again.
+  - **`tbl_12_lcp_variant_comparison.csv`** (97 pairs × 3 variants; the
+    CSV keeps 15 significant digits): no two costs are equal at 12
+    significant digits, in `cost_base` or in `cost_variant`, for any
+    variant. The smallest relative gap between two costs is 2.9e-5. The
+    stored ranks are the ranks of the CSV values (largest difference
+    3.3e-16).
+  - **With the rounding:** no rank, no flag (`material_rank`,
+    `material_pair`) and no label changes. The largest change of a ρ is
+    4.4e-16. `noghm`, `road15` and `road50` stay "robust"
+    (`tbl_12_lcp_variant_summary.csv`). The largest |rank change| is 0.135
+    (`noghm`), 0.115 below the limit of 0.25.
+  - **The other committed tables with a Spearman ρ on values that are not
+    rounded** (the gotcha "An inference is not a check"):
+    `tbl_13_network_metrics.csv` (`betweenness_norm` of the four surfaces
+    and of the second run without the cross-group links; one row for each
+    node) has no near-tie. The ρ of `tbl_13_network_variant_comparison.csv`,
+    calculated again from the metrics table with the equal values as
+    ties, differs from the table by 1e-15 or less; the labels stay.
+    `tbl_17_reserve_suitability.csv` (`cloglog_mean`, `density_2022`) has
+    no near-tie.
+  - **Not checked:** the ρ of the two sensitivity runs of Week 14
+    (`sdm_compare()`; Decision 24 point 10). Their predictions are not in
+    a committed table.
+  - `lcp_compare_variant()` and `lcp_compare_summary()` do not change (a3
+    was not chosen). They rank the values with no rounding, so a later run
+    with other costs can meet a near-tie.
+- **(b) The `I()` fix of `scripts/03` — b1.** An edit of one line; the
+  author checks it in the R console (the table with and without `I()`);
+  no run of `scripts/03`–`05`. The edit and the check are task 18.2.
+  - `renv.lock` holds `readr` 2.2.0. It gives a deprecation warning, not
+    an error, for literal data without `I()` (the `readr` NEWS of 2.2.0).
+  - A run of `scripts/03` writes `stats_reserve_census_7755.gpkg` again
+    without the four growth columns. Then `scripts/04` (it stops if the
+    columns are on the layer) and `scripts/05` must run again. This is why
+    b2 is large.
+  - The call is at line 103 (lines 103–104), not at line 101 as
+    `handoff.md` and the archive entry of 2026-09-27 say. The other
+    `read_*()` calls of `scripts/` and `R/` take a file path or a
+    connection, not literal data.
+- **(c) The "Sources" line of `fig_07` and `fig_08` — c3.** The check
+  passes. The item is closed with no change now.
+  - The line (`scripts/10` STEP 17.3) names GBIF (the two DOIs),
+    iNaturalist, ESA WorldCover 2021, gHM 2022, AWS Terrain Tiles and
+    OpenStreetMap. The Stage-2 baseline surface uses WorldCover, gHM and
+    the OpenStreetMap roads (Decisions 14–16): the line names all three.
+    Terrain is a model input (`elev_mean`).
+  - The line does not name the sources of the outlines. The NTCA (the
+    reserve outlines) and Natural Earth (the state lines) are in the
+    "outlines" sentence of the caption. `fig_04`–`fig_06` (`scripts/09`
+    STEP 16.2) have the same form. The "Sources" line of `fig_03` names
+    "reserve boundaries NTCA". `data-sources.md` gives the NTCA licence as
+    "attribution required".
+  - The text of the "Sources" lines of `fig_04`–`fig_08` goes to Decision
+    28 (b) (the captions in the PNG files or as page text). Then one edit
+    and one set of runs follow that Decision.
+- **(d) The six overlaps of the reserve polygons — d1.** No fix. The
+  reserve layer does not change. The item is closed as a limitation.
+  Facts (from `tbl_12_reserve_pairs.csv`, `tbl_13_network_metrics.csv` and
+  `tbl_17_reserve_suitability.csv`):
+  - All six overlap pairs are contiguous pairs of Decision 17 (gap 0, cost
+    0, no path). In Decision 19 the two reserves of each pair are in one
+    node: Pakke + Nameri; Manas + Buxa; Bandipur + Nagarhole + Mudumalai +
+    Sathyamangalam; Periyar + Srivilliputhur-Megamalai; Parambikulam +
+    Anamalai. The two reserves of each pair have the same landscape
+    complex.
+  - A fix needs a rule for the overlap area, and no source gives the legal
+    line (the polygons are the core protected-area outlines; Decision 4).
+    The re-run guard of `scripts/02` stops when a polygon area changes.
+    The runs after a fix: `scripts/02`–`05`, `07` (Weeks 10–12), `08`
+    (STEP 13.6), `09` (Weeks 15–16) and `10` (Week 17), with their QA.
+  - The Limitations item "Reserve polygons overlap" gets these facts in
+    task 18.2.
+- **Next:** task 18.2 — the edit of b1 and the author's console check;
+  then the docs of the four items (the Limitations, the open items of
+  `handoff.md`) and the split point.
+
 ### 2026-11-15 — Week 17 complete: task 17.7 (docs close; the Week-18 plan)
 
 - **Docs only.** No rule, value, data layer, table or script changed; no
@@ -7478,6 +7617,14 @@ reader of the Stage-3 result needs.)*
   to more than the records inside: 13 background records (all in the
   Parambikulam–Anamalai overlap) count two times. The reserve layer is not
   changed; the Stage-2 results use it.
+  *(2026-11-21, d1 of task 18.1: no fix.)* All six pairs are contiguous
+  pairs of Decision 17 (gap 0, cost 0, no path), and the two reserves of
+  each pair are in one node of Decision 19. The two reserves of each pair
+  have the same landscape complex. A 1 km cell in an overlap counts in the
+  values of both reserves in `tbl_17_reserve_suitability.csv` (the centre
+  rule), and a 0.2° cell can be a cell of both reserves in Decision 27.
+  No source gives the legal line between the two reserves: the polygons
+  are the core protected-area outlines (Decision 4).
 - **Small tiger counts are suppressed.** In `tbl_15_occ_by_reserve.csv` a
   tiger count of 1 or 2 is `<3` (Decision 22 point 9). A reader cannot add
   the tiger columns. The number of tiger records inside all reserve
@@ -7646,8 +7793,11 @@ SDM-based check needs.)*
 - **The figure text is a draft, and it is in the image.** The titles, the
   subtitles and the captions of `fig_07` and `fig_08` are drafts of the
   chat, drawn in the PNG files; an edit needs a change of `scripts/10`
-  (STEP 17.3) and a new run. The "Sources" line is the line of `fig_04`;
-  a check that it also covers the inputs of the Stage-2 surface is open.
+  (STEP 17.3) and a new run. The "Sources" line is the line of `fig_04`.
+  It names the inputs of the Stage-2 surface (WorldCover, gHM and
+  OpenStreetMap; checked 2026-11-21, c3 of task 18.1). It does not name
+  the NTCA and Natural Earth, which are in the "outlines" sentence of the
+  caption. The text of the "Sources" lines is a part of Decision 28 (b).
 - **No layer of Decision 27 is published** (the surfaces, the currents,
   the paths) before the rule of the pending item "Published layers" (Week
   19).

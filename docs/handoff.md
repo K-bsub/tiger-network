@@ -175,9 +175,15 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
     the Limitations, `proposal.md` §8, `README.md`, this file) and the
     Week-18 plan. The author's answer "W1 + W2"; the chat's reading:
     Week 18 holds both, the open items first, then the site skeleton.
-    The commit is task 17.8.
-  - **Next: Week 18, task 18.1** — the forks of the four open items (see
-    "Week-18 entry point").
+    The commit is task 17.8 *(2026-11-21: done on 2026-11-15 —
+    `0ee2243`, pushed)*.
+  - **Week 18 (in progress; 2026-11-21):** task 18.1 — the author's
+    choices a1, b1, c3, d1 for the four open items; task 18.2 — the four
+    items closed (b1: `scripts/03` reads the census text in `I()`; the
+    author's console check passed; (a), (c), (d): docs only). Full
+    record: the change log of `methodology.md`, 2026-11-21.
+  - **Next: the split point (the commit of tasks 18.1–18.2), then task
+    18.3 — Decision 28** (see "Week-18 entry point").
 - **Week 18 plan** (the author's answer "W1 + W2" of task 17.7): first the
   four open analysis items (W2: the near-ties of Decision 18 in Week 10;
   the `I()` fix of `scripts/03`; the "Sources" line of `fig_07` and
@@ -278,7 +284,11 @@ log of `methodology.md`, 2026-11-15, task 17.7.)*
   author committed each task with code (an `analysis:` and a `docs:`
   commit; the last pair, task 17.6b: `4454621`, `422ca5f`, pushed).
   Task 17.8: the commit of task 17.7 and a push. Nothing under `data/`
-  may be staged.
+  may be staged. *(2026-11-21: done on 2026-11-15 — `0ee2243`, pushed.)*
+- *(2026-11-21)* **Done: tasks 18.1–18.2** — the four open items are
+  closed (a1, b1, c3, d1). **Next: the split point, then task 18.3
+  (Decision 28).** The bullet below is the plan as written on
+  2026-11-15.
 - **Next: task 18.1 — the open items (W2)**, a fork for each before any
   code: (a) the near-ties of Decision 18 in the Week-10 comparisons; (b)
   the `I()` fix of `scripts/03`; (c) the "Sources" line of `fig_07` and
@@ -400,6 +410,10 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
 - `scripts/03` line 101: wrap the literal text in `I()` for `readr` ≥ 2.2
   (no output change; not done). *(2026-11-15: in Week 18, task 18.1 (b);
   the author's answer "W1 + W2".)*
+  *(2026-11-21: closed — b1 of task 18.1. The call was at line 103, not
+  101. `scripts/03` now reads the text in `I()`; the author's console
+  check (task 18.2) gave the same table (155 rows, 16 columns, identical
+  values, 0 read problems) and no warning. No run of `scripts/03`–`05`.)*
 - The NTCA overlap has no buffer (Decision 17). Transboundary links are
   absent (India-only surface).
 - `fig_03`: the title, subtitle and caption, and the wording of
@@ -417,10 +431,18 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
   checked for Week 10; no new run is proposed. Decide in Week 20 if a
   check is wanted. *(2026-11-15: moved to Week 18, task 18.1 (a); the
   author's answer "W1 + W2".)*
+  *(2026-11-21: closed — a1 of task 18.1. The chat's read-only check: no
+  two costs of `tbl_12_lcp_variant_comparison.csv` are equal at 12
+  significant digits; no rank, flag or label changes; no near-tie in
+  `tbl_13` and `tbl_17` either. `lcp_compare_variant()` is not changed.)*
 - `fig_07`, `fig_08`: the titles, subtitles and captions are chat drafts
   — the author's edit is open. The "Sources" line is the line of
   `fig_04`: check that it also covers the inputs of the Stage-2 baseline
-  surface *(2026-11-15: in Week 18, task 18.1 (c))*. The colours and
+  surface *(2026-11-15: in Week 18, task 18.1 (c))* *(2026-11-21:
+  checked, c3 of task 18.1 — the line names WorldCover, gHM and
+  OpenStreetMap; it does not name the NTCA and Natural Earth, which are
+  in the "outlines" sentence, as in `fig_04`–`fig_06`. The text of the
+  "Sources" lines goes to Decision 28 (b).)*. The colours and
   widths (PL1, L7a, L8a) are start values.
   The text is drawn in the PNG files: an edit needs a change of
   `scripts/10` (STEP 17.3; text fix of task 17.6b) and a new run (or the caption as page text on the site,
@@ -435,6 +457,9 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
   again. Decide when the reserve layer is next touched. *(2026-11-15: in
   Week 18, task 18.1 (d); a fix would now also need the runs of Weeks 15
   and 17 again.)*
+  *(2026-11-21: closed as a limitation — d1 of task 18.1; no fix. All six
+  pairs are contiguous pairs of Decision 17, each in one node of Decision
+  19. The facts are in the Limitations of `methodology.md`.)*
 - The 18 records of the tiger 1 km set from 2018–2022 are in one cell
   outside all reserve polygons; the cause is not known (not a model input).
 - 13 of the 6,969 model cells carry no current in phase 1 and in phase 2
@@ -547,7 +572,9 @@ of closed one-time work are in git history.)*
   "India NSF LCC".
 - **renv records only the packages that a script loads** (`library()`,
   `require()`, `pkg::`). A package in the `scripts/00a` list only (now
-  `sfdep`) is not in `renv.lock`; snapshot after the first script that
+  `leaflet` and `htmlwidgets`; *corrected 2026-11-21: the text said
+  `sfdep`, which S1 of task 16.6 removed from the list*) is not in
+  `renv.lock`; snapshot after the first script that
   calls it. A package called through `requireNamespace()` (for example
   `gifski`) may need `renv::snapshot(packages = ...)`.
 - **`rlang` lock:** if an update says "cannot remove prior installation" or
