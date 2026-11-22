@@ -1283,5 +1283,142 @@ SDMRES_RANK_SIGNIF <- 12L
 #        again; the publish checks. Its own table (the slug phase2_qa)
 SDMRES_QA2_SAMPLE_N <- 100L                # a limit of the QA
 
+# ---- Stage 4: the story site (Decision 28, 2026-11-21) ----------------------
+# Fixed BEFORE any page, any copy into site/ and any site script. See
+# docs/methodology.md, Decision 28: a3 with t1 and m1; b3 with P1, S1 and n2;
+# c1; d1; e1; f2; the readings R7-R10. Process choices of task 18.4
+# (2026-11-21): s1, f1, n1, p1, l1, w2, d1, t1, m1, r1, h1.
+# scripts/11_build_site.R reads these; do not repeat a value as a literal.
+#   copies = each figure of SITE_FIGURES into site/<SITE_FIG_DIR>/ with the
+#            same file name (P1: the PNG files keep their drawn text; S1:
+#            they are the stand-ins of the skeleton until the interactive
+#            maps and chart of Week 19)
+#   tables = each table of SITE_TABLES_PAGE as a Markdown file
+#            site/<SITE_TABLE_DIR>/_<name>.md (w2 columns, d1 numbers) that
+#            its page includes; the tables of SITE_TABLES_LINK as links with
+#            their row counts (site/<SITE_TABLE_DIR>/_links_<page>.md)
+#   check  = the publish check of Decision 28 point 8 runs before each write
+#            (STEP 18.1); the check of site/_site/ after the render is STEP
+#            18.2 (task 18.6)
+
+# Folders and pages (n1, p1). The names of SITE_PAGES are the page keys of
+# the lists below; the values are the page files in site/.
+DIR_SITE            <- here::here("site")
+SITE_FIG_DIR        <- "figures"          # site/figures/<file>
+SITE_TABLE_DIR      <- "tables"           # site/tables/_<name>.md
+SITE_INCLUDE_PREFIX <- "_"                # Quarto does not render an
+                                          # included file as a page
+SITE_PAGES <- c(index = "index.qmd", growth = "growth.qmd",
+                connectivity = "connectivity.qmd",
+                habitat = "suitability.qmd", check = "check.qmd",
+                methods = "methods.qmd", data = "data.qmd")
+
+# (1) The figures and their pages (Decision 28 point 1). kind: the
+# interactive form of Week 19 (R7: fig_01 is a chart; the others are maps).
+SITE_FIGURES <- data.frame(
+  file = c("fig_01_growth_ranking.png", "fig_02_growth_animation.gif",
+           "fig_03_reserve_network.png", "fig_04_suitability_classes.png",
+           "fig_05_suitability_value.png", "fig_06_effort_gistar.png",
+           "fig_07_sdm_current.png", "fig_08_sdm_paths.png"),
+  page = c("growth", "growth", "connectivity", "habitat", "habitat",
+           "habitat", "check", "check"),
+  kind = c("chart", "map", "map", "map", "map", "map", "map", "map"),
+  stringsAsFactors = FALSE)
+
+# (2) Tables on a page (t1: SITE_TABLE_MAX_ROWS rows or fewer) and the
+# columns that the page shows (w2: a draft list of the chat, for the
+# author's edit). Below each table the page gives the link to its full CSV
+# file.
+SITE_TABLE_MAX_ROWS <- 60L                # Decision 28 point 2 (judgement value)
+SITE_TABLES_PAGE <- list(
+  tbl_01_reserve_growth = list(page = "growth", columns = c(
+    "unit_name", "state", "landscape_complex", "baseline_year",
+    "pop_baseline", "pop_2022", "change_abs", "change_pct", "aagr",
+    "density_2022")),
+  tbl_02_regional_rollup = list(page = "growth", columns = c(
+    "unit_level", "region", "n_reserves", "n_measured", "pop_2014",
+    "pop_2018", "pop_2022", "change_abs", "change_pct", "aagr")),
+  tbl_03_reserve_network = list(page = "connectivity", columns = c(
+    "unit_name", "state", "node_name", "set_id", "set_size", "degree",
+    "betweenness_norm", "linchpin", "stable_linchpin", "cut_node",
+    "pendant", "n_pinch_points")),
+  tbl_17_reserve_suitability = list(page = "habitat", columns = c(
+    "unit_name", "state", "landscape_complex", "cloglog_mean",
+    "cloglog_rank", "density_2022", "n_1km_cells_used",
+    "n_1km_cells_no_value")),
+  tbl_15_occ_by_reserve = list(page = "habitat", columns = c(
+    "unit_name", "state", "landscape_complex", "tiger_1km_records",
+    "tiger_5km_records", "background_5km_records")),
+  tbl_19_sdmres_compare_summary = list(page = "check", columns = c(
+    "surface", "reference", "pairs_compared", "share_material_route",
+    "share_material_rank", "share_material_pair", "spearman_rho",
+    "median_route_overlap", "label"))
+)
+
+# (2) Tables as links: more than SITE_TABLE_MAX_ROWS rows (a guard checks
+# it). Written with their row counts to site/tables/_links_<page>.md.
+SITE_TABLES_LINK <- data.frame(
+  name = c("tbl_03b_pinch_points", "tbl_18_gistar", "tbl_19_sdmres_pairs",
+           "tbl_19_sdmres_compare", "tbl_19_sdmres_phase2"),
+  page = c("connectivity", "habitat", "check", "check", "check"),
+  stringsAsFactors = FALSE)
+SITE_LINKS_PAGE_FILE <- "links_%s"        # site/tables/_links_<page>.md
+
+# Note files on a page (a copy; each heading goes down by
+# SITE_NOTES_HEADING_SHIFT levels, below the headings of the page).
+SITE_NOTES <- data.frame(name = "tbl_03_notes", page = "connectivity",
+                         stringsAsFactors = FALSE)
+SITE_NOTES_HEADING_SHIFT <- 2L
+
+# (3) The list of links to all committed tables (t1; the Data page).
+SITE_LINKS_ALL_FILE <- "links_tables"     # site/tables/_links_tables.md
+SITE_LINKS_ALL_PAGE <- "data"
+
+# Links point to the files of the branch main of the repository.
+SITE_REPO_URL <- "https://github.com/K-bsub/tiger-network/blob/main"
+
+# (d1) The numbers of a table on a page: a whole number stays as it is;
+# another number gets SITE_SIGNIF significant digits; NA is "NA"; text stays
+# as it is. The writer adds no total row.
+SITE_SIGNIF <- 3L
+
+# (point 8) The publish check (e1).
+#   suppressed : the tables with the counts of Decision 22 point 9: each
+#                SITE_SUPPRESSED_MARK of the CSV stays on the page, and no
+#                shown column that matches SITE_SUPPRESSED_COLS holds 1 or 2
+#   banned     : file types that must not be in site/ (a layer, a raster, a
+#                data file, a model or a CSV file; the CSV files stay in the
+#                repository and the pages link them)
+#   widgets    : R9 — no widget and no layer in Week 18 (no .html, .js or
+#                .json file in site/ outside the render folders)
+SITE_SUPPRESSED_TABLES <- c("tbl_15_occ_by_reserve")
+SITE_SUPPRESSED_MARK   <- "<3"
+SITE_SUPPRESSED_COLS   <- "^tiger_"
+SITE_BANNED_EXT <- c("gpkg", "tif", "tiff", "rds", "rda", "rdata", "shp",
+                     "shx", "dbf", "prj", "cpg", "kml", "kmz", "geojson",
+                     "csv", "zip", "parquet", "pbf", "sqlite", "nc")
+SITE_ALLOW_WIDGETS <- FALSE               # R9 (Week 18)
+SITE_WIDGET_EXT    <- c("html", "htm", "js", "json")
+SITE_SKIP_DIRS     <- c("_site", ".quarto", "site_libs")  # render folders
+
+# ---- Stage 4: the QA of the site (task 18.6, 2026-11-21) ---------------------
+# STEP 18.2 of scripts/11_build_site.R (s1 of task 18.4). Process choices of
+# task 18.6 (the author: "as recommended"): q1 the QA table, x1 xml2 reads the
+# rendered HTML, c1 the checks a-j, v1 the Quarto version of the Action is
+# pinned in .github/workflows/publish.yml (a dated note on Decision 28 point
+# 7). Limits and names of the QA, not values of the analysis.
+SITE_OUT_DIR          <- "_site"           # the output-dir of site/_quarto.yml
+SITE_QA_TABLE_NN      <- 20L               # q1: tbl_20_site_qa.csv
+SITE_QA_TABLE_SLUG    <- "site_qa"
+SITE_QA_LIB_DIR       <- "site_libs"       # check f: the folder of Quarto
+SITE_QA_QUARTO_FILES  <- c("search.json", "sitemap.xml", "robots.txt")
+# Check h: a column name of a position, and a text of a decimal degree with 3
+# or more decimals (perl regular expressions).
+SITE_QA_POSITION_COLS <- "^(x|y|lon|lat|longitude|latitude|grid[0-9]*_(id|x_km|y_km))$"
+SITE_QA_DEGREE_RE     <- "[0-9]{1,3}\\.[0-9]{3,} ?(\\x{00B0}|deg\\b|[NSEW]\\b)"
+# Check k (v1): the Quarto version of the QA render, pinned in publish.yml.
+SITE_QUARTO_VERSION   <- "1.10.18"
+SITE_PUBLISH_YML      <- here::here(".github", "workflows", "publish.yml")
+
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a

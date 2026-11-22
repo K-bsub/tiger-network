@@ -1,0 +1,46 @@
+"group","check","value","pass"
+"test case","STEP 18.1: d1: whole numbers stay; others get 3 significant digits; text, NA, <3, TRUE stay","pass",TRUE
+"test case","STEP 18.1: table: the expected pipe table, right-aligned numbers, '|' escaped","pass",TRUE
+"test case","STEP 18.1: table block: the table, then rows, columns and the link","pass",TRUE
+"test case","STEP 18.1: publish check: a plain table passes; an x column and a grid column are refused","pass",TRUE
+"test case","STEP 18.1: Decision 22 point 9: a table with its marks passes","pass",TRUE
+"test case","STEP 18.1: Decision 22 point 9: a mark replaced by 2 is found","pass",TRUE
+"test case","STEP 18.1: Decision 22 point 9: a total row is found","pass",TRUE
+"test case","STEP 18.1: scan: a clean folder gives no file; the render folders are not read","pass",TRUE
+"test case","STEP 18.1: scan: a layer file and a widget file are found","pass",TRUE
+"test case","STEP 18.1: write: written, then the same (a non-ASCII text; time stamp kept), then written","pass",TRUE
+"test case","STEP 18.1: copy: copied, then the same; the copy has the MD5 of its source","pass",TRUE
+"test case","STEP 18.1: headings: down by 2 levels, at most 6; other lines stay","pass",TRUE
+"test case","STEP 18.1: page references: the figure and the include; a comment is not read","pass",TRUE
+"test case","STEP 18.1: link lists: the rows with a thousands mark; the files sorted","pass",TRUE
+"test case","STEP 18.2: files: the render folders are not listed","pass",TRUE
+"test case","STEP 18.2: fresh: TRUE after the render; FALSE when a site file is newer","pass",TRUE
+"test case","STEP 18.2: page: two images; the alt text and the caption of the first; none for the second","pass",TRUE
+"test case","STEP 18.2: page: the table header, its 2 rows and the mark <3 in row 2","pass",TRUE
+"test case","STEP 18.2: page: the link to the repository","pass",TRUE
+"test case","STEP 18.2: positions: the degree text is found; 0.2 degrees, 0.123 NA and 0.456 are not","pass",TRUE
+"test case","STEP 18.2: positions: grid10_x_km, lon and x are position columns; unit_name is not","pass",TRUE
+"test case","STEP 18.2: widgets: a frame is found; the plain page has none","pass",TRUE
+"test case","STEP 18.2: version: the pinned line is found; another version is not","pass",TRUE
+"a pages","each page of SITE_PAGES has its HTML file in _site/","7 of 7",TRUE
+"a pages","_site/ holds no other HTML page (site_libs/ not counted)","0 other",TRUE
+"b images","each image of each page is a file in _site/","8 of 8",TRUE
+"b images","each page shows its figures of SITE_FIGURES, once each, and no other image","7 of 7 pages",TRUE
+"b images","each figure in _site/figures/ has the MD5 of its source in outputs/figures/","8 of 8",TRUE
+"b images","each copy in site/figures/ has the MD5 of its source","8 of 8",TRUE
+"c alt text","each image has an alt text","8 of 8",TRUE
+"c alt text","each image has a caption (the stand-in label)","8 of 8",TRUE
+"d tables","tbl_01_reserve_growth: one table on its page with the shown columns, the rows of the CSV file, the first column in the CSV order, each mark <3 in its row","58 rows, 10 columns, 0 marks",TRUE
+"d tables","tbl_02_regional_rollup: one table on its page with the shown columns, the rows of the CSV file, the first column in the CSV order, each mark <3 in its row","23 rows, 10 columns, 0 marks",TRUE
+"d tables","tbl_03_reserve_network: one table on its page with the shown columns, the rows of the CSV file, the first column in the CSV order, each mark <3 in its row","56 rows, 12 columns, 0 marks",TRUE
+"d tables","tbl_17_reserve_suitability: one table on its page with the shown columns, the rows of the CSV file, the first column in the CSV order, each mark <3 in its row","58 rows, 8 columns, 0 marks",TRUE
+"d tables","tbl_15_occ_by_reserve: one table on its page with the shown columns, the rows of the CSV file, the first column in the CSV order, each mark <3 in its row","58 rows, 6 columns, 7 marks",TRUE
+"d tables","tbl_19_sdmres_compare_summary: one table on its page with the shown columns, the rows of the CSV file, the first column in the CSV order, each mark <3 in its row","2 rows, 9 columns, 0 marks",TRUE
+"e links","each link to the repository names a file of the repository","76 of 76",TRUE
+"f _site","_site/ holds only the pages, the listed figures, site_libs/ and the files of Quarto","0 other files",TRUE
+"g site/","site/ holds no banned file type and no widget file (the render folders not read)","29 files read",TRUE
+"h positions","no table on a page has a column of a position","0 columns",TRUE
+"h positions","no page text holds a decimal degree with 3 or more decimals","0 pages",TRUE
+"i widgets","no page holds a widget or a frame (Week 18; Decision 28 R9)","0 pages",TRUE
+"j tables list","the Data page names each file of outputs/tables/ once","75 listed; 75 on disk",TRUE
+"k version","publish.yml pins the Quarto version of the QA render (v1)","1.10.18",TRUE
