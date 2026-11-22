@@ -1,5 +1,49 @@
 ---
-title: "methods"
+title: "Methods"
 ---
 
-*Placeholder — content added in Stage 4 (site build).*
+<!-- Skeleton of Week 18 (Decision 28 m1; t1 of task 18.4). The table below
+is a draft of the chat: rows 1-27 are the table "Fixed Decisions" of
+docs/handoff.md (2026-11-21), word for word; row 28 is new. The author's edit
+is in Week 20. -->
+
+::: {.callout-note appearance="simple"}
+**Placeholder** — the author's text (Week 20).
+:::
+
+## Decisions
+
+::: {.callout-note appearance="simple"}
+**Draft (chat)** — the short form of each numbered Decision. The full text,
+with the reasons and the sources:
+[`docs/methodology.md`](https://github.com/K-bsub/tiger-network/blob/main/docs/methodology.md).
+:::
+
+| D | Rule (short form) |
+|---|---|
+| 1 | Habitat suitability (SDM), not occupancy |
+| 2 | Unit = the reserve, rolled up to landscape complex and state |
+| 3 | CRS EPSG:7755 |
+| 4 | NTCA DSS KML for the geometry only; area and density from the NTCA census |
+| 5 | Target-group background = Mammalia (tiger excluded) |
+| 6 | Census series = within-reserve SECR 2014/2018/2022 only; 2006/2010 are context, not a baseline |
+| 7 | A missing (reserve, round) cell is `NA`; no imputation |
+| 8 | Reserve area = the NTCA-notified core + buffer total (ISFR 2021 Ch. 4 is a cross-check only) |
+| 9 | Real zeros: `change_abs` always valid; a ratio is `NA` with a flag only when the baseline is 0; a real 2022 zero is −100 % |
+| 10 | Covariate stack: a common NA mask (any band `NA` → all bands `NA`) |
+| 11–13 | gHM gap fill by a relevance rule; gHM closed; land cover from the unmasked tile cache; terrain from the raw DEM; 7 tile-corner no-class cells accepted (12 and 13 post-result) |
+| 14 | Resistance: set-B class values × (1 + 4 × gHM), cap 100; Sundarban water 10 (50 elsewhere); variant `noghm` |
+| 15 | Road barrier: motorway to secondary, value 30, maximum rule, `touches = TRUE`; variants `road15`, `road50` |
+| 16 | Water exempt from the gHM multiplier (post-result) |
+| 17 | Least-cost paths: pairs by allocation adjacency + gap ≤ 315 km; through-reserve rule P3; 16 neighbours with the crossed-cells knight rule; own engine, validated; edge to edge; contiguous = a shared footprint cell; Amrabad from the state split; Pilibhit and Dholpur-Karauli out (no polygon) |
+| 18 | Variant comparison: "material" if the 5 km route overlap < 0.5 or the rank change ≥ 0.25; "robust" if ≤ 20 % material and ρ ≥ 0.9 (the road value only if both road variants are) |
+| 19 | Network: each in-network pair is a link (cost = weight, no threshold); contiguous reserves merge (56 reserves → 47 nodes); betweenness normalised in the node's own set; `linchpin` = top 3 in the set with a value > 0; `isolated` = degree 0, `pendant` = degree 1; "robust" if the sets are the same, ρ ≥ 0.9 and linchpin retention ≥ 2/3 |
+| 20 | Road pinch points: crossings of the in-network paths with the D15 barrier cells; crossings ≤ 5 km apart = one site; a pinch point is a site on a bridge edge or a site that ≥ 2 edges use (tiers 1–3); "robust" if the site overlap ≥ 2/3; published as a 10 km grid cell + state + district; a network label, not the pinch point of circuit-theory mapping |
+| 21 | Occurrence cleaning: one rule of nine steps for the tiger and the background; the 1 km set (main) and the 5 km set; the obscured set (iNaturalist, uncertainty ≥ 25 km, with its 0.2° cell; never a 1 km presence); one presence per cell; the limits 25 and 80 cells (point 8); a dataset check by a word list; outcome `no_1km_model` (locked) |
+| 22 | Effort surfaces: effort, tiger records and city/town settlement; the 5 km sets; one unit per 1 km cell; quartic kernel of 20 km radius (σ 7,071 m), QA surfaces at 10 and 30 km; three time windows; the tiger surface is never published or committed; the published tiger product is the count by reserve (1 or 2 → `<3`) |
+| 23 | A `maxnet` model at the 0.2° grain on the obscured set; model cell = complete-case cover ≥ 50 %; the limits 25 and 80 presence cells; background = the clean iNaturalist Mammalia records (two parts), ≥ 10 × the presence cells; the Facebook dataset is a check (0 records); Gi* of the effort and of the tiger records (tiger Gi* never published); no ratio. Outcome `planned_model` (locked) |
+| 24 | Model settings: nine candidates summarised over the 1 km cells of a cell; no water cells in the terrain means, elevation floor 0 m; \|r\| > 0.7 removes the later candidate of a fixed order; AICc over `lq`/`lqh`/`lqph` × regmult 1–4 (fewest coefficients within ΔAICc 2); no bias covariate; presences added to the background; 2° blocks in 5 folds (Boyce, test AUC, OR10, AUCdiff; cloglog); gate: mean test Boyce ≤ 0 → no suitability map; reserve check (Week 15); two sensitivity runs; the model file under `data/processed/` |
+| 25 | Prediction and publication: the model file of 2026-10-25, cloglog with clamping; a cell with a covariate outside the training range is flagged, counted and hatched; five equal-count classes by rank (a tie to the lower cell id; class 5 = the top-20 % set of the sensitivity rule), no value in the legend; no published layer before the rule of the pending item "Published layers" (Week 18 in the Decision text; Week 19 since 2026-11-07); tier T1; two static figures, `fig_04` (classes) and `fig_05` (value, label "model output (cloglog), relative; not a probability of presence"); nine caption items; a reserve table (58 rows, no presence column); reserve check: a 1 km cell is inside if its centre is, a 1 km cell outside the model cells has no value and is counted; point 9 (task 15.2): r2 only if each count of the 2 × 2 table is 3 or more, and a QA stop on a reserve whose presence state the outputs show |
+| 26 | Gi\*: four Gi\* — `effort_inat` (the model background, before `maxnet` adds a presence cell) with `tiger_obscured`; `effort_all` (the clean background of all datasets) with `tiger_5km`; no comparison with Phase 1; the 6,969 model cells, value 0/1; a 50 km band on the sphere (Amendment 1), the cell itself included; a class only with 8 neighbours or more; QA bands queen and 75 km (descriptive); the exact p (hypergeometric, random relabelling); Benjamini–Hochberg, q = 0.05; `fig_06` = `effort_inat` (`effort_all`: table only, a reading); the tiger Gi\* never published: counts only (obscured set), and counts by landscape complex by rule L1 (5 km set); all years; own code. The tiger Gi\* cannot show a cold spot |
+| 27 | SDM-based resistance and circuit theory: input = the percentile rank of the cloglog value over the 6,969 model cells (the 32 hatched cells kept and counted); `main` R = 1 + 99 × (1 − x) and the variant `negexp8` (c = 8), range 1–100; a graph of the model cells only (8 neighbours; link = distance on the sphere × mean R; reserve cells by the centre rule); circuit theory (each reserve of a pair joined into one node; zero current in the two reserves of a pair) and least-cost paths on the same graph; own R code, checked by hand-made circuits and `gdistance`; phase 1 = the 106 pairs of D17, compared with the Stage-2 baseline paths by the D18 rule with d = 20 km ("agrees"/"differs"; the variant "robust"/"sensitive") and descriptive values; phase 2 = all 1,540 pairs on both surfaces, a check of the D17 pair rule ("agrees" if 2/3 or more of the D17 pairs are among the same number of lowest effective resistances); no layer; `fig_07` (the phase-1 current, P3a) and `fig_08` (the paths, plain background) |
+| 28 | Story site: seven pages (a page of its own for the check of Decision 27); interactive maps, and an interactive `fig_01`, where the rule of "Published layers" allows, with the PNG files as the record in the repository; captions as page text with the numbers from code; no R code in the pages; deploy on each push that changes `site/**`; a publish check in code |

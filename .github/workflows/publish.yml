@@ -20,12 +20,17 @@ jobs:
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
+        # Pinned to the Quarto version of the local QA render (task 18.6,
+        # v1; Decision 28 point 7). Change it only with SITE_QUARTO_VERSION
+        # in R/00_config.R and a new QA (scripts/11_build_site.R STEP 18.2).
+        with:
+          version: 1.10.18
 
-      # The site is rendered LOCALLY and its computed output is frozen in
-      # site/_freeze/ (committed). The Action therefore needs only Quarto, not
-      # the R spatial stack. Re-render locally and commit site/_freeze/ whenever
-      # a .qmd's code changes.
-      - name: Render site (from freeze)
+      # The pages hold no R code (Decision 28 c1): scripts/11_build_site.R
+      # writes the figures and the tables into site/ on the local machine, so
+      # the Action needs only Quarto, not R. A page with R code would need a
+      # committed site/_freeze/ (freeze: auto in site/_quarto.yml).
+      - name: Render site
         run: quarto render site
 
       - name: Deploy to gh-pages

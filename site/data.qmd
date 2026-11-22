@@ -1,5 +1,55 @@
 ---
-title: "data"
+title: "Data & References"
 ---
 
-*Placeholder — content added in Stage 4 (site build).*
+<!-- Skeleton of Week 18 (Decision 28 m1; t1 of task 18.4). The list of the
+data sources is a draft of the chat from docs/data-sources.md; the author's
+edit is in Week 20. The list of the tables comes from scripts/11_build_site.R:
+do not edit the files in tables/ by hand. -->
+
+::: {.callout-note appearance="simple"}
+**Placeholder** — the author's text (Week 20).
+:::
+
+## Data sources
+
+::: {.callout-note appearance="simple"}
+**Draft (chat)** — from `docs/data-sources.md`. The author's edit is in Week 20.
+:::
+
+- **Tiger population.** National Tiger Conservation Authority and Wildlife
+  Institute of India, All India Tiger Estimation reports, 2006–2022
+  (<https://ntca.gov.in>). Government of India. The census series of this
+  project is the within-reserve estimate of 2014, 2018 and 2022.
+- **Reserve and corridor outlines.** National Tiger Conservation Authority
+  (2022), *PA_TR_Corridor_Final* (KML), Decision Support System
+  (<https://ntca.gov.in/dss/>). Government of India; attribution required.
+  The outlines are the core protected areas, not the notified area of the
+  reserve.
+- **Reserve area.** The NTCA-notified core and buffer total of each reserve.
+- **Tiger records.** GBIF.org (2026-09-07), GBIF Occurrence Download,
+  <https://doi.org/10.15468/dl.npxmxx>. CC BY or CC0 for each record.
+- **Mammal records (the background).** GBIF.org (2026-09-07), GBIF
+  Occurrence Download, <https://doi.org/10.15468/dl.2d523e>. CC BY or CC0 for
+  each record.
+- **Land cover.** ESA WorldCover 2021 v200,
+  <https://doi.org/10.5281/zenodo.7254221>. CC BY 4.0.
+- **Human pressure.** Global Human Modification 2022 (Theobald et al., v3),
+  <https://doi.org/10.5281/zenodo.14502573>. CC BY 4.0.
+- **Roads, settlements and zoos.** OpenStreetMap data, © OpenStreetMap
+  contributors (ODbL), from the Geofabrik India extract
+  (<https://download.geofabrik.de/asia/india.html>).
+- **Terrain.** AWS Terrain Tiles (<https://registry.opendata.aws/terrain-tiles/>).
+- **States.** Natural Earth admin-1 boundaries (public domain).
+- **Districts.** DataMeet Census-2011 districts (CC BY 4.0).
+- **Forest (a cross-check of the reserve area only).** Forest Survey of
+  India, India State of Forest Report 2021 (<https://fsi.nic.in>).
+
+## All committed tables
+
+{{< include tables/_links_tables.md >}}
+
+## References
+
+The reference list follows in Week 20, after each entry is verified
+(Decision 28 point 3).
