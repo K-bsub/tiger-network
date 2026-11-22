@@ -1487,6 +1487,62 @@ linkage costs (r > 0.5, p < 0.05) than by straight-line distance. Decision
 27, "Reason".)* *(Through a fetch tool (a summary of the first part of the
 PMC page) and the repository abstract.)*
 
+## Story site (Decision 28) and the open items of Week 18
+
+*All entries in this section were read on 2026-11-21, through a search
+tool (snippets) or a fetch tool (summaries of the page). No entry was read
+in full. Verify each entry before it is cited on the site.*
+
+Posit Community forum (2024). "Can change the Quarto working directory in
+one line?"
+https://forum.posit.co/t/can-change-the-quarto-working-directory-in-one-line/188311
+· *(A user reports that an image path `../image.png` does not work in a
+Quarto project. Decision 28 c1, a fact for the fork.)* *(Through a search
+tool (a snippet). Users, not staff; the year is not checked. Not to be
+cited on the site.)*
+
+Quarto documentation. "Includes".
+https://quarto.org/docs/authoring/includes.html · *(The `include`
+shortcode is the same as a copy of the text of the file into the page; it
+must be alone on its line, with empty lines around it; an included file
+has an underscore prefix, so that `quarto render` ignores it. Decision 28
+point 6.)* *(Through a fetch tool (a summary).)*
+
+Quarto documentation. "Publishing — GitHub Pages".
+https://quarto.org/docs/publishing/github-pages.html · *(With `freeze:
+auto` the code runs only on the local machine; the `_freeze` directory
+"should be checked in to version control"; by default `quarto publish`
+renders the project again before it publishes it (`render: false` stops
+this); a `path` input for a project in a subdirectory. Decision 28 c1 and
+d1.)* *(Through a fetch tool (a summary).)*
+
+Quarto documentation. "Variables".
+https://quarto.org/docs/authoring/variables.html · *(A `_variables.yml`
+file next to `_quarto.yml`; `{{< var email.info >}}` reads a nested key.
+The page does not name website projects. Decision 28 n2.)* *(Through a
+fetch tool (a summary).)*
+
+Quarto documentation. "Website Tools", section "Site Resources".
+https://quarto.org/docs/websites/website-tools.html · *(Quarto copies
+each file that a page references into the output directory; the option
+`resources` for a file that auto-detection does not find. The section
+says nothing about a file outside the project directory. Decision 28
+c1.)* *(Through a fetch tool (a summary).)*
+
+readr NEWS, version 2.2.0 (2026-02-19).
+https://cloud.r-project.org/web/packages/readr/news/news.html ·
+https://tidyverse.r-universe.dev/readr/NEWS.txt · *(`read_csv()` and the
+other read functions give a deprecation warning when literal data is not
+in `I()` (#1611). Task 18.1 (b) and 18.2.)* *(Through a search tool
+(snippets).)*
+
+quarto-dev/quarto-actions. "setup" action, README.
+https://github.com/quarto-dev/quarto-actions/blob/main/setup/README.md ·
+*(With no `version` input, the action installs the latest released
+Quarto; the input `version:` under `with:` pins a version. Task 18.6 v1:
+`publish.yml` pins 1.10.18.)* *(Through a fetch tool (a summary); read on
+2026-11-21.)*
+
 ## Tiger movement and landscape resistance (Decision 14)
 
 Dutta, S., & Krishnamurthy, R. (2024). Multiphasic movement and step-selection

@@ -72,6 +72,9 @@ Two-digit prefix sets execution order (`00a`, `00b`, `01`, `02`, ...). Function
 files in `R/` use the `00_functions_<domain>.R` pattern and are sourced, never
 run standalone.
 
+*(2026-11-21, task 18.5: `scripts/11_build_site.R` and
+`R/00_functions_site.R` — the files of the story site (Decision 28).)*
+
 ---
 
 ## 4. R objects
@@ -165,6 +168,7 @@ suffix marks a companion table to a numbered one (`tbl_05b_…`). As built:
 | `tbl_17` | `reserve_suitability` — the publishable table of the reserve values (Decision 25 point 7; `scripts/09` STEP 15.2, task 15.4; reserved by process choice n1 of task 15.2). One row per reserve; no presence column *(built 2026-11-01: 58 rows)* |
 | `tbl_18` | `gistar` — the publishable statistics of the Gi\* (Decision 26 point 7; `scripts/09` STEP 16.1, task 16.3); `gistar_qa` — the QA of STEP 16.3 (task 16.5). Reserved by t1 of task 16.2 (2026-11-07). A landscape-complex name only in the `tiger_5km` rows of `gistar` *(built 2026-11-07: `gistar`, 92 rows; `gistar_qa`, 113 rows)* |
 | `tbl_19` | `sdmres_surface`, `sdmres_pairs`, `sdmres_compare`, `sdmres_compare_summary`, `sdmres_phase2`, `sdmres_phase2_summary`, `sdmres_qa`, `sdmres_phase2_qa` — the SDM-based resistance and the circuit-theory check (Decision 27; `scripts/10`). Reserved by n1 of task 17.2 (2026-11-14); `sdmres_compare_summary` added by TB1 of task 17.5; `sdmres_phase2_summary` and `sdmres_phase2_qa` added by T2a and Q2a of task 17.6b. Counts, statistics and pair rows with reserve names; no position and no cell id (Decision 27 point 10) *(built 2026-11-14: `sdmres_surface`, 52 rows; `sdmres_pairs`, 212 rows; `sdmres_compare`, 194 rows; `sdmres_compare_summary`, 2 rows; `sdmres_qa`, 196 rows; built 2026-11-15: `sdmres_phase2`, 3,080 rows; `sdmres_phase2_summary`, 48 rows; `sdmres_phase2_qa`, 62 rows)* |
+| `tbl_20` | `site_qa` — the QA of the render of the story site (`scripts/11` STEP 18.2, task 18.6; Decision 28). Check names, counts and file names; no position *(built 2026-11-21: 45 rows)* |
 
 Before a new table is written, check that its full filename is not already in
 use. A new, unrelated table takes the next free number.
@@ -221,6 +225,18 @@ numbers.)*
 and `sdmres_phase2_qa` (T2a, Q2a); the layers `main_phase2` and
 `negexp8_phase2` and the phase-2 current files are built (gitignored).
 `fig_09` and `tbl_20` are still the next free numbers.)*
+*(2026-11-21, tasks 18.5–18.6: `tbl_20_site_qa.csv` is built. `tbl_21` and
+`fig_09` are the next free numbers.)*
+
+**Site files** *(2026-11-21, Decision 28, task 18.5)*: `site/figures/` holds
+copies of the committed figures, with the same file names. `site/tables/`
+holds the include files: `_<table name>.md` for a table on a page,
+`_links_<page>.md` for the links of a page to its longer tables,
+`_links_tables.md` for the list of all tables, and `_tbl_03_notes.md`. The
+underscore prefix tells Quarto not to render the file as a page.
+`scripts/11_build_site.R` writes all of these files; do not edit them by
+hand. A page file has a short name of its page; the page "Habitat" is
+`suitability.qmd`.
 
 ---
 
@@ -231,5 +247,6 @@ and `sdmres_phase2_qa` (T2a, Q2a); the layers `main_phase2` and
   - `data: add GBIF re-download script`
   - `analysis: compute reserve growth metrics`
   - `docs: record boundary-source decision`
+  - `site: add the skeleton pages of Decision 28`
 - Documentation commits and site commits are always **separate** from analysis
   commits.

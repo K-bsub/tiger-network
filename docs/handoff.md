@@ -56,6 +56,7 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   | 25 | Prediction and publication: the model file of 2026-10-25, cloglog with clamping; a cell with a covariate outside the training range is flagged, counted and hatched; five equal-count classes by rank (a tie to the lower cell id; class 5 = the top-20 % set of the sensitivity rule), no value in the legend; no published layer before the rule of the pending item "Published layers" (Week 18 in the Decision text; Week 19 since 2026-11-07); tier T1; two static figures, `fig_04` (classes) and `fig_05` (value, label "model output (cloglog), relative; not a probability of presence"); nine caption items; a reserve table (58 rows, no presence column); reserve check: a 1 km cell is inside if its centre is, a 1 km cell outside the model cells has no value and is counted; point 9 (task 15.2): r2 only if each count of the 2 × 2 table is 3 or more, and a QA stop on a reserve whose presence state the outputs show |
 | 26 | Gi\*: four Gi\* — `effort_inat` (the model background, before `maxnet` adds a presence cell) with `tiger_obscured`; `effort_all` (the clean background of all datasets) with `tiger_5km`; no comparison with Phase 1; the 6,969 model cells, value 0/1; a 50 km band on the sphere (Amendment 1), the cell itself included; a class only with 8 neighbours or more; QA bands queen and 75 km (descriptive); the exact p (hypergeometric, random relabelling); Benjamini–Hochberg, q = 0.05; `fig_06` = `effort_inat` (`effort_all`: table only, a reading); the tiger Gi\* never published: counts only (obscured set), and counts by landscape complex by rule L1 (5 km set); all years; own code. The tiger Gi\* cannot show a cold spot |
 | 27 | SDM-based resistance and circuit theory: input = the percentile rank of the cloglog value over the 6,969 model cells (the 32 hatched cells kept and counted); `main` R = 1 + 99 × (1 − x) and the variant `negexp8` (c = 8), range 1–100; a graph of the model cells only (8 neighbours; link = distance on the sphere × mean R; reserve cells by the centre rule); circuit theory (each reserve of a pair joined into one node; zero current in the two reserves of a pair) and least-cost paths on the same graph; own R code, checked by hand-made circuits and `gdistance`; phase 1 = the 106 pairs of D17, compared with the Stage-2 baseline paths by the D18 rule with d = 20 km ("agrees"/"differs"; the variant "robust"/"sensitive") and descriptive values; phase 2 = all 1,540 pairs on both surfaces, a check of the D17 pair rule ("agrees" if 2/3 or more of the D17 pairs are among the same number of lowest effective resistances); no layer; `fig_07` (the phase-1 current, P3a) and `fig_08` (the paths, plain background) |
+| 28 | Story site: seven pages (a page "Check" for Decision 27); interactive maps, and an interactive `fig_01`, where the rule of "Published layers" allows, with the PNG files as the record in the repository and as the stand-ins of the skeleton; tables of 60 rows or fewer on a page, longer tables as links; captions as page text with the numbers from `site/_variables.yml`; no R code in the pages (`scripts/11_build_site.R` copies the figures and writes the tables); deploy on each push of `site/**`; a publish check in code (STEPs 18.1–18.2); draft alt text |
 
 ## Ways of working (apply every chat)
 
@@ -85,7 +86,8 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   or a caption from a chat is a draft and is marked as one.
 - Before each deliverable, check the new text against the AI-word list.
 - Take each figure from code or data, never from prose.
-- Doc commits are separate from analysis commits (`analysis:` / `docs:`).
+- Doc commits and site commits are separate from analysis commits
+  (`analysis:` / `site:` / `docs:`).
 - **Commit commands** (the author, 2026-11-07): with each commit (at a
   split point or at the end of a week), the chat gives the exact git
   commands — the files to add, the messages, the push, and the
@@ -93,10 +95,50 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ---
 
-## Current state  ·  **Week 17 complete (tasks 17.1–17.7)** · 2026-11-15
+## Current state  ·  **Week 18 complete (tasks 18.1–18.7)** · 2026-11-21
 
 ### Where the project is
 
+- **Week 18 in short (2026-11-21; tasks 18.1–18.7; full record: Decision
+  28 and the change log in `methodology.md`):**
+  - Task 18.1: the four open items — the author's choices a1, b1, c3, d1
+    (each as the chat recommended). (a) No near-tie at 12 significant
+    digits in `tbl_12_lcp_variant_comparison.csv` (the chat's read-only
+    check; no rank, flag or label changes; none in `tbl_13` and `tbl_17`
+    either). (b) The `I()` edit. (c) The "Sources" line of `fig_07` and
+    `fig_08` names the three Stage-2 inputs; the text of the "Sources"
+    lines goes with the captions. (d) The six polygon overlaps stay a
+    limitation (all six are contiguous pairs of Decision 17).
+  - Task 18.2: `scripts/03` reads the census text in `I()` (line 107);
+    the author's console check: the same table, no warning. Split point
+    `eb9557d`, `b6ce1a6`.
+  - Task 18.3: **Decision 28** (the form of the story site) — a3 with t1
+    and m1; b3 with P1, S1 and n2; c1; d1; e1; f2; the readings R7–R10
+    (a3 and d1 are not the chat's recommendation). Seven pages (a page
+    "Check" for Decision 27); interactive maps, and `fig_01` as an
+    interactive chart, where the rule of "Published layers" allows; the
+    PNG files stay the record in the repository and are the stand-ins of
+    the skeleton; captions as page text with the numbers from
+    `site/_variables.yml`; no R code in the pages (a site script copies
+    the files); deploy on each push of `site/**`; a publish check in code;
+    draft alt text.
+  - Task 18.4: the process choices s1, f1, n1, p1, l1, w2, d1, t1, m1,
+    r1, h1 (each as recommended).
+  - Task 18.5: the `SITE_*` block, `R/00_functions_site.R`,
+    `scripts/11_build_site.R` STEP 18.1 and the seven pages; the run and
+    the render (Quarto 1.10.18) on the project machine; the author saw each
+    page with its outputs.
+  - Task 18.6: q1, x1, c1, v1 (as recommended); STEP 18.2, the QA of the
+    render: 45 of 45 (`tbl_20_site_qa.csv`); `publish.yml` pins Quarto
+    1.10.18 (the author's edit by hand: the chat cannot write
+    `.github/workflows/`).
+  - Commits by the author: `90ac814` (`analysis:`) and `c908447`
+    (`site:`), pushed; the Action ran green and deployed the skeleton
+    (https://K-bsub.github.io/tiger-network/).
+  - Task 18.7: the docs close and the Week-19 plan; the author's answer
+    **W19a**: Stage 4 moves by one week (Weeks 18–22).
+  - **Next: the docs commit (task 18.8); then Week 19, task 19.1 —
+    Decision 29 (the pending item "Published layers").**
 - **Week 17 in short (2026-11-14 to 2026-11-15; tasks 17.1–17.7; full
   record: Decision 27 and the change log in `methodology.md`):**
   - A text fix before Week 17: the headers of the two one-time scripts
@@ -177,21 +219,17 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
     Week 18 holds both, the open items first, then the site skeleton.
     The commit is task 17.8 *(2026-11-21: done on 2026-11-15 —
     `0ee2243`, pushed)*.
-  - **Week 18 (in progress; 2026-11-21):** task 18.1 — the author's
-    choices a1, b1, c3, d1 for the four open items; task 18.2 — the four
-    items closed (b1: `scripts/03` reads the census text in `I()`; the
-    author's console check passed; (a), (c), (d): docs only). Full
-    record: the change log of `methodology.md`, 2026-11-21.
-  - **Next: the split point (the commit of tasks 18.1–18.2), then task
-    18.3 — Decision 28** (see "Week-18 entry point").
-- **Week 18 plan** (the author's answer "W1 + W2" of task 17.7): first the
-  four open analysis items (W2: the near-ties of Decision 18 in Week 10;
-  the `I()` fix of `scripts/03`; the "Sources" line of `fig_07` and
-  `fig_08`; the reserve-polygon overlaps), a split point, then **Decision
-  28** (the form of the story site) and the site skeleton (W1). Stage 4
-  stays in Weeks 18–21; if Week 18 runs long, the skeleton continues in
-  Week 19 and Stage 4 moves by one week. The draft task breakdown is in
-  `project-plan.md` → "Week 18 — task breakdown".
+- **Week 19 plan** (the author's answer W19a of task 18.7): Stage 4 moves
+  by one week (Weeks 18–22). Week 19 — Decision 29 (the published
+  layers), the tool of the maps and the chart, the interactive `fig_01`
+  and `fig_02`, the QA of the map files; Week 20 — the interactive maps
+  that Decision 29 allows (`fig_03`–`fig_08`) and the layout item; Week
+  21 — the author's text, the captions, the alt text, the references;
+  Week 22 — publish and docs close. The draft task breakdown is in
+  `project-plan.md` → "Week 19 — task breakdown".
+- **Week 18 plan** (the author's answer "W1 + W2" of task 17.7; done):
+  the four open analysis items first, then Decision 28 and the site
+  skeleton.
 - **Week 17 plan** (the author's choice R4 of task 16.6; done): a
   resistance surface from the suitability and a circuit-theory check
   against the Stage-2 paths. Stage 4 moved to Weeks 18–21.
@@ -229,6 +267,8 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   complete and committed (Week 14: `30a512d`, "Week 14 complete"); **Week
   15 complete (2026-11-01)**. Week 15 was committed on 2026-11-01
   (`7ae300a`). **Week 16 complete (2026-11-07): Stage 3 complete.**
+  **Stage 4 (the story site; Weeks 18–22 since W19a):** Week 18 complete
+  (2026-11-21) — the skeleton is live.
 - **Week 15 in short** (full record: Decision 25 and the change log in
   `methodology.md`):
   - **Decision 25** (task 15.1): the prediction and its published form,
@@ -274,43 +314,38 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   `scripts/00a` list follows the code; `sfdep`, `spatstat.*` and
   `predicts` are out of it.)*
 
-### Week-18 entry point
+### Week-19 entry point
 
-*(Written 2026-11-15 at the Week-17 close. Read the Week-18 plan in
-`project-plan.md` first; the chat's reading of "W1 + W2" is in the change
-log of `methodology.md`, 2026-11-15, task 17.7.)*
+*(Written 2026-11-21 at the Week-18 close. Read the Week-19 plan in
+`project-plan.md` first.)*
 
-- **Done: Week 17** (2026-11-14 to 2026-11-15; tasks 17.1–17.7). The
-  author committed each task with code (an `analysis:` and a `docs:`
-  commit; the last pair, task 17.6b: `4454621`, `422ca5f`, pushed).
-  Task 17.8: the commit of task 17.7 and a push. Nothing under `data/`
-  may be staged. *(2026-11-21: done on 2026-11-15 — `0ee2243`, pushed.)*
-- *(2026-11-21)* **Done: tasks 18.1–18.2** — the four open items are
-  closed (a1, b1, c3, d1). **Next: the split point, then task 18.3
-  (Decision 28).** The bullet below is the plan as written on
-  2026-11-15.
-- **Next: task 18.1 — the open items (W2)**, a fork for each before any
-  code: (a) the near-ties of Decision 18 in the Week-10 comparisons; (b)
-  the `I()` fix of `scripts/03`; (c) the "Sources" line of `fig_07` and
-  `fig_08`; (d) the six overlaps of the reserve polygons (a fix needs the
-  runs of Weeks 10–12, 15 and 17 again). Then 18.2 (the work), a split
-  point, 18.3 **Decision 28** (the form of the story site) before any
-  page, 18.4 (process choices), 18.5 (the skeleton pages), 18.6 (site
-  QA), 18.7 (docs; the Week-19 plan), 18.8 (commit).
-- **Read before Week 18:** the Week-18 plan and pitfalls in
-  `project-plan.md`; the open items below; `docs/sensitive-data-policy.md`
-  §3; the pending item "Published layers" (it stays in Week 19); the
-  "Published form" points of Decisions 20, 25, 26 and 27; Decision 18
-  (the rank rule) and the NT1 note of Decision 27 point 7, for item (a);
-  the gotcha "A push under `site/` deploys the site".
-- **Files for the Week-18 chat:** the docs; `site/_quarto.yml` and the six
-  `.qmd` pages; `.github/workflows/publish.yml`; `R/00_config.R`,
-  `R/00_functions_lcp.R` (for item (a)), `R/00_functions_fig.R`;
-  `scripts/02_prepare_boundaries.R` and `scripts/03` (items (b) and (d)),
-  `scripts/10_check_sdm_connectivity.R` (item (c)); the names of the
-  committed figures and tables (`outputs/`). No data file (rule d1).
+- **Done: Week 18** (2026-11-21; tasks 18.1–18.7). The author committed
+  the split point (`eb9557d`, `b6ce1a6`) and tasks 18.5–18.6 (`90ac814`
+  `analysis:`, `c908447` `site:`), pushed; the deploy ran green. Task
+  18.8: the commit of the docs of tasks 18.3–18.7 (`docs:`) and a push.
+  The docs commit changes no file under `site/**` or `publish.yml`, so it
+  does not deploy. Nothing under `data/` may be staged.
+- **Next: task 19.1 — Decision 29 (the published layers)**, before any map
+  file: for each figure `fig_02`–`fig_08` (and the surfaces of Decision
+  27), no layer or a layer in a stated form (the geometry in the file, the
+  class or the value, a zoom limit, a download or none); the check of the
+  coordinates inside a map file; the hatch and the caption items in an
+  interactive map; the tiger Gi\* never. Then 19.2 (the tool and the
+  process choices), 19.3 (the interactive `fig_01` and `fig_02`), 19.4
+  (the QA), 19.5 (docs; the Week-20 plan), 19.6 (commit).
+- **Read before Week 19:** the Week-19 plan and pitfalls in
+  `project-plan.md`; Decision 28 (all points; R7–R10); the pending item
+  "Published layers" with its dated notes; `docs/sensitive-data-policy.md`
+  §3; the "Published form" points of Decisions 20, 25, 26 and 27; the
+  Leaflet recipe of the tools record (ESRI basemaps; `fitBounds` last).
+- **Files for the Week-19 chat:** the docs; `R/00_config.R` (`SITE_*`,
+  `SITE_QA_*`), `R/00_functions_site.R`, `scripts/11_build_site.R`;
+  `site/_quarto.yml` and the seven pages; `.github/workflows/publish.yml`
+  (the chat cannot write it; the author edits it by hand);
+  `scripts/05_growth_analysis.R` (the code of `fig_01` and `fig_02`); the
+  names of the committed figures and tables. No data file (rule d1).
 
-### Results by stage (a record for the write-up of Weeks 17–20)
+### Results by stage (a record for the write-up of Weeks 17–21)
 
 - **Stage 1 — Growth (Weeks 3–7).** Within-reserve totals 1,586 (2014),
   1,958 (2018), 2,257 (2022); change +651; 53 reserves with census data.
@@ -378,6 +413,13 @@ log of `methodology.md`, 2026-11-15, task 17.7.)*
   `tbl_19_sdmres_*` (8 tables); no layer; QA 196 of 196 and 62 of 62. The
   Stage-2 outputs do not change. Record against proposal questions 2 and
   3: `methodology.md`, change log, 2026-11-15, Week 17 complete.
+- **Week 18 — the open items and the site skeleton (Decision 28).** The
+  four open items closed (no analysis output changed). The story site:
+  seven pages at https://K-bsub.github.io/tiger-network/ (the PNG
+  stand-ins, the tables of 60 rows or fewer, links to the longer tables,
+  draft alt texts, placeholders for the author's text);
+  `scripts/11_build_site.R`; QA 45 of 45 (`tbl_20_site_qa.csv`). Record:
+  `methodology.md`, change log, 2026-11-21, Week 18 complete.
 
 ### Files that later weeks read
 
@@ -402,13 +444,22 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
 | `data/processed/resist_sdm_<surface>_cell02.csv` (2 files: `main`, `negexp8`) | The SDM-based resistance of Decision 27 (STEP 17.1): `id`, `x`, `resistance`; 6,969 rows each | No geometry; holds cell ids: no table row from it; no layer published (Decision 27 point 10) |
 | `data/processed/lcp_sdm_network_7755.gpkg` (layers `<surface>_phase1` and `<surface>_phase2`) and `circ_current_<surface>_<phase>_cell02.csv` | The paths on the SDM-based surfaces and the total currents of phase 1 (STEP 17.2) and phase 2 (STEP 17.5) | Modelled paths: never a position finer than 10 km in a committed table or figure; no layer on the site; the current files hold cell ids |
 | `data/processed/boundary_states_7755.gpkg` | Natural Earth states (36), for the state boundaries of the figures | State and district can disagree at a border (gotcha) |
-| `site/` (`_quarto.yml`, six `.qmd` pages) and `.github/workflows/publish.yml` | The Quarto story site (placeholders) and its deploy | Each push to `main` that changes `site/**` deploys to `gh-pages` (Week 18: Decision 28 (d)) |
-| `outputs/tables/tbl_00`–`tbl_19_*`, `outputs/figures/fig_01`–`fig_08` | Committed tables and figures | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `tbl_18_gistar.csv` holds only the tiger counts of D26 point 7; `fig_04`–`fig_06` (STEP 16.2) show 0.2° model cells only: no point, no presence or background mark; `tbl_18_gistar_qa.csv` is the QA of STEP 16.3; `tbl_19_*` (Decision 27): counts, statistics and pair rows with reserve names, no position, no cell id; `fig_07`–`fig_08` (STEP 17.3): 0.2° cells and modelled path lines at national scale only |
+| `site/` (`_quarto.yml`, seven `.qmd` pages, `figures/`, `tables/_*.md`) and `.github/workflows/publish.yml` | The story site (the skeleton of Decision 28) and its deploy (Quarto 1.10.18 pinned) | `site/figures/` and `site/tables/` come from `scripts/11_build_site.R` (do not edit them by hand); each push to `main` that changes `site/**` or `publish.yml` deploys to `gh-pages` (Decision 28 d1); run the QA (STEP 18.2) before such a commit |
+| `outputs/tables/tbl_00`–`tbl_20_*`, `outputs/figures/fig_01`–`fig_08` | Committed tables and figures (`tbl_20_site_qa.csv`: the QA of STEP 18.2) | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `tbl_18_gistar.csv` holds only the tiger counts of D26 point 7; `fig_04`–`fig_06` (STEP 16.2) show 0.2° model cells only: no point, no presence or background mark; `tbl_18_gistar_qa.csv` is the QA of STEP 16.3; `tbl_19_*` (Decision 27): counts, statistics and pair rows with reserve names, no position, no cell id; `fig_07`–`fig_08` (STEP 17.3): 0.2° cells and modelled path lines at national scale only |
 
 ### Open items (carried)
 
+- **The site (Decision 28; 2026-11-21):** the skeleton is live with
+  drafts — the PNG stand-ins with their drawn draft text, the draft alt
+  texts, the draft headings and titles, the draft table of the Decisions
+  (Methods) and of the data sources (Data & References), the column
+  lists of `SITE_TABLES_PAGE` (w2). The author's edit is in Week 21 (the
+  narrative week since W19a; the items below that say Week 20 mean Week
+  21). The layout in a wide window (an empty area at the left) — Week
+  20. The reference list of the Data page — Week 21, after each entry is
+  verified.
 - `scripts/03` line 101: wrap the literal text in `I()` for `readr` ≥ 2.2
-  (no output change; not done). *(2026-11-15: in Week 18, task 18.1 (b);
+  (no output change; **closed 2026-11-21**). *(2026-11-15: in Week 18, task 18.1 (b);
   the author's answer "W1 + W2".)*
   *(2026-11-21: closed — b1 of task 18.1. The call was at line 103, not
   101. `scripts/03` now reads the text in `I()`; the author's console
@@ -529,15 +580,19 @@ Full text in `methodology.md` → "Decisions pending".
   layer would wait for the same rule.)*
   *(2026-11-14, Decision 27 point 10: a layer of the SDM-based surfaces,
   their currents or their paths waits for this rule too.)*
+  *(2026-11-21, Decision 28 R7: the site shows an interactive map where
+  this rule allows the layer; a map file holds its coordinates, so the
+  rule decides the geometry in the file. W19a: Decision 29, Week 19,
+  task 19.1.)*
 
-_Resolved (in `methodology.md`): Decisions 7 to 27 closed the earlier
+_Resolved (in `methodology.md`): Decisions 7 to 28 closed the earlier
 items (missing years, area source, zeros, the NA policy, the gHM fill,
 resistance values, barrier roads, water and gHM, the path set-up, the
 comparison metric, the link rule, the pinch-point rule, the cleaning rule,
 the settlement layer, the target-group scope, the model Decisions, the
 uses of the effort surfaces, the terrain variables, the prediction and its
 publication, the Gi\* settings, the SDM-based resistance and the
-circuit-theory check)._
+circuit-theory check, the form of the story site)._
 
 ### Data on disk (raw; via `scripts/01`)
 
@@ -583,6 +638,9 @@ of closed one-time work are in git history.)*
   (`quarto publish gh-pages site`); do not use
   `quarto::quarto_publish_site(server = "gh-pages")` (it targets Posit
   Connect). The `gh-pages` branch shows the source as "deleted": correct.
+- **`quarto render site` is a command of the Terminal tab** (Quarto 1.10.18
+  on the project machine), not of the R console, where it is an R error
+  (task 18.5). In R: `quarto::quarto_render("site", as_job = FALSE)`.
 - **On Windows, R reports only its own heap.** Read Task Manager for the
   process peak.
 - **`terra`:** `ext()` returns an S4 `SpatExtent` (use `as.vector()` before
@@ -719,6 +777,23 @@ of closed one-time work are in git history.)*
   75 km QA band, 1,408 (`effort_inat`) and 949 (`effort_all`). A text must
   not read the absence of `cold` cells as records everywhere (Decision 26
   point 6).
+- **Compare a text file by its bytes** (task 18.5): `identical()` on a
+  text with a non-ASCII character and the same text read from the file
+  is `FALSE` (different encoding marks). `site_write_if_changed()` uses
+  `charToRaw(enc2utf8(...))` and `readBin()`.
+- **`paste0()` of an empty vector and a fixed text gives one element**
+  (`paste0("_", character(0), ".md")` is `"_.md"`), not none (task
+  18.5).
+- **`sort()` depends on the locale** (task 18.6): a sorted list that is
+  written to a file changes when the locale changes. `sort(method =
+  "radix")` gives byte order in each locale (`site_links_all()`).
+- **`xml2::read_html()` reads a page with no charset as Latin-1** (task
+  18.6). Quarto writes a charset; `site_qa_page()` reads UTF-8.
+- **The HTML comments of a `.qmd` page go into the public HTML** (task
+  18.6). Put no private note in a page comment.
+- **A new table under `outputs/tables/` changes the list of the Data
+  page** (`tbl_20_site_qa.csv`, task 18.6): source the script, render,
+  source again (the NOTE of `scripts/11`).
 
 **Process (chat)**
 - **`gdistance::commuteDistance()` grounds the last cell of the grid**, so
@@ -740,6 +815,9 @@ of closed one-time work are in git history.)*
   so git cannot remove its own `.lock` files there. The chat runs only
   read-only git commands, with `GIT_OPTIONAL_LOCKS=0`, and never `git
   fetch`; the author runs every git command that writes.
+- **`.github/workflows/` is a protected folder for the chat's tools**
+  (task 18.6): the chat cannot write `publish.yml`; it gives the full
+  file, and the author edits it by hand.
 - **A push under `site/` deploys the site** (found 2026-11-15, task 17.7):
   `.github/workflows/publish.yml` renders `site/` with Quarto (no R) and
   deploys it to `gh-pages` on each push to `main` that changes
@@ -798,6 +876,37 @@ of closed one-time work are in git history.)*
 
 *(Weeks 0–13: git history, and the change log of `methodology.md` with its
 archive.)*
+
+### Week 18 — the open items and the site skeleton (Decision 28) · 2026-11-21
+- Entry state: Week 17 complete and committed (`0ee2243`, pushed).
+- Did: task 18.1 the forks of the four open items; task 18.2 the `I()`
+  edit and the author's console check (split point `eb9557d`,
+  `b6ce1a6`); task 18.3 Decision 28; task 18.4 the process choices; task
+  18.5 STEP 18.1 and the seven pages; task 18.6 STEP 18.2 (the QA) and the
+  pin of Quarto; task 18.7 the docs close and the Week-19 plan.
+- Decisions made: **Decision 28** (a3 with t1 and m1; b3 with P1, S1 and
+  n2; c1; d1; e1; f2; the readings R7–R10; a3 and d1 are not the chat's
+  recommendation). Choices: task 18.1 a1, b1, c3, d1; task 18.4 s1, f1,
+  n1, p1, l1, w2, d1, t1, m1, r1, h1; task 18.6 q1, x1, c1, v1; task 18.7
+  W19a.
+- Outputs: `scripts/03` (`I()`); the blocks `SITE_*` and `SITE_QA_*` in
+  `R/00_config.R`; `R/00_functions_site.R` and `scripts/11_build_site.R`
+  (new); the seven pages, `site/figures/`, `site/tables/`;
+  `tbl_20_site_qa.csv`; `publish.yml` (Quarto 1.10.18); the live skeleton;
+  the docs. Commits by the author: `eb9557d`, `b6ce1a6`, `90ac814`,
+  `c908447`.
+- Gotchas found: see "Known gotchas" (the render is a Terminal command;
+  compare a text file by its bytes; `paste0()` of an empty vector;
+  `sort()` and the locale; the protected `.github/workflows/`; `xml2` and a
+  page with no charset; the HTML comments of a page are public; a new QA
+  table and the list of the Data page).
+- Errors of the chat: the docs gave line 101 for the call of `scripts/03`
+  (it was line 103); the text of choice t1 of task 18.4 said 73 tables
+  (74). Found by the chat's own tests before delivery (each in the change
+  log): the `paste0()` guard, the comparison of a non-ASCII text, the sort
+  by locale, the test text "0.123 N-S", a raw degree sign in the code.
+- Carried forward / next session: the docs commit (task 18.8, by the
+  author); then Week 19, task 19.1 — Decision 29.
 
 ### Week 17 — SDM-based resistance and the circuit-theory check (Decision 27) · 2026-11-14 to 2026-11-15
 - Entry state: Week 16 complete and committed; the text fix before Week

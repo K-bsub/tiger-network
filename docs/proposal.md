@@ -195,3 +195,7 @@ open are documented as numbered Decisions in `docs/methodology.md`, not here.*
   effective resistance (share 0.481). Two static figures (`fig_07`,
   `fig_08`) and the `tbl_19` tables; no layer. The Stage-2 outputs do not
   change. Not a new deviation.)*
+  *(2026-11-21, choice W19a of task 18.7: the story site moves one more
+  week (Weeks 18–22). Week 18 closed the open items and built the
+  skeleton of Decision 28, which is live on GitHub Pages; Week 19 starts
+  with Decision 29 (the published layers). Not a new deviation.)*

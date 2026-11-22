@@ -2,7 +2,11 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** **Week 17 complete (2026-11-14 to 2026-11-15; tasks
+**Status:** **Week 18 complete (2026-11-21; tasks 18.1–18.7): the four
+open items closed; Decision 28 (the form of the story site); the site
+skeleton built, checked (QA 45 of 45) and deployed (`90ac814`,
+`c908447`); the Week-19 plan (W19a: Stage 4 in Weeks 18–22).**
+**Week 17 complete (2026-11-14 to 2026-11-15; tasks
 17.1–17.7; the author committed each task with code; the commit of task
 17.7 is task 17.8, done on 2026-11-15: `0ee2243`).** **Week 16 complete (2026-11-07; tasks 16.1–16.6, each
 committed by the author); Stage 3 (habitat suitability) complete.**
@@ -81,8 +85,18 @@ the site skeleton.
 open items — a1, b1, c3, d1 (the change log). No rule changed.
 **Task 18.2 (2026-11-21):** the four items are closed. b1: `scripts/03`
 reads the census text in `I()`; the author's console check passed (the
-same table, no warning). (a), (c) and (d): docs only. **Next:** the
-split point, then task 18.3 (Decision 28, the form of the story site).
+same table, no warning). (a), (c) and (d): docs only. Committed at the
+split point (`eb9557d`, `b6ce1a6`). **Task 18.3 (2026-11-21): Decision
+28** — the form of the story site: seven pages (a page of its own for
+the check of Week 17); interactive maps and an interactive `fig_01`
+where the rule of "Published layers" (Week 19) allows, with the PNG
+files as the record in the repository; captions as page text with the
+numbers from code; no R code in the pages; deploy on push; a publish
+check in code. **Tasks 18.4–18.6:** the process choices, the site build
+(`scripts/11_build_site.R`) and its QA (45 of 45); committed and
+deployed by the author. **Task 18.7:** the docs close and the Week-19
+plan. **Next: Week 19** — Decision 29 (the published layers), then the
+first interactive figures.
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -253,6 +267,30 @@ effort proxy.
   effort Gi\*; 52 (the 5 km set), 20 of them also `hot` in the effort Gi\*
   of all datasets. QA 113 of 113.)*
 - No ratio of the tiger and the effort surfaces.
+
+### 5.6 Story site (Decision 28; Stage 4)
+
+*(Added 2026-11-21 at the Week-18 close.)*
+
+- **Pages:** seven Quarto pages in `site/` — Story, Growth, Connectivity,
+  Habitat, Check (the SDM-based check of Decision 27), Methods, Data &
+  References. The narrative is the author's (Week 21 since W19a).
+- **Outputs on the pages:** the figures `fig_01`–`fig_08`, and the tables
+  of 60 rows or fewer; a longer table is a link to its CSV file in the
+  repository. In Week 18 each figure is its PNG file as a static stand-in;
+  from Week 19 an interactive map or chart takes its place where the rule
+  of the pending item "Published layers" (Decision 29) allows its layer
+  (`fig_01` is an interactive chart).
+- **The build:** `scripts/11_build_site.R` STEP 18.1 copies the figures
+  into `site/figures/` and writes the tables as include files in
+  `site/tables/`; the pages hold no R code, and the Action renders with
+  Quarto only (pinned to 1.10.18). STEP 18.2 checks the render
+  (`tbl_20_site_qa.csv`).
+- **Publication:** each push to `main` that changes `site/**` deploys the
+  site (`gh-pages`). The publish check of Decision 28 point 8 runs before
+  each write and on the render: no position finer than a 10 km cell, no
+  layer before the rule of "Published layers", no tiger Gi\*, the `<3`
+  rule of `tbl_15_occ_by_reserve.csv`.
 
 ---
 
@@ -5420,6 +5458,231 @@ the check limit 1e-6 (Decision 17).
 This closes the **[Week 17] SDM-based resistance + circuit-theory check**
 pending item.
 
+### Decision 28 — The form of the story site: pages, tables, maps and charts, captions, the path of the files, the deploy trigger, the publish check, the alt text
+**Date:** 2026-11-21 (fixed **before** any page, any copy into `site/` and
+any site script — see "What was seen before this Decision")
+**Choice:** Fork codes as raised and chosen on 2026-11-21: a3 with t1 and
+m1; b3 with P1, S1 and n2; c1; d1; e1; f2. The author's note with b3
+(interactive maps) and the author's addition (`fig_01` as an interactive
+chart); the chat's readings R7–R10, which the author confirmed. *(Task
+18.1 of the same week also used a1–d1. Write the Decision with the code,
+for example "Decision 28 a3".)* Settings: a block `SITE_*` in
+`R/00_config.R` (task 18.4).
+
+**Aim.** The form of the story site, before any page: where each output
+goes, in which form, how a page gets it, when it becomes public, the check
+before it becomes public, and the alt text. The narrative is the author's
+(Week 20). This Decision does not decide a layer: the pending item
+"Published layers" (Week 19) stays open.
+
+**Fixed by earlier Decisions (not forks; stated here so that the record is
+complete):**
+- The sensitive-data policy §3: a modelled path or crossing at a 10 km
+  cell at most; path lines in static figures at national scale only; a
+  path layer that a reader can zoom or download needs its own rule first.
+- Decision 20 point 7; Decision 25 point 4 (no suitability layer; tier
+  T1); Decision 26 point 7 (the tiger Gi\* never published; counts only);
+  Decision 27 point 10 (no layer); Decision 22 point 9 (a tiger count of
+  1 or 2 is `<3`).
+- The deploy workflow `.github/workflows/publish.yml` renders `site/` with
+  Quarto only (no R) and deploys it to `gh-pages`.
+
+1. **Pages (a3).** Seven pages: the six of today (Story, Growth,
+   Connectivity, Habitat, Methods, Data & References) and one page for the
+   SDM-based check of Decision 27 (Week 17). Its file name, its title (a
+   draft) and its place in the navbar: task 18.4. The place of each
+   output:
+   - **Growth:** `fig_01`, `fig_02`; `tbl_01_reserve_growth.csv`,
+     `tbl_02_regional_rollup.csv`.
+   - **Connectivity:** `fig_03`; `tbl_03_reserve_network.csv`,
+     `tbl_03b_pinch_points.csv` and the text of `tbl_03_notes.md`.
+   - **Habitat:** `fig_04`, `fig_05`; `tbl_17_reserve_suitability.csv`; an
+     effort section with `fig_06`, `tbl_15_occ_by_reserve.csv` and
+     `tbl_18_gistar.csv`.
+   - **The page of the check (Week 17):** `fig_07`, `fig_08`;
+     `tbl_19_sdmres_compare_summary.csv`, `tbl_19_sdmres_pairs.csv`,
+     `tbl_19_sdmres_compare.csv`, `tbl_19_sdmres_phase2.csv`.
+   - **Story:** a marked place for the author's text only.
+2. **Tables on a page (t1).** A table of `SITE_TABLE_MAX_ROWS` = 60 rows
+   or fewer is on its page in full. A longer table is a link to its CSV
+   file in the repository. As of 2026-11-21 the links are
+   `tbl_03b_pinch_points.csv` (200 rows), `tbl_18_gistar.csv` (92),
+   `tbl_19_sdmres_pairs.csv` (212), `tbl_19_sdmres_compare.csv` (194) and
+   `tbl_19_sdmres_phase2.csv` (3,080).
+3. **Methods and Data & References (m1).** Methods: a short table of the
+   Decisions (from the table "Fixed Decisions" of `handoff.md`; a chat
+   draft, marked as a draft) and a link to `docs/methodology.md`. Data &
+   References: each data source with its licence and DOI (from
+   `docs/data-sources.md`) and a link to each committed table. The
+   reference list waits for Week 20: many entries of `references.md` are
+   not verified (`handoff.md`, "References still to verify").
+4. **Interactive maps and charts (reading R7; b3 with P1 and S1).**
+   - **R7 (the author's note with b3, confirmed on 2026-11-21):** the site
+     shows an interactive map in place of each static map where the rule
+     of the pending item "Published layers" (Week 19) allows its layer.
+     The PNG files stay in `outputs/figures/` as the record in the
+     repository. **`fig_01`** (a chart, not a map) **is an interactive
+     chart too** (the author's addition): a reader sees the values of
+     `tbl_01_reserve_growth.csv` when the pointer is on a bar. A figure
+     whose layer the rule does not allow stays the PNG on the site.
+   - The growth map (`fig_02`: the reserve outlines and the census values,
+     tier T0) is not under the pending item (the chat's reading, part of
+     R7). It passes the check of point 8.
+   - **P1:** the PNG files keep their drawn text (the title, the subtitle
+     and the caption) as complete records in the repository. The scripts
+     `05`, `07`, `09` and `10` do not change for the text.
+   - **S1:** in the skeleton of Week 18 each figure is its PNG file as a
+     stand-in, marked "static stand-in; interactive map (or chart) in Week
+     19". The page adds no caption beside a stand-in: its caption is in
+     the image.
+   - The tool of the interactive maps and of the chart, and the layers
+     that each map may hold: Week 19 (the pending item first).
+5. **Captions (b3 with n2).** The caption of an interactive map or chart
+   is page text. Its words are in the page (a chat draft, marked, until
+   the author's edit in Week 20). Each number in it is a `{{< var >}}`
+   reference to `site/_variables.yml`, a file that a script writes from
+   the outputs (Week 19 or 20). The text of the "Sources" lines (c3 of
+   task 18.1) is page text in the same form.
+6. **The path of the files (c1; reading R8).** A site script (named in
+   task 18.4) copies the figures of point 1 from `outputs/figures/` into
+   `site/` and writes each table of point 2 that is on a page as a
+   Markdown file with an underscore prefix in `site/`; the page includes
+   it with `{{< include >}}`. The pages hold no R code: no `_freeze/` and
+   no new package; the Action renders with Quarto only. The copies are
+   committed.
+   - **R8:** in Week 19, each interactive map or chart is a
+     self-contained HTML file that a script writes into `site/`, shown in
+     a frame of its page. A change to R code in the pages would be an
+     amendment of this point.
+7. **The deploy trigger (d1; reading R10).** `publish.yml` does not
+   change: each push to `main` that changes `site/**` deploys the site,
+   and a run by hand stays possible. **R10:** the first such push makes
+   the skeleton public, with the draft text in the PNG stand-ins (S1). The
+   check of point 8 passes before each commit that changes `site/**`.
+   *(2026-11-21, v1 of task 18.6: `publish.yml` changes in one place —
+   the setup step pins Quarto to `SITE_QUARTO_VERSION` (1.10.18, the
+   version of the QA render on the project machine), and a stale comment
+   about `site/_freeze/` is corrected. The trigger (d1) does not change.
+   A push that changes `publish.yml` deploys the site, so the edit goes
+   into the site commit after the QA.)*
+8. **The publish check (e1; reading R9).** In the site script, before a
+   file is written into `site/`, the script stops if:
+   - a file is not on the allow-list (the figures and the tables of
+     points 1 and 2);
+   - a table does not pass `assert_publishable_table()` (a position at a
+     10 km cell at most);
+   - `tbl_15_occ_by_reserve.csv` has lost a `<3` value, or a page would
+     hold a total or a column sum of a table with a `<3` value;
+   - a file is a layer, a widget or a file from `data/`.
+   After the render, a second check reads `_site/`: each file is a file of
+   the list or a file of Quarto itself. **R9:** in Week 18 no layer and no
+   widget is allowed. In Week 19 the rule of "Published layers" adds the
+   allowed layers and a check of the coordinates inside each map file.
+   The details of the checks: task 18.4.
+9. **Alt text (f2).** Each figure gets a short factual alt text from the
+   chat: what the figure shows and what the colour, the line or the bar
+   means, with no reading of a result. It is marked as a draft; the
+   author's edit is in Week 20. An interactive map or chart gets its alt
+   text in Week 19.
+
+**What was seen before this Decision (pre-registration, stated plainly):**
+- The eight figures (the author, in earlier weeks). In Week 18 the chat
+  read their file sizes (53–268 KB; about 1.0 MB in total) and the code
+  of their captions, not the images.
+- The committed tables: their columns and row counts, and the values that
+  task 18.1 read.
+- The six placeholder pages, `site/_quarto.yml` and `publish.yml`; the
+  live site (the placeholders of 2026-09-07, `gh-pages` commit
+  `f6f138a`).
+- The packages: `knitr`, `rmarkdown`, `quarto`, `leaflet` and
+  `htmlwidgets` are in the project library but not in `renv.lock`.
+- No page, no `_freeze/`, no copy in `site/` and no site script existed.
+
+**Reason and sources:**
+- **A page for the check (a3).** The author's choice: Decision 27 has two
+  phases and two figures of its own, and a page of its own keeps the
+  Connectivity and Habitat pages on their stages. In the docs, §5.3 keeps
+  Decision 27 under Connectivity; the site does not follow it.
+- **Long tables as links (t1).** The CSV file in the repository is the
+  full record; a table of hundreds of rows on a page is hard to read.
+- **The reference list later (m1).** A reference is verified before the
+  site cites it (`handoff.md`).
+- **Interactive maps (R7, P1).** The author's choice for the story site:
+  a reader can zoom and see values. The PNG file stays a complete record
+  in the repository. Text drawn in an image is not read by a screen
+  reader, and on a narrow screen it becomes very small.
+- **Numbers from code, words in the page (n2).** "Take each figure from
+  code or data" (the ways of working), and the narrative is the author's.
+  Quarto reads `_variables.yml` next to `_quarto.yml`, and `{{< var a.b
+  >}}` reads a nested key (Quarto documentation, "Variables"). A change of
+  the words then needs no run.
+- **No R code in the pages (c1).** The Action has no R. With R code, the
+  results must be kept in `_freeze/`, which "should be checked in"
+  (Quarto documentation, "GitHub Pages"). Quarto copies the files that a
+  page references into the output folder; its documentation does not say
+  this for a file outside the project (Quarto documentation, "Website
+  Tools"), and `outputs/` is outside `site/`. A user report says that a
+  `../` path outside a Quarto project does not work (Posit forum; not to
+  be cited on the site). An included file with an underscore prefix is
+  not rendered as a page (Quarto documentation, "Includes").
+- **Deploy on push (d1).** The author's choice. The repository is public,
+  so the source of each page is public at the push in any case.
+- **A check in code (e1).** The form of the earlier publish rules
+  (`assert_publishable_table()`, Decision 20).
+- **Alt text (f2).** The figures carry their text in the image (P1, S1).
+
+**Judgement values:** 60 rows (`SITE_TABLE_MAX_ROWS`; point 2; the
+reserve tables have 56–58 rows).
+
+**Rejected:**
+- *a1* (the check of Week 17 as a section of the Connectivity page; the
+  chat's recommendation), *a2* (a section of the Habitat page).
+- *t2* (each table in full on its page), *t3* (no table on a page).
+- *m2* (links to the docs only), *m3* (placeholders until Week 20).
+- *b1* (the text in the PNG files on the site, with no page text), *b2*
+  (page text in Week 18, with a change of four scripts).
+- *P2* (PNG files with no drawn text). *S2* (no image in the place of a
+  map in the skeleton).
+- *n1* (the script writes the whole caption, words and numbers), *n3* (R
+  code in the page).
+- *c2* (R code in the pages, with `knitr` and `_freeze/`).
+- *d2* (a deploy by hand only until Week 21; the chat's recommendation),
+  *d3* (a release branch or a tag).
+- *e2* (a written checklist only).
+- *f1* (a placeholder), *f3* (the caption as the alt text).
+
+**Limitations:**
+- With d1 the skeleton is public at the first push that changes
+  `site/**`, with the draft text of the PNG stand-ins.
+- A copy in `site/` is a second copy of a committed file. The site script
+  must run again when an output changes.
+- A figure whose layer the rule of "Published layers" does not allow stays
+  a PNG on the site, with its caption in the image.
+- A link to a CSV file points to the branch `main`: a later commit
+  changes what the link shows.
+- Week 19 now has more work than its 3–4 h: up to eight interactive
+  figures (`fig_01`–`fig_08`) and the rule of "Published layers". The
+  Week-19 plan (task 18.7) gives its size; Stage 4 can move by one week.
+
+**Consequences:**
+- Task 18.4: the process choices (the site script and its function file;
+  the names of the copies and of the table files; the file name, the
+  title draft and the navbar place of the new page; the allow-list; the
+  form and the rounding of a table on a page; the check of `_site/`; the
+  render command; a hand-made case first).
+- Task 18.5: the site script, the seven pages (the skeleton) and a local
+  render. Task 18.6: the site QA with the check of point 8.
+- `R/00_config.R`: a block `SITE_*`. `site/_quarto.yml`: the seventh page
+  in the navbar.
+- Week 19: the pending item "Published layers" first; then the
+  interactive maps and the chart (the tool, the files of R8, the check of
+  R9, the captions of point 5, the alt text).
+- Week 20: the author's text, the captions (point 5), the alt text (point
+  9) and the reference list (point 3).
+- `publish.yml` does not change (d1). No analysis output changes.
+- `references.md`: a new section "Story site (Decision 28) and the open
+  items of Week 18".
+
 ### Decisions pending (raised, not yet made)
 
 These forks are open. Each is decided in the week noted in the project plan,
@@ -5447,12 +5710,283 @@ before the relevant code is written.
   R4); the Leaflet maps, and this item, are in Week 19.)*
   *(2026-11-14, Decision 27 point 10: a layer of the SDM-based surfaces,
   their currents or their paths waits for this rule too.)*
+  *(2026-11-21, Decision 28 point 4 (reading R7): the site shows an
+  interactive map in place of each static figure where this rule allows
+  its layer, and `fig_01` is an interactive chart. A Leaflet map keeps
+  the coordinates of each feature in the page source, so this rule
+  decides which geometry goes into each map file (for example
+  simplified lines or 10 km cells), not only a zoom limit. The growth
+  map (`fig_02`; the reserve outlines and the census values, T0) is not
+  under this item; it passes the check of Decision 28 point 8.)*
+  *(2026-11-21, W19a of task 18.7: decided in Week 19, task 19.1, as
+  Decision 29, before any map file.)*
 
 ---
 
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-21 — Week 18 complete: task 18.7 (docs close; the Week-19 plan)
+
+- **Docs only.** No rule, value, data layer, table or script changed; no
+  run.
+- **The author's answer (2026-11-21): "W19a".** The chat had given two
+  options, with W19a recommended:
+  - **W19a:** Stage 4 moves by one week (Weeks 18–22). Week 19 —
+    Decision 29 (the pending item "Published layers"), the tool of the
+    interactive maps and the chart, the interactive `fig_01` and `fig_02`,
+    the QA of the map files; Week 20 — the interactive maps that Decision
+    29 allows (`fig_03`–`fig_08`) and the layout item; Week 21 — the
+    author's text, the captions, the alt text, the reference check; Week
+    22 — publish and docs close.
+  - **W19b** (not chosen): Weeks 19–21 as planned, Week 19 with Decision
+    29 and all eight interactive figures (an estimate of 8–12 h).
+- **The commits of tasks 18.5–18.6** (by the author, before this task):
+  `90ac814` (`analysis:` `R/00_config.R`, `R/00_functions_site.R`,
+  `scripts/11_build_site.R`, `tbl_20_site_qa.csv`) and `c908447` (`site:`
+  the pages, `site/figures/`, `site/tables/`, `publish.yml`); pushed. The
+  Action "Publish story site" ran green (Quarto 1.10.18) and deployed the
+  skeleton. The author: "It deployed and render looks good".
+- **Week 18 against the proposal (a record, not text for the site):**
+  deliverable 1 (the Quarto story site) — the site structure, the skeleton
+  pages, the build script, its QA and the deploy exist; the interactive
+  figures (Weeks 19–20), the narrative (Week 21) and the final deploy
+  (Week 22) follow. No analysis result changed in Week 18; the four open
+  items are closed (task 18.2).
+- **§5.6** (new): the story site. **"Limitations":** seven Week-18 items at
+  the end. **"Decisions pending":** a dated note on "Published layers"
+  (Week 19, Decision 29).
+- **`proposal.md`:** no change (Decision 28 fixes the form of deliverable
+  1; the move of Stage 4 is a change of the schedule, not a deviation).
+- **`README.md`:** the status (Week 18 first; Week 17 in one line), the
+  story site (live; the skeleton), the stack (Quarto 1.10.18 pinned; the
+  site build and its QA with `xml2`), the repository structure
+  (`site/figures/`, `site/tables/`).
+- **`naming-conventions.md`:** the site files, `tbl_20` (`site_qa`), the
+  next free numbers (`tbl_21`, `fig_09`), the commit prefix `site:`.
+- **`data-dictionary.md`:** `tbl_20_site_qa.csv` and the site files.
+- **`references.md`:** the `quarto-actions/setup` page (the version pin).
+- **`project-plan.md`:** task 18.7 ticked (task 18.8 is the docs commit);
+  the Stage-4 table for Weeks 18–22 (W19a); the Week-19 task breakdown (a
+  plan, not a Decision); the milestones; the progress rows.
+- **`handoff.md`:** written for Week 19 (the current state, the Week-19
+  entry point, the files, the open items, the pending Decision, row 28 of
+  "Fixed Decisions", the weekly log of Week 18, the gotchas, the commit
+  prefix `site:`).
+- **Next:** the docs commit (task 18.8, by the author); then Week 19, task
+  19.1 — Decision 29 (the pending item "Published layers").
+
+### 2026-11-21 — Week 18, task 18.6 complete: STEP 18.2, the QA of the site passes
+
+- **The author's edit of `publish.yml`** (by hand; the chat's tools cannot
+  write `.github/workflows/`): the setup step pins Quarto 1.10.18; the
+  comment about `site/_freeze/` is corrected; the render step is named
+  "Render site". The trigger does not change (Decision 28 d1).
+- **Run on the project machine (2026-11-21; the record), the last run of
+  the rounds:** STEP 18.1 changed no file (0 written or copied; the list
+  of all tables holds 75 files). STEP 18.2: the hand-made case 9 of 9; then
+  `tbl_20_site_qa.csv` (45 rows): **45 of 45 pass** (23 hand-made checks of
+  STEPs 18.1 and 18.2, and 22 checks of the site):
+  - a: 7 of 7 pages; no other page.
+  - b: 8 of 8 images found; each page shows its figures (7 of 7 pages);
+    the MD5 of each figure in `_site/figures/` and in `site/figures/` is
+    the MD5 of its source (8 of 8 each).
+  - c: an alt text and a caption for 8 of 8 images.
+  - d: the six tables on a page (rows, columns): `tbl_01` 58, 10;
+    `tbl_02` 23, 10; `tbl_03` 56, 12; `tbl_17` 58, 8; `tbl_15` 58, 6 with
+    the 7 marks `<3` in their rows; `tbl_19_sdmres_compare_summary` 2, 9.
+  - e: 76 of 76 links to the repository name a file of the repository.
+  - f: `_site/` holds no other file. g: 29 files read in `site/`, no
+    banned file. h: no position column, no decimal degree. i: no widget.
+    j: 75 tables listed, 75 on disk. k: the pin 1.10.18 in `publish.yml`.
+- **Next:** task 18.7 (the docs close and the Week-19 plan), then task
+  18.8 (the commits).
+
+### 2026-11-21 — Week 18, task 18.6: process choices and the code of STEP 18.2 (the run is open)
+
+- **The author's answer (2026-11-21): "as recommended"** — q1, x1, c1, v1
+  of task 18.6:
+  - **q1:** the QA table `outputs/tables/tbl_20_site_qa.csv` (slug
+    `site_qa`; columns `group`, `check`, `value`, `pass`, as the earlier
+    QA tables). The first time, the new table is not yet on the list of
+    the Data page: one more round (the script, the render, the script).
+  - **x1:** `xml2` (1.6.0, in `renv.lock`) reads the rendered HTML.
+  - **c1:** the checks a–j as given (the pages; the images and the MD5
+    of the figures; the alt text and the caption; each table on a page
+    against its CSV file, the marks `<3` in their rows; the links to the
+    repository; only the expected files in `_site/`; no banned file in
+    `site/`; no position; no widget; the list of all tables). The chat
+    added check **k** for v1 (the pin in `publish.yml`).
+  - **v1:** `publish.yml` pins Quarto 1.10.18 (Decision 28 point 7, the
+    dated note).
+- **Code (not committed):** a block `SITE_QA_*` and `SITE_OUT_DIR`,
+  `SITE_QUARTO_VERSION`, `SITE_PUBLISH_YML` in `R/00_config.R`; the
+  `site_qa_*` functions (a second path; they call no `site_*` function of
+  STEP 18.1) and the hand-made case of STEP 18.2 (9 checks) in
+  `R/00_functions_site.R`; STEP 18.2 in `scripts/11_build_site.R`. Two
+  changes to STEP 18.1: `site_links_all()` sorts in byte order
+  (`method = "radix"`), because `sort()` depends on the locale and the list
+  was written again when the locale changed; the value of check e names a
+  link that is not found.
+- **`publish.yml`:** the chat's tools cannot write `.github/workflows/`
+  (a protected folder). The author makes the edit by hand (the full file in
+  the chat's reply).
+- **The chat's test** (R 4.3.3 in a UTF-8 locale, Quarto 1.6.40, a copy of
+  the committed outputs): the hand-made case of STEP 18.2 failed first for
+  two reasons of the test, not of the rule — the negative example "0.123
+  N-S" holds "0.123 N" (a real match), and a made-up page with no charset
+  was read as Latin-1 (`site_qa_page()` now reads UTF-8, as Quarto
+  writes). A raw degree sign in the code was changed to an escape. Then: the
+  rounds as the NOTE of the script says; QA 45 of 45; a repeated run wrote
+  the same `tbl_20_site_qa.csv`. Two faults added by hand (a stray file in
+  `_site/`, a mark `<3` changed to 2 on the Habitat page) gave 2 failed
+  checks (f and d); after the restore, 45 of 45.
+- **Next:** the author edits `publish.yml`, then runs the script, the
+  render and the script, and sends the console text.
+
+### 2026-11-21 — Week 18, task 18.5 complete: STEP 18.1 and the skeleton pages
+
+- **Code (not committed; `site/` waits for the QA of task 18.6, Decision
+  28 d1):**
+  - `R/00_config.R`: the block `SITE_*` (Decision 28; the process choices
+    of task 18.4), before the block "Convenience". No other line changed.
+  - `R/00_functions_site.R` (new; f1): the site functions and the
+    hand-made case of STEP 18.1 (14 checks; h1).
+  - `scripts/11_build_site.R` (new; s1): STEP 18.1. It writes a file only
+    if its content changes, so a second run changes no time stamp.
+  - The pages: `_quarto.yml` (the page "Check" in the navbar after
+    Habitat; p1); `index.qmd` (the placeholder box); `growth.qmd`,
+    `connectivity.qmd`, `suitability.qmd`, `check.qmd` (new) with their
+    figures, tables and link lists; `methods.qmd` (rows 1–27 of the table
+    "Fixed Decisions" of `handoff.md`, word for word, and a new row 28);
+    `data.qmd` (the data sources, the list of all tables, a placeholder for
+    the references).
+  - Layout in the code (the chat's, inside the process choices; drafts):
+    the heading of each figure and table is its file name; the stand-in
+    label is the figure caption; a table on a page scrolls sideways in a
+    narrow window (a div of the class `table-responsive`); the headings of
+    `tbl_03_notes.md` go down 2 levels.
+- **The chat's test before delivery** (R 4.3.3, Quarto 1.6.40, a copy of
+  the committed outputs and of the pages; no file under `data/`):
+  - The first run stopped at a guard: `paste0()` makes `"_.md"` of an empty
+    vector, so a page with no include file seemed to need one. Fixed in
+    `inc_name()`.
+  - A second run wrote the three link lists again: `identical()` on a text
+    with a non-ASCII character (the dash of the lists) and the same text
+    read from the file is `FALSE` in R. `site_write_if_changed()` now
+    compares the bytes; the hand-made case now tests a non-ASCII text (it
+    fails with the old code). Then a second run changed no file.
+- **Run on the project machine (2026-11-21; the record):**
+  - STEP 18.1: the hand-made case 14 of 14; `SITE_*` 11 of 11; the guards
+    8 of 8; Decision 22 point 9 (`tbl_15_occ_by_reserve`) 3 of 3, 7 marks
+    `<3` kept.
+  - The tables on a page (rows; columns shown of all): `tbl_01` 58, 10 of
+    13; `tbl_02` 23, 10 of 16; `tbl_03` 56, 12 of 27; `tbl_17` 58, 8 of 9;
+    `tbl_15` 58, 6 of 11; `tbl_19_sdmres_compare_summary` 2, 9 of 17. The
+    link tables: 200, 92, 212, 194 and 3,080 rows. The notes: 32 lines. The
+    list of all committed tables: 74 files. 8 figures copied. The scan: 4
+    of 4. 17 files written or copied. The same as the chat's test.
+  - The render: the author first typed `quarto render site` in the R
+    console (an R error; nothing rendered); then in the Terminal: Quarto
+    1.10.18, 7 pages, "Output created: _site\index.html".
+  - **The author's look at the pages:** Growth has the static maps and
+    the tables; Connectivity has the map, the table and the notes; Habitat
+    has the maps, the table, the effort map and its table; Check has the
+    maps and the table; Methods has the table of the Decisions; Data &
+    References has the sources, the committed tables and the placeholder
+    of the references.
+- **Seen in the author's screenshot of the Story page:** in a wide window
+  the text column starts near the middle, with an empty area at the left
+  (`page-layout: full` with `toc: true`). Not changed; a layout item for
+  Weeks 19–20.
+- **Next:** task 18.6 — the process choices of STEP 18.2 (the QA of
+  `site/_site/`), then the QA.
+
+### 2026-11-21 — Week 18, task 18.4: process choices of the site (no code, no run)
+
+- **The author's answer (2026-11-21):** "s1, f1, n1, p1, l1, w2, d1, t1,
+  m1, r1, h1". Each is the chat's recommendation. *(Codes of task 18.4;
+  other tasks use the same letters.)*
+  - **s1:** one script, `scripts/11_build_site.R`. STEP 18.1 (task 18.5):
+    the copies, the table files and the check before each write. STEP
+    18.2 (task 18.6): the QA of the rendered `site/_site/`; it runs only
+    if `_site/index.html` is newer than each file of the site, otherwise it
+    gives a message and stops.
+  - **f1:** the functions in `R/00_functions_site.R`.
+  - **n1:** the figures in `site/figures/` (the same file names); the
+    table files in `site/tables/`, each with an underscore prefix
+    (`_tbl_01_reserve_growth.md`, `_tbl_03_notes.md`); `site/media/images/`
+    stays for photos.
+  - **p1:** the page of the check is `site/check.qmd`; the title "A check
+    from the suitability" (a draft; the heading of §5.3); the navbar text
+    "Check" (a draft), after Habitat.
+  - **l1:** the lists in a block `SITE_*` of `R/00_config.R` (the figures
+    and their pages; the tables on a page; the link tables; the URL of the
+    repository); a guard checks the 60-row rule against the lists.
+  - **w2:** for each table on a page, a list of the columns shown (a draft
+    of the chat, for the author's edit), and a link to the full CSV file.
+  - **d1:** a whole number stays as it is; another number has 3
+    significant digits; `NA` stays "NA" and `<3` stays `<3`; the column
+    names are the names of the CSV file; the writer adds no total row.
+  - **t1:** the chat writes the table of the Decisions (Methods) and the
+    data sources (Data & References) in the pages, as marked drafts; the
+    script writes the list of links to all committed tables
+    (`site/tables/_links_tables.md`). *(Correction: the chat's text of the
+    choice said 73 files; `outputs/tables/` holds 74 files, not counted
+    `.gitkeep`.)*
+  - **m1:** each place for the author's text is a callout box
+    "Placeholder — the author's text (Week 20)"; each stand-in figure has
+    the label "Static stand-in; interactive map (chart) in Week 19" and a
+    draft alt text (f2).
+  - **r1:** the render command is `quarto render site` in the RStudio
+    Terminal, the command of the Action.
+  - **h1:** the hand-made case of the site functions runs first, on
+    made-up files; a failure stops the script. The QA of STEP 18.2 also
+    compares each copy in `site/` with its source.
+- **Next:** task 18.5 — the `SITE_*` block, the function file, the script
+  and the seven pages; the author runs the script and the render.
+
+### 2026-11-21 — Week 18, task 18.3: Decision 28 recorded (no page, no code)
+
+- **Decision 28** (the form of the story site) is recorded before any
+  page, any copy into `site/` and any site script. No rule of an analysis
+  changed; no run.
+- **The author's first answer (2026-11-21):** "a3, t1, m1, b3 (The story
+  map will not have static maps as much as possible, need to be dynamic.
+  Keep this into consideration. The pngs are what will be stored in the
+  repository), n2, c1, d1, e1, f2".
+  - The note with b3 changes b3 as raised (a change of four scripts in
+    Week 20). Before the Decision was written, the chat gave its reading
+    of the note (R7) and two sub-forks: P (the text drawn in the PNG
+    files) and S (what the skeleton shows in place of a map), and three
+    readings of other choices: R8 (c1 and the maps), R9 (e1 in Week 18
+    and Week 19) and R10 (d1 makes the skeleton public at the first push).
+  - **The author's second answer:** "Regarding fig_01, let's make this
+    dynamic too (it'll be useful especially with hovering and displaying
+    values).. Confirm your readings otherwise. P1, S1". The chat's
+    reading: R7–R10 confirmed; `fig_01` is added to R7 as an interactive
+    chart.
+  - Not the chat's recommendation: a3 (the chat: a1) and d1 (the chat:
+    d2).
+- **Facts given with the forks** (the sources are in the new section of
+  `references.md`): Quarto copies the files that a page references into
+  the output folder, and its documentation does not say this for a file
+  outside the project; a user report says a `../` path outside a Quarto
+  project does not work; with R code in a page, `_freeze/` must be
+  committed for an Action with no R; `_variables.yml` and the `var` and
+  `include` shortcodes; the live site holds the placeholders of 2026-09-07;
+  the eight figures are about 1.0 MB in total; `knitr`, `rmarkdown`,
+  `quarto`, `leaflet` and `htmlwidgets` are in the project library but not
+  in `renv.lock`.
+- **"Decisions pending":** a dated note on "Published layers" (Decision 28
+  R7: the geometry in a map file, not only a zoom limit).
+- **`references.md`:** a new section "Story site (Decision 28) and the
+  open items of Week 18" (the Quarto pages, the forum thread, the `readr`
+  NEWS of task 18.1 (b)).
+- **`project-plan.md`:** task 18.3 ticked. **`handoff.md`:** the Week-18
+  state.
+- **Next:** task 18.4 — the process choices of the site, before any code.
 
 ### 2026-11-21 — Week 18, task 18.2 complete: the four open items closed
 
@@ -7801,3 +8335,31 @@ SDM-based check needs.)*
 - **No layer of Decision 27 is published** (the surfaces, the currents,
   the paths) before the rule of the pending item "Published layers" (Week
   19).
+
+*(Week 18, added 2026-11-21 at the Week-18 close: the story site, Decision
+28.)*
+
+- **The skeleton is public with draft text.** With d1 each push that
+  changes `site/**` deploys the site. Since 2026-11-21 the live site shows
+  the PNG stand-ins with their drawn draft text (titles, subtitles,
+  captions), draft alt texts, draft headings and titles, and placeholders
+  for the author's text.
+- **Text in an image.** A stand-in carries its text in the image: a
+  screen reader cannot read it, the site search cannot find it, and on a
+  narrow screen it becomes very small. The alt texts are short drafts (f2).
+- **Links point to `main`.** A link to a CSV file or a doc shows the file
+  of the branch `main` at the time of reading, not at the time of the
+  deploy.
+- **A copy is a second copy.** `site/figures/` and `site/tables/` repeat
+  committed outputs, so `scripts/11_build_site.R` must run again after an
+  output changes. The QA (STEP 18.2) checks the MD5 of each figure copy;
+  for a table it checks the rows, the columns, the first column and the
+  marks `<3`, not each cell.
+- **The Quarto version is pinned** (1.10.18). A later version needs a new
+  local render and QA before the pin changes.
+- **The layout in a wide window.** The text column starts near the middle,
+  with an empty area at the left (`page-layout: full` with `toc: true`); a
+  layout item for Week 20.
+- **The HTML comments of the pages are public.** Quarto keeps them in the
+  rendered HTML (the skeleton notes and the draft marks); the `.qmd`
+  files are public in the repository too.

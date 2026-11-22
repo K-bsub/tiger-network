@@ -2076,4 +2076,39 @@ rows.
 | `group` | character | `test case`, `inputs`, `pairs`, `decision17`, `sample`, `paths`, `pair rule`, `summary`, `publish`, `info` |
 | `check`, `value`, `pass` | — | As in `tbl_19_sdmres_qa.csv` |
 
+## tbl_20_site_qa.csv  *(Week 18 — built, task 18.6)*
+
+Written by `scripts/11` STEP 18.2 (the QA of the render `site/_site/`;
+choices q1 and x1 of task 18.6): a second path that reads the HTML pages
+with `xml2`. STEP 18.2 runs only when `site/_site/` is newer than the site
+files. The table is written before the stop on a failure. Check names,
+counts and file names; no position and no cell id.
+
+**As built (2026-11-21):** 45 rows, 45 pass: 23 hand-made checks (`test
+case`: 14 of STEP 18.1, 9 of STEP 18.2) and 22 checks of the render.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `group` | character | `test case`, `a pages`, `b images`, `c alt text`, `d tables`, `e links`, `f _site`, `g site/`, `h positions`, `i widgets`, `j tables list`, `k version` |
+| `check` | character | What the row checks |
+| `value` | character | A count (for example `8 of 8`), the items that fail, or a fact (`k version`: the pinned Quarto version) |
+| `pass` | logical | TRUE if the check passes |
+
+## Site files — `site/figures/`, `site/tables/`  *(Week 18 — built, task 18.5)*
+
+Written by `scripts/11` STEP 18.1 (Decision 28; choices w2 and d1 of task
+18.4). Do not edit them by hand: the next run writes them again. A file is
+written only when its bytes change (a figure: when its MD5 changes). The
+files are public on the site.
+
+**As built (2026-11-21):** 8 figures and 11 include files.
+
+| File | Content |
+|---|---|
+| `site/figures/fig_01_*` – `fig_08_*` | Copies of `outputs/figures/` (the same MD5); the static stand-ins of the skeleton |
+| `site/tables/_<table name>.md` | A table of `SITE_TABLES_PAGE` (60 rows or fewer) as a pipe table: the columns of w2; numbers by d1 (a whole number as it is, other numbers to 3 significant digits); the mark `<3` kept. Then a line with the rows, the columns shown and a link to the full CSV file in the repository |
+| `site/tables/_links_<page>.md` | The links of a page to its longer tables (`SITE_TABLES_LINK`), each with its row count |
+| `site/tables/_links_tables.md` | The links to all files of `outputs/tables/`, for the Data page (sorted in byte order) |
+| `site/tables/_tbl_03_notes.md` | `outputs/tables/tbl_03_notes.md`, with its headings 2 levels down |
+
 *(Further layers — sdm — documented as they are built.)*
