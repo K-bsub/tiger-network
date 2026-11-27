@@ -52,6 +52,14 @@ written agreement, following the Bay Area policy §4.
       that a reader can zoom or download needs its own rule first. Each
       published path or crossing is labelled as modelled, not observed.
       Enforced in code by `assert_publishable_table()`.
+      *(Amended 2026-11-26, Decision 29 point 3 (P4a): the 10 km position
+      stays for the road crossings and the pinch points. The Stage-2 paths
+      are also in the interactive maps of the story site, as built (1 km),
+      with a maximum zoom; this replaces "Path lines are drawn in static
+      figures at national scale only". A map file holds the coordinates,
+      so a reader with a road layer can find a modelled crossing to about
+      1 km. Each path line is labelled as modelled, not observed. The check
+      of the coordinates of a map file is Decision 29 point 13.)*
 - [ ] **Watch small-n.** A reserve or cell with very few underlying records can
       reverse-narrow a location. `warn_small_n()` flags these; suppress or
       coarsen before publishing.

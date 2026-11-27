@@ -57,6 +57,7 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 | 26 | Gi\*: four Gi\* — `effort_inat` (the model background, before `maxnet` adds a presence cell) with `tiger_obscured`; `effort_all` (the clean background of all datasets) with `tiger_5km`; no comparison with Phase 1; the 6,969 model cells, value 0/1; a 50 km band on the sphere (Amendment 1), the cell itself included; a class only with 8 neighbours or more; QA bands queen and 75 km (descriptive); the exact p (hypergeometric, random relabelling); Benjamini–Hochberg, q = 0.05; `fig_06` = `effort_inat` (`effort_all`: table only, a reading); the tiger Gi\* never published: counts only (obscured set), and counts by landscape complex by rule L1 (5 km set); all years; own code. The tiger Gi\* cannot show a cold spot |
 | 27 | SDM-based resistance and circuit theory: input = the percentile rank of the cloglog value over the 6,969 model cells (the 32 hatched cells kept and counted); `main` R = 1 + 99 × (1 − x) and the variant `negexp8` (c = 8), range 1–100; a graph of the model cells only (8 neighbours; link = distance on the sphere × mean R; reserve cells by the centre rule); circuit theory (each reserve of a pair joined into one node; zero current in the two reserves of a pair) and least-cost paths on the same graph; own R code, checked by hand-made circuits and `gdistance`; phase 1 = the 106 pairs of D17, compared with the Stage-2 baseline paths by the D18 rule with d = 20 km ("agrees"/"differs"; the variant "robust"/"sensitive") and descriptive values; phase 2 = all 1,540 pairs on both surfaces, a check of the D17 pair rule ("agrees" if 2/3 or more of the D17 pairs are among the same number of lowest effective resistances); no layer; `fig_07` (the phase-1 current, P3a) and `fig_08` (the paths, plain background) |
 | 28 | Story site: seven pages (a page "Check" for Decision 27); interactive maps, and an interactive `fig_01`, where the rule of "Published layers" allows, with the PNG files as the record in the repository and as the stand-ins of the skeleton; tables of 60 rows or fewer on a page, longer tables as links; captions as page text with the numbers from `site/_variables.yml`; no R code in the pages (`scripts/11_build_site.R` copies the figures and writes the tables); deploy on each push of `site/**`; a publish check in code (STEPs 18.1–18.2); draft alt text |
+| 29 | Published layers: a map holds only the layers of its figure (A1); the reserve outlines and state lines as built (B1); the Stage-2 paths as built (1 km) with a maximum zoom — a reader can find a modelled crossing to about 1 km; the tables and hover texts stay at 10 km; policy §3 amended (P4a); `fig_03` nodes at the centroid, pinch points at the 10 km cell centre with the cell outline (N1; R13); the 0.2° cells from their corners — the suitability class and value (S3, Sf1), the effort Gi\* class (G2), the current class (C2); the SDM-based paths at 0.2° (Q2); the hatch as an outline and lines (H3; R11); labels and attribution in the map file, the caption items as page text (T2); a maximum zoom, a limit of the display only (Z2); no download (D1); a check of each coordinate of a map file, on the object and on the file (K1); the tiger Gi\* never |
 
 ## Ways of working (apply every chat)
 
@@ -76,6 +77,9 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   A modelled path or road crossing is given as a 10 km grid cell in every
   committed table, figure and caption (`assert_publishable_table()`); 1 km
   cells stay in gitignored layers.
+  *(2026-11-26, Decision 29 P4a: the crossings and the pinch points stay
+  at 10 km; the Stage-2 paths are also in the map files of the site, as
+  built (1 km), with a maximum zoom.)*
 - **Rule d1:** no data file with positions goes to a chat. Console text sent
   to a chat holds counts, names and statistics only. The chat tests its code
   on made-up records.
@@ -95,10 +99,33 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ---
 
-## Current state  ·  **Week 18 complete (tasks 18.1–18.7)** · 2026-11-21
+## Current state  ·  **Week 19 in progress — task 19.1 done (Decision 29)** · 2026-11-26
 
 ### Where the project is
 
+- **Week 19 so far (2026-11-26; task 19.1; full record: Decision 29 and
+  the change log in `methodology.md`):**
+  - Task 18.8 is done: the docs commit `3bac6f1` (2026-11-21), pushed.
+    The tick of task 18.8 in `project-plan.md` is the author's edit; it
+    goes into the docs commit of task 19.1.
+  - Task 19.1: **Decision 29** (the published layers) — A1, B1, P4 with
+    P4a, N1, S3 with Sf1, G2, C2, Q2, H3, T2, Z2, D1, K1; the readings R11
+    and R13 (as read for P4); R12 does not apply with P4. Not the chat's
+    recommendation: B1 (B2), P4 with P4a (P2), H3 (H1). It closes the
+    pending item "Published layers".
+  - **P4a:** the Stage-2 paths go into the map files as built (1 km), with
+    a maximum zoom. A reader with a road layer can find a modelled
+    crossing to about 1 km; the tables and the hover texts stay at 10 km.
+    `sensitive-data-policy.md` §3 is amended (Decision 29 point 3).
+  - The other points: a map holds only the layers of its figure (A1); the
+    reserve outlines as built (B1); the 0.2° cells from their corners,
+    with the class (and the value for the suitability; S3, G2, C2); the
+    SDM-based paths at 0.2° (Q2); the hatch as an outline and lines (H3);
+    the labels and an attribution line in each map file (T2); a maximum
+    zoom (Z2); no download (D1); a check of each coordinate of a map file,
+    on the object and on the file (K1).
+  - **Next: task 19.2** — the process choices of the maps and the chart,
+    before any code (Decision 29, "Consequences").
 - **Week 18 in short (2026-11-21; tasks 18.1–18.7; full record: Decision
   28 and the change log in `methodology.md`):**
   - Task 18.1: the four open items — the author's choices a1, b1, c3, d1
@@ -137,8 +164,9 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
     (https://K-bsub.github.io/tiger-network/).
   - Task 18.7: the docs close and the Week-19 plan; the author's answer
     **W19a**: Stage 4 moves by one week (Weeks 18–22).
-  - **Next: the docs commit (task 18.8); then Week 19, task 19.1 —
-    Decision 29 (the pending item "Published layers").**
+  - Next (as of 2026-11-21): the docs commit (task 18.8); then Week 19,
+    task 19.1 — Decision 29 (the pending item "Published layers").
+    *(2026-11-26: both done — `3bac6f1`; Decision 29.)*
 - **Week 17 in short (2026-11-14 to 2026-11-15; tasks 17.1–17.7; full
   record: Decision 27 and the change log in `methodology.md`):**
   - A text fix before Week 17: the headers of the two one-time scripts
@@ -322,10 +350,12 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 - **Done: Week 18** (2026-11-21; tasks 18.1–18.7). The author committed
   the split point (`eb9557d`, `b6ce1a6`) and tasks 18.5–18.6 (`90ac814`
   `analysis:`, `c908447` `site:`), pushed; the deploy ran green. Task
-  18.8: the commit of the docs of tasks 18.3–18.7 (`docs:`) and a push.
+  18.8: the commit of the docs of tasks 18.3–18.7 (`docs:`) and a push
+  *(2026-11-26: done — `3bac6f1`, pushed)*.
   The docs commit changes no file under `site/**` or `publish.yml`, so it
   does not deploy. Nothing under `data/` may be staged.
-- **Next: task 19.1 — Decision 29 (the published layers)**, before any map
+- **Task 19.1 — Decision 29 (the published layers)** *(2026-11-26: done;
+  next: task 19.2)*, before any map
   file: for each figure `fig_02`–`fig_08` (and the surfaces of Decision
   27), no layer or a layer in a stated form (the geometry in the file, the
   class or the value, a zoom limit, a download or none); the check of the
@@ -430,7 +460,7 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
 | `data/processed/boundary_reserves_all_7755.gpkg` | 58 reserves (56 with a polygon; 6 polygon pairs overlap) | Key `unit_id` |
 | `data/processed/stats_reserve_census_7755.gpkg` | Census series, notified area, `density_2022` | Density per total notified area (D8) |
 | `data/processed/cov_stack_1km_7755.tif` | 6 bands, 3,067,467 complete-case cells | Common NA mask (D10) |
-| `data/processed/resist_tiger_<surface>_7755.tif`, `lcp_reserve_network_7755.gpkg` | Stage-2 surfaces and paths (4 variants) | Path layer on the site: pending [Week 19] ("Published layers") |
+| `data/processed/resist_tiger_<surface>_7755.tif`, `lcp_reserve_network_7755.gpkg` | Stage-2 surfaces and paths (4 variants) | Path layer on the site: Decision 29 point 3 (the baseline paths as built, in the maps of `fig_03`, `fig_07` and `fig_08`); no surface layer |
 | `data/processed/lcp_road_crossings_7755.gpkg` | Crossings at 1 km | Never published |
 | `data/processed/occ_tiger_gbif_clean_7755.gpkg` | 300 clean tiger records | Tier T2; never published |
 | `data/processed/occ_tiger_gbif_obscured_7755.gpkg` | 884 obscured records | Tier T1 |
@@ -569,7 +599,8 @@ uses 0.4.2). Task 16.5: Clopper & Pearson 1934 (the R help page of
 ### Open pending Decisions (decide in the week noted)
 
 Full text in `methodology.md` → "Decisions pending".
-- **[Week 19] Published layers** (was Week 18 until 2026-11-07; raised
+- **[Week 19] Published layers** *(closed 2026-11-26 by Decision 29, task
+  19.1)* (was Week 18 until 2026-11-07; raised
   with Decision 20 as "Published
   path layer"; widened by Decision 25 point 4): before a path layer or a
   suitability layer goes on the site. Paths: no layer, simplified lines,
@@ -585,14 +616,14 @@ Full text in `methodology.md` → "Decisions pending".
   rule decides the geometry in the file. W19a: Decision 29, Week 19,
   task 19.1.)*
 
-_Resolved (in `methodology.md`): Decisions 7 to 28 closed the earlier
+_Resolved (in `methodology.md`): Decisions 7 to 29 closed the earlier
 items (missing years, area source, zeros, the NA policy, the gHM fill,
 resistance values, barrier roads, water and gHM, the path set-up, the
 comparison metric, the link rule, the pinch-point rule, the cleaning rule,
 the settlement layer, the target-group scope, the model Decisions, the
 uses of the effort surfaces, the terrain variables, the prediction and its
 publication, the Gi\* settings, the SDM-based resistance and the
-circuit-theory check, the form of the story site)._
+circuit-theory check, the form of the story site, the published layers)._
 
 ### Data on disk (raw; via `scripts/01`)
 
@@ -701,6 +732,9 @@ of closed one-time work are in git history.)*
 **Publish and sensitive data**
 - **No position finer than 10 km for a modelled path or crossing** in a
   committed table or figure (`assert_publishable_table()`).
+  *(2026-11-26, Decision 29 P4a: a map file of the site holds the
+  Stage-2 paths at 1 km; the crossings and the pinch points stay at 10 km
+  in each table, figure, caption and hover text.)*
 - **A published total can give a suppressed count.** Do not publish a total
   next to a table with `<3` values.
 - **"Pinch point" is a network label** (Decision 20): not each crossing, not

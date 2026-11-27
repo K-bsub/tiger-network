@@ -1543,6 +1543,55 @@ Quarto; the input `version:` under `with:` pins a version. Task 18.6 v1:
 `publish.yml` pins 1.10.18.)* *(Through a fetch tool (a summary); read on
 2026-11-21.)*
 
+## Published layers (Decision 29)
+
+*All entries in this section were read on 2026-11-26, through a fetch tool
+(a summary of the page) or a search tool (snippets). No entry was read in
+full. Verify each entry before it is cited on the site.*
+
+RStudio (Posit). leaflet for R, article "projections".
+https://rstudio.github.io/leaflet/articles/projections.html · *(Leaflet
+"expects all point, line, and shape data to be specified in latitude and
+longitude using WGS 84", and shows the data in EPSG:3857. Decision 29,
+facts.)* *(Through a fetch tool (a summary). The title of the page is not
+recorded.)*
+
+RStudio (Posit). leaflet for R, article "raster".
+https://rstudio.github.io/leaflet/articles/raster.html ·
+*(`addRasterImage()` projects the raster to EPSG:3857 and encodes each
+cell to an RGBA colour, to produce a PNG image; it stops when the PNG is
+larger than `maxBytes`, 4 MB by default. Decision 29 Sf1.)* *(Through a
+fetch tool (a summary).)*
+
+htmlwidgets, source file `R/htmlwidgets.R`, version 1.3 (Debian source
+mirror).
+https://sources.debian.org/src/r-cran-htmlwidgets/1.3%2Bdfsg-1/R/htmlwidgets.R
+· *(`widget_data()` "Generates a <script type="application/json"> tag with
+the JSON-encoded data". Decision 29, facts.)* *(Through a search tool (a
+snippet). An old version; the current source is not checked.)*
+
+htmlwidgets, vignette "HTML Widgets: Advanced Topics" (CRAN).
+https://cran.r-project.org/web/packages/htmlwidgets/vignettes/develop_advanced.html
+· *(The data of a widget goes to JSON through `htmlwidgets:::toJSON()`, a
+wrapper of `jsonlite::toJSON()`; the serializer in the text has `digits =
+getOption("shiny.json.digits", 16)` and `use_signif = TRUE`. Decision 29,
+facts.)* *(Through a search tool (snippets of CRAN mirrors). The title is
+not checked.)*
+
+MariaDB documentation. "ST_Simplify".
+https://mariadb.com/docs/server/reference/sql-statements/geometry-constructors/miscellaneous-gis-functions/st_simplify
+· *(The Douglas–Peucker algorithm returns "a geometry that is similar to g
+but uses only a subset of points". Decision 29 P3.)* *(Through a search
+tool (a snippet). A database manual, not the GEOS documentation that
+`sf::st_simplify()` uses; the property is one of the algorithm.)*
+
+Stack Overflow answer (an offline mirror).
+https://kiwix.lema.org/stackoverflow.com_en_all_2023-11/a/34575951 · *(An
+example of the element `<script type="application/json"
+data-for="htmlwidget-…">` in a file of `saveWidget()`. Decision 29,
+facts.)* *(Through a search tool (a snippet). Users, not staff. Not to be
+cited on the site.)*
+
 ## Tiger movement and landscape resistance (Decision 14)
 
 Dutta, S., & Krishnamurthy, R. (2024). Multiphasic movement and step-selection

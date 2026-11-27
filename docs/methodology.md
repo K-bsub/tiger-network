@@ -2,7 +2,9 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** **Week 18 complete (2026-11-21; tasks 18.1–18.7): the four
+**Status:** **Week 19 in progress (2026-11-26): task 19.1 done —
+Decision 29 (the published layers); the pending item "Published layers"
+is closed.** **Week 18 complete (2026-11-21; tasks 18.1–18.7): the four
 open items closed; Decision 28 (the form of the story site); the site
 skeleton built, checked (QA 45 of 45) and deployed (`90ac814`,
 `c908447`); the Week-19 plan (W19a: Stage 4 in Weeks 18–22).**
@@ -95,8 +97,14 @@ numbers from code; no R code in the pages; deploy on push; a publish
 check in code. **Tasks 18.4–18.6:** the process choices, the site build
 (`scripts/11_build_site.R`) and its QA (45 of 45); committed and
 deployed by the author. **Task 18.7:** the docs close and the Week-19
-plan. **Next: Week 19** — Decision 29 (the published layers), then the
-first interactive figures.
+plan. **Week 19, task 19.1 (2026-11-26): Decision 29** — the
+published layers, fixed before any map file: a map holds only the layers
+of its figure; the reserve outlines and the Stage-2 paths as built (the
+paths at 1 km with a maximum zoom; policy §3 amended, P4a); the 0.2°
+cells from their corners, with the class, and the value for the
+suitability; the hatch as an outline and lines; labels in each map file;
+no download; a check of each coordinate of a map file. **Next:** task
+19.2 — the process choices of the maps and the chart.
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -1947,6 +1955,9 @@ policy rule.
      national scale. A published path layer that a reader can zoom or
      download (the Stage-4 Leaflet maps) needs its own rule first (pending
      item below).
+     *(2026-11-26: the rule is Decision 29 point 3 (P4a): the Stage-2
+     paths are also in the interactive maps, as built, with a maximum
+     zoom.)*
    - **Policy:** `docs/sensitive-data-policy.md` §3 gets one rule for
      modelled paths and crossings. `assert_no_raw_points()` stops all point
      geometry, so a published site is a table row or a grid cell, never a
@@ -3761,6 +3772,7 @@ complete):**
    - A layer that a reader can zoom or download (the Stage-4 maps) waits
      for a rule in Week 18. The pending item "[Week 18] Published path
      layer" becomes "[Week 18] Published layers" and includes this surface.
+     *(2026-11-26: the rule is Decision 29 point 5 (S3 with Sf1).)*
    - **Tier T1** (sensitive-data policy §2: public data that the source
      obscured; "normal use; document the obscuring"). The caption says
      that the presences are obscured records (point 5, item 3).
@@ -4411,6 +4423,8 @@ use some of the same letters. Write the Decision with the code, for example
      process choice of task 16.2 (prefix `hot_`, naming §2). The two tiger
      layers are never committed. No layer is published before the Week-18
      rule (pending item "Published layers").
+     *(2026-11-26: the rule is Decision 29 point 6 (G2); the two tiger
+     layers stay unpublished.)*
    - **Check (as Decision 25 point 4):** the code of `fig_06` reads only
      the `effort_inat` layer, the grid layer, the reserve layer and the
      state layer: no tiger layer and no presence field. The check is
@@ -5017,6 +5031,9 @@ complete):**
       by cell and the paths stay under `data/processed/` (gitignored)
       before the rule of the pending item "Published layers" (Week 19). A
       current layer waits for the same rule.
+      *(2026-11-26: the rule is Decision 29 points 1, 7 and 8: the
+      class of the phase-1 current of `fig_07` and the phase-1 paths of
+      `main` of `fig_08`; no other layer.)*
     - **Tables `tbl_19_*`** (slugs: n1 of task 17.2): counts, statistics
       and pair rows with reserve names; no position
       (`assert_publishable_table()` with no prefix); no cell id. *(Task
@@ -5683,10 +5700,356 @@ reserve tables have 56–58 rows).
 - `references.md`: a new section "Story site (Decision 28) and the open
   items of Week 18".
 
+### Decision 29 — Published layers: what a map may hold, the form of each layer, the hatch, the labels, the zoom, the download, the check of the coordinates
+**Date:** 2026-11-26 (fixed **before** any map file, any map script and any
+change of the site checks — see "What was seen before this Decision")
+**Choice:** Fork codes as raised and chosen on 2026-11-26 (task 19.1): A1;
+B1; P4 with P4a; N1; S3 with Sf1; G2; C2; Q2; H3; T2; Z2; D1; K1. The
+readings R11 and R13 confirmed; R12 does not apply with P4 (the author:
+"R12 and R13 as read"). Not the chat's recommendation: B1 (the chat: B2),
+P4 with P4a (the chat: P2; of the two forms of P4, P4b) and H3 (H1).
+*(Codes of task 19.1; other tasks use the same letters. Write the Decision
+with the code, for example "Decision 29 P4a".)* This Decision closes the
+pending item "Published layers". Settings: a block in `R/00_config.R`
+(task 19.2).
+
+**Aim.** The rule of the pending item "Published layers" (raised
+2026-10-10 with Decision 20), before any map file: for each figure
+`fig_02`–`fig_08` and for the layers of Decision 27, no layer or a layer in
+a stated form — the geometry in the map file, the class only or the class
+and the value, the zoom, a download or none; the hatch and the labels in a
+map; the check of the coordinates inside a map file (Decision 28 R9). The
+tool, the basemap, the script, the names and the values of the zoom, the
+hatch step, the rounding and the size limit are process choices of task
+19.2.
+
+**Fixed by earlier Decisions (not forks; stated here so that the record is
+complete):**
+- The tiger Gi\* (`tiger_obscured`, `tiger_5km`): never published, in no
+  form (Decision 26 point 7).
+- No map file holds a tiger record (the clean set or the obscured set), a
+  tiger density surface, a presence or background field, or the model
+  file (Decision 22 point 9; Decision 23 point 9; Decision 25 point 4).
+- `fig_01` is a chart: the values of `tbl_01_reserve_growth.csv` only, and
+  no geometry (Decision 28 R7).
+- `fig_02` (the reserve outlines and the census values; tier T0) is not
+  under the pending item (Decision 28 R7); it passes the check of Decision
+  28 point 8. Its geometry is point 2.
+- Each published path or crossing is labelled as modelled, not observed
+  (sensitive-data policy §3).
+- The `effort_all` Gi\* is a table only (Decision 26, the reading of
+  C1-2). It has no figure, so it has no map.
+- Decision 28 R8: each interactive map is a self-contained HTML file that a
+  script writes into `site/`, in a frame of its page.
+
+**Facts given with the forks** (the sources are in the new section of
+`references.md`):
+- Leaflet takes point, line and polygon data in longitude and latitude
+  (WGS 84) and shows them in EPSG:3857.
+- An htmlwidget writes its data as JSON in a `<script
+  type="application/json">` element of the page, and the serializer of
+  `htmlwidgets` keeps up to 16 significant digits. Thus a map file holds
+  each coordinate of each feature. A zoom limit does not remove one.
+- `addRasterImage()` projects a raster to EPSG:3857 and writes a PNG image
+  of the colours of the cells (no value); the limit is 4 MB by default.
+- The Douglas–Peucker simplification keeps a subset of the original
+  points: each kept vertex is an original vertex.
+- From the code of the project:
+  - A Stage-2 path is a line through the centres of 1 km cells
+    (`lcp_path_line()`).
+  - An SDM-based path of Decision 27 is a line through the centres of
+    0.2° cells, (i + 0.5) × 0.2° (`circ_path_line()`).
+  - The corners of a 0.2° cell are whole multiples of 0.2°
+    (`sdm_cell_polygons()`). The grid file on disk is in EPSG:7755, with
+    21 points on each edge.
+  - A node mark of `fig_03` is the centroid of the union of the reserve
+    polygons of the node (`pinch_node_points()`); it can be outside the
+    polygons.
+  - The 10 km cell of a pinch point is the cell of the mean position of
+    the crossings of its site (`pinch_grid_cell_xy()` on `mean_x` and
+    `mean_y`). Thus it is not always a cell that its path goes through.
+- The reason of the 10 km position (Decision 20 p1) is false precision: a
+  1 km modelled crossing on a public map can be read as an observed place.
+  It is not a rule for the safety of the species.
+- With a 1 km path line and the public OpenStreetMap roads, a reader can
+  find each road crossing of the path to about 1 km.
+
+1. **What a map may hold (A1).** An interactive map holds only the layers
+   of the static figure that it replaces (Decision 28 R7), each in the
+   form of points 2–9, and, as context, the reserve outlines, the state
+   lines and a basemap (task 19.2).
+   - No layer that no figure shows: no resistance surface of Stage 2 or of
+     Decision 27, no density surface of Decision 22, no layer of a variant
+     surface (`noghm`, `road15`, `road50`, `negexp8`), no phase-2 path or
+     current, no `effort_all` Gi\*.
+   - A figure with a layer that this Decision does not allow stays its PNG
+     file on the site. With the choices of points 2–9, each of
+     `fig_02`–`fig_08` can be a map.
+2. **Reserve outlines and state lines (B1).** Tier T0.
+   - In each map: the reserve polygons of `boundary_reserves_all_7755.gpkg`
+     as built (the core protected-area outlines, Decision 4) and the state
+     lines of `boundary_states_7755.gpkg` as built, in longitude and
+     latitude. No simplification.
+   - The rounding of the coordinates in the file is a process choice (task
+     19.2); the check of point 13 uses the same rounding.
+   - The two reserves with no polygon (Pilibhit, Dholpur-Karauli) are
+     named in the map or on the page, as in `fig_02`, and are never drawn.
+   - The size of each map file is a check of point 13. If a file is too
+     large for the site, the author decides again; the chat does not
+     simplify the outlines.
+3. **The Stage-2 paths (P4 with P4a).** The 73 baseline edge paths of
+   `fig_03` and the 97 baseline paths of `fig_07` and `fig_08`.
+   - The lines as built: each vertex is a centre of a 1 km cell of the
+     analysis grid, in longitude and latitude. Each map has a maximum zoom
+     (point 11).
+   - **P4a, stated plainly.** The map file holds each 1 km vertex, and a
+     zoom limit does not remove it. With the roads of a basemap, or of any
+     public road layer, a reader can find where a path crosses a road, to
+     about 1 km. The tables (`tbl_03b_pinch_points.csv`, `tbl_14_*`) and
+     the hover text of a pinch point still give the 10 km cell (Decision
+     20 p1), and the layer of the 1 km crossings
+     (`lcp_road_crossings_7755.gpkg`) stays under `data/` and is never
+     published. On the site, a map thus shows more than the tables: the
+     10 km cell does not hide the position of a crossing from a reader of
+     the map. The crossings are modelled places, not records of tigers on
+     a road.
+   - The label of point 10 ("modelled, not observed") goes with each path
+     line, in the map file.
+   - **Amendment of `docs/sensitive-data-policy.md` §3 (2026-11-26).** The
+     rule "Modelled least-cost paths and road crossings are published at a
+     generalised position" stays for the road crossings and the pinch
+     points. For the paths, this point replaces "Path lines are drawn in
+     static figures at national scale only": the Stage-2 paths are also in
+     the interactive maps of this Decision, as built (1 km), with a
+     maximum zoom.
+   - The text of Decision 20 does not change. Its point 7 left a path layer
+     that a reader can zoom or download to "its own rule first", and the
+     pending item named a zoom limit as one option.
+   - The line of `handoff.md` "A modelled path or road crossing is given as
+     a 10 km grid cell in every committed table, figure and caption" (the
+     ways of working and a gotcha) gets a dated note.
+4. **The nodes and the pinch points of `fig_03` (N1; readings R12 and
+   R13).**
+   - Nodes: a mark at the position of `pinch_node_points()` (as in
+     `fig_03`), by flag. The hover text holds the reserve names of the node
+     and the values of `tbl_03_reserve_network.csv`.
+   - Pinch points: a mark at the centre of the 10 km cell of
+     `tbl_03b_pinch_points.csv`, by tier, and the outline of that 10 km
+     cell. The hover text holds columns of `tbl_03b` only (no 1 km field).
+   - **R13 (as read for P4):** a pinch-point mark is at the centre of its
+     10 km cell, and that centre can be off the 1 km line of its path. The
+     QA (task 19.4) counts these marks; no mark is moved.
+   - **R12** (raised for P2) does not apply: with P4 the map lines are the
+     lines of the PNG files.
+5. **Suitability (S3 with Sf1; `fig_04`, `fig_05`; tier T1).**
+   - The 6,969 model cells as polygons, each with its 4 corners in
+     longitude and latitude (whole multiples of 0.2°), built again from
+     the cell indices and not from the grid file in EPSG:7755 (Sf1). No
+     raster image.
+   - The class of Decision 25 point 3 (by rank; no value in the legend) and
+     the cloglog value of Decision 25 point 1. The value is in the hover
+     text, with the label of Decision 25 point 6 (`SDM_PUB_VALUE_LABEL`).
+     The rounding of the value, and one map with two layers or two maps,
+     are process choices (task 19.2).
+   - No cell id, no rank number, no covariate value, no presence or
+     background field and no record count in the file. A cell that is not
+     a model cell is not drawn (blank, as in the figures).
+   - Tier T1: the labels of point 10 say that the presences are obscured
+     records.
+6. **The effort Gi\* (G2; `fig_06`).** The model cells as in point 5, with
+   the class of Decision 26 point 6 (`hot`, `cold`, `not_significant`,
+   `few_neighbours`). No Gi\* value, no p-value and no neighbour count in
+   the file. No tiger layer.
+7. **The current (C2; `fig_07`).** The model cells as in point 5, with the
+   class of Decision 27 points 9 and 10 (five classes of equal count by
+   rank; no value), and the 97 Stage-2 baseline paths of point 3.
+8. **The SDM-based paths (Q2; `fig_08`).** The 94 phase-1 paths of the
+   `main` surface as built: each vertex is the centre of a 0.2° cell. The
+   hover text holds the names of the pair and the values of
+   `tbl_19_sdmres_compare.csv` for the pair. With the 97 Stage-2 baseline
+   paths of point 3. The 3 pairs that are contiguous at 0.2° have no
+   SDM-based path (as in `fig_08`). No `negexp8` path and no phase-2 path.
+9. **The hatch (H3; reading R11).** In the maps of `fig_04`, `fig_05`,
+   `fig_07` and `fig_08`, each of the 32 cells outside the training range
+   (Decision 25 point 2) gets both: a heavy outline (the cell corners) and
+   hatch lines inside the cell, with their ends on the cell edges at a
+   fixed step (task 19.2). The hover text of the cell says "outside the
+   training range of one or more covariates"; the legend gives the count.
+   **R11:** in a map, the "hatch" of Decision 25 point 2 and of Decision
+   27 point 10 is this form.
+10. **Labels and caption items (T2).**
+    - The caption items (Decision 20 point 7, Decision 25 point 5,
+      Decision 26 point 7, Decision 27 point 10) are page text below the
+      map, with each number from `site/_variables.yml` (Decision 28 point
+      5).
+    - A map file can be opened alone (R8), so it also holds: a title (a
+      draft); the legend; the labels that the rules need — "modelled, not
+      observed" for each path and pinch point (policy §3), "relative
+      suitability; not a probability of presence" and the label of
+      Decision 25 point 6 for the value, and that the presences are
+      obscured records (T1); and an attribution line with the data sources
+      and the basemap.
+    - A number in a map file is a value of a legend or of a hover text of
+      points 4–9, from the same run.
+11. **Zoom (Z2).** Each map has a maximum zoom; the value is a process
+    choice (task 19.2). It is a limit of the display, not a protection:
+    the file holds the coordinates (point 3).
+12. **Download (D1).** No download file: no GeoJSON, CSV or other layer
+    file in `site/`. A map file is the only file on the site with a
+    geometry. The banned file types of Decision 28 point 8
+    (`SITE_BANNED_EXT`) do not change; the tables stay links to their CSV
+    files in the repository.
+13. **The check of the coordinates in a map file (K1; Decision 28 R9).**
+    - Two paths: (i) before the save, on the widget object in R; (ii)
+      after the save, on the JSON in the file (a second path, as STEP
+      18.2).
+    - Each coordinate must be a point of a kind that is allowed for that
+      map: a vertex of the reserve outlines or of the state lines of point
+      2; a vertex of a Stage-2 path of point 3 (a centre of a 1 km cell of
+      the analysis grid); a corner of a 0.2° cell (points 5–7 and 9); a
+      point of a hatch line of point 9; a centre of a 0.2° cell (point 8);
+      a centre or a corner of a 10 km cell of Decision 20 p1 (point 4); a
+      node mark of point 4; the bounds of the map. Any other coordinate
+      stops the script.
+    - Also: the number of features of each layer against its source; the
+      fields of the hover text of each layer against a list; no text with
+      a decimal degree (as check h of STEP 18.2); the size of each map file
+      against a limit.
+    - The tolerance of the comparison and the size limit: task 19.2.
+14. **Summary by figure.**
+
+    | Figure | Form on the site | In the map file | Not in the map file |
+    |---|---|---|---|
+    | `fig_01` | chart (R7) | the values of `tbl_01` | a geometry |
+    | `fig_02` | map (R7) | the reserve outlines as built (B1); the census values by round | — |
+    | `fig_03` | map | the Stage-2 edge paths at 1 km (P4a); the node marks; the pinch points at the centre of the 10 km cell, with the cell outline (N1) | the 1 km crossings |
+    | `fig_04`, `fig_05` | map | the 0.2° model cells (corners); the class and the value (S3); the hatch (H3) | cell id, rank, covariates, presence or background |
+    | `fig_06` | map | the 0.2° model cells; the Gi\* class (G2) | Gi\* value, p, counts; each tiger Gi\* |
+    | `fig_07` | map | the 0.2° model cells; the current class (C2); the Stage-2 paths at 1 km; the hatch | the current value |
+    | `fig_08` | map | the SDM-based paths at 0.2° (Q2); the Stage-2 paths at 1 km; the hatch | `negexp8` and phase-2 paths |
+
+**What was seen before this Decision (pre-registration, stated plainly):**
+- **By the author** (stated on 2026-11-26): the eight figures and the live
+  site; no layer was seen.
+- **By the chat:** the docs; the site code (`R/00_functions_site.R`,
+  `scripts/11_build_site.R`, the blocks `SITE_*` and `SITE_QA_*` of
+  `R/00_config.R`), `R/00_functions_sensitive.R`, `R/00_functions_io.R`,
+  `scripts/05_growth_analysis.R`, and the functions that build the 0.2°
+  cells, the paths, the 10 km cell and the node marks; the names, the
+  sizes and the column names of the committed outputs; the web sources of
+  `references.md`. No data file, no figure image, no map file and no row
+  of a table.
+- No map file and no map script existed.
+- **The check of combinations** (the gotcha "two outputs that are safe
+  alone"): the reserve names in a hover text with the class, the value and
+  the hatch of the cells give no new link of a reserve name to a presence
+  state (the z1 count of Decision 25 point 9 is 0, STEP 15.3), and no layer
+  holds a tiger record. With P4a a map gives the road crossings to about
+  1 km (point 3): the author's choice, stated in point 3.
+
+**Reason and sources:**
+- **A1.** Decision 28 R7 puts a map in place of a static figure. A layer
+  that no figure shows is a new output that no earlier Decision planned,
+  and each layer adds to the check.
+- **B1.** The author's choice. The outlines are T0 (NTCA; Natural Earth),
+  and no rule of the sensitive-data policy applies to them. The cost is
+  the file size (point 13).
+- **P4, P4a.** The author's choice, after the chat raised the conflict
+  with the reason of Decision 20 p1 (the change log of task 19.1). The
+  reader sees the modelled route at the grain of the analysis, and the
+  label "modelled, not observed" stays with each line. The chat
+  recommended P2 (the paths on the 10 km grid), which keeps the reason of
+  Decision 20 p1 on the site.
+- **N1.** The outline of the cell shows that a pinch point is a 10 km cell,
+  not a point.
+- **S3, Sf1.** The value is public as the colour of `fig_05` (Decision 25
+  f3), and the label goes with each number. With Sf1 each corner is a
+  whole multiple of 0.2°, so the check of point 13 is exact, and a reader
+  sees the value on hover. A raster image is resampled to EPSG:3857 and
+  holds no value.
+- **G2, C2.** Decision 26 point 7 and Decision 27 point 10 publish the
+  classes and the counts, not a value for each cell.
+- **Q2.** Each vertex is at 0.2°, coarser than the 10 km grid; Decision 27
+  defines no road crossing.
+- **H3.** The author's choice: the hatch lines keep the look of the
+  figures, and the outline shows at each zoom.
+- **T2.** A map file has its own URL (R8) and can be opened without its
+  page; the label of the policy must stay with each path line.
+- **Z2.** A reading aid: a 0.2° cell or a 10 km cell on a basemap at street
+  zoom can be read as a place.
+- **D1.** A download is one more copy to check; the code can build the
+  layers again from the public sources.
+- **K1.** The check reads what the reader gets (the file), by a second
+  path, as STEP 18.2 does for the pages.
+
+**Judgement values:** none here. The maximum zoom, the step of the hatch
+lines, the rounding of the coordinates and of the value, the tolerance of
+the check and the size limit of a map file are process choices of task
+19.2.
+
+**Rejected:**
+- *A2* (more layers than the figures show).
+- *B2* (the outlines simplified for the file size; the chat's
+  recommendation).
+- *P1* (no Stage-2 path; `fig_03`, `fig_07` and `fig_08` stay PNG files);
+  *P2* (the paths on the 10 km grid; the chat's recommendation); *P3*
+  (Douglas–Peucker lines: each kept vertex is a 1 km cell centre); *P4b*
+  (P4 with no road on the basemap of the three maps; a limit of the
+  display only).
+- *N2* (the pinch-point mark only).
+- *S1* (no layer), *S2* (the class only); *Sf2* (a raster image).
+- *G1* (no layer), *G3* (the class and the values); *C1* (no layer), *C3*
+  (the class and the value); *Q1* (no layer).
+- *H1* (the outline only; the chat's recommendation), *H2* (the hatch lines
+  only).
+- *T1* (the legend only in the file), *T3* (all caption items in the file).
+- *Z1* (no zoom limit). *D2* (a GeoJSON download).
+- *K2* (the check of the widget object only), *K3* (the check of the input
+  layers only).
+
+**Limitations:**
+- With P4a a reader of a map can find a modelled road crossing to about
+  1 km; on the site, the 10 km cell of the tables does not hide it. The
+  crossing is modelled, not a record of a tiger on a road.
+- A zoom limit is a limit of the display. The coordinates in a map file
+  can be read from the page source at their full precision.
+- A pinch-point mark at the centre of its 10 km cell can be off the 1 km
+  line of its path (R13).
+- With B1 the map files can be large; the size is not known before the
+  build.
+- The hover text of point 5 gives a number for each cell. The value is
+  relative, and the label says so; a reader can still read it as a
+  probability.
+- The basemap (task 19.2) comes from a third party: its content and its
+  terms are not under this Decision.
+
+**Consequences:**
+- `docs/sensitive-data-policy.md` §3: the dated amendment of point 3.
+- `handoff.md`: the dated note of point 3 on the line of the ways of
+  working and on the gotcha; row 29 of "Fixed Decisions"; the pending item
+  closed.
+- Dated notes on Decision 20 point 7, Decision 25 point 4, Decision 26
+  point 7 and Decision 27 point 10: the rule is this Decision.
+- Task 19.2: the process choices — the tool (`leaflet`,
+  `htmlwidgets::saveWidget()`), the chart of `fig_01`, the basemap, the
+  script, the names, the values of points 9, 11 and 13, the rounding; the
+  changes of each site check that now refuses a widget or expects a PNG
+  file: `site_check_config()` (`SITE_ALLOW_WIDGETS`), the scan of STEP 18.1
+  (`site_scan_files()`), the page guards of the figures, and the checks b,
+  c, f, g and i of STEP 18.2; `renv.lock` and the `scripts/00a` list (rule
+  S1).
+- Task 19.3: the interactive `fig_01` and `fig_02`. Week 20: the maps of
+  `fig_03`–`fig_08` by this Decision.
+- `assert_publishable_rast()` does not change: no raster goes on the site
+  (Sf1).
+
 ### Decisions pending (raised, not yet made)
 
 These forks are open. Each is decided in the week noted in the project plan,
 before the relevant code is written.
+
+*(2026-11-26: no item is open. The last item, "Published layers", is
+closed by Decision 29 (task 19.1); its text stays below as a record.)*
 
 - **[Week 19] Published layers (was "[Week 18]" until 2026-11-07; raised
   2026-10-10 with Decision 20 as
@@ -5720,12 +6083,70 @@ before the relevant code is written.
   under this item; it passes the check of Decision 28 point 8.)*
   *(2026-11-21, W19a of task 18.7: decided in Week 19, task 19.1, as
   Decision 29, before any map file.)*
+  *(2026-11-26: closed — Decision 29, task 19.1.)*
 
 ---
 
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-26 — Week 19, task 19.1: Decision 29 recorded (no map file, no code)
+
+- **Decision 29** (the published layers) is recorded before any map file,
+  any map script and any change of the site checks. It closes the pending
+  item "Published layers". No rule of an analysis changed; no run.
+- **Entry state:** Week 18 committed and pushed; the docs commit of task
+  18.8 is `3bac6f1` (2026-11-21). One edit was not committed: the tick of
+  task 18.8 in `project-plan.md` (by the author).
+- **The author's first answer (2026-11-26):** "A1, B1, P4, N1, S3, Sf1,
+  G2, C2, Q2, H3, T2, Z2, D1, K1, R11-R13 confirmed, seen eight figures and
+  the live site, no layer was seen".
+  - Not the chat's recommendation: B1 (the chat: B2), P4 (P2), H3 (H1).
+  - Before the Decision was written, the chat raised a conflict (the gotcha
+    "a chosen option can conflict with the reasons of another"): with P4
+    the map files hold the 1 km vertices of the Stage-2 paths, so a reader
+    with a road layer can find a crossing to about 1 km, against the reason
+    of the 10 km position of Decision 20 p1 (false precision). The options:
+    P4a (P4, with the amendment of policy §3), P4b (P4, with no road on the
+    basemap of the three maps) and P2. The chat recommended P2, and of the
+    two forms of P4, P4b. Two readings for P4: R12 does not apply; R13 is
+    read for the 1 km lines.
+  - **The author's second answer:** "P4a; R12 and R13 as read".
+- **Error of the chat** (the fork text of task 19.1; found by the chat
+  before the Decision was written): the options P3 and P4 said that each
+  needs "an amendment of D20 point 7 and policy §3". Exact: Decision 20
+  point 7 and the policy leave a path layer that a reader can zoom to "its
+  own rule first", and the pending item named a zoom limit as one option,
+  so the text of Decision 20 does not change. The policy §3 and a line of
+  `handoff.md` change (Decision 29 point 3).
+- **Facts given with the forks:** Leaflet takes longitude and latitude; a
+  widget writes its data as JSON in the page, with up to 16 significant
+  digits; `addRasterImage()` writes a PNG of colours; Douglas–Peucker keeps
+  a subset of the original points; in the code, the geometry of the paths,
+  the 0.2° cells, the node marks and the 10 km cell of a pinch point (the
+  cell of the mean position of the crossings of its site); the reason of
+  the 10 km position of Decision 20 p1. The sources are in the new section
+  of `references.md`.
+- **Dated notes:** Decision 20 point 7, Decision 25 point 4, Decision 26
+  point 7 and Decision 27 point 10 (the rule is Decision 29); "Decisions
+  pending" (the item is closed; no item is open).
+- **`docs/sensitive-data-policy.md` §3:** the amendment of Decision 29
+  point 3.
+- **`references.md`:** a new section "Published layers (Decision 29)".
+- **`project-plan.md`:** task 19.1 ticked; a dated note on the Week-19
+  pitfall "The checks of STEP 18.2"; the progress rows of Weeks 18 and
+  19–22.
+- **`handoff.md`:** the Week-19 state; row 29 of "Fixed Decisions"; the
+  dated notes of Decision 29 point 3; the pending item closed; the stale
+  "Next" lines of task 18.8 (the commit is `3bac6f1`).
+- **AI-word check:** the new text of task 19.1 (Decision 29, this entry, the dated notes, the
+  handoff lines and the new section of `references.md`) has no hit of a
+  fallback pattern of 59 common AI words and phrases. The humanizeai.io
+  list page was not found by a search on 2026-11-26; the project terms
+  "robust" and "landscape" are not in the pattern.
+- **Next:** task 19.2 — the process choices of the maps and the chart,
+  before any code.
 
 ### 2026-11-21 — Week 18 complete: task 18.7 (docs close; the Week-19 plan)
 
