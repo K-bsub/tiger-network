@@ -99,15 +99,15 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ---
 
-## Current state  ·  **Week 19 in progress — task 19.1 done (Decision 29)** · 2026-11-26
+## Current state  ·  **Week 19 in progress — tasks 19.1–19.2 done (Decision 29; the process choices)** · 2026-11-26
 
 ### Where the project is
 
-- **Week 19 so far (2026-11-26; task 19.1; full record: Decision 29 and
+- **Week 19 so far (2026-11-26; tasks 19.1–19.2; full record: Decision 29 and
   the change log in `methodology.md`):**
   - Task 18.8 is done: the docs commit `3bac6f1` (2026-11-21), pushed.
-    The tick of task 18.8 in `project-plan.md` is the author's edit; it
-    goes into the docs commit of task 19.1.
+    The tick of task 18.8 in `project-plan.md` is its own commit
+    (`ac2f48a`, by the author). The docs of task 19.1: `7cae6de`.
   - Task 19.1: **Decision 29** (the published layers) — A1, B1, P4 with
     P4a, N1, S3 with Sf1, G2, C2, Q2, H3, T2, Z2, D1, K1; the readings R11
     and R13 (as read for P4); R12 does not apply with P4. Not the chat's
@@ -124,8 +124,22 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
     the labels and an attribution line in each map file (T2); a maximum
     zoom (Z2); no download (D1); a check of each coordinate of a map file,
     on the object and on the file (K1).
-  - **Next: task 19.2** — the process choices of the maps and the chart,
-    before any code (Decision 29, "Consequences").
+  - Task 19.2: the process choices of the maps and the chart — mt1, ch1,
+    bm1, zm1, sc1, nm1, lv1, fg1, fr1, hv1, rd1, ht1, sz1, vy1, ck1, rv1,
+    ts1 (each as recommended). In short: `leaflet` maps and a `ggiraph`
+    chart, saved as self-contained files in `site/widgets/<PNG stem>.html`
+    by a new script `scripts/12_build_maps.R` (with
+    `R/00_functions_map.R`; `MAP_*`; QA table `tbl_21_map_qa.csv`); the
+    ESRI Light Gray Canvas; a maximum zoom of 10 (`fig_02`, `fig_03`) or 9
+    (`fig_04`–`fig_08`); coordinates to 5 decimals; a limit of 10 MB a
+    file; a frame on the page with a link to the PNG; `site/_variables.yml`
+    from `scripts/11`; a list `SITE_MAPS` in place of
+    `SITE_ALLOW_WIDGETS`. **Run order:** `scripts/11`, `scripts/12`, the
+    render, `scripts/11` again. Full list: the change log of task 19.2.
+  - **Next: task 19.3** — STEP 19.1 of `scripts/12` (the interactive
+    `fig_01` and `fig_02`), the changes of STEP 18.1 that it needs, the
+    frames of the Growth page, `site/_variables.yml` and the captions as
+    page text; the chat's test first (ts1).
 - **Week 18 in short (2026-11-21; tasks 18.1–18.7; full record: Decision
   28 and the change log in `methodology.md`):**
   - Task 18.1: the four open items — the author's choices a1, b1, c3, d1
@@ -354,8 +368,8 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   *(2026-11-26: done — `3bac6f1`, pushed)*.
   The docs commit changes no file under `site/**` or `publish.yml`, so it
   does not deploy. Nothing under `data/` may be staged.
-- **Task 19.1 — Decision 29 (the published layers)** *(2026-11-26: done;
-  next: task 19.2)*, before any map
+- **Task 19.1 — Decision 29 (the published layers)** *(2026-11-26: done, and task
+  19.2; next: task 19.3)*, before any map
   file: for each figure `fig_02`–`fig_08` (and the surfaces of Decision
   27), no layer or a layer in a stated form (the geometry in the file, the
   class or the value, a zoom limit, a download or none); the check of the
@@ -871,6 +885,11 @@ of closed one-time work are in git history.)*
   package from CRAN). The project-machine
   run is the record. A chat cannot rebuild every input; it tests on
   made-up records.
+  *(2026-11-26, ts1 of task 19.2: neither the cloud workspace nor the
+  shell of the desktop app has R; `apt` gives R 4.3.3 and some R
+  packages (`htmlwidgets` 1.6.4, `plotly` 4.10.4, `sf` 1.0-15,
+  `ggplot2` 3.4.4); `leaflet`, `leaflet.providers` and `ggiraph` are
+  not in `apt` and are built from GitHub; CRAN is blocked.)*
 - **A forecast in a Decision can be wrong** (Decision 20: "robust" was
   named as likely; the result was "sensitive"; Decision 24 point 1 expected
   slope or TRI to stay). Record the result; do not change the Decision text.

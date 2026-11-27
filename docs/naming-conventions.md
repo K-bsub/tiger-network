@@ -75,6 +75,11 @@ run standalone.
 *(2026-11-21, task 18.5: `scripts/11_build_site.R` and
 `R/00_functions_site.R` — the files of the story site (Decision 28).)*
 
+*(2026-11-26, sc1 and nm1 of task 19.2: `scripts/12_build_maps.R` and
+`R/00_functions_map.R` — the maps and the chart of Decision 29 (reserved;
+built from task 19.3). Run order: `scripts/11` (STEP 18.1), `scripts/12`,
+the render, `scripts/11` again (STEP 18.2).)*
+
 ---
 
 ## 4. R objects
@@ -169,6 +174,7 @@ suffix marks a companion table to a numbered one (`tbl_05b_…`). As built:
 | `tbl_18` | `gistar` — the publishable statistics of the Gi\* (Decision 26 point 7; `scripts/09` STEP 16.1, task 16.3); `gistar_qa` — the QA of STEP 16.3 (task 16.5). Reserved by t1 of task 16.2 (2026-11-07). A landscape-complex name only in the `tiger_5km` rows of `gistar` *(built 2026-11-07: `gistar`, 92 rows; `gistar_qa`, 113 rows)* |
 | `tbl_19` | `sdmres_surface`, `sdmres_pairs`, `sdmres_compare`, `sdmres_compare_summary`, `sdmres_phase2`, `sdmres_phase2_summary`, `sdmres_qa`, `sdmres_phase2_qa` — the SDM-based resistance and the circuit-theory check (Decision 27; `scripts/10`). Reserved by n1 of task 17.2 (2026-11-14); `sdmres_compare_summary` added by TB1 of task 17.5; `sdmres_phase2_summary` and `sdmres_phase2_qa` added by T2a and Q2a of task 17.6b. Counts, statistics and pair rows with reserve names; no position and no cell id (Decision 27 point 10) *(built 2026-11-14: `sdmres_surface`, 52 rows; `sdmres_pairs`, 212 rows; `sdmres_compare`, 194 rows; `sdmres_compare_summary`, 2 rows; `sdmres_qa`, 196 rows; built 2026-11-15: `sdmres_phase2`, 3,080 rows; `sdmres_phase2_summary`, 48 rows; `sdmres_phase2_qa`, 62 rows)* |
 | `tbl_20` | `site_qa` — the QA of the render of the story site (`scripts/11` STEP 18.2, task 18.6; Decision 28). Check names, counts and file names; no position *(built 2026-11-21: 45 rows)* |
+| `tbl_21` | `map_qa` — the QA of the map and chart files (`scripts/12` STEP 19.2, task 19.4; Decision 29 point 13). Reserved by nm1 of task 19.2 (2026-11-26). Check names, counts and file names; no position |
 
 Before a new table is written, check that its full filename is not already in
 use. A new, unrelated table takes the next free number.
@@ -227,6 +233,12 @@ and `sdmres_phase2_qa` (T2a, Q2a); the layers `main_phase2` and
 `fig_09` and `tbl_20` are still the next free numbers.)*
 *(2026-11-21, tasks 18.5–18.6: `tbl_20_site_qa.csv` is built. `tbl_21` and
 `fig_09` are the next free numbers.)*
+*(2026-11-26, nm1 of task 19.2: `tbl_21_map_qa.csv` is reserved; `tbl_22`
+and `fig_09` are the next free numbers. The map and chart files are
+`site/widgets/<PNG stem>.html`, one for each figure
+(`fig_01_growth_ranking.html` to `fig_08_sdm_paths.html`). They are site
+files, written by `scripts/12`; they take no figure number, and the PNG
+files stay the record (Decision 28 P1).)*
 
 **Site files** *(2026-11-21, Decision 28, task 18.5)*: `site/figures/` holds
 copies of the committed figures, with the same file names. `site/tables/`

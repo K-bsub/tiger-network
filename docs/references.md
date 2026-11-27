@@ -1592,6 +1592,60 @@ data-for="htmlwidget-…">` in a file of `saveWidget()`. Decision 29,
 facts.)* *(Through a search tool (a snippet). Users, not staff. Not to be
 cited on the site.)*
 
+## Maps and chart (task 19.2)
+
+*All entries in this section were read on 2026-11-26, through a fetch tool
+(a summary of the page) or a search tool (snippets). No entry was read in
+full. Verify each entry before it is cited on the site.*
+
+leaflet-extras. `leaflet-providers.js` (GitHub, branch master).
+https://github.com/leaflet-extras/leaflet-providers/blob/master/leaflet-providers.js
+· *(The Esri tile address
+`https://server.arcgisonline.com/ArcGIS/rest/services/{variant}/MapServer/tile/{z}/{y}/{x}`;
+the credit "Tiles © Esri"; `WorldGrayCanvas` = `Canvas/World_Light_Gray_Base`,
+maximum zoom 16, credit "Esri, DeLorme, NAVTEQ"; `WorldTerrain` and
+`WorldShadedRelief`, maximum zoom 13. Choices bm1 and zm1 of task 19.2.)*
+*(Through a fetch tool (a summary). The master branch, not the version in
+the R package `leaflet.providers` of the project.)*
+
+OpenStreetMap Wiki. "Zoom levels".
+https://wiki.openstreetmap.org/wiki/Zoom_levels · *(Metres per pixel at
+the equator for 256 px tiles, for example 611.496 at zoom 8, 305.748 at
+zoom 9 and 152.874 at zoom 10; multiply by the cosine of the latitude.
+Choice zm1 of task 19.2.)* *(Through a fetch tool (a summary). A wiki
+page.)*
+
+CRAN. Package `ggiraph` (index pages of CRAN mirrors; r-universe API).
+https://ftp.fau.de/cran/web/packages/ggiraph/index.html ·
+https://cran.dcc.uchile.cl/web/packages/ggiraph/index.html ·
+https://cran.r-universe.dev/api/packages/ggiraph · *(Version 0.9.6, with
+Windows binaries; imports `ggplot2` (≥ 4.0.0), `gdtools`, `htmlwidgets`
+(≥ 1.5), `systemfonts` (≥ 1.3.1) and others; `NeedsCompilation: yes`.
+Choices ch1 and ts1 of task 19.2.)* *(Through a search tool (snippets).
+The minimum version of `gdtools` differs between the mirror page (0.4.4)
+and r-universe (0.5.0); not checked.)*
+
+r-pkg.org. "Make 'ggplot2' Graphics Interactive" (the README of
+`ggiraph`). https://r-pkg.org/pkg/ggiraph · *(`ggiraph` is an htmlwidget
+and a `ggplot2` extension; it exports the graphics as SVG documents.
+Choice ch1 of task 19.2.)* *(Through a search tool (a snippet).)*
+
+Sievert, C. *Interactive web-based data visualization with R, plotly, and
+shiny*, chapter "Saving and embedding HTML" (the online book).
+https://plotly-book.netlify.app/saving ·
+https://www.taylorfrancis.com/chapters/mono/10.1201/9780429447273-12/saving-embedding-html-carson-sievert
+· *(A self-contained file of a simple `plotly` chart: 3.495 MB, and 1.068
+MB with `partial_bundle()`; with many self-contained widgets in frames the
+browser parses the same libraries again. Choices mt1 and ch1 of task
+19.2.)* *(Through a search tool (snippets). The year and the edition are
+not recorded.)*
+
+htmlwidgets NEWS (CRAN).
+https://cran.r-project.org/web/packages/htmlwidgets/news/news.html ·
+*(`saveWidget(selfcontained=TRUE)` uses the `rmarkdown` package to find
+and call pandoc. Choices mt1 and rv1 of task 19.2.)* *(Through a search
+tool (a snippet). The version of this NEWS item is not recorded.)*
+
 ## Tiger movement and landscape resistance (Decision 14)
 
 Dutta, S., & Krishnamurthy, R. (2024). Multiphasic movement and step-selection

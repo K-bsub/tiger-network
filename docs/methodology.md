@@ -2,9 +2,9 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** **Week 19 in progress (2026-11-26): task 19.1 done —
-Decision 29 (the published layers); the pending item "Published layers"
-is closed.** **Week 18 complete (2026-11-21; tasks 18.1–18.7): the four
+**Status:** **Week 19 in progress (2026-11-26): tasks 19.1–19.2 done —
+Decision 29 (the published layers; the pending item "Published layers" is
+closed) and the process choices of the maps and the chart.** **Week 18 complete (2026-11-21; tasks 18.1–18.7): the four
 open items closed; Decision 28 (the form of the story site); the site
 skeleton built, checked (QA 45 of 45) and deployed (`90ac814`,
 `c908447`); the Week-19 plan (W19a: Stage 4 in Weeks 18–22).**
@@ -103,8 +103,11 @@ of its figure; the reserve outlines and the Stage-2 paths as built (the
 paths at 1 km with a maximum zoom; policy §3 amended, P4a); the 0.2°
 cells from their corners, with the class, and the value for the
 suitability; the hatch as an outline and lines; labels in each map file;
-no download; a check of each coordinate of a map file. **Next:** task
-19.2 — the process choices of the maps and the chart.
+no download; a check of each coordinate of a map file. **Task 19.2
+(2026-11-26):** the process choices of the maps and the chart: `leaflet`
+maps and a `ggiraph` chart, saved as self-contained files in
+`site/widgets/` by a new script `scripts/12_build_maps.R`. **Next:** task
+19.3 — the interactive `fig_01` and `fig_02`.
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -6090,6 +6093,128 @@ closed by Decision 29 (task 19.1); its text stays below as a record.)*
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-26 — Week 19, task 19.2: process choices of the maps and the chart (no code, no run)
+
+- **No rule, value, data layer, table or script changed; no run.** The
+  docs of task 19.1 are committed (`7cae6de`; the tick of task 18.8 in
+  `ac2f48a`, by the author).
+- **The author's answer (2026-11-26):** "mt1, ch1, bm1, zm1, sc1, nm1, lv1,
+  fg1, fr1, hv1, rd1, ht1, sz1, vy1, ck1, rv1, ts1". Each is the chat's
+  recommendation. *(Codes of task 19.2 have two letters, so that they do
+  not mix with the codes of Decision 29. Write "ch1 of task 19.2".)*
+  - **mt1 (the map tool):** `leaflet`; each map is saved with
+    `htmlwidgets::saveWidget(selfcontained = TRUE)` (Decision 28 R8). A
+    guard `rmarkdown::pandoc_available()` stops the script with no pandoc,
+    and makes renv record `rmarkdown`. The Leaflet recipe of the tools
+    record applies: `fitBounds` last; a wait for the real height of the
+    frame before `fitBounds`; `zoomSnap` 0.1; small bounds made wider;
+    `minZoom` below the fit.
+  - **ch1 (the chart of `fig_01`):** `ggiraph`, an htmlwidget that writes
+    SVG. The chart uses the `ggplot` code of `fig_01` (`scripts/05` STEP 5)
+    with interactive bars, and it reads `tbl_01_reserve_growth.csv` only.
+  - **bm1 (the basemap):** `Esri.WorldGrayCanvas` (the Light Gray Canvas
+    base) in each map, with no label layer and no road overlay.
+  - **zm1 (Decision 29 Z2):** `minZoom` 4 in each map; the maximum zoom is
+    10 for `fig_02` and `fig_03`, and 9 for `fig_04`–`fig_08`. Judgement
+    values: at 20° N a 0.2° cell is about 75 px at zoom 9; a 1 km cell is
+    about 7 px at zoom 10; India is about 670 px wide at zoom 5.
+  - **sc1 (the script):** a new script `scripts/12_build_maps.R` and a new
+    function file `R/00_functions_map.R`. The script reads
+    `data/processed/` and `outputs/tables/`; it writes the map and chart
+    files into `site/widgets/` and its QA table. `scripts/11` reads no
+    file under `data/` (no change). Run order: source `scripts/11` (STEP
+    18.1), source `scripts/12`, `quarto render site` in the Terminal,
+    source `scripts/11` again (STEP 18.2).
+  - **nm1 (the names):** `site/widgets/<PNG stem>.html`, one file for each
+    figure (for example `fig_02_growth_animation.html`); a config block
+    `MAP_*`; the functions `map_*` and the second path `map_qa_*`; STEP
+    19.1 (task 19.3) and STEP 19.2 (task 19.4); the QA table
+    `tbl_21_map_qa.csv`. The slug of `fig_02` says "animation"; its map has
+    a radio control (fg1).
+  - **lv1:** `fig_04` and `fig_05` are two maps, one for each figure.
+  - **fg1 (the form of `fig_02`):** one map with three layers (2014, 2018,
+    2022) and radio buttons; 2022 shows first; the fixed classes and the
+    colours of `scripts/05` (`POP_BREAKS`, `POP_RAMP`), with "No estimate"
+    and "0 (real)" kept apart.
+  - **fr1 (the frame):** a page shows each map in an `<iframe>` (a
+    `title`, `loading="lazy"`, width 100 %). Below the frame: the draft
+    alt text as a short description and a link "Static version (PNG)" to
+    the copy in `site/figures/`, which stays. `site/_quarto.yml` gets
+    `resources: widgets/`, so that Quarto copies the map files.
+  - **hv1:** a label on hover and the same text in a popup on click or
+    tap.
+  - **rd1 (the rounding):** each coordinate to 5 decimals of a degree
+    (about 1.1 m), and the same rounding in the check; the corners of the
+    0.2° cells stay exact. The cloglog value to 2 decimals, "< 0.01" below
+    0.005. Other numbers by d1 of task 18.4.
+  - **ht1 (the hatch of Decision 29 H3):** lines at 45° (y = x + c), with
+    c in steps of 0.1°: 3 lines in each cell (the corner diagonal and two
+    lines through the midpoints of the edges), as in the PNG files. Each
+    end of a line is a multiple of 0.1°; the check allows these points for
+    the hatch layer only.
+  - **sz1 (Decision 29 point 13):** a limit of 10 MB for each map file (a
+    judgement value); above it the script stops, and the author decides
+    (Decision 29 point 2). The coordinate check is exact after the
+    rounding of rd1 (within 1e-9°).
+  - **vy1:** `scripts/11` writes `site/_variables.yml` (STEP 18.1), from
+    the committed tables only.
+  - **ck1 (the site checks):** a list `SITE_MAPS` (the file, the figure,
+    the page, the kind) in `R/00_config.R` takes the place of
+    `SITE_ALLOW_WIDGETS`. STEP 18.1 (task 19.3): the config guard, the
+    scan (an `.html` file in `site/widgets/` only if it is on
+    `SITE_MAPS`; `.js` and `.json` stay refused) and the page guards (the
+    frames, the PNG links). STEP 18.2 (task 19.4): check b (each map of a
+    page is a frame; its file in `_site/` has the MD5 of the file in
+    `site/widgets/`), check c (a title and a description for each frame),
+    checks f and g (the map files are allowed), check i (no frame that is
+    not on `SITE_MAPS`), and a new check l (`tbl_21_map_qa.csv` passes).
+  - **rv1 (rule S1):** `renv::snapshot()` after the first run of
+    `scripts/12` records `leaflet`, `htmlwidgets`, `htmltools`,
+    `leaflet.providers`, `rmarkdown` and `ggiraph` with their
+    dependencies. The `scripts/00a` list gets `ggiraph` and `rmarkdown`,
+    and the comment "Planned, not used yet" changes.
+  - **ts1 (the chat's tests):** the chat installs R 4.3.3 from `apt`,
+    builds `leaflet` and `leaflet.providers` from their GitHub sources,
+    and for ch1 also `ggplot2` 4.0.3, `systemfonts`, `gdtools` and
+    `ggiraph`. It tests on made-up layers, with no data file. The run on
+    the project machine is the record. If a build fails, the chat says
+    so, and the author's run tests that part.
+- **Facts given with the choices** (the sources are in the new section of
+  `references.md`): the ESRI tile address and its credit; the maximum zoom
+  of `Esri.WorldGrayCanvas` (16) and of the two terrain basemaps (13); the
+  metres per pixel at each zoom; `ggiraph` 0.9.6 (it imports `ggplot2`
+  4.0.0 or later, `gdtools` and `systemfonts`; compiled code; SVG
+  output); the size of a self-contained `plotly` file (3.495 MB; 1.068 MB
+  with a partial bundle); `saveWidget(selfcontained = TRUE)` finds pandoc
+  through `rmarkdown`; self-contained widgets in many frames repeat their
+  libraries. The chat's workspaces (2026-11-26): no R in the cloud
+  workspace or in the shell of the desktop app (pandoc 3.1.3 and 2.9.2.1
+  only); `apt` gives R 4.3.3, `htmlwidgets` 1.6.4, `htmltools` 0.5.7,
+  `plotly` 4.10.4, `sf` 1.0-15, `ggplot2` 3.4.4, `rmarkdown` 2.25,
+  `systemfonts` 1.0.5 and `gdtools` 0.3.5; `leaflet`,
+  `leaflet.providers` and `ggiraph` are not in `apt`; CRAN is blocked;
+  GitHub is open.
+- **Not checked:** that Quarto 1.10.18 copies `site/widgets/*.html` with
+  `resources:` and does not render them as pages (the QA of task 19.4
+  compares the MD5); the vertex counts of the outlines and the paths (the
+  optional console count of task 19.2 was not sent); the versions of
+  `leaflet`, `htmlwidgets` and `rmarkdown` on the project machine.
+- **`naming-conventions.md`:** `scripts/12_build_maps.R`,
+  `R/00_functions_map.R`, `site/widgets/` and `tbl_21_map_qa.csv`
+  (reserved); `tbl_22` and `fig_09` are the next free numbers.
+- **`references.md`:** a new section "Maps and chart (task 19.2)".
+- **`project-plan.md`:** task 19.2 ticked; the progress row. **`handoff.md`:**
+  the Week-19 state; a dated note on the gotcha "The chat's tests use
+  other versions"; a text fix (the tick of task 18.8 is its own commit,
+  `ac2f48a`).
+- **AI-word check:** the new text of task 19.2 (this entry, the notes, the handoff lines and
+  the new section of `references.md`) has no hit of the fallback pattern
+  of 59 common AI words and phrases (as in task 19.1).
+- **Next:** task 19.3 — STEP 19.1 of `scripts/12` (the interactive `fig_01`
+  and `fig_02`), the changes of STEP 18.1 that it needs (ck1), the frames
+  of the Growth page (fr1), `site/_variables.yml` (vy1) and the captions
+  as page text; the chat's test first (ts1).
 
 ### 2026-11-26 — Week 19, task 19.1: Decision 29 recorded (no map file, no code)
 
