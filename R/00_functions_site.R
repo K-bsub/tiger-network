@@ -21,11 +21,18 @@
 #   site_shift_headings()   each Markdown heading down by n levels
 #   site_check_suppressed() the check of Decision 22 point 9 on a page table
 #   site_scan_files()       the files in site/ that the check refuses
-#   site_page_refs()        the figures and the include files that a page
-#                           holds
+#   site_page_refs()        the figures, the images, the frames, the
+#                           include files and the {{< var >}} keys that a
+#                           page holds
 #   site_write_if_changed() write lines only if the file differs
 #   site_copy_if_changed()  copy a file only if the copy differs (MD5)
 #   site_self_test()        the hand-made case of STEP 18.1 (h1)
+# Task 19.3 (2026-11-26; Decision 29; ck1 and vy1 of task 19.2):
+#   site_vars_growth()      the numbers (and two lists of names, mb1) of the
+#                           captions of fig_01 and fig_02
+#                           from tbl_01 and tbl_02 (text)
+#   site_variables_lines()  the lines of site/_variables.yml
+#   (changed) site_check_config(), site_scan_files(), site_page_refs()
 #
 # SENSITIVE DATA (docs/sensitive-data-policy.md; Decision 28 point 8): the
 # functions read committed outputs only (outputs/figures, outputs/tables).
@@ -65,8 +72,12 @@ site_check_config <- function() {
       SITE_SIGNIF == round(SITE_SIGNIF),
     "SITE_REPO_URL: an https URL with no trailing slash" =
       grepl("^https://", SITE_REPO_URL) && !grepl("/$", SITE_REPO_URL),
-    "SITE_ALLOW_WIDGETS is FALSE in Week 18 (Decision 28 R9)" =
-      identical(SITE_ALLOW_WIDGETS, FALSE),
+    "SITE_MAPS: unique files, each figure on SITE_FIGURES (Decision 29; ck1)" =
+      !anyDuplicated(SITE_MAPS$file) &&
+      all(SITE_MAPS$figure %in% SITE_FIGURES$file) &&
+      all(grepl("\\.html$", SITE_MAPS$file)),
+    "SITE_VARIABLES_FILE: a .yml file at the top of site/ (vy1)" =
+      grepl("^_[a-z_]+\\.yml$", SITE_VARIABLES_FILE),
     "SITE_BANNED_EXT holds csv, gpkg, tif and rds" =
       all(c("csv", "gpkg", "tif", "rds") %in% SITE_BANNED_EXT)
   )
@@ -201,10 +212,11 @@ site_check_suppressed <- function(csv, shown, mark = SITE_SUPPRESSED_MARK,
 }
 
 # The files in site_dir that the check refuses (Decision 28 point 8): a
-# banned file type, or (with no widgets allowed) a widget file. The render
-# folders are not read. Returns the paths relative to site_dir.
+# banned file type, or a widget file that is not on the allow-list (the
+# files of SITE_MAPS in site/widgets/; Decision 29, ck1 of task 19.2). The
+# render folders are not read. Returns the paths relative to site_dir.
 site_scan_files <- function(site_dir, banned = SITE_BANNED_EXT,
-                            allow_widgets = SITE_ALLOW_WIDGETS,
+                            allowed = file.path(SITE_WIDGET_DIR, SITE_MAPS$file),
                             widget_ext = SITE_WIDGET_EXT,
                             skip = SITE_SKIP_DIRS) {
   f <- list.files(site_dir, recursive = TRUE, all.files = TRUE,
@@ -212,26 +224,122 @@ site_scan_files <- function(site_dir, banned = SITE_BANNED_EXT,
   top <- sub("/.*$", "", f)
   f <- f[!top %in% skip & !grepl("(^|/)(_site|\\.quarto|site_libs)/", f)]
   ext <- tolower(tools::file_ext(f))
-  bad <- ext %in% banned
-  if (!allow_widgets) bad <- bad | ext %in% widget_ext
+  bad <- ext %in% banned | (ext %in% widget_ext & !f %in% allowed)
   f[bad]
 }
 
-# The figures and the include files that a page holds. Returns a list:
-# figures (file names in SITE_FIG_DIR) and includes (file names in
-# SITE_TABLE_DIR).
+# The references that a page holds; the HTML comments are not read.
+# Returns a list:
+#   figures  : each file of SITE_FIG_DIR in a link or an image, `](figures/x)`
+#   images   : each file of SITE_FIG_DIR in an image, `![...](figures/x)`
+#   frames   : each file of SITE_WIDGET_DIR in a frame, `<iframe src="widgets/x"`
+#   includes : each file of SITE_TABLE_DIR in an include shortcode
+#   vars     : each key of a var shortcode, `{{< var a.b >}}`
 site_page_refs <- function(page_path, fig_dir = SITE_FIG_DIR,
-                           table_dir = SITE_TABLE_DIR) {
+                           table_dir = SITE_TABLE_DIR,
+                           widget_dir = SITE_WIDGET_DIR) {
   txt <- readLines(page_path, warn = FALSE, encoding = "UTF-8")
-  txt <- txt[!grepl("^\\s*<!--", txt)]
-  fig_re <- paste0("\\]\\(", fig_dir, "/([^)\\s]+)\\)")
-  figs <- unlist(regmatches(txt, gregexpr(fig_re, txt, perl = TRUE)))
-  figs <- sub(paste0("^\\]\\(", fig_dir, "/"), "", sub("\\)$", "", figs))
-  inc_re <- paste0("\\{\\{< include ", table_dir, "/([^ ]+) >\\}\\}")
-  incs <- unlist(regmatches(txt, gregexpr(inc_re, txt, perl = TRUE)))
-  incs <- sub(paste0("^\\{\\{< include ", table_dir, "/"), "",
-              sub(" >\\}\\}$", "", incs))
-  list(figures = figs, includes = incs)
+  txt <- paste(txt, collapse = "\n")
+  txt <- gsub("(?s)<!--.*?-->", "", txt, perl = TRUE)
+  grab <- function(re) {
+    m <- regmatches(txt, gregexpr(re, txt, perl = TRUE))[[1]]
+    if (length(m) == 0) return(character(0))
+    sub(re, "\\1", m, perl = TRUE)
+  }
+  list(
+    figures  = grab(paste0("\\]\\(", fig_dir, "/([^)\\s]+)\\)")),
+    images   = grab(paste0("!\\[[^\\]]*\\]\\(", fig_dir, "/([^)\\s]+)\\)")),
+    frames   = grab(paste0("<iframe[^>]*\\ssrc=\"", widget_dir, "/([^\"]+)\"")),
+    includes = grab(paste0("\\{\\{< include ", table_dir, "/([^ ]+) >\\}\\}")),
+    vars     = grab("\\{\\{< var ([A-Za-z0-9_.]+) >\\}\\}"))
+}
+
+# ---- The numbers of the captions (vy1 of task 19.2) ----------------------------------
+# The keys and the values (text, with a thousands mark) of the captions of
+# fig_01 and fig_02, from the committed tables only.
+#   t01    : tbl_01_reserve_growth.csv as text (site_read_table())
+#   t02    : tbl_02_regional_rollup.csv as text
+#   t07    : tbl_07_census_join_check.csv as text (unit_name,
+#            geometry_present) (mb1, task 19.3)
+#   metric : SITE_VARS_METRIC (the metric of fig_01)
+#   rounds : CENSUS_SERIES_YEARS
+# Returns a named character vector; the names are the keys ("fig01.n_ranked").
+# A list of names is in byte order, ", " between names, or "none".
+#   fig01.no_panel    the reserves with no value in a landscape complex with
+#                     no reserve with a value (the chart has no panel for
+#                     that complex)
+#   fig02.n_not_drawn, fig02.not_drawn   the reserves with no polygon
+# It stops if the landscape rows and the state rows of tbl_02 give other
+# totals (they must agree: scripts/05 STEP 7), or if geometry_present is not
+# TRUE or FALSE.
+site_vars_growth <- function(t01, t02, t07, metric = SITE_VARS_METRIC,
+                             rounds = CENSUS_SERIES_YEARS) {
+  names_or_none <- function(x) {
+    if (length(x) == 0) "none" else paste(sort(x, method = "radix"),
+                                          collapse = ", ")
+  }
+  num <- function(x) suppressWarnings(as.numeric(x))
+  n <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
+  if (!metric %in% names(t01)) {
+    stop("site_vars_growth(): tbl_01 has no column ", metric, call. = FALSE)
+  }
+  has_v <- !is.na(num(t01[[metric]]))
+  n_ranked <- sum(has_v)
+  no_panel <- t01$unit_name[!has_v & !t01$landscape_complex %in%
+                              t01$landscape_complex[has_v]]
+  gp <- toupper(t07$geometry_present)
+  if (!all(c("unit_name", "geometry_present") %in% names(t07)) ||
+      !all(gp %in% c("TRUE", "FALSE"))) {
+    stop("site_vars_growth(): tbl_07 needs unit_name and a geometry_present ",
+         "of TRUE or FALSE in each row.", call. = FALSE)
+  }
+  out <- c("fig01.n_reserves" = n(nrow(t01)),
+           "fig01.n_ranked" = n(n_ranked),
+           "fig01.n_not_ranked" = n(nrow(t01) - n_ranked),
+           "fig01.no_panel" = names_or_none(no_panel),
+           "fig02.n_not_drawn" = n(sum(gp == "FALSE")),
+           "fig02.not_drawn" = names_or_none(t07$unit_name[gp == "FALSE"]))
+  lc <- t02[t02$unit_level == "landscape_complex", , drop = FALSE]
+  sr <- t02[t02$unit_level == "state", , drop = FALSE]
+  for (yr in rounds) {
+    pc <- paste0("pop_", yr); nc <- paste0("n_pop_", yr)
+    if (!all(c(pc, nc) %in% names(t02))) {
+      stop("site_vars_growth(): tbl_02 has no column ", pc, " or ", nc,
+           call. = FALSE)
+    }
+    tot <- sum(num(lc[[pc]]), na.rm = TRUE)
+    cnt <- sum(num(lc[[nc]]), na.rm = TRUE)
+    if (tot != sum(num(sr[[pc]]), na.rm = TRUE) ||
+        cnt != sum(num(sr[[nc]]), na.rm = TRUE)) {
+      stop("site_vars_growth(): the landscape rows and the state rows of ",
+           "tbl_02 give other totals for ", yr, ".", call. = FALSE)
+    }
+    out[paste0("fig02.total_", yr)] <- n(tot)
+    out[paste0("fig02.n_", yr)] <- n(cnt)
+  }
+  out
+}
+
+# The lines of site/_variables.yml: one block for each first part of the
+# keys, the keys in byte order, each value as a quoted text.
+site_variables_lines <- function(vars) {
+  if (is.null(names(vars)) || anyDuplicated(names(vars)) ||
+      !all(grepl("^[a-z0-9_]+\\.[a-z0-9_]+$", names(vars)))) {
+    stop("site_variables_lines(): each key must be unique, of the form ",
+         "a.b (lower case, digits, _).", call. = FALSE)
+  }
+  vars <- vars[sort(names(vars), method = "radix")]
+  grp <- sub("\\..*$", "", names(vars))
+  key <- sub("^[^.]*\\.", "", names(vars))
+  esc <- function(x) gsub("\"", "\\\\\"", gsub("\\\\", "\\\\\\\\", x))
+  out <- c("# Written by scripts/11_build_site.R STEP 18.1 (vy1 of task 19.2) from",
+           "# the committed tables. Do not edit it by hand.")
+  for (g in unique(grp)) {
+    i <- which(grp == g)
+    out <- c(out, paste0(g, ":"),
+             paste0("  ", key[i], ": \"", esc(unname(vars[i])), "\""))
+  }
+  out
 }
 
 # ---- Write and copy ---------------------------------------------------------------
@@ -316,12 +424,17 @@ site_self_test <- function() {
   writeLines("x", file.path(sd, "figures", "fig_99.png"))
   writeLines("x", file.path(sd, "_site", "page.html"))
   writeLines("x", file.path(sd, ".quarto", "cache.json"))
-  scan_clean <- site_scan_files(sd, c("csv", "gpkg"), FALSE, c("html", "json"),
-                                c("_site", ".quarto"))
+  scan_clean <- site_scan_files(sd, c("csv", "gpkg"), character(0),
+                                c("html", "json"), c("_site", ".quarto"))
   writeLines("x", file.path(sd, "figures", "layer.gpkg"))
   writeLines("x", file.path(sd, "map.html"))
-  scan_bad <- site_scan_files(sd, c("csv", "gpkg"), FALSE, c("html", "json"),
-                              c("_site", ".quarto"))
+  scan_bad <- site_scan_files(sd, c("csv", "gpkg"), character(0),
+                              c("html", "json"), c("_site", ".quarto"))
+  dir.create(file.path(sd, "widgets"))
+  writeLines("x", file.path(sd, "widgets", "m.html"))
+  writeLines("x", file.path(sd, "widgets", "n.html"))
+  scan_allow <- site_scan_files(sd, c("csv", "gpkg"), "widgets/m.html",
+                                c("html", "json"), c("_site", ".quarto"))
   # Write and copy only if changed; the time stamp of an unchanged file.
   f1 <- file.path(tmp, "a.md")
   w1 <- site_write_if_changed(c("x", "y \u2014 \u00e9"), f1)
@@ -341,6 +454,36 @@ site_self_test <- function() {
                "![label](figures/fig_01_a.png){fig-alt=\"t\"}", "",
                "{{< include tables/_tbl_01_a.md >}}", ""), pg)
   refs <- site_page_refs(pg, "figures", "tables")
+  pg2 <- file.path(tmp, "p2.qmd")
+  writeLines(c("<!-- a note over two lines: ![x](figures/old.png)",
+               "<iframe src=\"widgets/old.html\"></iframe> -->",
+               "```{=html}",
+               "<iframe src=\"widgets/fig_02_b.html\" title=\"t\" loading=\"lazy\"></iframe>",
+               "```", "",
+               "A count: {{< var fig01.n_ranked >}}.", "",
+               "[Static version (PNG)](figures/fig_02_b.png)", ""), pg2)
+  refs2 <- site_page_refs(pg2, "figures", "tables", "widgets")
+  # vy1: the numbers of the captions and the lines of the YAML file.
+  t01 <- data.frame(unit_name = c("A", "B", "C", "D"),
+                    landscape_complex = c("x", "x", "x", "y"),
+                    change_pct = c("10", NA, "-5", NA), stringsAsFactors = FALSE)
+  t07 <- data.frame(unit_name = c("Q", "A", "P"),
+                    geometry_present = c("FALSE", "TRUE", "FALSE"),
+                    stringsAsFactors = FALSE)
+  t07_bad <- t07; t07_bad$geometry_present[1] <- NA
+  t02 <- data.frame(unit_level = c("landscape_complex", "landscape_complex",
+                                   "state", "state"),
+                    pop_2014 = c("1000", "586", "1500", "86"),
+                    n_pop_2014 = c("1", "2", "2", "1"),
+                    stringsAsFactors = FALSE)
+  vg <- site_vars_growth(t01, t02, t07, "change_pct", 2014L)
+  vg0 <- site_vars_growth(t01[1:3, ], t02, t07[2, ], "change_pct", 2014L)
+  t02_bad <- t02; t02_bad$pop_2014[3] <- "1499"
+  vg_bad <- tryCatch({ site_vars_growth(t01, t02_bad, t07, "change_pct", 2014L)
+                       FALSE }, error = function(e) TRUE)
+  vg_bad7 <- tryCatch({ site_vars_growth(t01, t02, t07_bad, "change_pct", 2014L)
+                        FALSE }, error = function(e) TRUE)
+  yl <- site_variables_lines(c("b.x" = "1", "a.y" = "q\"r"))
   links <- site_links_block(data.frame(name = "tbl_99_b", rows = 3080),
                             "https://example.org/r")
   la <- site_links_all(c("b.csv", "a.md"), "https://example.org/r")
@@ -374,6 +517,28 @@ site_self_test <- function() {
     "page references: the figure and the include; a comment is not read" =
       identical(refs$figures, "fig_01_a.png") &&
       identical(refs$includes, "_tbl_01_a.md"),
+    "page references: an image is an image; a frame, a PNG link and a var key; a comment over two lines is not read" =
+      identical(refs$images, "fig_01_a.png") &&
+      identical(refs2$figures, "fig_02_b.png") &&
+      length(refs2$images) == 0 &&
+      identical(refs2$frames, "fig_02_b.html") &&
+      identical(refs2$vars, "fig01.n_ranked"),
+    "scan: a widget file on the allow-list passes; another one is found" =
+      setequal(scan_allow, c("figures/layer.gpkg", "map.html",
+                             "widgets/n.html")),
+    "vy1: the counts of fig_01; the totals of fig_02 with a thousands mark; other totals stop" =
+      identical(unname(vg[c("fig01.n_reserves", "fig01.n_ranked",
+                            "fig01.n_not_ranked", "fig02.total_2014",
+                            "fig02.n_2014")]),
+                c("4", "2", "2", "1,586", "3")) && vg_bad,
+    "vy1 (mb1): no panel, not drawn; names in byte order, or none; a bad geometry_present stops" =
+      identical(unname(vg[c("fig01.no_panel", "fig02.n_not_drawn",
+                            "fig02.not_drawn")]), c("D", "2", "P, Q")) &&
+      identical(unname(vg0[c("fig01.no_panel", "fig02.n_not_drawn",
+                             "fig02.not_drawn")]), c("none", "0", "none")) &&
+      vg_bad7,
+    "vy1: the YAML lines: the groups and the keys in byte order, quoted values" =
+      identical(yl[-(1:2)], c("a:", "  y: \"q\\\"r\"", "b:", "  x: \"1\"")),
     "link lists: the rows with a thousands mark; the files sorted" =
       identical(links[1], "- [`tbl_99_b.csv`](https://example.org/r/outputs/tables/tbl_99_b.csv) \u2014 3,080 rows") &&
       identical(la[3], "- [`a.md`](https://example.org/r/outputs/tables/a.md)")
@@ -424,11 +589,17 @@ site_qa_fresh <- function(site_dir, out = SITE_OUT_DIR) {
 }
 
 # One rendered page (x1: xml2). Returns a list:
-#   img    data frame: src, alt, caption (the figcaption of its figure)
-#   tables list of list(header = text, cells = a character matrix)
-#   links  the href of each link
-#   text   the text of the body
-#   html   the HTML as one text
+#   img     data frame: src, alt, caption (the figcaption of its figure)
+#   frames  data frame: src, title, desc (the text of the element that
+#           aria-describedby names), static (the href of the first link to
+#           figures/ after the frame, in the same section and before the
+#           next frame) (task 19.4, ck1)
+#   widgets the number of widgets in the page itself (an element of the
+#           class html-widget, or a script with data-for) (task 19.4)
+#   tables  list of list(header = text, cells = a character matrix)
+#   links   the href of each link
+#   text    the text of the body
+#   html    the HTML as one text
 site_qa_page <- function(path) {
   html <- paste(readLines(path, warn = FALSE, encoding = "UTF-8"),
                 collapse = "\n")
@@ -453,7 +624,33 @@ site_qa_page <- function(path) {
   })
   links <- xml2::xml_attr(xml2::xml_find_all(doc, "//a[@href]"), "href")
   body <- xml2::xml_find_first(doc, "//body")
-  list(img = img, tables = tabs, links = links,
+  path_of <- function(n) {
+    if (inherits(n, "xml_missing")) NA_character_ else xml2::xml_path(n)
+  }
+  ifr <- xml2::xml_find_all(doc, "//iframe")
+  fr_desc <- vapply(ifr, function(f) {
+    id <- xml2::xml_attr(f, "aria-describedby")
+    if (is.na(id) || !nzchar(id)) return(NA_character_)
+    n <- xml2::xml_find_first(doc, sprintf("//*[@id='%s']", id))
+    if (inherits(n, "xml_missing")) NA_character_ else trimws(xml2::xml_text(n))
+  }, character(1))
+  fr_static <- vapply(ifr, function(f) {
+    a <- xml2::xml_find_first(f, "following::a[starts-with(@href, 'figures/')][1]")
+    if (inherits(a, "xml_missing")) return(NA_character_)
+    same_frame <- identical(path_of(xml2::xml_find_first(a, "preceding::iframe[1]")),
+                            xml2::xml_path(f))
+    same_sec <- identical(path_of(xml2::xml_find_first(a, "preceding::h2[1]")),
+                          path_of(xml2::xml_find_first(f, "preceding::h2[1]")))
+    if (same_frame && same_sec) xml2::xml_attr(a, "href") else NA_character_
+  }, character(1))
+  frames <- data.frame(src = xml2::xml_attr(ifr, "src"),
+                       title = xml2::xml_attr(ifr, "title"),
+                       desc = fr_desc, static = fr_static,
+                       stringsAsFactors = FALSE)
+  n_wid <- length(xml2::xml_find_all(doc, paste0(
+    "//*[contains(concat(' ', normalize-space(@class), ' '), ' html-widget ')]",
+    " | //script[@data-for]")))
+  list(img = img, frames = frames, widgets = n_wid, tables = tabs, links = links,
        text = if (inherits(body, "xml_missing")) "" else xml2::xml_text(body),
        html = html)
 }
@@ -485,7 +682,13 @@ site_qa_self_test <- function() {
             "<p><a href=\"https://example.org/r/outputs/tables/t.csv\">t</a> at 21.1234\u00b0 N</p>",
             "</main></body></html>")
   writeLines(page, file.path(out, "index.html"), useBytes = TRUE)
-  writeLines("<html><body><iframe src=\"m.html\"></iframe></body></html>",
+  writeLines(c("<html><body><h2>A</h2>",
+               "<iframe src=\"widgets/m.html\" title=\"T\" aria-describedby=\"d1\"></iframe>",
+               "<div id=\"d1\"><p><strong>Description.</strong> D</p></div>",
+               "<p><a href=\"figures/m.png\">Static version (PNG)</a></p>",
+               "<iframe src=\"widgets/n.html\"></iframe>",
+               "<h2>B</h2><p><a href=\"figures/z.png\">z</a></p>",
+               "<div class=\"leaflet html-widget\"></div></body></html>"),
              file.path(out, "map.html"))
   pg <- site_qa_page(file.path(out, "index.html"))
   pw <- site_qa_page(file.path(out, "map.html"))
@@ -522,9 +725,13 @@ site_qa_self_test <- function() {
       all(grepl(SITE_QA_POSITION_COLS, c("grid10_x_km", "lon", "x"),
                 perl = TRUE)) &&
       !grepl(SITE_QA_POSITION_COLS, "unit_name", perl = TRUE),
-    "widgets: a frame is found; the plain page has none" =
-      grepl("<iframe|htmlwidget", pw$html, ignore.case = TRUE) &&
-      !grepl("<iframe|htmlwidget", pg$html, ignore.case = TRUE),
+    "frames: the src, the title, the description and the PNG link of a frame; none for a bare frame or a link in the next section" =
+      nrow(pw$frames) == 2 && nrow(pg$frames) == 0 &&
+      identical(unname(unlist(pw$frames[1, ])),
+                c("widgets/m.html", "T", "Description. D", "figures/m.png")) &&
+      all(is.na(unlist(pw$frames[2, c("title", "desc", "static")]))),
+    "widgets: a widget in the page itself is found; the plain page has none" =
+      pw$widgets == 1L && pg$widgets == 0L,
     "version: the pinned line is found; another version is not" =
       ver_ok && !ver_bad
   )

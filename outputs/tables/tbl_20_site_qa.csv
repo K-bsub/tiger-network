@@ -12,6 +12,11 @@
 "test case","STEP 18.1: copy: copied, then the same; the copy has the MD5 of its source","pass",TRUE
 "test case","STEP 18.1: headings: down by 2 levels, at most 6; other lines stay","pass",TRUE
 "test case","STEP 18.1: page references: the figure and the include; a comment is not read","pass",TRUE
+"test case","STEP 18.1: page references: an image is an image; a frame, a PNG link and a var key; a comment over two lines is not read","pass",TRUE
+"test case","STEP 18.1: scan: a widget file on the allow-list passes; another one is found","pass",TRUE
+"test case","STEP 18.1: vy1: the counts of fig_01; the totals of fig_02 with a thousands mark; other totals stop","pass",TRUE
+"test case","STEP 18.1: vy1 (mb1): no panel, not drawn; names in byte order, or none; a bad geometry_present stops","pass",TRUE
+"test case","STEP 18.1: vy1: the YAML lines: the groups and the keys in byte order, quoted values","pass",TRUE
 "test case","STEP 18.1: link lists: the rows with a thousands mark; the files sorted","pass",TRUE
 "test case","STEP 18.2: files: the render folders are not listed","pass",TRUE
 "test case","STEP 18.2: fresh: TRUE after the render; FALSE when a site file is newer","pass",TRUE
@@ -20,27 +25,34 @@
 "test case","STEP 18.2: page: the link to the repository","pass",TRUE
 "test case","STEP 18.2: positions: the degree text is found; 0.2 degrees, 0.123 NA and 0.456 are not","pass",TRUE
 "test case","STEP 18.2: positions: grid10_x_km, lon and x are position columns; unit_name is not","pass",TRUE
-"test case","STEP 18.2: widgets: a frame is found; the plain page has none","pass",TRUE
+"test case","STEP 18.2: frames: the src, the title, the description and the PNG link of a frame; none for a bare frame or a link in the next section","pass",TRUE
+"test case","STEP 18.2: widgets: a widget in the page itself is found; the plain page has none","pass",TRUE
 "test case","STEP 18.2: version: the pinned line is found; another version is not","pass",TRUE
 "a pages","each page of SITE_PAGES has its HTML file in _site/","7 of 7",TRUE
 "a pages","_site/ holds no other HTML page (site_libs/ not counted)","0 other",TRUE
-"b images","each image of each page is a file in _site/","8 of 8",TRUE
-"b images","each page shows its figures of SITE_FIGURES, once each, and no other image","7 of 7 pages",TRUE
+"b images","each image of each page is a file in _site/","6 of 6",TRUE
+"b images","each page shows its figures of SITE_FIGURES that are not on SITE_MAPS as images, once each, and no other image","7 of 7 pages",TRUE
 "b images","each figure in _site/figures/ has the MD5 of its source in outputs/figures/","8 of 8",TRUE
 "b images","each copy in site/figures/ has the MD5 of its source","8 of 8",TRUE
-"c alt text","each image has an alt text","8 of 8",TRUE
-"c alt text","each image has a caption (the stand-in label)","8 of 8",TRUE
+"b frames","each map of SITE_MAPS is a frame on the page of its figure, once","2 of 2",TRUE
+"b frames","each frame has a link to the file of its figure in figures/, after it","2 of 2",TRUE
+"b frames","each map file in _site/widgets/ has the MD5 of its file in site/widgets/","2 of 2",TRUE
+"c alt text","each image has an alt text","6 of 6",TRUE
+"c alt text","each image has a caption (the stand-in label)","6 of 6",TRUE
+"c alt text","each frame has a title and a description (the element of its aria-describedby)","2 of 2",TRUE
 "d tables","tbl_01_reserve_growth: one table on its page with the shown columns, the rows of the CSV file, the first column in the CSV order, each mark <3 in its row","58 rows, 10 columns, 0 marks",TRUE
 "d tables","tbl_02_regional_rollup: one table on its page with the shown columns, the rows of the CSV file, the first column in the CSV order, each mark <3 in its row","23 rows, 10 columns, 0 marks",TRUE
 "d tables","tbl_03_reserve_network: one table on its page with the shown columns, the rows of the CSV file, the first column in the CSV order, each mark <3 in its row","56 rows, 12 columns, 0 marks",TRUE
 "d tables","tbl_17_reserve_suitability: one table on its page with the shown columns, the rows of the CSV file, the first column in the CSV order, each mark <3 in its row","58 rows, 8 columns, 0 marks",TRUE
 "d tables","tbl_15_occ_by_reserve: one table on its page with the shown columns, the rows of the CSV file, the first column in the CSV order, each mark <3 in its row","58 rows, 6 columns, 7 marks",TRUE
 "d tables","tbl_19_sdmres_compare_summary: one table on its page with the shown columns, the rows of the CSV file, the first column in the CSV order, each mark <3 in its row","2 rows, 9 columns, 0 marks",TRUE
-"e links","each link to the repository names a file of the repository","76 of 76",TRUE
-"f _site","_site/ holds only the pages, the listed figures, site_libs/ and the files of Quarto","0 other files",TRUE
-"g site/","site/ holds no banned file type and no widget file (the render folders not read)","29 files read",TRUE
+"e links","each link to the repository names a file of the repository","77 of 77",TRUE
+"f _site","_site/ holds only the pages, the listed figures, the map files of SITE_MAPS, site_libs/ and the files of Quarto","0 other files",TRUE
+"g site/","site/ holds no banned file type and no widget file that is not on SITE_MAPS (the render folders not read)","32 files read",TRUE
 "h positions","no table on a page has a column of a position","0 columns",TRUE
 "h positions","no page text holds a decimal degree with 3 or more decimals","0 pages",TRUE
-"i widgets","no page holds a widget or a frame (Week 18; Decision 28 R9)","0 pages",TRUE
-"j tables list","the Data page names each file of outputs/tables/ once","75 listed; 75 on disk",TRUE
+"i widgets","no page holds a widget in the page itself (each map is a frame)","0 pages",TRUE
+"i widgets","no page holds a frame that is not a map of SITE_MAPS","0 frames",TRUE
+"j tables list","the Data page names each file of outputs/tables/ once","76 listed; 76 on disk",TRUE
 "k version","publish.yml pins the Quarto version of the QA render (v1)","1.10.18",TRUE
+"l map QA","tbl_21_map_qa.csv passes, and it holds the MD5 of each map file in _site/widgets/ (the QA is of these files)","52 of 52 pass; MD5 2 of 2",TRUE

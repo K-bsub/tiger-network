@@ -1,0 +1,53 @@
+"file","group","check","value","pass"
+"test case","test case","STEP 19.1: constants: the values in the order of the file; a value uses an earlier one","pass",TRUE
+"test case","test case","STEP 19.1: constants: a missing name and a name assigned twice stop","pass",TRUE
+"test case","test case","STEP 19.1: rounding: 5 decimals; the type and the CRS stay","pass",TRUE
+"test case","test case","STEP 19.1: keys: the vertices of the polygon and the line, each once","pass",TRUE
+"test case","test case","STEP 19.1: bounds: a narrow box gets the minimum span; rounded outward","pass",TRUE
+"test case","test case","STEP 19.1: hover: the title in bold, a field line, NA, the escape","pass",TRUE
+"test case","test case","STEP 19.1: classes: NA, a real 0, the breaks","pass",TRUE
+"test case","test case","STEP 19.1: widget points: the 5 polygon and 2 line vertices","pass",TRUE
+"test case","test case","STEP 19.1: K1 (i): a widget of allowed points, calls and texts passes","pass",TRUE
+"test case","test case","STEP 19.1: K1 (i): a point that is not allowed is found","pass",TRUE
+"test case","test case","STEP 19.1: K1 (i): a call that is not on the list is found","pass",TRUE
+"test case","test case","STEP 19.1: K1 (i): a decimal degree in a text is found","pass",TRUE
+"test case","test case","STEP 19.1: K1 (i): a coordinate with more decimals than MAP_DIGITS is found","pass",TRUE
+"test case","test case","STEP 19.1: save: written, then the same (time stamp kept); a file over the limit stops","pass",TRUE
+"test case","test case","STEP 19.1: save: one self-contained file, no script from another place","pass",TRUE
+"test case","test case","STEP 19.2: read and check: a made-up map file passes each check","pass",TRUE
+"test case","test case","STEP 19.2: a point that is not a vertex of the layers is found","pass",TRUE
+"test case","test case","STEP 19.2: a coordinate with more decimals than MAP_DIGITS is found","pass",TRUE
+"test case","test case","STEP 19.2: a decimal degree in a text is found","pass",TRUE
+"test case","test case","STEP 19.2: a script from another place is found","pass",TRUE
+"test case","test case","STEP 19.2: a call that is not on the list is found","pass",TRUE
+"test case","test case","STEP 19.2: a file over the size limit is found","pass",TRUE
+"test case","test case","STEP 19.2: chart: one bar with its id and its hover text passes; a lng/lat object is found","pass",TRUE
+"test case","test case","STEP 19.2: hover text: the name and the fields, unescaped","pass",TRUE
+"fig_01_growth_ranking.html","file","one widget in the file, with the id of the file","1 widget(s)",TRUE
+"fig_01_growth_ranking.html","file","self-contained: no script, style sheet, image or frame from another place","0 reference(s)",TRUE
+"fig_01_growth_ranking.html","file","the size is at most MAP_MAX_BYTES (sz1)","207,062 bytes",TRUE
+"fig_01_growth_ranking.html","file","the MD5 of the file (read by check l of STEP 18.2)","5bb30e1b5fe7df2110d279eb69406531",TRUE
+"fig_01_growth_ranking.html","bars","one interactive bar for each reserve of tbl_01 with a value, with its unit_id","48 bars; 48 reserves with a value",TRUE
+"fig_01_growth_ranking.html","bars","each bar has a hover text with the name of its reserve and the fields of MAP_FIG01_HOVER (hv1)","0 of 48 not as tbl_01",TRUE
+"fig_01_growth_ranking.html","coordinates","no geometry in the file: no lng/lat object (Decision 29 point 14)","0 objects",TRUE
+"fig_01_growth_ranking.html","texts","no text of the file holds a decimal degree (as check h)","0 texts",TRUE
+"fig_02_growth_animation.html","file","one widget in the file, with the id of the file","1 widget(s)",TRUE
+"fig_02_growth_animation.html","file","self-contained: no script, style sheet, image or frame from another place","0 reference(s)",TRUE
+"fig_02_growth_animation.html","file","the size is at most MAP_MAX_BYTES (sz1)","4,026,202 bytes",TRUE
+"fig_02_growth_animation.html","file","the MD5 of the file (read by check l of STEP 18.2)","7844afe998744b602ae4fcbef0a9864d",TRUE
+"fig_02_growth_animation.html","layers","each call of the file is on MAP_QA_METHODS (no other layer)","addProviderTiles, addPolygons, addLayersControl, addLegend",TRUE
+"fig_02_growth_animation.html","layers","one basemap, MAP_BASEMAP (bm1)","Esri.WorldGrayCanvas",TRUE
+"fig_02_growth_animation.html","coordinates","each point is a point of an allowed kind (Decision 29 point 13, K1 (ii))","164,389 points; 0 not allowed; 0 objects that are not pairs",TRUE
+"fig_02_growth_animation.html","coordinates","no point has more decimals than MAP_DIGITS (rd1)","0 points",TRUE
+"fig_02_growth_animation.html","bounds","fitBounds and the fit of onRender hold one box: it holds each point and is no wider than needed","the same box",TRUE
+"fig_02_growth_animation.html","bounds","the data limits of the file are the range of the points","the range",TRUE
+"fig_02_growth_animation.html","zoom","the minimum and the maximum zoom are MAP_MIN_ZOOM and MAP_MAX_ZOOM (Z2, zm1)","4 and 10",TRUE
+"fig_02_growth_animation.html","texts","no text of the file holds a decimal degree (as check h)","0 of 661 texts",TRUE
+"fig_02_growth_animation.html","layers","the state lines: one layer, no fill, one feature for each feature of the state layer","1 layer(s); 36 of 36 features",TRUE
+"fig_02_growth_animation.html","layers","the reserve outlines: one layer, once (fs2), one feature with its unit_id for each reserve with a polygon","1 layer(s); 56 of 56 reserves",TRUE
+"fig_02_growth_animation.html","rounds","the radio buttons: one for each round of MAP_FIG02_ROUNDS, MAP_FIG02_FIRST first (fg1)","2022, 2018, 2014",TRUE
+"fig_02_growth_animation.html","rounds","the hover texts: for each reserve and round, the name, the state, the round and the estimate of the layer (hv1, fs2)","168 texts; 0 not as the layer",TRUE
+"fig_02_growth_animation.html","rounds","the classes: each class of a hover text is the class of the estimate (the breaks of scripts/05)","0 not the class",TRUE
+"fig_02_growth_animation.html","rounds","the colours: each colour is the colour of the class in the legend of scripts/05","0 not the colour",TRUE
+"fig_02_growth_animation.html","rounds","the first view: the colours, the popups and the labels of the layer are those of MAP_FIG02_FIRST","2022",TRUE
+"fig_02_growth_animation.html","layers","the legend: the classes and the colours of scripts/05, with No estimate","7 classes",TRUE

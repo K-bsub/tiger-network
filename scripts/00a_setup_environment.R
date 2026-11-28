@@ -35,8 +35,10 @@ required <- c(
   # QA of scripts/09 STEP 16.3 (codetools::findGlobals(); a recommended
   # package of R)
   "codetools",
-  # Planned, not used yet — listed so a fresh setup has them
-  "leaflet", "htmlwidgets"                         # story site
+  # Story site: the maps and the chart of scripts/12_build_maps.R (Decision
+  # 29; rv1 of task 19.2, 2026-11-26). rmarkdown finds pandoc for
+  # htmlwidgets::saveWidget(selfcontained = TRUE); ggiraph needs gdtools.
+  "leaflet", "htmlwidgets", "htmltools", "ggiraph", "gdtools", "rmarkdown"
 )
 
 installed <- rownames(installed.packages())

@@ -35,6 +35,14 @@
 #              tables -> site/tables/_links_tables.md; the figures ->
 #              site/figures/<file>; a scan of site/ (no banned file, no
 #              widget, no file that is not on the lists)
+#   (2026-11-26, task 19.3; Decision 29, ck1 and vy1 of task 19.2: STEP
+#              18.1 also checks the frames of the maps of SITE_MAPS and the
+#              PNG link of each of their figures, writes site/_variables.yml
+#              (the numbers of the captions, and the names of mb1: the
+#              reserves with no panel in fig_01 and with no polygon in
+#              fig_02) from the committed tables, and
+#              allows the files of SITE_MAPS in site/widgets/, which
+#              scripts/12_build_maps.R writes.)
 #   STEP 18.2 (task 18.6)  the QA of the rendered site/_site/, by a second
 #              path (the site_qa_* functions; x1: xml2): it runs only if
 #              site/_site/index.html is newer than each file of site/;
@@ -42,6 +50,15 @@
 #              a-j of c1 and check k of v1 (the pinned Quarto version) ->
 #              outputs/tables/tbl_20_site_qa.csv (q1), then a stop if a
 #              check fails
+#   (2026-11-26, task 19.4; ck1 of task 19.2: the maps of SITE_MAPS. Check
+#              b: each map is a frame on the page of its figure, once, with
+#              the link to its figure file after it, and its file in
+#              _site/widgets/ has the MD5 of the file in site/widgets/;
+#              check c: each frame has a title and a description
+#              (aria-describedby); checks a, f and g: the map files are
+#              allowed; check i: no widget in a page itself and no frame
+#              that is not on SITE_MAPS; a new check l: tbl_21_map_qa.csv
+#              of STEP 19.2 passes and holds the MD5 of each map file.)
 #
 # RUN (r1 of task 18.4): in a NEW R session with tiger-network.Rproj open:
 #   source("scripts/11_build_site.R")
@@ -137,7 +154,10 @@ want_refs <- lapply(names(SITE_PAGES), function(k) {
             inc_name(SITE_NOTES$name[SITE_NOTES$page == k]),
             if (k %in% link_pages) inc_name(sprintf(SITE_LINKS_PAGE_FILE, k)),
             if (k == SITE_LINKS_ALL_PAGE) inc_name(SITE_LINKS_ALL_FILE))
-  list(figures = SITE_FIGURES$file[SITE_FIGURES$page == k],
+  figs <- SITE_FIGURES$file[SITE_FIGURES$page == k]
+  list(figures = figs,
+       images = figs[!figs %in% SITE_MAPS$figure],     # S1: the stand-ins
+       frames = SITE_MAPS$file[SITE_MAPS$figure %in% figs],   # fr1
        includes = as.character(incs))
 })
 names(want_refs) <- names(SITE_PAGES)
@@ -172,7 +192,11 @@ run_guards(list(
   "each page holds its figures, once each, and no other figure" =
     refs_ok("figures"),
   "each page holds its include files, once each, and no other include" =
-    refs_ok("includes")
+    refs_ok("includes"),
+  "each page shows each figure that is not on SITE_MAPS as an image (S1)" =
+    refs_ok("images"),
+  "each page holds the frame of each map of its figures, once, and no other frame (fr1)" =
+    refs_ok("frames")
 ), "STEP 18.1 guards")
 
 # ---- The tables on a page (Decision 28 point 2; w2, d1; point 8) --------------
@@ -257,6 +281,24 @@ cat("files in outputs/tables/ (no dot files):", length(all_tabs), "->",
                                                             SITE_REPO_URL),
                                               out), "\n")
 
+# ---- The numbers of the captions (vy1 of task 19.2; Decision 28 point 5) ----------------
+cat("\n--- the numbers of the captions ---\n")
+vars <- site_vars_growth(
+  site_read_table(file.path(DIR_TABLES, paste0(SITE_VARS_TABLES[["t01"]], ".csv"))),
+  site_read_table(file.path(DIR_TABLES, paste0(SITE_VARS_TABLES[["t02"]], ".csv"))),
+  site_read_table(file.path(DIR_TABLES, paste0(SITE_VARS_TABLES[["t07"]], ".csv"))))
+var_keys_used <- unique(unlist(lapply(have_refs, function(r) r$vars)))
+run_guards(list(
+  "each {{< var >}} key of each page is a key of the file" =
+    all(var_keys_used %in% names(vars)),
+  "no value holds a decimal degree" =
+    !any(grepl(SITE_QA_DEGREE_RE, vars, perl = TRUE))
+), "vy1 guards")
+vfile <- file.path(DIR_SITE, SITE_VARIABLES_FILE)
+v_status <- site_write_if_changed(site_variables_lines(vars), vfile)
+cat(length(vars), "keys ->", basename(vfile), ":", v_status,
+    "| keys that the pages use:", length(var_keys_used), "\n")
+
 # ---- The figures (P1, S1) -------------------------------------------------------------
 cat("\n--- the figures ---\n")
 fig_log <- data.frame(file = SITE_FIGURES$file, page = SITE_FIGURES$page,
@@ -278,14 +320,24 @@ want_tab_files <- c(vapply(names(SITE_TABLES_PAGE), inc_name, character(1)),
                     inc_name(SITE_LINKS_ALL_FILE))
 have_fig_files <- list.files(dir_fig_out, all.files = TRUE, no.. = TRUE)
 have_tab_files <- list.files(dir_tab_out, all.files = TRUE, no.. = TRUE)
+dir_wid_out <- file.path(DIR_SITE, SITE_WIDGET_DIR)
+have_wid_files <- if (dir.exists(dir_wid_out)) {
+  list.files(dir_wid_out, all.files = TRUE, no.. = TRUE)
+} else character(0)
 extra_fig <- setdiff(have_fig_files, SITE_FIGURES$file)
 extra_tab <- setdiff(have_tab_files, want_tab_files)
-if (length(extra_fig) + length(extra_tab) > 0) {
+extra_wid <- setdiff(have_wid_files, SITE_MAPS$file)
+if (length(extra_fig) + length(extra_tab) + length(extra_wid) > 0) {
   cat("files that are not on the lists (remove them by hand):",
       paste(file.path(c(rep(SITE_FIG_DIR, length(extra_fig)),
-                        rep(SITE_TABLE_DIR, length(extra_tab))),
-                      c(extra_fig, extra_tab)), collapse = ", "), "\n")
+                        rep(SITE_TABLE_DIR, length(extra_tab)),
+                        rep(SITE_WIDGET_DIR, length(extra_wid))),
+                      c(extra_fig, extra_tab, extra_wid)), collapse = ", "),
+      "\n")
 }
+cat("site/", SITE_WIDGET_DIR, "/: ", length(have_wid_files), " of ",
+    nrow(SITE_MAPS), " files of SITE_MAPS (scripts/12_build_maps.R writes ",
+    "them)\n", sep = "")
 run_guards(list(
   "no banned file type and no widget file in site/ (the render folders not read)" =
     length(banned) == 0,
@@ -293,6 +345,8 @@ run_guards(list(
     setequal(have_fig_files, SITE_FIGURES$file),
   "site/tables/ holds the expected include files and no other file" =
     setequal(have_tab_files, want_tab_files),
+  "site/widgets/ holds no file that is not on SITE_MAPS" =
+    length(extra_wid) == 0,
   "each copy in site/figures/ has the MD5 of its source" =
     identical(unname(tools::md5sum(fig_src)),
               unname(tools::md5sum(file.path(dir_fig_out,
@@ -302,9 +356,9 @@ if (length(banned) > 0) cat("refused:", paste(banned, collapse = ", "), "\n")
 
 n_written <- sum(c(vapply(tab_log, function(x) x$status, character(1)),
                    lnk$status[!duplicated(lnk$page)],
-                   fig_log$status) %in% c("written", "copied"))
-cat("\nfiles written or copied in this run (tables, link lists, figures):",
-    n_written, "\n")
+                   v_status, fig_log$status) %in% c("written", "copied"))
+cat("\nfiles written or copied in this run (tables, link lists, the",
+    "variables, figures):", n_written, "\n")
 rule("STEP 18.1 done.")
 
 # ==============================================================================
@@ -358,8 +412,10 @@ if (!fr$fresh) {
   out_files <- site_qa_files(out_dir, character(0))
   in_lib <- startsWith(out_files, paste0(SITE_QA_LIB_DIR, "/"))
 
-  # a. the pages
-  html_out <- out_files[grepl("\\.html?$", out_files) & !in_lib]
+  # a. the pages (the map files of SITE_MAPS in widgets/ are not pages)
+  map_paths <- file.path(SITE_WIDGET_DIR, SITE_MAPS$file)
+  html_out <- out_files[grepl("\\.html?$", out_files) & !in_lib &
+                          !out_files %in% map_paths]
   add("a pages", "each page of SITE_PAGES has its HTML file in _site/",
       paste(sum(html_files %in% out_files), "of", length(html_files)),
       all(html_files %in% out_files))
@@ -381,13 +437,14 @@ if (!fr$fresh) {
   add("b images", "each image of each page is a file in _site/",
       paste(sum(img_found), "of", nrow(img_all)),
       nrow(img_all) > 0 && all(img_found))
+  img_figs <- SITE_FIGURES[!SITE_FIGURES$file %in% SITE_MAPS$figure, ]
   pages_figs <- vapply(names(SITE_PAGES), function(k) {
     setequal(basename(img_all$src[img_all$page == k]),
-             SITE_FIGURES$file[SITE_FIGURES$page == k]) &&
+             img_figs$file[img_figs$page == k]) &&
       !anyDuplicated(img_all$src[img_all$page == k])
   }, logical(1))
   add("b images",
-      "each page shows its figures of SITE_FIGURES, once each, and no other image",
+      "each page shows its figures of SITE_FIGURES that are not on SITE_MAPS as images, once each, and no other image",
       paste(sum(pages_figs), "of", length(pages_figs), "pages"),
       all(pages_figs))
   f_src  <- file.path(DIR_FIGURES, SITE_FIGURES$file)
@@ -400,6 +457,39 @@ if (!fr$fresh) {
   add("b images", "each copy in site/figures/ has the MD5 of its source",
       paste(sum(md5_same(f_site, f_src)), "of", length(f_src)),
       all(md5_same(f_site, f_src)))
+  # b. the frames of the maps (ck1, task 19.4)
+  fr_all <- do.call(rbind, lapply(names(pages), function(k) {
+    p <- pages[[k]]
+    if (is.null(p) || nrow(p$frames) == 0) return(NULL)
+    data.frame(page = k, p$frames, stringsAsFactors = FALSE)
+  }))
+  if (is.null(fr_all)) {
+    fr_all <- data.frame(page = character(0), src = character(0),
+                         title = character(0), desc = character(0),
+                         static = character(0))
+  }
+  map_page <- SITE_FIGURES$page[match(SITE_MAPS$figure, SITE_FIGURES$file)]
+  fr_place <- vapply(seq_len(nrow(SITE_MAPS)), function(i) {
+    sum(fr_all$src == map_paths[i] & fr_all$page == map_page[i]) == 1L &&
+      sum(fr_all$src == map_paths[i]) == 1L
+  }, logical(1))
+  add("b frames",
+      "each map of SITE_MAPS is a frame on the page of its figure, once",
+      paste(sum(fr_place), "of", nrow(SITE_MAPS)), all(fr_place))
+  fr_png <- vapply(seq_len(nrow(SITE_MAPS)), function(i) {
+    s <- fr_all$static[fr_all$src == map_paths[i]]
+    length(s) == 1L && identical(s, file.path(SITE_FIG_DIR, SITE_MAPS$figure[i])) &&
+      file.exists(file.path(out_dir, s))
+  }, logical(1))
+  add("b frames",
+      "each frame has a link to the file of its figure in figures/, after it",
+      paste(sum(fr_png), "of", nrow(SITE_MAPS)), all(fr_png))
+  m_out <- file.path(out_dir, map_paths)
+  m_site <- file.path(DIR_SITE, map_paths)
+  add("b frames",
+      "each map file in _site/widgets/ has the MD5 of its file in site/widgets/",
+      paste(sum(md5_same(m_out, m_site)), "of", length(m_out)),
+      all(md5_same(m_out, m_site)))
 
   # c. the alt text and the caption
   alt_ok <- !is.na(img_all$alt) & nchar(trimws(img_all$alt)) > 0
@@ -408,6 +498,11 @@ if (!fr$fresh) {
       paste(sum(alt_ok), "of", nrow(img_all)), all(alt_ok))
   add("c alt text", "each image has a caption (the stand-in label)",
       paste(sum(cap_ok), "of", nrow(img_all)), all(cap_ok))
+  fr_tc <- !is.na(fr_all$title) & nchar(trimws(fr_all$title)) > 0 &
+    !is.na(fr_all$desc) & nchar(fr_all$desc) > 0
+  add("c alt text",
+      "each frame has a title and a description (the element of its aria-describedby)",
+      paste(sum(fr_tc), "of", nrow(fr_all)), nrow(fr_all) > 0 && all(fr_tc))
 
   # d. the tables on a page, against their CSV files
   for (nm in names(SITE_TABLES_PAGE)) {
@@ -455,10 +550,10 @@ if (!fr$fresh) {
 
   # f. the files of _site/
   allowed <- c(html_files, file.path(SITE_FIG_DIR, SITE_FIGURES$file),
-               SITE_QA_QUARTO_FILES)
+               map_paths, SITE_QA_QUARTO_FILES)
   extra <- out_files[!out_files %in% allowed & !in_lib]
   add("f _site",
-      "_site/ holds only the pages, the listed figures, site_libs/ and the files of Quarto",
+      "_site/ holds only the pages, the listed figures, the map files of SITE_MAPS, site_libs/ and the files of Quarto",
       if (length(extra) == 0) "0 other files" else
         paste0(length(extra), " other: ", paste(utils::head(extra, 5),
                                                 collapse = "; ")),
@@ -467,10 +562,10 @@ if (!fr$fresh) {
   # g. site/ (a second path to the scan of STEP 18.1)
   s_files <- site_qa_files(DIR_SITE)
   s_ext <- tolower(tools::file_ext(s_files))
-  s_bad <- s_files[s_ext %in% c(SITE_BANNED_EXT,
-                                if (!SITE_ALLOW_WIDGETS) SITE_WIDGET_EXT)]
+  s_bad <- s_files[s_ext %in% SITE_BANNED_EXT |
+                     (s_ext %in% SITE_WIDGET_EXT & !s_files %in% map_paths)]
   add("g site/",
-      "site/ holds no banned file type and no widget file (the render folders not read)",
+      "site/ holds no banned file type and no widget file that is not on SITE_MAPS (the render folders not read)",
       if (length(s_bad) == 0) paste(length(s_files), "files read") else
         paste(s_bad, collapse = "; "),
       length(s_bad) == 0)
@@ -491,13 +586,19 @@ if (!fr$fresh) {
       if (length(deg) == 0) "0 pages" else paste(deg, collapse = ", "),
       length(deg) == 0)
 
-  # i. no widget (Decision 28 R9)
+  # i. the widgets (Decision 28 R9; Decision 29; ck1): no widget in a page
+  # itself; each frame of each page is a map of SITE_MAPS
   wid <- names(pages)[vapply(pages, function(p) {
-    !is.null(p) && grepl("<iframe|htmlwidget", p$html, ignore.case = TRUE)
+    !is.null(p) && p$widgets > 0
   }, logical(1))]
-  add("i widgets", "no page holds a widget or a frame (Week 18; Decision 28 R9)",
+  add("i widgets", "no page holds a widget in the page itself (each map is a frame)",
       if (length(wid) == 0) "0 pages" else paste(wid, collapse = ", "),
-      length(wid) == 0 && !SITE_ALLOW_WIDGETS)
+      length(wid) == 0)
+  fr_other <- unique(fr_all$src[!fr_all$src %in% map_paths])
+  add("i widgets", "no page holds a frame that is not a map of SITE_MAPS",
+      if (length(fr_other) == 0) "0 frames" else
+        paste(utils::head(fr_other, 3), collapse = ", "),
+      length(fr_other) == 0)
 
   # j. the list of all committed tables (the Data page)
   dl <- pages[[SITE_LINKS_ALL_PAGE]]$links
@@ -520,6 +621,28 @@ if (!fr$fresh) {
   add("k version",
       paste0("publish.yml pins the Quarto version of the QA render (v1)"),
       SITE_QUARTO_VERSION, any(grepl(pin_re, yml_a)))
+
+  # l. the QA of the map files (STEP 19.2 of scripts/12; ck1, task 19.4)
+  mq_file <- file.path(DIR_TABLES, sprintf("tbl_%02d_%s.csv", MAP_QA_TABLE_NN,
+                                           MAP_QA_TABLE_SLUG))
+  mq <- if (file.exists(mq_file)) site_qa_csv(mq_file) else NULL
+  mq_pass <- !is.null(mq) && nrow(mq) > 0 && all(mq$pass == "TRUE")
+  md5_row <- function(f) {
+    if (is.null(mq)) return(NA_character_)
+    v <- mq$value[mq$file == f & mq$group == "file" &
+                    startsWith(mq$check, "the MD5 of the file")]
+    if (length(v) == 1L) v else NA_character_
+  }
+  mq_md5 <- vapply(SITE_MAPS$file, md5_row, character(1))
+  md5_now <- ifelse(file.exists(m_out), unname(tools::md5sum(m_out)), NA)
+  mq_same <- !is.na(mq_md5) & !is.na(md5_now) & mq_md5 == md5_now
+  add("l map QA",
+      paste0(basename(mq_file), " passes, and it holds the MD5 of each map ",
+             "file in _site/widgets/ (the QA is of these files)"),
+      if (is.null(mq)) "no table" else
+        paste0(sum(mq$pass == "TRUE"), " of ", nrow(mq), " pass; MD5 ",
+               sum(mq_same), " of ", nrow(SITE_MAPS)),
+      mq_pass && all(mq_same))
 
   # ---- The QA table (q1), then a stop if a check fails -------------------------------
   qa_file <- file.path(DIR_TABLES, sprintf("tbl_%02d_%s.csv", SITE_QA_TABLE_NN,

@@ -1390,15 +1390,43 @@ SITE_SIGNIF <- 3L
 #                data file, a model or a CSV file; the CSV files stay in the
 #                repository and the pages link them)
 #   widgets    : R9 — no widget and no layer in Week 18 (no .html, .js or
-#                .json file in site/ outside the render folders)
+#                .json file in site/ outside the render folders).
+#                2026-11-26 (Decision 29; ck1 of task 19.2): an .html file
+#                of SITE_MAPS in site/widgets/ is allowed; each other .html,
+#                .js or .json file is refused
 SITE_SUPPRESSED_TABLES <- c("tbl_15_occ_by_reserve")
 SITE_SUPPRESSED_MARK   <- "<3"
 SITE_SUPPRESSED_COLS   <- "^tiger_"
 SITE_BANNED_EXT <- c("gpkg", "tif", "tiff", "rds", "rda", "rdata", "shp",
                      "shx", "dbf", "prj", "cpg", "kml", "kmz", "geojson",
                      "csv", "zip", "parquet", "pbf", "sqlite", "nc")
-SITE_ALLOW_WIDGETS <- FALSE               # R9 (Week 18)
+# (2026-11-26, task 19.4; ck1 of task 19.2) SITE_ALLOW_WIDGETS of R9 (Week
+# 18) is removed: STEP 18.1 and STEP 18.2 allow a widget file only if it is
+# a map file of SITE_MAPS in site/widgets/.
 SITE_WIDGET_EXT    <- c("html", "htm", "js", "json")
+
+# (Decision 29; ck1, nm1, fr1 and vy1 of task 19.2, 2026-11-26) The map and
+# chart files. Each is a self-contained HTML file site/<SITE_WIDGET_DIR>/
+# <the stem of its PNG file>.html, written by scripts/12_build_maps.R and
+# shown in a frame of the page of its figure; the page also links the PNG
+# copy. A figure that is not on SITE_MAPS stays its PNG file (an image) on
+# its page. Week 19 (task 19.3): fig_01 and fig_02; Week 20: fig_03-fig_08.
+SITE_WIDGET_DIR <- "widgets"
+SITE_MAPS <- data.frame(
+  figure = c("fig_01_growth_ranking.png", "fig_02_growth_animation.gif"),
+  file   = c("fig_01_growth_ranking.html", "fig_02_growth_animation.html"),
+  kind   = c("chart", "map"),
+  stringsAsFactors = FALSE)
+# vy1: the numbers of the captions (Decision 28 point 5), written by STEP
+# 18.1 from the committed tables only; a page reads them with {{< var >}}.
+SITE_VARIABLES_FILE <- "_variables.yml"
+SITE_VARS_METRIC    <- "change_pct"   # the metric of fig_01 (RANK_METRIC of
+                                      # scripts/05; scripts/12 checks it)
+SITE_VARS_TABLES    <- c(t01 = "tbl_01_reserve_growth",
+                         t02 = "tbl_02_regional_rollup",
+                         t07 = "tbl_07_census_join_check")  # mb1 (task
+                         # 19.3): the reserves with no polygon (the column
+                         # geometry_present), named in the caption of fig_02
 SITE_SKIP_DIRS     <- c("_site", ".quarto", "site_libs")  # render folders
 
 # ---- Stage 4: the QA of the site (task 18.6, 2026-11-21) ---------------------
@@ -1418,7 +1446,99 @@ SITE_QA_POSITION_COLS <- "^(x|y|lon|lat|longitude|latitude|grid[0-9]*_(id|x_km|y
 SITE_QA_DEGREE_RE     <- "[0-9]{1,3}\\.[0-9]{3,} ?(\\x{00B0}|deg\\b|[NSEW]\\b)"
 # Check k (v1): the Quarto version of the QA render, pinned in publish.yml.
 SITE_QUARTO_VERSION   <- "1.10.18"
+# (2026-11-26) SITE_QA_WIDGETS of task 19.3 is removed in task 19.4: STEP
+# 18.2 checks the map files (checks b, c, f, g, i and l).
 SITE_PUBLISH_YML      <- here::here(".github", "workflows", "publish.yml")
+
+# ---- Stage 4: the maps and the chart (Decision 29, 2026-11-26) ---------------
+# Fixed BEFORE any map file. See docs/methodology.md, Decision 29: A1; B1; P4
+# with P4a; N1; S3 with Sf1; G2; C2; Q2; H3; T2; Z2; D1; K1; the readings
+# R11 and R13. Process choices of task 19.2 (2026-11-26): mt1, ch1, bm1,
+# zm1, sc1, nm1, lv1, fg1, fr1, hv1, rd1, ht1, sz1, vy1, ck1, rv1, ts1.
+# scripts/12_build_maps.R reads these; do not repeat a value as a literal.
+# The list of the files is SITE_MAPS (the SITE_* block above).
+MAP_OUT_DIR <- file.path(DIR_SITE, SITE_WIDGET_DIR)          # nm1
+# fg1, ch1: the colours, the classes, the effort caveat and the theme of
+# fig_01 and fig_02 come from the literal assignments of scripts/05 (STEPs
+# 5 and 6), read by map_read_constants(); they are not written again here.
+# scripts/05 does not change (Decision 28 P1).
+MAP_GROWTH_SCRIPT <- here::here("scripts", "05_growth_analysis.R")
+MAP_GROWTH_NAMES  <- c("RANK_METRIC", "PAL_GROW", "PAL_DECLINE", "PAL_FLAT",
+                       "INK", "PAPER", "PAPER_ALT", "GRID", "POP_BREAKS",
+                       "POP_LABELS", "POP_RAMP", "NO_ESTIMATE_COL",
+                       "STATE_LINE", "EFFORT_CAVEAT", "metric_label",
+                       "metric_title", "lc_pretty", "theme_tiger",
+                       "sign_pal", "y_labeller")
+# rd1, sz1: the rounding, the match of the check, the size limit
+MAP_DIGITS        <- 5L            # decimals of a degree (about 1.1 m)
+MAP_CHECK_TOL_DEG <- 1e-9          # a coordinate matches after rd1
+MAP_MAX_BYTES     <- 10 * 1024^2   # 10 MB for each file (judgement value)
+# zm1 (Decision 29 Z2; judgement values) and the Leaflet recipe of the
+# tools record: zoomSnap 0.1; bounds narrower than MAP_MIN_SPAN_DEG made
+# wider; minZoom below the fit; fitBounds last, after a wait for the real
+# height of the frame (map_fit_js()).
+MAP_MIN_ZOOM <- 4L
+MAP_MAX_ZOOM <- c(fig_02_growth_animation = 10L, fig_03_reserve_network = 10L,
+                  fig_04_suitability_classes = 9L,
+                  fig_05_suitability_value = 9L, fig_06_effort_gistar = 9L,
+                  fig_07_sdm_current = 9L, fig_08_sdm_paths = 9L)
+MAP_ZOOM_SNAP    <- 0.1
+MAP_ZOOM_DELTA   <- 0.5
+MAP_FIT_PAD_PX   <- 8L
+MAP_MIN_SPAN_DEG <- 0.05
+MAP_BASEMAP      <- "Esri.WorldGrayCanvas"   # bm1: the Light Gray Canvas base
+MAP_VALUE_DECIMALS <- 2L           # rd1: the cloglog value (Week 20)
+MAP_HATCH_STEP_DEG <- 0.1          # ht1: the hatch lines (Week 20)
+# fig_01 (ch1): the size of the SVG as in scripts/05 STEP 5; the title and
+# the subtitle (drafts, T2); the hover fields = the columns of the page
+# table (hv1, w2 of task 18.4)
+MAP_FIG01_TABLE     <- "tbl_01_reserve_growth"
+MAP_FIG01_WIDTH_IN  <- 9
+MAP_FIG01_HEIGHT_IN <- c(min = 6, base = 1.4, per_bar = 0.19, per_facet = 0.25)
+MAP_FIG01_TITLE     <- "India's tiger reserves ranked by population change"
+MAP_FIG01_SUBTITLE  <- paste("Within-reserve %s over each reserve's own",
+                             "baseline to 2022 (SECR estimates, NTCA/WII)")
+MAP_FIG01_HOVER     <- SITE_TABLES_PAGE$tbl_01_reserve_growth$columns
+# FALSE: no font file in the chart file (the reader's sans font; a small
+# file). TRUE: Liberation Sans in the file (about 2 MB more; the same text
+# size in each browser). A process choice found in task 19.3 (fn1); see
+# map_fig01_chart().
+MAP_FIG01_FONT_FILE <- FALSE
+# fig_02 (fg1): the layers (tier T0), the rounds, the round shown first,
+# the hover fields, the title (a draft) and the sources line (T2 of
+# Decision 29 point 10). mb1 and mp1 (task 19.3, 2026-11-26): no text box
+# in the map; the title is the heading of the legend (at most
+# MAP_FIG02_LEGEND_WIDTH_PX wide); the sources are in the attribution line
+# of the map, after the credit of the basemap; the caveat and the names of
+# the reserves with no polygon are page text.
+MAP_FIG02_LAYERS <- c(reserves = "stats_reserve_census_7755.gpkg",
+                      states   = "boundary_states_7755.gpkg")
+MAP_FIG02_ROUNDS <- CENSUS_SERIES_YEARS
+MAP_FIG02_FIRST  <- 2022L
+MAP_FIG02_HOVER  <- c("unit_name", "state", "round", "estimate", "class")
+MAP_FIG02_TITLE  <- "Tiger population by reserve, 2014-2022"
+MAP_FIG02_SOURCES <- paste(
+  "Data: NTCA and WII, All India Tiger Estimation 2014, 2018 and 2022;",
+  "reserve outlines: NTCA DSS (2022); states: Natural Earth")
+MAP_FIG02_LEGEND_WIDTH_PX <- 150L
+# fs2 (task 19.4, 2026-11-26): the reserve outlines are in the file once;
+# the radio buttons change the colours and the hover texts. The weight of
+# an outline (pixels), and on hover.
+MAP_FIG02_WEIGHT <- c(line = 0.6, hover = 2)
+
+# ---- Stage 4: the QA of the map files (task 19.4, 2026-11-26) ----------------
+# STEP 19.2 of scripts/12_build_maps.R: K1 (ii) of Decision 29 point 13, by
+# a second path (the map_qa_* functions) on the JSON of each saved file
+# (nm1, ck1 and sz1 of task 19.2). The QA table (nm1): tbl_21_map_qa.csv,
+# with the columns file, group, check, value, pass; one row of each file
+# holds its MD5, which check l of STEP 18.2 compares with the file in
+# site/_site/widgets/.
+MAP_QA_TABLE_NN   <- 21L
+MAP_QA_TABLE_SLUG <- "map_qa"
+# The calls that each map file may hold ("no other layer").
+MAP_QA_METHODS <- list(
+  fig_02_growth_animation = c("addProviderTiles", "addPolygons",
+                              "addLayersControl", "addLegend"))
 
 # ---- Convenience -----------------------------------------------------------
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a
