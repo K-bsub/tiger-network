@@ -167,11 +167,14 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<!-- Skeleton of Week 18 (Decision 28). The headings, the labels and the alt
-texts are drafts of the chat; the narrative is the author's (Week 20). Each
-figure is its PNG file as a static stand-in (S1); the interactive chart and
-map follow in Week 19 (R7). The tables come from scripts/11_build_site.R:
-do not edit the files in tables/ by hand. -->
+<!-- Skeleton of Week 18 (Decision 28), with the interactive figures of
+Week 19 (Decision 29; task 19.3). The headings, the labels, the captions
+and the alt texts are drafts of the chat; the narrative is the author's
+(Week 21). Each figure is a frame of its file in widgets/ (fr1 of task
+19.2), with a link to its PNG file; its description is the div that its
+aria-describedby names (check c of STEP 18.2, task 19.4). The numbers of the captions come from
+_variables.yml (vy1): do not write a number by hand. The tables come from
+scripts/11_build_site.R: do not edit the files in tables/ by hand. -->
 <div class="callout callout-style-simple callout-note">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -184,23 +187,37 @@ do not edit the files in tables/ by hand. -->
 </div>
 <section id="fig_01_growth_ranking" class="level2">
 <h2 class="anchored" data-anchor-id="fig_01_growth_ranking"><code>fig_01_growth_ranking</code></h2>
-<!-- DRAFT (chat; Decision 28 f2): the alt text. The author's edit is in Week 20. -->
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="figures/fig_01_growth_ranking.png" class="img-fluid figure-img" alt="A bar chart of the tiger reserves of India in panels by landscape complex. The length of each bar is the change in the within-reserve tiger estimate, in percent, from the first census round of the reserve to 2022. The colour shows growth or decline."></p>
-<figcaption>Static stand-in; interactive chart in Week 19.</figcaption>
-</figure>
+<iframe src="widgets/fig_01_growth_ranking.html" aria-describedby="desc-fig_01_growth_ranking" title="Interactive chart: the tiger reserves of India ranked by the change of the within-reserve tiger estimate" loading="lazy" style="border:0;width:100%;aspect-ratio:0.75;"></iframe>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
 </div>
+<div class="callout-body-container">
+<p><strong>Draft (chat)</strong> — the caption and the description of the two figures of this page. The author’s edit is in Week 21.</p>
+</div>
+</div>
+</div>
+<p><strong>Caption.</strong> The tiger reserves of India in panels by landscape complex, ranked by the change of the within-reserve tiger estimate (NTCA/WII, SECR), in percent, from the first census round of each reserve to 2022. 48 of 58 reserves have a value and a bar. 10 have no value (one census round only, no estimate in 2022, or a baseline of 0, Decision 9) and have no bar; the title of each panel gives their number. A landscape complex with no ranked reserve has no panel; its reserves with no value: Sundarbans. Put the pointer on a bar, or tap it, for the values of the table <code>tbl_01_reserve_growth</code> below. Caveat: the census figures are estimates, and an apparent change partly shows survey effort and method, not distribution alone; read the ranking as indicative. Series 2014, 2018 and 2022 (Decision 6). Sources: NTCA and WII, All India Tiger Estimation 2014, 2018 and 2022.</p>
+<div id="desc-fig_01_growth_ranking">
+<p><strong>Description.</strong> An interactive bar chart of the tiger reserves of India, in panels by landscape complex. The length of each bar is the change in the within-reserve tiger estimate, in percent, from the first census round of the reserve to 2022; the colour shows growth, no change or decline. A label with the values of the reserve shows when the pointer is on a bar or after a tap.</p>
+</div>
+<p><a href="figures/fig_01_growth_ranking.png">Static version (PNG)</a></p>
 </section>
 <section id="fig_02_growth_animation" class="level2">
 <h2 class="anchored" data-anchor-id="fig_02_growth_animation"><code>fig_02_growth_animation</code></h2>
-<!-- DRAFT (chat; Decision 28 f2): the alt text. The author's edit is in Week 20. -->
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="figures/fig_02_growth_animation.gif" class="img-fluid figure-img" alt="An animated map of India in three frames, one for each census round (2014, 2018 and 2022). The colour of each tiger reserve is its within-reserve tiger estimate in that round."></p>
-<figcaption>Static stand-in; interactive map in Week 19.</figcaption>
-</figure>
+<style>
+/* mp1 (task 19.3): a map frame is taller on a narrow screen, so that the
+   map at its minimum zoom and its controls fit one above the other. */
+.tn-map { border: 0; width: 100%; height: 620px; }
+@media (max-width: 767.98px) { .tn-map { height: 780px; } }
+</style>
+<iframe class="tn-map" src="widgets/fig_02_growth_animation.html" aria-describedby="desc-fig_02_growth_animation" title="Interactive map: the within-reserve tiger estimate of each tiger reserve of India in 2014, 2018 and 2022" loading="lazy"></iframe>
+<p><strong>Caption.</strong> The within-reserve tiger estimate of each tiger reserve in each census round (2014, 2018 and 2022). The buttons of the map select the round; 2022 shows first. The colour classes are the same in each round. Grey: no estimate in that round (Decision 7). The lightest class is a real estimate of 0 (Decision 9). The totals of the reserves with an estimate: 1,586 tigers in 45 reserves (2014), 1,958 in 50 reserves (2018) and 2,257 in 52 reserves (2022); the set of reserves is not the same in each round. The outlines are the core protected-area polygons of the NTCA DSS (Decision 4), not the notified reserve area. Reserves with no polygon, not drawn (2): Dholpur-Karauli, Pilibhit. Caveat: as for <code>fig_01_growth_ranking</code>. Sources: NTCA and WII, All India Tiger Estimation 2014, 2018 and 2022; NTCA DSS (2022); Natural Earth; basemap © Esri.</p>
+<div id="desc-fig_02_growth_animation">
+<p><strong>Description.</strong> An interactive map of India with the outlines of the tiger reserves on a grey basemap. Buttons select the census round: 2014, 2018 or 2022. The colour of each reserve is its within-reserve tiger estimate in that round, in six fixed classes; grey is no estimate. The legend gives the title of the map and the classes. A label with the name, the state, the round, the estimate and the class shows when the pointer is on a reserve or after a tap.</p>
 </div>
+<p><a href="figures/fig_02_growth_animation.gif">Animated version (GIF)</a></p>
 </section>
 <section id="tbl_01_reserve_growth" class="level2">
 <h2 class="anchored" data-anchor-id="tbl_01_reserve_growth"><code>tbl_01_reserve_growth</code></h2>
