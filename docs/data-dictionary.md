@@ -2086,12 +2086,36 @@ counts and file names; no position and no cell id.
 
 **As built (2026-11-21):** 45 rows, 45 pass: 23 hand-made checks (`test
 case`: 14 of STEP 18.1, 9 of STEP 18.2) and 22 checks of the render.
+*(2026-11-27, task 19.4: 57 rows, 57 pass — 29 hand-made checks (19 of
+STEP 18.1, 10 of STEP 18.2) and 28 checks of the render; the new groups
+`b frames` and `l map QA`; `i widgets` has two rows.)*
 
 | Field | Type | Meaning |
 |---|---|---|
-| `group` | character | `test case`, `a pages`, `b images`, `c alt text`, `d tables`, `e links`, `f _site`, `g site/`, `h positions`, `i widgets`, `j tables list`, `k version` |
+| `group` | character | `test case`, `a pages`, `b images`, `b frames`, `c alt text`, `d tables`, `e links`, `f _site`, `g site/`, `h positions`, `i widgets`, `j tables list`, `k version`, `l map QA` *(`b frames` and `l map QA` since 2026-11-27)* |
 | `check` | character | What the row checks |
 | `value` | character | A count (for example `8 of 8`), the items that fail, or a fact (`k version`: the pinned Quarto version) |
+| `pass` | logical | TRUE if the check passes |
+
+## tbl_21_map_qa.csv  *(Week 19 — built, task 19.4)*
+
+Written by `scripts/12` STEP 19.2 (K1 (ii) of Decision 29 point 13; nm1 of
+task 19.2): a second path that reads the JSON of each saved map or chart
+file in `site/widgets/`, and the source layers and `tbl_01` again. The
+table is written before the stop on a failure. Check names, counts, file
+names and the MD5 of each file; no coordinate and no cell id.
+
+**As built (2026-11-27):** 52 rows, 52 pass: 24 hand-made checks (`test
+case`: 15 of STEP 19.1, 9 of STEP 19.2), 8 checks of
+`fig_01_growth_ranking.html` and 20 checks of
+`fig_02_growth_animation.html`.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `file` | character | The map or chart file (`test case` for a hand-made check) |
+| `group` | character | `test case`, `file`, `layers`, `coordinates`, `bounds`, `zoom`, `texts`, `rounds`, `bars` |
+| `check` | character | What the row checks |
+| `value` | character | A count (for example `56 of 56 reserves`), the calls or the zoom limits, or the MD5 of the file (the row "the MD5 of the file", read by check l of STEP 18.2) |
 | `pass` | logical | TRUE if the check passes |
 
 ## Site files — `site/figures/`, `site/tables/`  *(Week 18 — built, task 18.5)*
@@ -2110,5 +2134,7 @@ files are public on the site.
 | `site/tables/_links_<page>.md` | The links of a page to its longer tables (`SITE_TABLES_LINK`), each with its row count |
 | `site/tables/_links_tables.md` | The links to all files of `outputs/tables/`, for the Data page (sorted in byte order) |
 | `site/tables/_tbl_03_notes.md` | `outputs/tables/tbl_03_notes.md`, with its headings 2 levels down |
+| `site/widgets/<PNG stem>.html` | *(2026-11-27, Week 19)* The map and chart files of Decision 29, written by `scripts/12` STEP 19.1 (a self-contained HTML file each; written only when its bytes change). Built: `fig_01_growth_ranking.html` (a `ggiraph` chart: the values of `tbl_01`; no geometry) and `fig_02_growth_animation.html` (a `leaflet` map: the reserve outlines and the state lines, rounded to 5 decimals of a degree; the census value and class of each reserve in each round). A map file holds the coordinates of its layers |
+| `site/_variables.yml` | *(2026-11-27, Week 19)* The values of the captions (Decision 28 point 5; vy1), written by `scripts/11` STEP 18.1 from `tbl_01`, `tbl_02` and `tbl_07_census_join_check.csv`: `fig01.n_reserves`, `fig01.n_ranked`, `fig01.n_not_ranked`, `fig01.no_panel` (names), `fig02.n_<year>`, `fig02.total_<year>`, `fig02.n_not_drawn`, `fig02.not_drawn` (names); text, with a thousands mark; a list of names in byte order, or "none" |
 
 *(Further layers — sdm — documented as they are built.)*

@@ -99,12 +99,12 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
 
 ---
 
-## Current state  ·  **Week 19 in progress — tasks 19.1–19.2 done (Decision 29; the process choices)** · 2026-11-26
+## Current state  ·  **Week 19 in progress — tasks 19.1–19.5 done (Decision 29; the interactive `fig_01` and `fig_02`; their QA; the docs); task 19.6 (the commits) open** · 2026-11-27
 
 ### Where the project is
 
-- **Week 19 so far (2026-11-26; tasks 19.1–19.2; full record: Decision 29 and
-  the change log in `methodology.md`):**
+- **Week 19 so far (2026-11-26 to 2026-11-27; tasks 19.1–19.5; full record:
+  Decision 29 and the change log in `methodology.md`):**
   - Task 18.8 is done: the docs commit `3bac6f1` (2026-11-21), pushed.
     The tick of task 18.8 in `project-plan.md` is its own commit
     (`ac2f48a`, by the author). The docs of task 19.1: `7cae6de`.
@@ -136,10 +136,32 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
     from `scripts/11`; a list `SITE_MAPS` in place of
     `SITE_ALLOW_WIDGETS`. **Run order:** `scripts/11`, `scripts/12`, the
     render, `scripts/11` again. Full list: the change log of task 19.2.
-  - **Next: task 19.3** — STEP 19.1 of `scripts/12` (the interactive
-    `fig_01` and `fig_02`), the changes of STEP 18.1 that it needs, the
-    frames of the Growth page, `site/_variables.yml` and the captions as
-    page text; the chat's test first (ts1).
+  - Task 19.3 (2026-11-26): STEP 19.1 of `scripts/12` — the interactive
+    `fig_01` (a `ggiraph` chart; 48 bars; 207,062 bytes) and `fig_02` (a
+    `leaflet` map; 56 reserves with a polygon; 3 round buttons, 2022
+    first); the frames, the draft captions and the draft descriptions of
+    the Growth page; `site/_variables.yml` (the numbers and two lists of
+    names of the captions). The author's choices: fn1 (no font file in
+    the chart file), qw1 (a temporary guard on STEP 18.2; removed in task
+    19.4), mb1 with t2a (no text box in the map; the title is the heading
+    of the legend; the sources are in the attribution line, T2), mp1 (the
+    first view keeps the reserves free of the controls; the frame is 780
+    px tall on a narrow screen), fs2 (the outlines once in the file; the
+    buttons change the colours and the hover texts; it changes fg1).
+    `fig_02`: 4,026,202 bytes (9,660,415 bytes before fs2).
+  - Task 19.4 (2026-11-27): STEP 19.2 of `scripts/12` — K1 (ii), the
+    check of each saved file by a second path: 52 of 52
+    (`tbl_21_map_qa.csv`; 164,389 points of `fig_02`, each a vertex of the
+    two layers). STEP 18.2: the checks b, c, f, g and i for the frames
+    and the map files, and a new check l (`tbl_21` passes and holds the
+    MD5 of each map file on the site): 57 of 57. `SITE_ALLOW_WIDGETS` and
+    `SITE_QA_WIDGETS` are removed.
+  - Task 19.5 (2026-11-27): the docs of tasks 19.3–19.5 and the Week-20
+    plan.
+  - **Next: task 19.6** — the commits (`analysis:`, `site:` and `docs:`
+    separate) and the push, by the author. The push deploys the Growth
+    page with the two interactive figures. Nothing under `data/` may be
+    staged.
 - **Week 18 in short (2026-11-21; tasks 18.1–18.7; full record: Decision
   28 and the change log in `methodology.md`):**
   - Task 18.1: the four open items — the author's choices a1, b1, c3, d1
@@ -310,7 +332,9 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   15 complete (2026-11-01)**. Week 15 was committed on 2026-11-01
   (`7ae300a`). **Week 16 complete (2026-11-07): Stage 3 complete.**
   **Stage 4 (the story site; Weeks 18–22 since W19a):** Week 18 complete
-  (2026-11-21) — the skeleton is live.
+  (2026-11-21) — the skeleton is live. Week 19: tasks 19.1–19.5 done
+  (2026-11-27); the interactive `fig_01` and `fig_02` go live with the
+  push of task 19.6.
 - **Week 15 in short** (full record: Decision 25 and the change log in
   `methodology.md`):
   - **Decision 25** (task 15.1): the prediction and its published form,
@@ -356,38 +380,38 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   `scripts/00a` list follows the code; `sfdep`, `spatstat.*` and
   `predicts` are out of it.)*
 
-### Week-19 entry point
+### Week-20 entry point
 
-*(Written 2026-11-21 at the Week-18 close. Read the Week-19 plan in
-`project-plan.md` first.)*
+*(Written 2026-11-27 at the Week-19 docs close (task 19.5). Read the
+Week-20 plan in `project-plan.md` first. The Week-19 entry point is in git
+history.)*
 
-- **Done: Week 18** (2026-11-21; tasks 18.1–18.7). The author committed
-  the split point (`eb9557d`, `b6ce1a6`) and tasks 18.5–18.6 (`90ac814`
-  `analysis:`, `c908447` `site:`), pushed; the deploy ran green. Task
-  18.8: the commit of the docs of tasks 18.3–18.7 (`docs:`) and a push
-  *(2026-11-26: done — `3bac6f1`, pushed)*.
-  The docs commit changes no file under `site/**` or `publish.yml`, so it
-  does not deploy. Nothing under `data/` may be staged.
-- **Task 19.1 — Decision 29 (the published layers)** *(2026-11-26: done, and task
-  19.2; next: task 19.3)*, before any map
-  file: for each figure `fig_02`–`fig_08` (and the surfaces of Decision
-  27), no layer or a layer in a stated form (the geometry in the file, the
-  class or the value, a zoom limit, a download or none); the check of the
-  coordinates inside a map file; the hatch and the caption items in an
-  interactive map; the tiger Gi\* never. Then 19.2 (the tool and the
-  process choices), 19.3 (the interactive `fig_01` and `fig_02`), 19.4
-  (the QA), 19.5 (docs; the Week-20 plan), 19.6 (commit).
-- **Read before Week 19:** the Week-19 plan and pitfalls in
-  `project-plan.md`; Decision 28 (all points; R7–R10); the pending item
-  "Published layers" with its dated notes; `docs/sensitive-data-policy.md`
-  §3; the "Published form" points of Decisions 20, 25, 26 and 27; the
-  Leaflet recipe of the tools record (ESRI basemaps; `fitBounds` last).
-- **Files for the Week-19 chat:** the docs; `R/00_config.R` (`SITE_*`,
-  `SITE_QA_*`), `R/00_functions_site.R`, `scripts/11_build_site.R`;
-  `site/_quarto.yml` and the seven pages; `.github/workflows/publish.yml`
-  (the chat cannot write it; the author edits it by hand);
-  `scripts/05_growth_analysis.R` (the code of `fig_01` and `fig_02`); the
-  names of the committed figures and tables. No data file (rule d1).
+- **Done: Week 19, tasks 19.1–19.5** (2026-11-26 to 2026-11-27). Task
+  19.6: the commits (`analysis:`, `site:` and `docs:` separate) and the
+  push, by the author; the push deploys the Growth page with the
+  interactive `fig_01` and `fig_02`. Nothing under `data/` may be staged.
+- **Task 20.1 — the process choices of the maps of `fig_03`–`fig_08`**,
+  before any code: the STEPs; the source of the reserve outlines; the
+  hover fields; the title, the legend and the labels of each map file
+  (T2); the calls of each map; the allowed kinds of points of each layer
+  for K1; the frames. Then 20.2 (`fig_03`), 20.3 (`fig_04`–`fig_06`), 20.4
+  (`fig_07`, `fig_08`), 20.5 (the QA), 20.6 (the layout item), 20.7 (docs;
+  the Week-21 plan), 20.8 (commit).
+- **Read before Week 20:** the Week-20 plan and pitfalls in
+  `project-plan.md`; Decision 29 (all points, with the dated notes of
+  2026-11-26 and 2026-11-27); the change log of tasks 19.2–19.4 (the
+  process choices, and the author's choices of task 19.3); the
+  "Published form" points of Decisions 20, 25, 26 and 27.
+- **Files for the Week-20 chat:** the docs; `R/00_config.R` (`SITE_*`,
+  `MAP_*`, `MAP_QA_*`), `R/00_functions_map.R`, `R/00_functions_site.R`,
+  `scripts/11_build_site.R`, `scripts/12_build_maps.R`; `site/_quarto.yml`
+  and the seven pages; the code that builds the layers of `fig_03`–`fig_08`
+  (`scripts/07`, `scripts/09`, `scripts/10`: the paths, the 0.2° cells,
+  the 10 km cells, the node marks); `.github/workflows/publish.yml` (the
+  author edits it). No data file (rule d1).
+- **Run order:** source `scripts/11`, source `scripts/12`, `quarto render
+  site` in the Terminal, source `scripts/11` again. A new QA table needs
+  one more render (the list of the Data page).
 
 ### Results by stage (a record for the write-up of Weeks 17–21)
 
@@ -464,6 +488,15 @@ git, in `docs/methodology.md` and in `docs/methodology-changelog-archive.md`.)*
   draft alt texts, placeholders for the author's text);
   `scripts/11_build_site.R`; QA 45 of 45 (`tbl_20_site_qa.csv`). Record:
   `methodology.md`, change log, 2026-11-21, Week 18 complete.
+- **Week 19 — the published layers (Decision 29) and the first interactive
+  figures.** The Growth page holds the interactive `fig_01` (a `ggiraph`
+  chart of the 48 reserves with a value; 207,062 bytes) and `fig_02` (a
+  `leaflet` map of the 56 reserves with a polygon, by round; 4,026,202
+  bytes), each in a frame with a draft caption, a draft description and a
+  link to its static file; live after the push of task 19.6. QA: STEP
+  19.2 52 of 52 (`tbl_21_map_qa.csv`), STEP 18.2 57 of 57. Record:
+  `methodology.md`, change log, 2026-11-26 and 2026-11-27, tasks
+  19.3–19.4.
 
 ### Files that later weeks read
 
@@ -488,8 +521,8 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
 | `data/processed/resist_sdm_<surface>_cell02.csv` (2 files: `main`, `negexp8`) | The SDM-based resistance of Decision 27 (STEP 17.1): `id`, `x`, `resistance`; 6,969 rows each | No geometry; holds cell ids: no table row from it; no layer published (Decision 27 point 10) |
 | `data/processed/lcp_sdm_network_7755.gpkg` (layers `<surface>_phase1` and `<surface>_phase2`) and `circ_current_<surface>_<phase>_cell02.csv` | The paths on the SDM-based surfaces and the total currents of phase 1 (STEP 17.2) and phase 2 (STEP 17.5) | Modelled paths: never a position finer than 10 km in a committed table or figure; no layer on the site; the current files hold cell ids |
 | `data/processed/boundary_states_7755.gpkg` | Natural Earth states (36), for the state boundaries of the figures | State and district can disagree at a border (gotcha) |
-| `site/` (`_quarto.yml`, seven `.qmd` pages, `figures/`, `tables/_*.md`) and `.github/workflows/publish.yml` | The story site (the skeleton of Decision 28) and its deploy (Quarto 1.10.18 pinned) | `site/figures/` and `site/tables/` come from `scripts/11_build_site.R` (do not edit them by hand); each push to `main` that changes `site/**` or `publish.yml` deploys to `gh-pages` (Decision 28 d1); run the QA (STEP 18.2) before such a commit |
-| `outputs/tables/tbl_00`–`tbl_20_*`, `outputs/figures/fig_01`–`fig_08` | Committed tables and figures (`tbl_20_site_qa.csv`: the QA of STEP 18.2) | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `tbl_18_gistar.csv` holds only the tiger counts of D26 point 7; `fig_04`–`fig_06` (STEP 16.2) show 0.2° model cells only: no point, no presence or background mark; `tbl_18_gistar_qa.csv` is the QA of STEP 16.3; `tbl_19_*` (Decision 27): counts, statistics and pair rows with reserve names, no position, no cell id; `fig_07`–`fig_08` (STEP 17.3): 0.2° cells and modelled path lines at national scale only |
+| `site/` (`_quarto.yml`, seven `.qmd` pages, `figures/`, `tables/_*.md`, `widgets/*.html`, `_variables.yml`) and `.github/workflows/publish.yml` | The story site (Decision 28; the maps and the chart of Decision 29) and its deploy (Quarto 1.10.18 pinned) | `site/figures/`, `site/tables/` and `site/_variables.yml` come from `scripts/11_build_site.R`, and `site/widgets/` from `scripts/12_build_maps.R` (do not edit them by hand); a map file holds the coordinates of its layers (Decision 29); each push to `main` that changes `site/**` or `publish.yml` deploys to `gh-pages` (Decision 28 d1); run the QA (STEP 19.2 and STEP 18.2) before such a commit *(2026-11-27, tasks 19.3–19.4)* |
+| `outputs/tables/tbl_00`–`tbl_21_*`, `outputs/figures/fig_01`–`fig_08` | Committed tables and figures (`tbl_20_site_qa.csv`: the QA of STEP 18.2; `tbl_21_map_qa.csv`: the QA of the map files, STEP 19.2, with the MD5 of each file and no coordinate) | Counts and statistics; positions at 10 km only; `tbl_17` is the publishable reserve table (no presence column); `tbl_18_gistar.csv` holds only the tiger counts of D26 point 7; `fig_04`–`fig_06` (STEP 16.2) show 0.2° model cells only: no point, no presence or background mark; `tbl_18_gistar_qa.csv` is the QA of STEP 16.3; `tbl_19_*` (Decision 27): counts, statistics and pair rows with reserve names, no position, no cell id; `fig_07`–`fig_08` (STEP 17.3): 0.2° cells and modelled path lines at national scale only |
 
 ### Open items (carried)
 
@@ -502,6 +535,14 @@ Field details: `docs/data-dictionary.md`. All under `data/` are gitignored.
   21). The layout in a wide window (an empty area at the left) — Week
   20. The reference list of the Data page — Week 21, after each entry is
   verified.
+  *(2026-11-27, Week 19: the Growth page holds the interactive `fig_01`
+  and `fig_02` with draft captions, draft descriptions and a draft map
+  title ("Tiger population by reserve, 2014-2022", the heading of the
+  legend) — the author's edit is in Week 21. The placeholder notes
+  "(Week 20)" on the pages are out of date since W19a, and the CSS rule
+  of the map frames is in `growth.qmd` only — Week 20, task 20.6. On a
+  screen of 320 px, India at the minimum zoom is wider than the frame of
+  `fig_02` (zm1).)*
 - `scripts/03` line 101: wrap the literal text in `I()` for `readr` ≥ 2.2
   (no output change; **closed 2026-11-21**). *(2026-11-15: in Week 18, task 18.1 (b);
   the author's answer "W1 + W2".)*
@@ -879,7 +920,10 @@ of closed one-time work are in git history.)*
   the Decision with the code: "Decision 27 P3a".
 - **A list of expected `git status` lines starts from the last commit.** Ask
   which tasks are committed (or for `git log -1`) before writing one.
-- **The chat's tests use other versions** (R 4.3.3, `glmnet` 4.1.8 in the
+- **The chat's tests use other versions** *(2026-11-27, tasks 19.3–19.4:
+  `ggiraph` 0.9.8.36 and `gdtools` (development versions) and pandoc
+  3.1.3 in the chat; `ggiraph` 0.9.7, `gdtools` 0.6.0 and pandoc 3.10 on
+  the project machine)* (R 4.3.3, `glmnet` 4.1.8 in the
   chat; R 4.5.2, `glmnet` 5.0 on the project machine; `ggplot2` 3.4.4 in
   the chat, 4.0.3 on the project machine; the chat cannot install a
   package from CRAN). The project-machine
@@ -906,6 +950,10 @@ of closed one-time work are in git history.)*
 - **A chosen option can conflict with the reasons of another chosen
   option** (task 15.1: f3, a value map, against the reasons of c1 and e1).
   Raise it before the Decision is written.
+  *(2026-11-26, task 19.3: an option can also conflict with a fixed point
+  of a Decision — mb1, as the chat first wrote it, took the title and the
+  sources out of the map file against Decision 29 point 10 (T2). Read the
+  points that an option touches before the option is raised.)*
 - **Two outputs that are safe alone can link a name to a state together**
   (task 15.2: r2 with the reserve table and the median; the hatch with
   the reserve outlines). Check each new published output against the
@@ -922,6 +970,28 @@ of closed one-time work are in git history.)*
 - **A sparse 0/1 Gi\*:** at 104 of 6,969 cells, the normal approximation is
   far from the exact p, and no cell can be a cold spot (Decision 26 point
   6). A text about the tiger Gi\* says so.
+- **A widget file can hold large fonts** (2026-11-26, task 19.3). In the
+  chat's test (`ggiraph` 0.9.8.36, a development version), the default
+  font set put font files into the chart file (9.2 MB);
+  `MAP_FIG01_FONT_FILE <- FALSE` keeps them out (fn1; 207,062 bytes on
+  the project machine with `ggiraph` 0.9.7).
+- **The SVG id of a `ggiraph` chart** (`canvas_id`) must differ from the
+  element id of the widget; else the browser gives a script error.
+- **The highlight of `leaflet`** (`highlightOptions`) sets the style of the
+  creation again on mouse-out. If a hook changes the colours, the hook
+  also holds the highlight (fs2 of task 19.3).
+- **A map with its controls at the minimum zoom needs a taller frame on a
+  phone** (mp1 of task 19.3: 780 px below 768 px of screen width). The fit
+  of `map_fit_js()` keeps the controls off the bounds of the first view
+  only; after a zoom or a pan a control can cover a reserve.
+- **A check of a widget file reads the parsed JSON** (task 19.4). The
+  serializer writes `</` as `<\/`; the scripts of a library hold tags as
+  text (`leaflet-providers` holds an `<img>` with a web address in the
+  credit of another basemap); `ggiraph` escapes each hover text twice in
+  its SVG.
+- **The layers control of `leaflet` lists numeric group names in
+  ascending order** (2014, 2018, 2022 from the top), whatever the order of
+  the call; the first group of the call is the one selected (fg1).
 
 ---
 
@@ -929,6 +999,43 @@ of closed one-time work are in git history.)*
 
 *(Weeks 0–13: git history, and the change log of `methodology.md` with its
 archive.)*
+
+### Week 19 — Decision 29, the interactive `fig_01` and `fig_02`, and their QA · 2026-11-26 to 2026-11-27
+- Entry state: Week 18 complete and committed (`3bac6f1`, pushed).
+- Did: task 19.1 Decision 29; task 19.2 the process choices; task 19.3
+  STEP 19.1 (the chart and the map; the frames, the captions and the
+  descriptions of the Growth page; `site/_variables.yml`); task 19.4 STEP
+  19.2 (the QA of the map files) and the checks of STEP 18.2; task 19.5
+  the docs and the Week-20 plan.
+- Decisions made: **Decision 29** (A1, B1, P4 with P4a, N1, S3 with Sf1,
+  G2, C2, Q2, H3, T2, Z2, D1, K1; R11 and R13; B1, P4 with P4a and H3 are
+  not the chat's recommendation). Choices: task 19.2 mt1, ch1, bm1, zm1,
+  sc1, nm1, lv1, fg1, fr1, hv1, rd1, ht1, sz1, vy1, ck1, rv1, ts1; task
+  19.3 fn1, qw1, mb1 with t2a, mp1, fs2 (fs2 changes fg1).
+- Outputs: `scripts/12_build_maps.R` and `R/00_functions_map.R` (new); the
+  blocks `MAP_*` and `MAP_QA_*` and the list `SITE_MAPS` in
+  `R/00_config.R`; the changes of `scripts/11` and
+  `R/00_functions_site.R`; `site/widgets/` (2 files),
+  `site/_variables.yml`, the Growth page; `tbl_21_map_qa.csv`;
+  `tbl_20_site_qa.csv` (57 rows); `renv.lock` (29 packages added); the
+  docs. Commits by the author: `7cae6de`, `ac2f48a`, `689d999`; the
+  commits of tasks 19.3–19.5 are task 19.6.
+- Gotchas found: see "Known gotchas" (the fonts in a widget file; the SVG
+  id; the highlight of `leaflet`; the frame on a phone; the parsed JSON;
+  the order of the layers control; an option against a fixed point of a
+  Decision).
+- Errors of the chat: mb1, as first raised, took the title and the sources
+  out of the map file against Decision 29 point 10 (corrected to t2a
+  before the run); the draft caption of `fig_01` said that the titles of
+  the panels count the reserves with no value (they count 9 of 10:
+  Sundarbans has no panel; found in the console text of the run); the
+  link text "Static version (PNG)" of fr1 for a GIF file. Found by the
+  chat's own tests before delivery: the font files in the chart file, the
+  script error of the SVG id, the page padding of `htmlwidgets`, the scan
+  that read the text of a script, the hover texts escaped twice, the
+  reset of the highlight, the tie of the two fits at the minimum zoom.
+- Carried forward / next session: task 19.6 (the commits and the push, by
+  the author); then Week 20, task 20.1.
 
 ### Week 18 — the open items and the site skeleton (Decision 28) · 2026-11-21
 - Entry state: Week 17 complete and committed (`0ee2243`, pushed).

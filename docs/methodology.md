@@ -2,9 +2,13 @@
 
 **Project:** India's Tiger Network
 **Author:** Kiran Balasubramanian
-**Status:** **Week 19 in progress (2026-11-26): tasks 19.1–19.2 done —
+**Status:** **Week 19 in progress (2026-11-27): tasks 19.1–19.5 done —
 Decision 29 (the published layers; the pending item "Published layers" is
-closed) and the process choices of the maps and the chart.** **Week 18 complete (2026-11-21; tasks 18.1–18.7): the four
+closed); the process choices of the maps and the chart; the interactive
+`fig_01` (a chart) and `fig_02` (a map) (STEP 19.1); the QA of the map
+files (STEP 19.2: 52 of 52; STEP 18.2: 57 of 57); the docs and the
+Week-20 plan. Task 19.6: the commits and the push (the push deploys the
+site).** **Week 18 complete (2026-11-21; tasks 18.1–18.7): the four
 open items closed; Decision 28 (the form of the story site); the site
 skeleton built, checked (QA 45 of 45) and deployed (`90ac814`,
 `c908447`); the Week-19 plan (W19a: Stage 4 in Weeks 18–22).**
@@ -106,8 +110,15 @@ suitability; the hatch as an outline and lines; labels in each map file;
 no download; a check of each coordinate of a map file. **Task 19.2
 (2026-11-26):** the process choices of the maps and the chart: `leaflet`
 maps and a `ggiraph` chart, saved as self-contained files in
-`site/widgets/` by a new script `scripts/12_build_maps.R`. **Next:** task
-19.3 — the interactive `fig_01` and `fig_02`.
+`site/widgets/` by a new script `scripts/12_build_maps.R`. **Tasks
+19.3–19.4 (2026-11-26 to 2026-11-27):** STEP 19.1 writes the interactive
+`fig_01` (a `ggiraph` chart; 207,062 bytes) and `fig_02` (a `leaflet` map;
+the reserve outlines once, and the colours and the hover texts of each
+round as data, fs2; 4,026,202 bytes); STEP 19.2 checks the saved files by
+a second path (52 of 52; `tbl_21_map_qa.csv`), and STEP 18.2 checks the
+frames and the map files (57 of 57). **Task 19.5:** the docs and the
+Week-20 plan. **Next:** task 19.6 — the commits and the push, which
+deploys the site.
 Earlier stages: **Stage 1 (Growth) complete in Week 7; Stage 2
 (Connectivity) complete in Week 12** — least-cost paths (Decisions 17–18),
 the reserve network (Decision 19) and road pinch points (Decision 20; they
@@ -5797,9 +5808,15 @@ complete):**
      19.2); the check of point 13 uses the same rounding.
    - The two reserves with no polygon (Pilibhit, Dholpur-Karauli) are
      named in the map or on the page, as in `fig_02`, and are never drawn.
+     *(2026-11-26, mb1 of task 19.3: on the page — the caption of `fig_02`
+     names them from `site/_variables.yml` (`fig02.not_drawn`, from
+     `tbl_07_census_join_check.csv`).)*
    - The size of each map file is a check of point 13. If a file is too
      large for the site, the author decides again; the chat does not
      simplify the outlines.
+     *(2026-11-27: `fig_02` is 4,026,202 bytes with the outlines once
+     (fs2 of task 19.3); it was 9,660,415 bytes with one copy of the
+     outlines for each round.)*
 3. **The Stage-2 paths (P4 with P4a).** The 73 baseline edge paths of
    `fig_03` and the 97 baseline paths of `fig_07` and `fig_08`.
    - The lines as built: each vertex is a centre of a 1 km cell of the
@@ -5894,6 +5911,11 @@ complete):**
       and the basemap.
     - A number in a map file is a value of a legend or of a hover text of
       points 4–9, from the same run.
+    *(2026-11-26, t2a of task 19.3: in the map of `fig_02` the title is the
+    heading of the legend, and the data sources follow the credit of the
+    basemap in the attribution line; the map has no other text box (mb1).
+    STEP 19.1 checks the legend heading and the sources line (the guards
+    "fig_02 page text (mb1)").)*
 11. **Zoom (Z2).** Each map has a maximum zoom; the value is a process
     choice (task 19.2). It is a limit of the display, not a protection:
     the file holds the coordinates (point 3).
@@ -5919,6 +5941,12 @@ complete):**
       a decimal degree (as check h of STEP 18.2); the size of each map file
       against a limit.
     - The tolerance of the comparison and the size limit: task 19.2.
+    *(2026-11-27: built — (i) in STEP 19.1 of `scripts/12`
+    (`map_check_leaflet()`, task 19.3); (ii) in STEP 19.2 (the `map_qa_*`
+    functions; `tbl_21_map_qa.csv`; task 19.4). The check of the file also
+    counts the features of each layer and compares each hover text, class
+    and colour of `fig_02` with the source; check l of STEP 18.2 compares
+    the MD5 of each map file on the site with the row of `tbl_21`.)*
 14. **Summary by figure.**
 
     | Figure | Form on the site | In the map file | Not in the map file |
@@ -6093,6 +6121,243 @@ closed by Decision 29 (task 19.1); its text stays below as a record.)*
 ## Change log
 
 *(Records as-built changes to data, code, or scope during execution.)*
+
+### 2026-11-27 — Week 19, task 19.5: docs close; the Week-20 plan
+
+- **No rule, value, data layer, table or script changed; no run.** The
+  docs of tasks 19.3–19.5 match the code and the runs of 2026-11-26 and
+  2026-11-27. Nothing of tasks 19.3–19.5 is committed yet: the commits and
+  the push are task 19.6 (the push deploys the site, Decision 28 d1).
+- **`methodology.md`:** the status lines; the change-log entries of tasks
+  19.3, 19.4 and 19.5; dated notes on Decision 29 points 2, 10 and 13.
+- **`project-plan.md`:** tasks 19.3–19.5 ticked; the progress row of
+  Weeks 19–22; the Week-20 plan ("Week 20 — task breakdown"; a draft plan;
+  it makes no Decision).
+- **`handoff.md`:** the Week-19 state; the Week-20 entry point (in place of
+  the Week-19 entry point); the site row and the table row of "Files that
+  later weeks read"; the open items of the site; new gotchas and dated
+  notes; the Week-19 log entry.
+- **`naming-conventions.md`:** `scripts/12` built (STEPs 19.1–19.2);
+  `tbl_21_map_qa.csv` built; the site files `site/widgets/`,
+  `site/_variables.yml`, the ids `desc-<PNG stem>` and the class `tn-map`.
+- **`data-dictionary.md`:** a new section for `tbl_21_map_qa.csv`; a dated
+  note on `tbl_20_site_qa.csv`; the site files `site/widgets/*.html` and
+  `site/_variables.yml`.
+- **`references.md`:** a dated note on the `ggiraph` entry (the version on
+  the project machine).
+- **`README.md`:** the status, the stack, the story-site row and the run
+  steps of the site (with `scripts/12`).
+- **`sensitive-data-policy.md`:** no change (§3 names Decision 29 point 13
+  for the check of a map file).
+- **AI-word check:** the new text of tasks 19.3–19.5 in the docs has no hit
+  of a fallback pattern of 59 common AI words and phrases. The pattern of
+  tasks 19.1–19.2 is not in the repository, so this chat built the
+  pattern again (59 entries; the project terms "robust" and "landscape"
+  are not in it). The two patterns can differ.
+- **Next:** task 19.6 — the commits (`analysis:`, `site:` and `docs:`
+  separate) and the push; then Week 20, task 20.1.
+
+### 2026-11-27 — Week 19, task 19.4 complete: STEP 19.2 (the QA of the map files) and the checks of STEP 18.2
+
+- **The run on the project machine (2026-11-27):** STEP 19.2 — 52 of 52
+  pass (24 hand-made checks: 15 of STEP 19.1 and 9 of STEP 19.2; 8 checks
+  of `fig_01`; 20 checks of `fig_02`); STEP 18.2 — 57 of 57 pass (29
+  hand-made checks: 19 of STEP 18.1 and 10 of STEP 18.2; 28 checks of the
+  render). The author: "Map looks good". The first run of a new QA table
+  needs one more render (the list of the Data page; the NOTE of STEP
+  19.2): `scripts/11`, `scripts/12`, the render, `scripts/11`, the render,
+  `scripts/11`.
+- **STEP 19.2 (`scripts/12`; K1 (ii) of Decision 29 point 13).** A second
+  path: it reads each saved file (the JSON of the widget in the file,
+  `map_qa_read()`) and reads the source layers and `tbl_01` again. Only
+  the constants of `scripts/05` (the colours and the breaks) come from
+  STEP 19.1. The hand-made case `map_qa_self_test()` (9 checks) runs
+  first. The checks:
+  - each file: one widget, with the id of its file; self-contained (no
+    script, style sheet, image or frame from another place; the text
+    inside a script is not read); the size against `MAP_MAX_BYTES`; the
+    MD5 of the file (a record for check l).
+  - `fig_02`: each call on `MAP_QA_METHODS` ("no other layer"); one
+    basemap, `MAP_BASEMAP`; each point a vertex of the reserve outlines
+    or of the state lines (rounded as rd1), and no point with more than
+    5 decimals; `fitBounds` and the box of the fit hook are one box that
+    holds each point and is no wider than needed; the data limits are the
+    range of the points; the zoom limits (4 and 10); no decimal degree in
+    a text; the state lines (one layer, no fill, one feature for each
+    feature of the layer); the reserve outlines (one layer, once, one
+    feature with its `unit_id` for each reserve with a polygon); the
+    buttons (one for each round, 2022 first); the hover texts against the
+    layer (the name, the state, the round, the estimate); each class
+    against the estimate (the breaks of `scripts/05`); each colour against
+    the class; the colours, the popups and the labels of the first view
+    (2022); the legend.
+  - `fig_01`: one bar for each reserve of `tbl_01` with a value, with its
+    `unit_id`; the hover text of each bar against `tbl_01` (the name and
+    the fields of `MAP_FIG01_HOVER`); no lng/lat object in the file
+    (Decision 29 point 14); no decimal degree in a text.
+- **`tbl_21_map_qa.csv`** (nm1): the columns `file`, `group`, `check`,
+  `value`, `pass` (the format of `tbl_20` and the column `file`). Counts,
+  names, TRUE/FALSE and the MD5 of each file; no coordinate. The table is
+  written before the stop on a failure.
+- **STEP 18.2 (`scripts/11`; ck1 of task 19.2).** `site_qa_page()` reads
+  the frames (the `src`, the `title`, the text of the element that
+  `aria-describedby` names, the first link to `figures/` after the frame
+  in the same section) and counts the widgets in a page itself.
+  - check a: a map file in `widgets/` is not a page.
+  - check b: each map of `SITE_MAPS` is a frame on the page of its figure,
+    once; each frame has the link to the file of its figure after it;
+    each map file in `_site/widgets/` has the MD5 of its file in
+    `site/widgets/`. The image check counts only the figures that are not
+    on `SITE_MAPS`.
+  - check c: each frame has a title and a description.
+  - checks f and g: the map files of `SITE_MAPS` are allowed.
+  - check i: no widget in a page itself; no frame that is not a map of
+    `SITE_MAPS`.
+  - check l (new): `tbl_21_map_qa.csv` passes and holds the MD5 of each
+    map file in `_site/widgets/`. Thus a map file that changed after STEP
+    19.2 fails check l.
+- **Removed:** `SITE_ALLOW_WIDGETS` (R9 of Week 18; ck1) and the guard
+  `SITE_QA_WIDGETS` of task 19.3 (qw1).
+- **The chat's choices in the task** (stated with the delivery on
+  2026-11-26; the author ran the code and did not ask for a change):
+  - the format of `tbl_21` (above) and its MD5 row;
+  - check c reads the description through `aria-describedby`: in
+    `growth.qmd` each description is in a div `#desc-<PNG stem>`, and the
+    frame names it. A screen reader also reads this link;
+  - `fig_01` in STEP 19.2: Decision 29 point 13 is for maps; for the
+    chart, the file checks, the bars and the hover texts against `tbl_01`,
+    and no geometry.
+- **The chat's tests (made-up layers; ts1):** each self-test passes (19,
+  10, 15 and 9 checks). The checks found each planted error: a point that
+  is not a vertex; a coordinate with 6 decimals; a decimal degree in a
+  text; a script from another place; a call not on the list; a file over
+  the size limit; in `fig_02`, a changed estimate, colour, class or name;
+  a changed map file in `_site/widgets/` (checks b and l fail). A full run
+  on the made-up layers: STEP 19.2 52 of 52, STEP 18.2 57 of 57.
+- **Found in the tests:** the library `leaflet-providers` holds an `<img>`
+  tag with a web address as text inside a script (the credit of another
+  basemap), so the scan for references skips the text of the scripts; the
+  serializer writes `</` as `<\/` in the JSON, so a check reads the parsed
+  JSON, not the raw file; `ggiraph` writes each hover text escaped twice
+  in its SVG.
+- **The item "Not checked" of task 19.2** is now checked: Quarto 1.10.18
+  copies `site/widgets/*.html` with `resources:` and does not change them
+  (check b: the MD5, 2 of 2).
+- **Values of the run** (from `tbl_21_map_qa.csv`): `fig_02` — 164,389
+  points, 0 not allowed; 36 of 36 state features; 56 of 56 reserves; 168
+  hover texts (56 reserves, 3 rounds), each as the layer; 661 texts, no
+  decimal degree; 4,026,202 bytes. `fig_01` — 48 bars for 48 reserves with
+  a value; 48 hover texts as `tbl_01`; no lng/lat object; 207,062 bytes.
+- **Not checked:** the map with a screen reader; a phone of the author
+  (the author's device for "Map looks good" is not recorded).
+
+### 2026-11-26 — Week 19, task 19.3 complete: STEP 19.1, the interactive `fig_01` and `fig_02`
+
+- **The run on the project machine (2026-11-26):** both figures render;
+  the author: "Looks good" (each run). STEP 19.1: the hand-made case 15
+  of 15; `MAP_*` settings 10 of 10; the guards 7 of 7; the constants of
+  `scripts/05` 20 of 20 (parsed, not run); `fig_01` checks 6 of 6;
+  `fig_02` K1 (i) 7 of 7 and its checks 4 of 4. Versions: R 4.5.2, pandoc
+  3.10, `leaflet` 2.2.3, `ggiraph` 0.9.7, `gdtools` 0.6.0, `htmlwidgets`
+  1.6.4. *(fs2 below was built and run on 2026-11-27, with task 19.4.
+  With fs2, `fig_02` has 6 checks in STEP 19.1 (the one check of fg1
+  became three); the run of 2026-11-27 passed STEP 19.1, because STEP 19.2
+  runs only after it. Its console text was not sent.)*
+- **Code (sc1, nm1):** `R/00_functions_map.R` (new) and
+  `scripts/12_build_maps.R` (new; STEP 19.1); in `R/00_config.R` the list
+  `SITE_MAPS`, `SITE_WIDGET_DIR`, `SITE_VARIABLES_FILE`, `SITE_VARS_*` and
+  the block `MAP_*`; in `R/00_functions_site.R` the scan and the page
+  references for the frames, `site_vars_growth()` and
+  `site_variables_lines()`; in `scripts/11` STEP 18.1 the page guards of
+  the frames and the PNG links, the scan of `site/widgets/`, and
+  `site/_variables.yml` (vy1); `site/growth.qmd` (two frames, the captions
+  and the descriptions: chat drafts); `site/_quarto.yml` (`resources:`);
+  the `scripts/00a` list (rv1). `scripts/12` reads the constants of
+  `scripts/05` (`MAP_GROWTH_NAMES`) by a parse of the file, not by a run.
+- **`renv.lock` (rv1):** `renv::snapshot()` by the author after the first
+  run of `scripts/12`; 29 packages added, among them `leaflet` 2.2.3,
+  `leaflet.providers` 3.0.0, `htmlwidgets` 1.6.4, `htmltools` 0.5.9,
+  `ggiraph` 0.9.7, `gdtools` 0.6.0, `systemfonts` 1.3.4 and `rmarkdown`
+  2.30.
+- **The author's choices in the task (2026-11-26)** (codes of task 19.3;
+  write "fn1 of task 19.3"):
+  - **fn1:** `MAP_FIG01_FONT_FILE <- FALSE` — the chart file holds no font
+    file; the browser uses its own sans font, so the text can look
+    different on another computer. In the chat's test (`ggiraph`
+    0.9.8.36, a development version), the default font set of `ggiraph`
+    put the Liberation fonts in the file: 9.2 MB; with an empty font set,
+    205 KB. The run with `ggiraph` 0.9.7: 207,062 bytes.
+  - **qw1:** a temporary guard (`SITE_QA_WIDGETS <- FALSE`): while
+    `site/widgets/` held a file, STEP 18.2 did not run, so that the run
+    order 11, 12, render, 11 held before task 19.4. Removed in task 19.4.
+  - **mb1 with t2a:** no text box in the map of `fig_02`. The title (a
+    draft, "Tiger population by reserve, 2014-2022") is the heading of the
+    legend; the data sources follow the credit of the basemap in the
+    attribution line (Decision 29 point 10, T2). The caveat and the names
+    of the reserves with no polygon are page text. The first text of mb1
+    (by the chat) also took the title and the sources out of the map file;
+    the chat had not checked T2, and t2a keeps it. The author's "Looks
+    good" was read as t2a; the reading was stated in the reply.
+  - **mp1:** the first view keeps the reserves free of the controls. The
+    fit hook (`map_fit_js()`) measures the controls and adds a margin at
+    the left and the right (a wide frame) or at the top and the bottom (a
+    narrow frame): the one with the larger scale before the zoom limits.
+    The frame of a map is 620 px tall, and 780 px on a screen narrower
+    than 768 px (a CSS rule in `growth.qmd`, the class `tn-map`). In the
+    chat's test (made-up layers over the extent of India), no reserve was
+    under a control at screen widths of 412 to 1280 px; at 320 px, India
+    at zoom 4 (zm1) is wider than the frame, so its east and west edges
+    are cut, and no control covers them.
+  - **fs2 (it changes fg1):** the reserve outlines are in the file once
+    (the layer id is `unit_id`). The three buttons are empty base groups;
+    the hook `map_rounds_js()` changes the fill colour, the label and the
+    popup of each outline, and it holds the highlight on hover (the
+    `highlightOptions` of `leaflet` set the style of the creation again on
+    mouse-out, so the colour of 2022 came back; seen in the chat's test).
+    The outlines do not change (B1 holds). Size of `fig_02`: 9,660,415
+    bytes with one layer for each round; 4,026,202 bytes with fs2. The
+    control lists the rounds 2014, 2018, 2022 from the top; 2022 is
+    selected first.
+- **Corrections of the chat's draft text:**
+  - `fig_01`: 10 reserves have no value, and the titles of the panels
+    count 9. The Sundarbans complex has no reserve with a value, so the
+    chart (as the PNG file of `scripts/05`) has no panel for it. A new
+    value `fig01.no_panel` names these reserves in the caption (now
+    "Sundarbans").
+  - `fig_02`: the caption names the reserves with no polygon from
+    `fig02.n_not_drawn` and `fig02.not_drawn`, which STEP 18.1 takes from
+    `tbl_07_census_join_check.csv` (the column `geometry_present`;
+    `SITE_VARS_TABLES` gets `t07`). Now: 2, "Dholpur-Karauli, Pilibhit".
+    STEP 19.1 stops if the layer or the chart gives another list or
+    count.
+  - fr1 said "Static version (PNG)". `fig_02` has no PNG file
+    (`fig_02_growth_animation.gif`), so its link says "Animated version
+    (GIF)".
+- **Found in the tests:** the SVG id of a `ggiraph` chart (`canvas_id`)
+  must differ from the element id (else a script error in the browser);
+  the toolbar of the development version needed `hidden = c("selection",
+  "zoom", "misc")`; the default page padding of `htmlwidgets` (40 px) is
+  set to 0.
+- **The reserve outlines of `fig_02`** come from
+  `stats_reserve_census_7755.gpkg`, the left join of the census onto
+  `boundary_reserves_all_7755.gpkg` (`scripts/03` STEP 6), so they are the
+  outlines of the boundary layer (Decision 29 point 2). From the code; no
+  run compared the two files.
+- **Values of the run:** `fig_01` — 48 bars; 10 not ranked; 4 panels
+  (Shivalik-Gangetic (Terai Arc) 4 not ranked; Central India & Eastern
+  Ghats 4; Western Ghats 1; North-East Hills & Brahmaputra 0); no panel:
+  Sundarbans; SVG 9 × 11.52 in. `fig_02` — 58 reserves read, 56 with a
+  polygon; not drawn: Dholpur-Karauli, Pilibhit; vertices (rounded,
+  unique): reserves 129,894, states 20,216; the maximum zoom 10. Reserves
+  by class and round (0 (real), 1-20, 21-50, 51-100, 101-200, >200, No
+  estimate): 2014 — 1, 23, 7, 9, 3, 1, 12; 2018 — 3, 20, 11, 9, 5, 1, 7;
+  2022 — 5, 22, 6, 10, 7, 1, 5. The values of the captions
+  (`site/_variables.yml`): 58 reserves, 48 ranked, 10 not ranked; the
+  totals 1,586 (45 reserves), 1,958 (50) and 2,257 (52).
+- **The chat's tests (ts1):** R 4.3.3, the development versions of
+  `ggiraph` and `gdtools`, pandoc 3.1.3; made-up layers; the pages seen
+  in a browser at 1280 px and 412 px wide. The ESRI tiles do not load in
+  the chat's workspace (its network); the author saw the basemap.
 
 ### 2026-11-26 — Week 19, task 19.2: process choices of the maps and the chart (no code, no run)
 

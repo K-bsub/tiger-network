@@ -1,0 +1,16 @@
+# Written by scripts/11_build_site.R STEP 18.1 (vy1 of task 19.2) from
+# the committed tables. Do not edit it by hand.
+fig01:
+  n_not_ranked: "10"
+  n_ranked: "48"
+  n_reserves: "58"
+  no_panel: "Sundarbans"
+fig02:
+  n_2014: "45"
+  n_2018: "50"
+  n_2022: "52"
+  n_not_drawn: "2"
+  not_drawn: "Dholpur-Karauli, Pilibhit"
+  total_2014: "1,586"
+  total_2018: "1,958"
+  total_2022: "2,257"

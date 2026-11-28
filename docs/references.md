@@ -1624,6 +1624,9 @@ Windows binaries; imports `ggplot2` (≥ 4.0.0), `gdtools`, `htmlwidgets`
 Choices ch1 and ts1 of task 19.2.)* *(Through a search tool (snippets).
 The minimum version of `gdtools` differs between the mirror page (0.4.4)
 and r-universe (0.5.0); not checked.)*
+*(2026-11-26, the run of task 19.3: the project machine installed
+`ggiraph` 0.9.7 from CRAN, with `gdtools` 0.6.0 and `systemfonts` 1.3.4
+(`renv.lock`), not 0.9.6.)*
 
 r-pkg.org. "Make 'ggplot2' Graphics Interactive" (the README of
 `ggiraph`). https://r-pkg.org/pkg/ggiraph · *(`ggiraph` is an htmlwidget

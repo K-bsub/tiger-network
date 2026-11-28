@@ -1783,9 +1783,9 @@ measured).
 |---|---|---|---|
 | 19.1 ✅ | **Decision 29 (numbered), the published layers, before any map file.** It closes the pending item "Published layers". For each figure `fig_02`–`fig_08` (and the surfaces of Decision 27): no layer, or a layer in a stated form — the geometry in the file (for example simplified lines, 10 km cells, the 0.2° cells), the class only or the class and the value, a zoom limit, a download or none; the check of the coordinates inside a map file (Decision 28 R9); the hatch and the caption items in an interactive map; the tiger Gi\* never; what was seen | Decision 29 recorded; the pending item closed *(2026-11-26: done — A1, B1, P4 with P4a, N1, S3 with Sf1, G2, C2, Q2, H3, T2, Z2, D1, K1; R11 and R13 (as read for P4); R12 does not apply. Not the chat's recommendation: B1, P4 with P4a, H3. Policy §3 amended (Decision 29 point 3))* | 45–60 min |
 | 19.2 ✅ | Process choices before code (not numbered): the tool of the maps (`leaflet`; a self-contained file in `site/` by `htmlwidgets::saveWidget()`, Decision 28 R8) and of the chart (for example `plotly`, `ggiraph`, or Observable JS in the page); the basemap (ESRI only, the tools record); the script (a STEP in `scripts/11` or a new script); the names; the changes of `SITE_*` and of the checks f and i of STEP 18.2; `renv.lock` and the `scripts/00a` list (rule S1); the Bay Area Leaflet recipe | Choices recorded in the change log *(2026-11-26: done — mt1, ch1, bm1, zm1, sc1, nm1, lv1, fg1, fr1, hv1, rd1, ht1, sz1, vy1, ck1, rv1, ts1, each as the chat recommended: `leaflet` maps and a `ggiraph` chart; `scripts/12_build_maps.R`; `site/widgets/`; the ESRI Light Gray Canvas)* | 20–30 min |
-| 19.3 | The interactive `fig_01` (the chart; the values of `tbl_01` on hover) and `fig_02` (the growth map; the reserve outlines and the census values, tier T0), each with its caption as page text (Decision 28 n2; `site/_variables.yml`) and its alt text | The two figures render on the project machine | 60–90 min |
-| 19.4 | The QA: STEP 18.2 extended (or a new STEP) — each map file against Decision 29 (the coordinates in the file; no other layer; the size of the file); the new files in the checks of `_site/` | QA passes | 30–45 min |
-| 19.5 | Docs; the Week-20 plan (the maps that Decision 29 allows) | Docs match as-built | 30 min |
+| 19.3 ✅ | The interactive `fig_01` (the chart; the values of `tbl_01` on hover) and `fig_02` (the growth map; the reserve outlines and the census values, tier T0), each with its caption as page text (Decision 28 n2; `site/_variables.yml`) and its alt text | The two figures render on the project machine *(2026-11-26: done — STEP 19.1 of `scripts/12`; the author's choices fn1, qw1, mb1 with t2a, mp1 and fs2 (fs2 changes fg1; built and run on 2026-11-27); `fig_01` 207,062 bytes, `fig_02` 4,026,202 bytes)* | 60–90 min |
+| 19.4 ✅ | The QA: STEP 18.2 extended (or a new STEP) — each map file against Decision 29 (the coordinates in the file; no other layer; the size of the file); the new files in the checks of `_site/` | QA passes *(2026-11-27: done — STEP 19.2 of `scripts/12`, 52 of 52 (`tbl_21_map_qa.csv`); STEP 18.2 with the checks b, c, f, g, i and the new check l, 57 of 57)* | 30–45 min |
+| 19.5 ✅ | Docs; the Week-20 plan (the maps that Decision 29 allows) | Docs match as-built *(2026-11-27: done — the Week-20 plan below)* | 30 min |
 | 19.6 | Commit (`analysis:`, `site:` and `docs:` separate). A push that changes `site/**` deploys the site | Committed and pushed; `git status --short` shows nothing under `data/` staged | 10 min |
 
 **Week 19 pitfalls:**
@@ -1826,6 +1826,102 @@ file.
 **Exit state:** Decision 29 recorded; the interactive `fig_01` and `fig_02`
 on the site; the QA of the map files passed; docs updated; the Week-20
 plan written; Week 19 ticked.
+
+### Week 20 — task breakdown
+
+*(Written 2026-11-27 at the Week-19 docs close (task 19.5). This is a
+draft plan. It makes no Decision. Decision 29 fixes the layers of each
+map; the process choices of the new maps come first (task 20.1).)*
+
+Entry state (as of the Week-19 docs close, 2026-11-27; the commits and
+the push are task 19.6):
+
+- **Live after the push of task 19.6:** the Growth page with the
+  interactive `fig_01` (a `ggiraph` chart) and `fig_02` (a `leaflet` map),
+  each in a frame with its caption, its description and a link to its
+  static file.
+- **Committed by task 19.6:** `scripts/12_build_maps.R` (STEP 19.1, the
+  maps and the chart; STEP 19.2, their QA), `R/00_functions_map.R`, the
+  blocks `MAP_*` and `MAP_QA_*` and the list `SITE_MAPS` in
+  `R/00_config.R`; the changes of `scripts/11` (STEPs 18.1–18.2) and
+  `R/00_functions_site.R`; `site/widgets/`, `site/_variables.yml`;
+  `tbl_21_map_qa.csv`; `renv.lock` with `leaflet` 2.2.3 and `ggiraph`
+  0.9.7.
+- **Sizes:** `fig_02` is 4,026,202 bytes: the reserve outlines once
+  (129,894 vertices after the rounding) and the state lines (20,216). Each
+  map of Decision 29 holds the outlines and the state lines (B1).
+- **Open:** the layout item of Week 18 (an empty area at the left in a
+  wide window); the placeholder notes "(Week 20)" on the pages, which are
+  out of date since W19a; the CSS rule of the map frames is in
+  `growth.qmd` only.
+
+**Size.** The estimates add up to about 5–7 hours (estimates, not
+measured), more than the 4–6 hours of the Stage-4 table. If Week 20 runs
+long, task 20.4 (`fig_07`, `fig_08`) can move to Week 21; the author
+decides at the start of the week.
+
+| # | Task | Done when | Est. |
+|---|---|---|---|
+| 20.1 | Process choices before code (not numbered), for `fig_03`–`fig_08`: the STEPs (new STEPs in `scripts/12` or STEPs 19.1–19.2 made wider); the source file of the reserve outlines (`fig_02` reads `stats_reserve_census_7755.gpkg`, the join onto `boundary_reserves_all_7755.gpkg`); the hover fields of each layer (from `tbl_03`, `tbl_03b`, `tbl_19_sdmres_compare.csv`, the labels of Decision 25 point 6); the title, the legend and the labels of each map file (T2); the calls of each map (`MAP_QA_METHODS`); the allowed kinds of points of each layer for K1 (a 1 km cell centre, a corner or a centre of a 0.2° cell, a centre or a corner of a 10 km cell, a node mark, a hatch point); the order of the layers and the buttons; the frames on the pages and their heights | Choices recorded in the change log | 30–45 min |
+| 20.2 | The interactive `fig_03` (Decision 29 points 3 and 4): the 73 Stage-2 edge paths as built (1 km; P4a), the node marks, the pinch points at the centre of their 10 km cell with the cell outline (N1), "modelled, not observed" with each path and pinch point; the maximum zoom 10 | The map renders on the project machine | 60–90 min |
+| 20.3 | The interactive `fig_04` and `fig_05` (two maps, lv1; the 6,969 model cells from their corners, Sf1; the class, and the value with its label, S3; the hatch of the 32 cells, H3 and ht1) and `fig_06` (the effort Gi\* class, G2) | The three maps render on the project machine | 60–90 min |
+| 20.4 | The interactive `fig_07` (the current class, C2, the 97 Stage-2 baseline paths, the hatch) and `fig_08` (the 94 phase-1 SDM-based paths at 0.2°, Q2, the 97 Stage-2 baseline paths, the hatch) | The two maps render on the project machine | 45–60 min |
+| 20.5 | The QA of the new map files: K1 (ii) for each kind of point; the features of each layer against its source; the hover texts; the count of R13 (pinch-point marks off their path line; no mark moves); the size of each file (sz1); STEP 18.2 for the new frames | QA passes | 45–60 min |
+| 20.6 | The layout item of Week 18 (the empty area at the left in a wide window); the placeholder notes "(Week 20)"; the CSS rule of the map frames in one site file for all pages | The site renders; QA passes | 30 min |
+| 20.7 | Docs; the Week-21 plan | Docs match as-built | 30 min |
+| 20.8 | Commit (`analysis:`, `site:` and `docs:` separate). A push that changes `site/**` deploys the site | Committed and pushed; `git status --short` shows nothing under `data/` staged | 10 min |
+
+**Week 20 pitfalls:**
+- **The size of a map file.** Each map holds the reserve outlines and the
+  state lines (about 4 MB in `fig_02`), and its own layers: the 6,969
+  cells of `fig_04`–`fig_07` (each with its corners), and the 1 km paths
+  of `fig_03`, `fig_07` and `fig_08` (their vertex count is not known).
+  Above the limit of sz1 (10 MB) the script stops, and the author decides
+  (Decision 29 point 2). Each self-contained file also holds its own copy
+  of the libraries.
+- **The allowed points** (Decision 29 point 13). A 1 km cell centre of the
+  analysis grid (EPSG:7755) is not a round number in longitude and
+  latitude: the check makes its keys with the same transform and the same
+  rounding (rd1) as the file. The hatch points are allowed for the hatch
+  layer only (ht1).
+- **R13:** a pinch-point mark at the centre of its 10 km cell can be off
+  its 1 km path line. The QA counts these marks; no mark moves.
+- **The labels in each map file (T2):** "modelled, not observed" with each
+  path line and pinch point; "relative suitability; not a probability of
+  presence" and the label of Decision 25 point 6 with each value; the
+  obscured records (T1); the title and the sources line, as in `fig_02`
+  (t2a).
+- **Not in a map file:** a tiger Gi\*, a cell id, a rank, a covariate
+  value, a presence or background field, a Gi\* value, p or count, a
+  current value, a `negexp8` or phase-2 path (Decision 29 points 5–8).
+- **The highlight of `leaflet`** sets the style of the creation again on
+  mouse-out. If a hook changes the colours, the hook also holds the
+  highlight (fs2 of task 19.3).
+- **A check of a map file reads the parsed JSON**, not the raw text (the
+  serializer writes `</` as `<\/`; the scripts of a library hold tags as
+  text).
+- **A push deploys** (Decision 28 d1): STEP 19.2 and STEP 18.2 pass before
+  each commit that changes `site/**`. Check l fails if a map file changed
+  after its QA.
+- **The chat cannot see the basemap** (the tiles do not load in its
+  workspace): the author checks the tiles and the zoom on the project
+  machine.
+- **The Quarto pin:** a page feature that needs a later Quarto needs a new
+  local render, a new QA and a change of the pin (the author edits
+  `publish.yml`).
+- **Numbers.** Decision 30 is the next Decision number; `tbl_22` and
+  `fig_09` are the next free numbers.
+- **PROJ `proj.db` clash still applies** — fresh session (`scripts/12`
+  reads the layers under `data/`).
+
+**Decisions due this week:** none planned (Decision 29 fixes the layers).
+A figure whose map fails a check of Decision 29, or the size limit, stays
+its PNG file (Decision 29 point 1), or the author decides again.
+
+**Exit state:** the interactive maps of `fig_03`–`fig_08` on the site
+(each map that passes its checks); the QA of the map files and of the
+site passed; the layout item done; docs updated; the Week-21 plan
+written; Week 20 ticked.
 
 ---
 
@@ -1879,4 +1975,4 @@ deliverable exists.
 | 13–16 | Suitability track | ✅ Complete (2026-11-07) — Week 13 complete (Decisions 21–22; outcome `no_1km_model`; committed 2026-10-18). **Week 14 complete (2026-10-25)** — Decision 23, a model at the 0.2° grain on the obscured set; `scripts/09`; the count: `planned_model` (104 presence cells, 1,486 background cells); Decision 24 (the model settings); the fit: `lq`, multiplier 1, mean test Boyce 0.668 over 5 spatial folds; QA 133 of 133; the commit by the author (task 14.8). **Week 15:** tasks 15.1–15.2 done (2026-10-31) — Decision 25 (the prediction and its published form; point 9 added in task 15.2) and the process choices; task 15.3 done (2026-11-01) — the prediction; the gate open; task 15.4 done (2026-11-01) — the reserve check: r1 "agrees"; task 15.5 done (2026-11-01) — QA 84 of 84. **Week 15 complete (2026-11-01)**; the commit (task 15.7) by the author. **Week 15 committed** (`7ae300a`). **Week 16:** task 16.1 done (2026-11-07) — Decision 26 (the Gi* settings). Task 16.2 done (2026-11-07) — the process choices and Amendment 1 of Decision 26. Task 16.3 done (2026-11-07) — STEP 16.1, the four Gi\*. Task 16.4 done (2026-11-07) — STEP 16.2, the figures `fig_04`, `fig_05` and `fig_06`. Task 16.5 done (2026-11-07) — STEP 16.3, QA 113 of 113. Task 16.6 done (2026-11-07) — the docs of the Stage-3 close. **Week 16 complete** |
 | 17 | SDM-based resistance + circuit-theory check (Decision 27; added 2026-11-07) | ✅ Complete (2026-11-15) — Decision 27, the process choices, STEPs 17.1–17.5 (point 7: "differs"; the variant "sensitive"; point 8: "differs"; QA 196 of 196 and 62 of 62), the docs close and the Week-18 plan (task 17.7); the author committed each task; the commit of task 17.7 is task 17.8 *(done 2026-11-15: `0ee2243`, pushed)* |
 | 18 | Open items + site skeleton (Decision 28) | ✅ Complete (2026-11-21) — the four open items closed (a1, b1, c3, d1); Decision 28; `scripts/11_build_site.R`; the seven pages; QA 45 of 45; deployed (`c908447`); the docs commit is task 18.8 *(done 2026-11-21: `3bac6f1`)* |
-| 19–22 | Interactive figures, narrative, publish *(W19a, 2026-11-21; was Weeks 19–21)* | In progress — tasks 19.1–19.2 done (2026-11-26): Decision 29 (the published layers); the process choices of the maps and the chart |
+| 19–22 | Interactive figures, narrative, publish *(W19a, 2026-11-21; was Weeks 19–21)* | In progress — tasks 19.1–19.5 done (2026-11-26 to 2026-11-27): Decision 29 (the published layers); the process choices of the maps and the chart; the interactive `fig_01` and `fig_02` (STEP 19.1); their QA (STEP 19.2, 52 of 52; STEP 18.2, 57 of 57); the docs and the Week-20 plan. Task 19.6: the commits and the push (the deploy) |

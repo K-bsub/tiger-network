@@ -1,4 +1,4 @@
-Files: 75.
+Files: 76.
 
 - [`tbl_00_data_audit.csv`](https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_00_data_audit.csv)
 - [`tbl_00_kba_tr_match.csv`](https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_00_kba_tr_match.csv)
@@ -75,4 +75,5 @@ Files: 75.
 - [`tbl_19_sdmres_qa.csv`](https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_19_sdmres_qa.csv)
 - [`tbl_19_sdmres_surface.csv`](https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_19_sdmres_surface.csv)
 - [`tbl_20_site_qa.csv`](https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_20_site_qa.csv)
+- [`tbl_21_map_qa.csv`](https://github.com/K-bsub/tiger-network/blob/main/outputs/tables/tbl_21_map_qa.csv)
 
